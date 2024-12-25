@@ -83,11 +83,14 @@ const Shop = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch(`https://${SHOPIFY_STORE_URL}/api/2024-01/storefront/graphql`, {
+      const response = await fetch(`https://${SHOPIFY_STORE_URL}/api/2024-01/graphql`, {
         method: "POST",
+        mode: 'cors',
+        credentials: 'include',
         headers: {
           "Content-Type": "application/json",
           "X-Shopify-Storefront-Access-Token": STOREFRONT_ACCESS_TOKEN,
+          "Accept": "application/json",
         },
         body: JSON.stringify({
           query: `
