@@ -60,12 +60,17 @@ const Shop = () => {
   const { data: products, isLoading, error } = useQuery({
     queryKey: ["shopifyProducts"],
     queryFn: fetchProducts,
-    onError: () => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load products. Please try again later.",
-      });
+    meta: {
+      errorMessage: "Failed to load products. Please try again later.",
+    },
+    onSettled: (data, error) => {
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load products. Please try again later.",
+        });
+      }
     },
   });
 
