@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from "@/hooks/use-toast";
 
 // Hardcoded Shopify store URL and access token
-const SHOPIFY_STORE_URL = "your-store-domain";
+const SHOPIFY_STORE_URL = "hechoenamerica-8edf7bf7df135b934de8.o2.myshopify.dev";
 const STOREFRONT_ACCESS_TOKEN = "your-access-token";
 
 const defaultProducts = [
@@ -82,65 +82,63 @@ const Shop = () => {
   const { toast } = useToast();
 
   const fetchProducts = async () => {
-    const response = await fetch(`https://${SHOPIFY_STORE_URL}/api/2024-01/storefront/graphql`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Shopify-Storefront-Access-Token": STOREFRONT_ACCESS_TOKEN,
-      },
-      body: JSON.stringify({
-        query: `
-          {
-            products(first: 3) { // Reduced from 6 to 3
-              edges {
-                node {
-                  id
-                  title
-                  description
-                  handle
-                  priceRange {
-                    minVariantPrice {
-                      amount
-                      currencyCode
+    try {
+      const response = await fetch(`https://${SHOPIFY_STORE_URL}/api/2024-01/storefront/graphql`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Shopify-Storefront-Access-Token": STOREFRONT_ACCESS_TOKEN,
+        },
+        body: JSON.stringify({
+          query: `
+            {
+              products(first: 3) {
+                edges {
+                  node {
+                    id
+                    title
+                    description
+                    handle
+                    priceRange {
+                      minVariantPrice {
+                        amount
+                        currencyCode
+                      }
                     }
-                  }
-                  images(first: 1) {
-                    edges {
-                      node {
-                        url
-                        altText
+                    images(first: 1) {
+                      edges {
+                        node {
+                          url
+                          altText
+                        }
                       }
                     }
                   }
                 }
               }
             }
-          }
-        `,
-      }),
-    });
+          `,
+        }),
+      });
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch products");
+      if (!response.ok) {
+        throw new Error("Failed to fetch products");
+      }
+
+      const data = await response.json();
+      return data.data.products.edges;
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      return defaultProducts;
     }
-
-    const data = await response.json();
-    return data.data.products.edges;
   };
 
-  const { data: products, isLoading, error } = useQuery({
+  const { data: products, isLoading } = useQuery({
     queryKey: ["shopifyProducts"],
     queryFn: fetchProducts,
-    onError: (err) => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: err.message,
-      });
-    },
   });
 
-  const displayedProducts = products?.map(({ node }) => node) || defaultProducts;
+  const displayedProducts = products || defaultProducts;
 
   if (isLoading) {
     return (
@@ -182,7 +180,7 @@ const Shop = () => {
                   ${parseFloat(product.priceRange.minVariantPrice.amount).toFixed(2)} {product.priceRange.minVariantPrice.currencyCode}
                 </span>
                 <Button
-                  onClick={() => window.open(`https://hechoenamerica-8edf7bf7df135b934de8.o2.myshopify.dev/`, '_blank')}
+                  onClick={() => window.open(`https://${SHOPIFY_STORE_URL}`, '_blank')}
                   className="bg-studio-red hover:bg-red-700 text-white"
                 >
                   Buy Now
@@ -194,7 +192,6 @@ const Shop = () => {
       </div>
     </section>
   );
-
 };
 
 export default Shop;
