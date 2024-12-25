@@ -10,13 +10,13 @@ const artists = [
   },
   {
     name: "Jiesson Diaz Santiago",
-    image: "/laptop-uploads/Jiesson Diaz.jpg",
+    image: "/laptop-uploads/Jiesson.png",
     country: "Bogotá, Colombia",
     genre: "Musica Medicina",
   },
   {
     name: "Nick Zinchenko",
-    image: "/laptop-uploads/Nick Zinchenko.jpg",
+    image: "/laptop-uploads/Zinchenko.png",
     country: "Luhansk, Ukraine",
     genre: "Hip Hop, Trap, R&B",
   },

@@ -68,7 +68,7 @@ const defaultProducts = [
       edges: [
         {
           node: {
-            url: "/laptop-uploads/Green Eyes.jpg", // Ensure this file is in the public/laptop-uploads directory
+            url: "/laptop-uploads/BlackJ.png", // Ensure this file is in the public/laptop-uploads directory
             altText: "Default Product 3",
           },
         },
