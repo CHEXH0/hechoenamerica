@@ -3,23 +3,23 @@ import { motion } from "framer-motion";
 
 const platforms = [
   {
-    name: "Spotify",
-    icon: "🎵",
-    url: "#",
+    name: "Instagram",
+    image: "/laptop-uploads/Instagram.png",
+    url: "https://www.instagram.com/hecho.en.america/",
   },
   {
-    name: "Apple Music",
-    icon: "🎵",
-    url: "#",
+    name: "YouTube",
+    image: "/laptop-uploads/YouTube.png",
+    url: "https://www.youtube.com/@HechoEnAmerica.",
   },
   {
-    name: "SoundCloud",
-    icon: "🎵",
-    url: "#",
+    name: "X",
+    image: "/laptop-uploads/x.png",
+    url: "https://x.com/HechoEnA",
   },
   {
-    name: "YouTube Music",
-    icon: "🎵",
+    name: "TikTok",
+    image: "/laptop-uploads/TikTok.png",
     url: "#",
   },
 ];
@@ -38,7 +38,9 @@ const AudioPlatforms = () => {
         </motion.h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {platforms.map((platform, index) => (
-            <motion.a
+              <motion.a
+              target="_blank"
+              rel="noopener noreferrer"
               key={platform.name}
               href={platform.url}
               initial={{ opacity: 0, y: 20 }}
@@ -47,7 +49,7 @@ const AudioPlatforms = () => {
               whileHover={{ scale: 1.05 }}
               className="flex flex-col items-center justify-center p-6 rounded-lg bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
             >
-              <span className="text-3xl mb-4">{platform.icon}</span>
+              <img src={platform.image} alt={platform.name} className="w-16 h-16 mb-4" />
               <span className="text-white font-medium">{platform.name}</span>
             </motion.a>
           ))}
