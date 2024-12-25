@@ -27,7 +27,7 @@ const Hero = () => {
             HECHO EN AMÉRICA
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 mb-8">
-            Where Sound Meets Innovation
+            LA MUSIC ES MEDICINE
           </p>
           <Waveform />
         </motion.div>

@@ -3,24 +3,28 @@ import { motion } from "framer-motion";
 
 const artists = [
   {
-    name: "Artist 1",
-    image: "https://source.unsplash.com/random/400x400?artist",
-    genre: "Hip Hop",
+    name: "CHEXHO",
+    image: "/laptop-uploads/Chexho.png",
+    country: "Riverside, California",
+    genre: "Alternative R&B, Musica Medicina",
   },
   {
-    name: "Artist 2",
-    image: "https://source.unsplash.com/random/400x400?musician",
-    genre: "R&B",
+    name: "Jiesson Diaz Santiago",
+    image: "/laptop-uploads/Jiesson Diaz.jpg",
+    country: "Bogotá, Colombia",
+    genre: "Musica Medicina",
   },
   {
-    name: "Artist 3",
-    image: "https://source.unsplash.com/random/400x400?singer",
-    genre: "Latin",
+    name: "Nick Zinchenko",
+    image: "/laptop-uploads/Nick Zinchenko.jpg",
+    country: "Luhansk, Ukraine",
+    genre: "Hip Hop, Trap, R&B",
   },
   {
-    name: "Artist 4",
+    name: "Rosella",
     image: "https://source.unsplash.com/random/400x400?rapper",
-    genre: "Trap",
+    country: "Playas De Tijuana, México",
+    genre: "Musica Medicina",
   },
 ];
 
@@ -55,7 +59,8 @@ const FeaturedArtists = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                   <h3 className="text-xl font-bold mb-2">{artist.name}</h3>
-                  <p className="text-sm text-gray-300">{artist.genre}</p>
+                  <p className="text-sm text-gray-300">{artist.country}</p>
+                  <p className="text-sm text-gray-300/50">{artist.genre}</p>
                 </div>
               </div>
             </motion.div>

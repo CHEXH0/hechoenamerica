@@ -4,8 +4,35 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { useToast } from "@/hooks/use-toast";
 
-const SHOPIFY_STORE_URL = "hechoenamerica-8edf7bf7df135b934de8.o2.myshopify.dev";
-const STOREFRONT_ACCESS_TOKEN = "477952feb4228f59925d6c822422100c";
+// Update the Shopify store URL and access token with environment variables
+const SHOPIFY_STORE_URL = process.env.PUBLIC_STORE_DOMAIN || "default-store-domain";
+const STOREFRONT_ACCESS_TOKEN = process.env.PUBLIC_STOREFRONT_API_TOKEN || "default-access-token";
+
+const fallbackProducts = [
+  {
+    id: "1",
+    title: "Fallback Product 1",
+    description: "This is a fallback product description.",
+    handle: "fallback-product-1",
+    priceRange: {
+      minVariantPrice: {
+        amount: "19.99",
+        currencyCode: "USD",
+      },
+    },
+    images: {
+      edges: [
+        {
+          node: {
+            url: "/placeholder.svg",
+            altText: "Fallback Product 1",
+          },
+        },
+      ],
+    },
+  },
+  // Add more fallback products as needed
+];
 
 const Shop = () => {
   const { toast } = useToast();
@@ -69,6 +96,8 @@ const Shop = () => {
     },
   });
 
+  const displayedProducts = error ? fallbackProducts : products?.map(({ node }) => node);
+
   if (isLoading) {
     return (
       <section className="py-16 bg-black">
@@ -86,14 +115,12 @@ const Shop = () => {
     );
   }
 
-  if (error) return null;
-
   return (
     <section className="py-16 bg-black">
       <div className="container mx-auto px-4">
         <h2 className="text-4xl font-bold text-studio-gold mb-8 text-center">Shop</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {products?.map(({ node: product }) => (
+          {displayedProducts.map((product) => (
             <Card key={product.id} className="bg-black/50 border-studio-gold hover:border-studio-red transition-colors">
               <CardHeader>
                 <CardTitle className="text-white">{product.title}</CardTitle>
@@ -123,6 +150,7 @@ const Shop = () => {
       </div>
     </section>
   );
+
 };
 
 export default Shop;
