@@ -2,7 +2,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
-import { useToast } from "./ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const SHOPIFY_STORE_URL = "hechoenamerica-8edf7bf7df135b934de8.o2.myshopify.dev";
 const STOREFRONT_ACCESS_TOKEN = "477952feb4228f59925d6c822422100c";
@@ -11,7 +11,7 @@ const Shop = () => {
   const { toast } = useToast();
 
   const fetchProducts = async () => {
-    const response = await fetch(`https://${SHOPIFY_STORE_URL}/api/2024-01/graphql.json`, {
+    const response = await fetch(`https://${SHOPIFY_STORE_URL}/api/2024-01/storefront/graphql`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -26,6 +26,7 @@ const Shop = () => {
                   id
                   title
                   description
+                  handle
                   priceRange {
                     minVariantPrice {
                       amount
@@ -59,6 +60,13 @@ const Shop = () => {
   const { data: products, isLoading, error } = useQuery({
     queryKey: ["shopifyProducts"],
     queryFn: fetchProducts,
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load products. Please try again later.",
+      });
+    },
   });
 
   if (isLoading) {
@@ -78,14 +86,7 @@ const Shop = () => {
     );
   }
 
-  if (error) {
-    toast({
-      variant: "destructive",
-      title: "Error",
-      description: "Failed to load products. Please try again later.",
-    });
-    return null;
-  }
+  if (error) return null;
 
   return (
     <section className="py-16 bg-black">
