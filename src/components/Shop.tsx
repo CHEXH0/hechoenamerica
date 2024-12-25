@@ -4,19 +4,19 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { useToast } from "@/hooks/use-toast";
 
-// Update the Shopify store URL and access token with environment variables
-const SHOPIFY_STORE_URL = process.env.PUBLIC_STORE_DOMAIN || "default-store-domain";
-const STOREFRONT_ACCESS_TOKEN = process.env.PUBLIC_STOREFRONT_API_TOKEN || "default-access-token";
+// Hardcoded Shopify store URL and access token
+const SHOPIFY_STORE_URL = "your-store-domain";
+const STOREFRONT_ACCESS_TOKEN = "your-access-token";
 
-const fallbackProducts = [
+const defaultProducts = [
   {
     id: "1",
-    title: "Fallback Product 1",
-    description: "This is a fallback product description.",
-    handle: "fallback-product-1",
+    title: "Studio Time",
+    description: "Book studio time for your next project.",
+    handle: "default-product-1",
     priceRange: {
       minVariantPrice: {
-        amount: "19.99",
+        amount: "100/hr",
         currencyCode: "USD",
       },
     },
@@ -24,14 +24,58 @@ const fallbackProducts = [
       edges: [
         {
           node: {
-            url: "/placeholder.svg",
-            altText: "Fallback Product 1",
+            url: "/laptop-uploads/recording.jpg", // Ensure this file is in the public directory
+            altText: "Default Product 1",
           },
         },
       ],
     },
   },
-  // Add more fallback products as needed
+  {
+    id: "2",
+    title: "Mixing & Mastering",
+    description: "Professional mixing and mastering services.",
+    handle: "default-product-2",
+    priceRange: {
+      minVariantPrice: {
+        amount: "500",
+        currencyCode: "USD",
+      },
+    },
+    images: {
+      edges: [
+        {
+          node: {
+            url: "/laptop-uploads/mixing-mastering.jpg", // Ensure this file is in the public/laptop-uploads directory
+            altText: "Default Product 2",
+          },
+        },
+      ],
+    },
+  },
+  {
+    id: "3",
+    title: "VSTs & Audio Software",
+    description: "Inlcudes a selection of VSTs and tools.",
+    handle: "default-product-3",
+    priceRange: {
+      minVariantPrice: {
+        amount: "25",
+        currencyCode: "USD",
+      },
+    },
+    images: {
+      edges: [
+        {
+          node: {
+            url: "/laptop-uploads/Green Eyes.jpg", // Ensure this file is in the public/laptop-uploads directory
+            altText: "Default Product 3",
+          },
+        },
+      ],
+    },
+  },
+  // Add more default products as needed
 ];
 
 const Shop = () => {
@@ -47,7 +91,7 @@ const Shop = () => {
       body: JSON.stringify({
         query: `
           {
-            products(first: 6) {
+            products(first: 3) { // Reduced from 6 to 3
               edges {
                 node {
                   id
@@ -87,16 +131,16 @@ const Shop = () => {
   const { data: products, isLoading, error } = useQuery({
     queryKey: ["shopifyProducts"],
     queryFn: fetchProducts,
-    onError: () => {
+    onError: (err) => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to load products. Please try again later.",
+        description: err.message,
       });
     },
   });
 
-  const displayedProducts = error ? fallbackProducts : products?.map(({ node }) => node);
+  const displayedProducts = products?.map(({ node }) => node) || defaultProducts;
 
   if (isLoading) {
     return (
@@ -138,7 +182,7 @@ const Shop = () => {
                   ${parseFloat(product.priceRange.minVariantPrice.amount).toFixed(2)} {product.priceRange.minVariantPrice.currencyCode}
                 </span>
                 <Button
-                  onClick={() => window.open(`https://${SHOPIFY_STORE_URL}/products/${product.handle}`, '_blank')}
+                  onClick={() => window.open(`https://hechoenamerica-8edf7bf7df135b934de8.o2.myshopify.dev/`, '_blank')}
                   className="bg-studio-red hover:bg-red-700 text-white"
                 >
                   Buy Now
