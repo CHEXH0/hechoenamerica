@@ -22,7 +22,7 @@ const artists = [
   },
   {
     name: "Rosella",
-    image: "https://source.unsplash.com/random/400x400?rapper",
+    image: "/laptop-uploads/Rosella.jpg",
     country: "Playas De Tijuana, México",
     genre: "Musica Medicina",
   },
