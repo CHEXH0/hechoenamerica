@@ -11,7 +11,7 @@ const Index = () => {
       <Hero />
       <FeaturedArtists />
       <AudioPlatforms />
-      <Shop />
+      // Add the Shop component here
       <Contact />
     </div>
   );

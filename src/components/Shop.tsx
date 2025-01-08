@@ -4,9 +4,9 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { useToast } from "@/hooks/use-toast";
 
-// Hardcoded Shopify store URL and access token
-const SHOPIFY_STORE_URL = "hechoenamerica-8edf7bf7df135b934de8.o2.myshopify.dev";
-const STOREFRONT_ACCESS_TOKEN = "your-access-token";
+//Hardcoded Shopify store URL and access token
+const SHOPIFY_STORE_URL = "";
+const STOREFRONT_ACCESS_TOKEN = "477952feb4228f59925d6c822422100c";
 
 const defaultProducts = [
   {
@@ -186,7 +186,7 @@ const Shop = () => {
                   onClick={() => window.open(`https://${SHOPIFY_STORE_URL}`, '_blank')}
                   className="bg-studio-red hover:bg-red-700 text-white"
                 >
-                  Buy Now
+                  Visit Now
                 </Button>
               </CardFooter>
             </Card>
