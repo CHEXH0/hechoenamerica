@@ -2,6 +2,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 
 const platforms = [
   {
@@ -24,7 +25,7 @@ const platforms = [
   },
   {
     name: "Sample Pack",
-    image: "/laptop-uploads/TikTok.png", // Reusing TikTok image for Sample Pack
+    isIcon: true, // New property to indicate we're using an icon instead of an image
     url: "/sample-pack",
     isExternal: false,
   },
@@ -77,7 +78,13 @@ const AudioPlatforms = () => {
                   to={platform.url}
                   className="flex flex-col items-center justify-center p-6 rounded-lg bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 w-full h-full"
                 >
-                  <img src={platform.image} alt={platform.name} className="w-16 h-16 mb-4" />
+                  {platform.isIcon ? (
+                    <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center mb-4">
+                      <ArrowRight className="h-8 w-8 text-white" />
+                    </div>
+                  ) : (
+                    <img src={platform.image} alt={platform.name} className="w-16 h-16 mb-4" />
+                  )}
                   <span className="text-white font-medium">{platform.name}</span>
                 </Link>
               </motion.div>
