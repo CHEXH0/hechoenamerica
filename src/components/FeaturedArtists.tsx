@@ -1,7 +1,15 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Music } from "lucide-react";
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from "@/components/ui/pagination";
 
 const artists = [
   {
@@ -32,15 +40,58 @@ const artists = [
     genre: "Musica Medicina",
     spotifyUrl: "https://open.spotify.com/artist/3oF1nqmZVtmOI0Vcte7GUz",
   },
+  {
+    name: "BlackJ",
+    image: "/laptop-uploads/BlackJ.png",
+    country: "Los Angeles, California",
+    genre: "Hip Hop, R&B",
+    spotifyUrl: "https://open.spotify.com/artist/5hKIALJCfhcnvPE6EJR4Jc",
+  },
+  {
+    name: "Luna Nova",
+    image: "/placeholder.svg",
+    country: "Mexico City, Mexico",
+    genre: "Alternative, Indie",
+    spotifyUrl: "https://open.spotify.com/artist/4YLtscXsxbVgi031ovDDdh",
+  },
+  {
+    name: "Soul Collective",
+    image: "/placeholder.svg",
+    country: "Austin, Texas",
+    genre: "Soul, Jazz Fusion",
+    spotifyUrl: "https://open.spotify.com/artist/1WQBRuVKjTDxMPOlNljzGT",
+  },
+  {
+    name: "Aria Rodriguez",
+    image: "/placeholder.svg",
+    country: "San Juan, Puerto Rico",
+    genre: "Latin Pop, R&B",
+    spotifyUrl: "https://open.spotify.com/artist/2FXDmKdUY0h3HWvQPf5chd",
+  },
 ];
 
+const ARTISTS_PER_PAGE = 4;
+
 const FeaturedArtists = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(artists.length / ARTISTS_PER_PAGE);
+  
   const handleArtistClick = (spotifyUrl: string) => {
     window.open(spotifyUrl, "_blank", "noopener,noreferrer");
   };
+  
+  const indexOfLastArtist = currentPage * ARTISTS_PER_PAGE;
+  const indexOfFirstArtist = indexOfLastArtist - ARTISTS_PER_PAGE;
+  const currentArtists = artists.slice(indexOfFirstArtist, indexOfLastArtist);
+  
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to the top of the section for better UX
+    document.getElementById("featured-artists")?.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
-    <section className="py-20 bg-black">
+    <section id="featured-artists" className="py-20 bg-black">
       <div className="container mx-auto px-4">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -51,7 +102,7 @@ const FeaturedArtists = () => {
           Featured Artists
         </motion.h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {artists.map((artist, index) => (
+          {currentArtists.map((artist, index) => (
             <motion.div
               key={artist.name}
               initial={{ opacity: 0, y: 20 }}
@@ -83,6 +134,51 @@ const FeaturedArtists = () => {
             </motion.div>
           ))}
         </div>
+        
+        {totalPages > 1 && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-12"
+          >
+            <Pagination>
+              <PaginationContent>
+                {currentPage > 1 && (
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      className="cursor-pointer text-white hover:text-green-400 transition-colors"
+                    />
+                  </PaginationItem>
+                )}
+                
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <PaginationItem key={i}>
+                    <PaginationLink
+                      isActive={currentPage === i + 1}
+                      onClick={() => handlePageChange(i + 1)}
+                      className={`cursor-pointer ${
+                        currentPage === i + 1 ? "bg-green-500 text-white" : "text-white hover:text-green-400"
+                      } transition-colors`}
+                    >
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                
+                {currentPage < totalPages && (
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      className="cursor-pointer text-white hover:text-green-400 transition-colors"
+                    />
+                  </PaginationItem>
+                )}
+              </PaginationContent>
+            </Pagination>
+          </motion.div>
+        )}
       </div>
     </section>
   );
