@@ -1,27 +1,32 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const platforms = [
   {
     name: "Instagram",
     image: "/laptop-uploads/Instagram.png",
     url: "https://www.instagram.com/hecho.en.america/",
+    isExternal: true,
   },
   {
     name: "YouTube",
     image: "/laptop-uploads/YouTube.png",
     url: "https://www.youtube.com/@HechoEnAmerica.",
+    isExternal: true,
   },
   {
     name: "WhatsApp",
     image: "/laptop-uploads/x.png", // Reusing the X image for WhatsApp
     url: "https://wa.me/message/YOUR_NUMBER", // Replace with actual WhatsApp contact link
+    isExternal: true,
   },
   {
     name: "Sample Pack",
     image: "/laptop-uploads/TikTok.png", // Reusing TikTok image for Sample Pack
-    url: "#", // Add actual download link when available
+    url: "/sample-pack",
+    isExternal: false,
   },
 ];
 
@@ -38,22 +43,46 @@ const AudioPlatforms = () => {
           Listen Now
         </motion.h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {platforms.map((platform, index) => (
-              <motion.a
-              target="_blank"
-              rel="noopener noreferrer"
-              key={platform.name}
-              href={platform.url}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              whileHover={{ scale: 1.05 }}
-              className="flex flex-col items-center justify-center p-6 rounded-lg bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
-            >
-              <img src={platform.image} alt={platform.name} className="w-16 h-16 mb-4" />
-              <span className="text-white font-medium">{platform.name}</span>
-            </motion.a>
-          ))}
+          {platforms.map((platform, index) => {
+            // For external links, render an anchor tag
+            if (platform.isExternal) {
+              return (
+                <motion.a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  key={platform.name}
+                  href={platform.url}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  whileHover={{ scale: 1.05 }}
+                  className="flex flex-col items-center justify-center p-6 rounded-lg bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
+                >
+                  <img src={platform.image} alt={platform.name} className="w-16 h-16 mb-4" />
+                  <span className="text-white font-medium">{platform.name}</span>
+                </motion.a>
+              );
+            }
+            
+            // For internal links, use React Router's Link component
+            return (
+              <motion.div
+                key={platform.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                whileHover={{ scale: 1.05 }}
+              >
+                <Link
+                  to={platform.url}
+                  className="flex flex-col items-center justify-center p-6 rounded-lg bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 w-full h-full"
+                >
+                  <img src={platform.image} alt={platform.name} className="w-16 h-16 mb-4" />
+                  <span className="text-white font-medium">{platform.name}</span>
+                </Link>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
