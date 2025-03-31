@@ -1,3 +1,4 @@
+
 import React from "react";
 import { motion } from "framer-motion";
 
@@ -13,14 +14,14 @@ const platforms = [
     url: "https://www.youtube.com/@HechoEnAmerica.",
   },
   {
-    name: "X",
-    image: "/laptop-uploads/x.png",
-    url: "https://x.com/HechoEnA",
+    name: "WhatsApp",
+    image: "/laptop-uploads/x.png", // Reusing the X image for WhatsApp
+    url: "https://wa.me/message/YOUR_NUMBER", // Replace with actual WhatsApp contact link
   },
   {
-    name: "TikTok",
-    image: "/laptop-uploads/TikTok.png",
-    url: "#",
+    name: "Sample Pack",
+    image: "/laptop-uploads/TikTok.png", // Reusing TikTok image for Sample Pack
+    url: "#", // Add actual download link when available
   },
 ];
 
