@@ -19,8 +19,8 @@ const platforms = [
   },
   {
     name: "WhatsApp",
-    image: "/laptop-uploads/x.png", // Reusing the X image for WhatsApp
-    url: "https://wa.me/message/YOUR_NUMBER", // Replace with actual WhatsApp contact link
+    image: "/laptop-uploads/whatsapp.svg", // Reusing the X image for WhatsApp
+    url: "https://chat.whatsapp.com/GfhMoPNoJs49pp4nti7uwU", // Replace with actual WhatsApp contact link
     isExternal: true,
   },
   {
