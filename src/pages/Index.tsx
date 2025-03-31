@@ -4,7 +4,6 @@ import Hero from "@/components/Hero";
 import FeaturedArtists from "@/components/FeaturedArtists";
 import AudioPlatforms from "@/components/AudioPlatforms";
 import Contact from "@/components/Contact";
-import Shop from "@/components/Shop";
 
 const Index = () => {
   return (
@@ -12,7 +11,6 @@ const Index = () => {
       <Hero />
       <FeaturedArtists />
       <AudioPlatforms />
-      <Shop />
       <Contact />
     </div>
   );
