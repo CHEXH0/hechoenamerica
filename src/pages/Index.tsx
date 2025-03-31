@@ -1,3 +1,4 @@
+
 import React from "react";
 import Hero from "@/components/Hero";
 import FeaturedArtists from "@/components/FeaturedArtists";
@@ -11,7 +12,7 @@ const Index = () => {
       <Hero />
       <FeaturedArtists />
       <AudioPlatforms />
-      // Add the Shop component here
+      <Shop />
       <Contact />
     </div>
   );
