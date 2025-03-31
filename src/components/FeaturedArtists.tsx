@@ -38,7 +38,7 @@ const artists = [
     image: "/laptop-uploads/Rosella.jpg",
     country: "Playas De Tijuana, México",
     genre: "Musica Medicina",
-    spotifyUrl: "https://open.spotify.com/artist/2tOG1hBhUrWO87AfSA4Ej6?si=xPwDEeGbS2uS1speXTcZtA",
+    spotifyUrl: "https://open.spotify.com/artist/2tOG1hBhUrWO87AfSA4Ej6?si=W8l0jUgsQ9-TSxoPPWMWvA",
   },
   {
     name: "Felicidad",
