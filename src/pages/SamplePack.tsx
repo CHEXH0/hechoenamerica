@@ -2,45 +2,75 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Music, Music2, PlayCircle } from "lucide-react";
+import { ArrowLeft, FileAudio, Play } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
-// Sample data - in a real app, this would come from a database or API
-const sampleCategories = [
-  {
-    id: "samples",
-    title: "Audio Samples",
-    description: "High quality audio samples for your productions",
-    icon: <Music className="h-8 w-8 text-primary" />,
-    items: [
-      { name: "Drum Kit - Latino Heat", type: "WAV", price: "Free" },
-      { name: "Bass Loops Collection", type: "WAV", price: "$19.99" },
-      { name: "Vocal Chops - Spanish Edition", type: "WAV/MP3", price: "$14.99" },
-      { name: "Percussion Essentials", type: "WAV", price: "Free" },
-    ]
+// Sample audio files data - in a real app, this would come from a database or API
+const audioFiles = [
+  { 
+    id: "001", 
+    name: "Drum Kit - Latino Heat", 
+    type: "WAV", 
+    duration: "1:35", 
+    price: "Free",
+    category: "Drums"
   },
-  {
-    id: "sounds",
-    title: "Premium Sounds",
-    description: "Professionally engineered sounds for music producers",
-    icon: <Music2 className="h-8 w-8 text-primary" />,
-    items: [
-      { name: "Reggaeton Presets", type: "VST/AU", price: "$29.99" },
-      { name: "Latin Piano Collection", type: "WAV/MIDI", price: "$24.99" },
-      { name: "Urban Bass Designer", type: "VST", price: "$39.99" },
-      { name: "Analog Synth Pack", type: "WAV", price: "Free" },
-    ]
+  { 
+    id: "002", 
+    name: "Bass Loops Collection", 
+    type: "WAV", 
+    duration: "2:20", 
+    price: "$19.99",
+    category: "Bass"
   },
-  {
-    id: "videos",
-    title: "Tutorial Videos",
-    description: "Learn production techniques from HechoEnAmerica Studio",
-    icon: <PlayCircle className="h-8 w-8 text-primary" />,
-    items: [
-      { name: "Mixing Vocals Like a Pro", type: "Video", price: "Free" },
-      { name: "Mastering Basics", type: "Video", price: "Free" },
-      { name: "Creating Reggaeton Beats", type: "Video", price: "$9.99" },
-      { name: "Advanced Production Techniques", type: "Video", price: "$19.99" },
-    ]
+  { 
+    id: "003", 
+    name: "Vocal Chops - Spanish Edition", 
+    type: "WAV/MP3", 
+    duration: "3:15", 
+    price: "$14.99",
+    category: "Vocals"
+  },
+  { 
+    id: "004", 
+    name: "Percussion Essentials", 
+    type: "WAV", 
+    duration: "1:45", 
+    price: "Free",
+    category: "Percussion"
+  },
+  { 
+    id: "005", 
+    name: "Reggaeton Beat Pack", 
+    type: "WAV", 
+    duration: "2:55", 
+    price: "$24.99",
+    category: "Beats"
+  },
+  { 
+    id: "006", 
+    name: "Latin Piano Samples", 
+    type: "WAV/MIDI", 
+    duration: "4:10", 
+    price: "$12.99",
+    category: "Keys"
+  },
+  { 
+    id: "007", 
+    name: "Urban FX Collection", 
+    type: "WAV", 
+    duration: "1:20", 
+    price: "$9.99",
+    category: "Effects"
+  },
+  { 
+    id: "008", 
+    name: "Analog Synth Pack", 
+    type: "WAV", 
+    duration: "3:30", 
+    price: "Free",
+    category: "Synths"
   },
 ];
 
@@ -58,74 +88,72 @@ const SamplePack = () => {
           </Link>
         </div>
         
-        <motion.h1 
+        <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-4xl md:text-5xl font-bold mb-6 text-center"
+          className="mb-10"
         >
-          HechoEnAmerica Sample Collection
-        </motion.h1>
-        
-        <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="text-xl text-center mb-12 max-w-3xl mx-auto text-gray-300"
-        >
-          Explore our curated collection of professional samples, sounds, and educational content
-        </motion.p>
-        
-        <div className="space-y-16">
-          {sampleCategories.map((category, index) => (
-            <motion.section 
-              key={category.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.2 }}
-              className="pb-8"
-            >
-              <div className="flex items-center justify-center mb-8">
-                <div className="bg-white/10 p-4 rounded-full mr-4">
-                  {category.icon}
-                </div>
-                <h2 className="text-3xl font-bold">{category.title}</h2>
-              </div>
-              
-              <p className="text-center text-gray-300 mb-8 max-w-2xl mx-auto">
-                {category.description}
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {category.items.map((item, itemIndex) => (
-                  <motion.div
-                    key={`${category.id}-${itemIndex}`}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: itemIndex * 0.1 }}
-                    whileHover={{ y: -5 }}
-                    className="bg-white/5 backdrop-blur-sm rounded-lg p-6 hover:bg-white/10 transition-all cursor-pointer group"
-                  >
-                    <h3 className="font-bold text-xl mb-2 group-hover:text-primary transition-colors">
-                      {item.name}
-                    </h3>
-                    <div className="flex justify-between items-center mt-4">
-                      <span className="text-gray-400">{item.type}</span>
-                      <span className={`${item.price === "Free" ? "text-green-400" : "text-white"} font-medium`}>
-                        {item.price}
-                      </span>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.section>
-          ))}
-        </div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-center">
+            Audio Sample Collection
+          </h1>
+          <p className="text-xl text-center text-gray-300 max-w-3xl mx-auto">
+            High-quality audio samples for your productions from HechoEnAmerica Studio
+          </p>
+        </motion.div>
         
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="mt-20 text-center"
+          transition={{ delay: 0.2 }}
+          className="bg-white/5 backdrop-blur-sm rounded-lg overflow-hidden border border-white/10"
+        >
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-white/10">
+                <TableHead className="text-white font-medium">Name</TableHead>
+                <TableHead className="text-white font-medium">Category</TableHead>
+                <TableHead className="text-white font-medium">Format</TableHead>
+                <TableHead className="text-white font-medium">Duration</TableHead>
+                <TableHead className="text-white font-medium">Price</TableHead>
+                <TableHead className="text-white font-medium text-right">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {audioFiles.map((file) => (
+                <TableRow 
+                  key={file.id}
+                  className="border-b border-white/10 hover:bg-white/5"
+                >
+                  <TableCell className="flex items-center gap-3">
+                    <FileAudio className="h-5 w-5 text-primary" />
+                    <span>{file.name}</span>
+                  </TableCell>
+                  <TableCell>{file.category}</TableCell>
+                  <TableCell>{file.type}</TableCell>
+                  <TableCell>{file.duration}</TableCell>
+                  <TableCell className={file.price === "Free" ? "text-green-400" : "text-white"}>
+                    {file.price}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      size="sm"
+                      variant={file.price === "Free" ? "default" : "outline"}
+                      className={file.price === "Free" ? "bg-green-600 hover:bg-green-700" : ""}
+                    >
+                      {file.price === "Free" ? "Download" : "Buy Now"}
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </motion.div>
+        
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="mt-12 text-center"
         >
           <h3 className="text-2xl font-medium mb-4">Need custom samples?</h3>
           <p className="mb-6 text-gray-300">Contact us for custom sample packs or production services</p>
