@@ -45,7 +45,7 @@ const artists = [
     image: "/laptop-uploads/BlackJ.png",
     country: "Bogota, Colombia",
     genre: "Musica Medicina, R&B",
-    spotifyUrl: "https://open.spotify.com/artist/5hKIALJCfhcnvPE6EJR4Jc",
+    spotifyUrl: "https://open.spotify.com/artist/5lXVO49vfafQSzevboRX2H?si=CduTeslpTFGD-6zPR8DivQ",
   },
   {
     name: "Christian Jones",
