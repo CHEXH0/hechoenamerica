@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, ExternalLink, Music, MapPin } from "lucide-react";
@@ -76,6 +75,10 @@ const artists = [
 const Artist = () => {
   const { id } = useParams();
   const artist = artists.find(a => a.id === id);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   if (!artist) {
     return (
