@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import SamplePack from "./pages/SamplePack";
 import ComingSoon from "./pages/ComingSoon";
-import Artist from "./pages/Artist";
 
 const queryClient = new QueryClient();
 
@@ -21,7 +20,6 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/sample-pack" element={<SamplePack />} />
           <Route path="/coming-soon" element={<ComingSoon />} />
-          <Route path="/artist/:id" element={<Artist />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

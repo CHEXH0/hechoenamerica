@@ -1,7 +1,7 @@
+
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Music } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { 
   Pagination, 
   PaginationContent, 
@@ -10,50 +10,49 @@ import {
   PaginationNext, 
   PaginationPrevious 
 } from "@/components/ui/pagination";
-import { Card, CardContent } from "@/components/ui/card";
 
 const artists = [
   {
-    id: "chexho",
     name: "CHEXHO",
     image: "/laptop-uploads/AlbumCover.png",
     country: "California, USA",
     genre: "Alternative R&B, Musica Medicina",
+    spotifyUrl: "https://open.spotify.com/artist/51oO373JL3YH8dvT6v94xg?si=EgGVOngeRTaejIWl3TYqkA",
   },
   {
-    id: "jiesson-diaz-santiago",
     name: "Jiesson Diaz Santiago",
     image: "/laptop-uploads/Jiesson.png",
     country: "Bogotá, Colombia",
     genre: "Musica Medicina",
+    spotifyUrl: "https://open.spotify.com/artist/5MpXNiUTlKk7WmwEYhnVaC?si=BOfW5qmwRFWNMhnjhOa0Fw",
   },
   {
-    id: "nick-zinchenko",
     name: "Nick Zinchenko",
     image: "/laptop-uploads/Zinchenko.png",
     country: "Luhansk, Ukraine",
     genre: "Hip Hop, Trap, R&B",
+    spotifyUrl: "https://open.spotify.com/artist/5MNMLU5i9pBJCNh9kEP9F5?si=RTt4qWrySHS2GMpaON0RBQ",
   },
   {
-    id: "rosella",
     name: "Rosella",
     image: "/laptop-uploads/Rosella.jpg",
     country: "Playas De Tijuana, México",
     genre: "Musica Medicina",
+    spotifyUrl: "https://open.spotify.com/artist/2tOG1hBhUrWO87AfSA4Ej6?si=W8l0jUgsQ9-TSxoPPWMWvA",
   },
   {
-    id: "felicidad",
     name: "Felicidad",
     image: "/laptop-uploads/BlackJ.png",
     country: "Bogota, Colombia",
     genre: "Musica Medicina, R&B",
+    spotifyUrl: "https://open.spotify.com/artist/5hKIALJCfhcnvPE6EJR4Jc",
   },
   {
-    id: "christian-jones",
     name: "Christian Jones",
     image: "/laptop-uploads/RIVERSIDE.jpg",
     country: "California, USA",
     genre: "Rap, Soul",
+    spotifyUrl: "https://open.spotify.com/artist/5iypl9rruEx6nUMwgGfZCJ?si=MHgV5vGtTSKTdTq3UM6NMA",
   },
 ];
 
@@ -61,8 +60,11 @@ const ARTISTS_PER_PAGE = 4;
 
 const FeaturedArtists = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const navigate = useNavigate();
   const totalPages = Math.ceil(artists.length / ARTISTS_PER_PAGE);
+  
+  const handleArtistClick = (spotifyUrl: string) => {
+    window.open(spotifyUrl, "_blank", "noopener,noreferrer");
+  };
   
   const indexOfLastArtist = currentPage * ARTISTS_PER_PAGE;
   const indexOfFirstArtist = indexOfLastArtist - ARTISTS_PER_PAGE;
@@ -70,11 +72,8 @@ const FeaturedArtists = () => {
   
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    // Scroll to the top of the section for better UX
     document.getElementById("featured-artists")?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const handleArtistClick = (artistId: string) => {
-    navigate(`/artist/${artistId}`);
   };
 
   return (
@@ -95,27 +94,29 @@ const FeaturedArtists = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              whileHover={{ scale: 1.02 }}
-              className="cursor-pointer"
-              onClick={() => handleArtistClick(artist.id)}
+              whileHover={{ scale: 1.05 }}
+              className="relative group cursor-pointer"
+              onClick={() => handleArtistClick(artist.spotifyUrl)}
             >
-              <Card className="bg-gray-900/50 border-gray-700 overflow-hidden hover:bg-gray-800/50 transition-colors">
-                <div className="relative">
-                  <img
-                    src={artist.image}
-                    alt={artist.name}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="absolute top-2 right-2 bg-green-500 rounded-full p-2">
-                    <Music size={16} className="text-white" />
-                  </div>
+              <div className="relative overflow-hidden rounded-lg aspect-square">
+                <img
+                  src={artist.image}
+                  alt={artist.name}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                  <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
+                    {artist.name}
+                    <Music size={18} className="text-green-400" />
+                  </h3>
+                  <p className="text-sm text-gray-300">{artist.country}</p>
+                  <p className="text-sm text-gray-300/50">{artist.genre}</p>
                 </div>
-                <CardContent className="p-4">
-                  <h3 className="text-xl font-bold text-white mb-2">{artist.name}</h3>
-                  <p className="text-sm text-gray-300 mb-1">{artist.country}</p>
-                  <p className="text-sm text-gray-400">{artist.genre}</p>
-                </CardContent>
-              </Card>
+              </div>
+              <div className="absolute top-2 right-2 bg-green-500 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <Music size={16} className="text-white" />
+              </div>
             </motion.div>
           ))}
         </div>
