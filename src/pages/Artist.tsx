@@ -2,7 +2,7 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, Music, MapPin } from "lucide-react";
 
 const artists = [
   {
@@ -79,10 +79,10 @@ const Artist = () => {
 
   if (!artist) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen bg-gradient-to-br from-pink-500 via-red-500 to-orange-500 text-white flex items-center justify-center">
+        <div className="text-center bg-white/10 backdrop-blur-lg p-8 rounded-3xl">
           <h1 className="text-2xl font-bold mb-4">Artist not found</h1>
-          <Link to="/" className="text-green-400 hover:text-green-300">
+          <Link to="/" className="text-white/80 hover:text-white underline">
             Return to home
           </Link>
         </div>
@@ -91,78 +91,130 @@ const Artist = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-4 py-8">
-        <Link 
-          to="/" 
-          className="inline-flex items-center gap-2 text-green-400 hover:text-green-300 mb-8 transition-colors"
-        >
-          <ArrowLeft size={20} />
-          Back to Artists
-        </Link>
+    <div className="min-h-screen bg-gradient-to-br from-pink-500 via-red-500 to-orange-500 relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-20 left-20 w-32 h-32 bg-white rounded-full blur-xl"></div>
+        <div className="absolute bottom-40 right-32 w-48 h-48 bg-white rounded-full blur-2xl"></div>
+        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-white rounded-full blur-lg"></div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
+      <div className="container mx-auto px-4 py-8 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <Link 
+            to="/" 
+            className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-8 transition-all duration-300 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full hover:bg-white/20"
           >
-            <img
-              src={artist.image}
-              alt={artist.name}
-              className="w-full max-w-md mx-auto rounded-lg shadow-2xl"
-            />
+            <ArrowLeft size={20} />
+            Back to Artists
+          </Link>
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
+            className="relative"
+          >
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/5 rounded-3xl transform rotate-6 group-hover:rotate-12 transition-transform duration-500"></div>
+              <img
+                src={artist.image}
+                alt={artist.name}
+                className="relative w-full max-w-md mx-auto rounded-3xl shadow-2xl transform group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute -bottom-4 -right-4 bg-white/20 backdrop-blur-sm p-3 rounded-full">
+                <Music size={24} className="text-white" />
+              </div>
+            </div>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="space-y-6"
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="space-y-8"
           >
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-2">{artist.name}</h1>
-              <p className="text-green-400 text-lg">{artist.country}</p>
-              <p className="text-gray-400">{artist.genre}</p>
+            <div className="bg-white/10 backdrop-blur-lg p-8 rounded-3xl">
+              <h1 className="text-5xl md:text-6xl font-bold mb-4 text-white bg-gradient-to-r from-white to-white/80 bg-clip-text">
+                {artist.name}
+              </h1>
+              <div className="flex items-center gap-2 text-white/90 text-xl mb-2">
+                <MapPin size={20} />
+                {artist.country}
+              </div>
+              <p className="text-white/70 text-lg">{artist.genre}</p>
             </div>
 
-            <div>
-              <h2 className="text-2xl font-semibold mb-3">About</h2>
-              <p className="text-gray-300 leading-relaxed">{artist.bio}</p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="bg-white/10 backdrop-blur-lg p-8 rounded-3xl"
+            >
+              <h2 className="text-3xl font-bold mb-4 text-white">About</h2>
+              <p className="text-white/90 leading-relaxed text-lg">{artist.bio}</p>
+            </motion.div>
 
-            <div>
-              <h2 className="text-2xl font-semibold mb-4">Listen On</h2>
-              <div className="space-y-3">
-                <a
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="bg-white/10 backdrop-blur-lg p-8 rounded-3xl"
+            >
+              <h2 className="text-3xl font-bold mb-6 text-white">Listen On</h2>
+              <div className="space-y-4">
+                <motion.a
                   href={artist.spotifyUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 bg-green-600 hover:bg-green-700 p-4 rounded-lg transition-colors"
+                  whileHover={{ scale: 1.05, x: 10 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center gap-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 p-5 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl"
                 >
-                  <span className="font-semibold">Spotify</span>
-                  <ExternalLink size={18} />
-                </a>
-                <a
+                  <div className="bg-white/20 p-2 rounded-full">
+                    <Music size={20} className="text-white" />
+                  </div>
+                  <span className="font-bold text-white text-lg flex-1">Spotify</span>
+                  <ExternalLink size={20} className="text-white" />
+                </motion.a>
+
+                <motion.a
                   href={artist.youtubeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 bg-red-600 hover:bg-red-700 p-4 rounded-lg transition-colors"
+                  whileHover={{ scale: 1.05, x: 10 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center gap-4 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 p-5 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl"
                 >
-                  <span className="font-semibold">YouTube Music</span>
-                  <ExternalLink size={18} />
-                </a>
-                <a
+                  <div className="bg-white/20 p-2 rounded-full">
+                    <Music size={20} className="text-white" />
+                  </div>
+                  <span className="font-bold text-white text-lg flex-1">YouTube Music</span>
+                  <ExternalLink size={20} className="text-white" />
+                </motion.a>
+
+                <motion.a
                   href={artist.appleMusicUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 bg-gray-800 hover:bg-gray-700 p-4 rounded-lg transition-colors"
+                  whileHover={{ scale: 1.05, x: 10 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center gap-4 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 p-5 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl"
                 >
-                  <span className="font-semibold">Apple Music</span>
-                  <ExternalLink size={18} />
-                </a>
+                  <div className="bg-white/20 p-2 rounded-full">
+                    <Music size={20} className="text-white" />
+                  </div>
+                  <span className="font-bold text-white text-lg flex-1">Apple Music</span>
+                  <ExternalLink size={20} className="text-white" />
+                </motion.a>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>
