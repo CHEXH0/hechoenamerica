@@ -10,24 +10,28 @@ const platforms = [
     image: "/laptop-uploads/Instagram.png",
     url: "https://www.instagram.com/hecho.en.america/",
     isExternal: true,
+    emojis: ["📸", "❤️", "👥", "✨", "🔥"],
   },
   {
     name: "YouTube",
     image: "/laptop-uploads/YouTube.png",
     url: "https://www.youtube.com/@HechoEnAmerica.",
     isExternal: true,
+    emojis: ["📺", "🎬", "👀", "🔴", "🎵"],
   },
   {
     name: "WhatsApp",
     image: "/laptop-uploads/whatsapp.svg",
     url: "https://chat.whatsapp.com/GfhMoPNoJs49pp4nti7uwU",
     isExternal: true,
+    emojis: ["💬", "📱", "👥", "💚", "📞"],
   },
   {
     name: "Sample Pack",
     isIcon: true,
     url: "/coming-soon",
     isExternal: false,
+    emojis: ["🎧", "🎵", "🎤", "🎹", "🎶"],
   },
 ];
 
@@ -57,10 +61,17 @@ const AudioPlatforms = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   whileHover={{ scale: 1.05 }}
-                  className="flex flex-col items-center justify-center p-6 rounded-lg bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
+                  className="relative flex flex-col items-center justify-center p-6 rounded-lg bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 overflow-hidden"
                 >
-                  <img src={platform.image} alt={platform.name} className="w-16 h-16 mb-4" />
-                  <span className="text-white font-medium">{platform.name}</span>
+                  {/* Blurry emoji decorations */}
+                  <div className="absolute top-2 left-3 text-sm opacity-25 blur-sm pointer-events-none z-10">{platform.emojis[0]}</div>
+                  <div className="absolute top-4 right-4 text-xs opacity-20 blur-sm pointer-events-none z-10">{platform.emojis[1]}</div>
+                  <div className="absolute bottom-3 left-6 text-xs opacity-15 blur-sm pointer-events-none z-10">{platform.emojis[2]}</div>
+                  <div className="absolute bottom-5 right-2 text-sm opacity-20 blur-sm pointer-events-none z-10">{platform.emojis[3]}</div>
+                  <div className="absolute top-6 left-8 text-xs opacity-10 blur-sm pointer-events-none z-10">{platform.emojis[4]}</div>
+                  
+                  <img src={platform.image} alt={platform.name} className="w-16 h-16 mb-4 relative z-20" />
+                  <span className="text-white font-medium relative z-20">{platform.name}</span>
                 </motion.a>
               );
             }
@@ -76,16 +87,23 @@ const AudioPlatforms = () => {
               >
                 <Link
                   to={platform.url}
-                  className="flex flex-col items-center justify-center p-6 rounded-lg bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 w-full h-full"
+                  className="relative flex flex-col items-center justify-center p-6 rounded-lg bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 w-full h-full overflow-hidden"
                 >
+                  {/* Blurry emoji decorations */}
+                  <div className="absolute top-2 left-3 text-sm opacity-25 blur-sm pointer-events-none z-10">{platform.emojis[0]}</div>
+                  <div className="absolute top-4 right-4 text-xs opacity-20 blur-sm pointer-events-none z-10">{platform.emojis[1]}</div>
+                  <div className="absolute bottom-3 left-6 text-xs opacity-15 blur-sm pointer-events-none z-10">{platform.emojis[2]}</div>
+                  <div className="absolute bottom-5 right-2 text-sm opacity-20 blur-sm pointer-events-none z-10">{platform.emojis[3]}</div>
+                  <div className="absolute top-6 left-8 text-xs opacity-10 blur-sm pointer-events-none z-10">{platform.emojis[4]}</div>
+                  
                   {platform.isIcon ? (
-                    <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center mb-4">
+                    <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center mb-4 relative z-20">
                       <ArrowRight className="h-8 w-8 text-white" />
                     </div>
                   ) : (
-                    <img src={platform.image} alt={platform.name} className="w-16 h-16 mb-4" />
+                    <img src={platform.image} alt={platform.name} className="w-16 h-16 mb-4 relative z-20" />
                   )}
-                  <span className="text-white font-medium">{platform.name}</span>
+                  <span className="text-white font-medium relative z-20">{platform.name}</span>
                 </Link>
               </motion.div>
             );
