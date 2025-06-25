@@ -47,10 +47,6 @@ const artists = [
     image: "/laptop-uploads/BlackJ.png",
     country: "Bogota, Colombia",
     genre: "Musica Medicina, R&B",
-<<<<<<< HEAD
-    spotifyUrl: "https://open.spotify.com/artist/5lXVO49vfafQSzevboRX2H?si=CduTeslpTFGD-6zPR8DivQ",
-=======
->>>>>>> 0185f0b8f915910c99b72b07cec60da9a51d0f0d
   },
   {
     id: "christian-jones",
