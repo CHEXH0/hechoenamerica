@@ -86,10 +86,10 @@ const Artist = () => {
 
   if (!artist) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-red-900 text-white flex items-center justify-center">
-        <div className="text-center bg-black/30 backdrop-blur-lg p-8 rounded-3xl border border-red-900/20">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 text-white flex items-center justify-center">
+        <div className="text-center bg-black/30 backdrop-blur-lg p-8 rounded-3xl border border-purple-900/20">
           <h1 className="text-2xl font-bold mb-4">Artist not found</h1>
-          <Link to="/" className="text-red-400 hover:text-red-300 underline">
+          <Link to="/" className="text-purple-400 hover:text-purple-300 underline">
             Return to home
           </Link>
         </div>
@@ -98,12 +98,12 @@ const Artist = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-red-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 relative overflow-hidden">
       {/* Dark Background Pattern */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-20 left-20 w-32 h-32 bg-red-500 rounded-full blur-xl"></div>
+        <div className="absolute top-20 left-20 w-32 h-32 bg-purple-500 rounded-full blur-xl"></div>
         <div className="absolute bottom-40 right-32 w-48 h-48 bg-purple-500 rounded-full blur-2xl"></div>
-        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-orange-500 rounded-full blur-lg"></div>
+        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-purple-500 rounded-full blur-lg"></div>
       </div>
 
       {/* Dark overlay for extra undertones */}

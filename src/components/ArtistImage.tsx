@@ -26,14 +26,14 @@ const ArtistImage = ({ image, name }: ArtistImageProps) => {
       className="relative"
     >
       <div className="relative group">
-        <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-red-900/20 rounded-3xl transform rotate-6 group-hover:rotate-12 transition-transform duration-500"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-purple-900/20 rounded-3xl transform rotate-6 group-hover:rotate-12 transition-transform duration-500"></div>
         <img
           src={image}
           alt={name}
-          className="relative w-full max-w-md mx-auto rounded-3xl shadow-2xl transform group-hover:scale-105 transition-transform duration-500 border border-red-900/30"
+          className="relative w-full max-w-md mx-auto rounded-3xl shadow-2xl transform group-hover:scale-105 transition-transform duration-500 border border-purple-900/30"
         />
         <motion.div 
-          className="absolute -bottom-4 -right-4 bg-black/60 backdrop-blur-sm p-4 rounded-full border border-red-500/30"
+          className="absolute -bottom-4 -right-4 bg-black/60 backdrop-blur-sm p-4 rounded-full border border-purple-500/30"
           animate={{ 
             scale: [1, 1.1, 1],
             rotate: showAngel ? 0 : 180
