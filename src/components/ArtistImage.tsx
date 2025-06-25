@@ -18,15 +18,15 @@ const ArtistImage = ({ image, name }: ArtistImageProps) => {
       className="relative"
     >
       <div className="relative group">
-        {/* Black overtone layer */}
-        <div className="absolute inset-0 bg-black/30 rounded-3xl z-10"></div>
-        
-        {/* Animated waveform background */}
-        <div className="absolute inset-0 flex items-center justify-center transform rotate-6 group-hover:rotate-12 transition-transform duration-500">
-          <div className="w-full h-full flex items-center justify-center opacity-20">
+        {/* Animated waveform background - more visible */}
+        <div className="absolute inset-0 flex items-center justify-center transform rotate-6 group-hover:rotate-12 transition-transform duration-500 z-0">
+          <div className="w-full h-full flex items-center justify-center opacity-60 scale-150">
             <Waveform />
           </div>
         </div>
+        
+        {/* Black overtone layer over the image */}
+        <div className="absolute inset-0 bg-black/40 rounded-3xl z-10"></div>
         
         <img
           src={image}
