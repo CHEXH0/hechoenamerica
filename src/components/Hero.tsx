@@ -38,8 +38,7 @@ const Hero = () => {
               alt="HechoEnAmerica Logo"
               className="w-full h-full object-contain transition-all duration-100"
               style={{
-                filter: `hue-rotate(${(logoColor.r + logoColor.g + logoColor.b) / 3}deg) saturate(1.2)`,
-                dropShadow: `0 0 20px rgb(${logoColor.r}, ${logoColor.g}, ${logoColor.b})`
+                filter: `hue-rotate(${(logoColor.r + logoColor.g + logoColor.b) / 3}deg) saturate(1.2) drop-shadow(0 0 20px rgb(${logoColor.r}, ${logoColor.g}, ${logoColor.b}))`
               }}
             />
           </div>
@@ -55,7 +54,7 @@ const Hero = () => {
         </motion.div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .melting-text {
           background: linear-gradient(
             45deg,
