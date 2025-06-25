@@ -179,23 +179,14 @@ const Contact = () => {
               />
             </div>
 
-            {/* Submit button - Glossy bubble with send emojis */}
-            <div className="relative bubble-container">
-              <div className="absolute top-4 left-12 text-xl opacity-40 blur-sm pointer-events-none z-10">🚀</div>
-              <div className="absolute top-6 right-16 text-lg opacity-35 blur-sm pointer-events-none z-10">📤</div>
-              <div className="absolute bottom-8 left-20 text-md opacity-30 blur-sm pointer-events-none z-10">✉️</div>
-              <div className="absolute top-2 left-6 text-sm opacity-25 blur-sm pointer-events-none z-10">⚡</div>
-              <div className="absolute bottom-4 right-8 text-sm opacity-20 blur-sm pointer-events-none z-10">🎯</div>
-              <div className="absolute top-8 right-6 text-xs opacity-15 blur-sm pointer-events-none z-10">🌟</div>
-              <div className="absolute bottom-2 left-32 text-xs opacity-25 blur-sm pointer-events-none z-10">💫</div>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-gradient-to-br from-purple-600/90 via-purple-500/80 to-violet-600/90 hover:from-purple-500 hover:via-purple-400 hover:to-violet-500 text-white rounded-full h-16 shadow-[0_12px_40px_rgba(147,51,234,0.5),inset_0_2px_0_rgba(255,255,255,0.4),inset_0_-2px_0_rgba(0,0,0,0.25),inset_0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_16px_50px_rgba(147,51,234,0.6)] transition-all duration-500 font-semibold text-lg backdrop-blur-sm border border-purple-300/50 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? "Sending..." : "Send Message"}
-              </Button>
-            </div>
+            {/* Submit button - Clean design without emojis */}
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-gradient-to-br from-purple-600/90 via-purple-500/80 to-violet-600/90 hover:from-purple-500 hover:via-purple-400 hover:to-violet-500 text-white rounded-full h-16 shadow-[0_12px_40px_rgba(147,51,234,0.5),inset_0_2px_0_rgba(255,255,255,0.4),inset_0_-2px_0_rgba(0,0,0,0.25),inset_0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_16px_50px_rgba(147,51,234,0.6)] transition-all duration-500 font-semibold text-lg backdrop-blur-sm border border-purple-300/50 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? "Sending..." : "Send Message"}
+            </Button>
           </form>
         </motion.div>
       </div>
