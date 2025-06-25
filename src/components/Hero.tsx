@@ -1,3 +1,4 @@
+
 import React from "react";
 import Waveform from "./Waveform";
 import { motion } from "framer-motion";
@@ -23,7 +24,7 @@ const Hero = () => {
               className="w-full h-full object-contain"
             />
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">
+          <h1 className="text-4xl md:text-6xl font-bold mb-4 font-gothic chrome-text">
             HECHO EN AMÉRICA
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 mb-8">
@@ -32,6 +33,38 @@ const Hero = () => {
           <Waveform />
         </motion.div>
       </div>
+      
+      <style>
+        {`
+          .chrome-text {
+            background: linear-gradient(
+              45deg,
+              #c0c0c0 0%,
+              #ffffff 15%,
+              #c0c0c0 30%,
+              #808080 45%,
+              #ffffff 60%,
+              #c0c0c0 75%,
+              #ffffff 90%,
+              #c0c0c0 100%
+            );
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: chromeShine 3s ease-in-out infinite;
+            text-shadow: 
+              0 0 10px rgba(192, 192, 192, 0.8),
+              0 0 20px rgba(255, 255, 255, 0.6),
+              0 0 30px rgba(192, 192, 192, 0.4);
+          }
+          
+          @keyframes chromeShine {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+          }
+        `}
+      </style>
     </section>
   );
 };
