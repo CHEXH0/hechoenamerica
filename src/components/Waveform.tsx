@@ -15,7 +15,7 @@ const Waveform = () => {
           }}
         />
       ))}
-      <style jsx>{`
+      <style>{`
         @keyframes waveform {
           0%, 100% { 
             transform: scaleY(0.3);
