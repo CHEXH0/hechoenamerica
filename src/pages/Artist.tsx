@@ -87,7 +87,7 @@ const Artist = () => {
   if (!artist) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-500 via-red-500 to-orange-500 text-white flex items-center justify-center">
-        <div className="text-center bg-black/30 backdrop-blur-lg p-8 rounded-3xl border border-white/10">
+        <div className="text-center bg-white/10 backdrop-blur-lg p-8 rounded-3xl">
           <h1 className="text-2xl font-bold mb-4">Artist not found</h1>
           <Link to="/" className="text-white/80 hover:text-white underline">
             Return to home
@@ -99,14 +99,11 @@ const Artist = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-500 via-red-500 to-pink-500 relative overflow-hidden">
-      {/* Black overtone layer */}
-      <div className="absolute inset-0 bg-black/20 z-0"></div>
-      
-      {/* Background Pattern with black overtones */}
+      {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-20 left-20 w-32 h-32 bg-black rounded-full blur-xl"></div>
-        <div className="absolute bottom-40 right-32 w-48 h-48 bg-black rounded-full blur-2xl"></div>
-        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-black rounded-full blur-lg"></div>
+        <div className="absolute top-20 left-20 w-32 h-32 bg-white rounded-full blur-xl"></div>
+        <div className="absolute bottom-40 right-32 w-48 h-48 bg-white rounded-full blur-2xl"></div>
+        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-white rounded-full blur-lg"></div>
       </div>
 
       <div className="container mx-auto px-4 py-8 relative z-10">

@@ -2,7 +2,6 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Music } from "lucide-react";
-import Waveform from "./Waveform";
 
 interface ArtistImageProps {
   image: string;
@@ -18,22 +17,13 @@ const ArtistImage = ({ image, name }: ArtistImageProps) => {
       className="relative"
     >
       <div className="relative group">
-        {/* Animated waveform background - more visible */}
-        <div className="absolute inset-0 flex items-center justify-center transform rotate-6 group-hover:rotate-12 transition-transform duration-500 z-0">
-          <div className="w-full h-full flex items-center justify-center opacity-60 scale-150">
-            <Waveform />
-          </div>
-        </div>
-        
-        {/* Black overtone layer over the image */}
-        <div className="absolute inset-0 bg-black/40 rounded-3xl z-10"></div>
-        
+        <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/5 rounded-3xl transform rotate-6 group-hover:rotate-12 transition-transform duration-500"></div>
         <img
           src={image}
           alt={name}
-          className="relative w-full max-w-md mx-auto rounded-3xl shadow-2xl transform group-hover:scale-105 transition-transform duration-500 z-20"
+          className="relative w-full max-w-md mx-auto rounded-3xl shadow-2xl transform group-hover:scale-105 transition-transform duration-500"
         />
-        <div className="absolute -bottom-4 -right-4 bg-black/40 backdrop-blur-sm p-3 rounded-full z-30">
+        <div className="absolute -bottom-4 -right-4 bg-white/20 backdrop-blur-sm p-3 rounded-full">
           <Music size={24} className="text-white" />
         </div>
       </div>
