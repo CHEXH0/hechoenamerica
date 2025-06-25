@@ -35,7 +35,7 @@ const artists = [
     genre: "Hip Hop, Trap, R&B",
   },
   {
-    id: "rossella",
+    id: "rosella",
     name: "Rossella",
     image: "/laptop-uploads/Rossella.jpg",
     country: "Playas De Tijuana, México",
