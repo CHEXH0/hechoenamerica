@@ -1,3 +1,4 @@
+
 import React from "react";
 import Waveform from "./Waveform";
 import { motion } from "framer-motion";
@@ -23,7 +24,7 @@ const Hero = () => {
               className="w-full h-full object-contain"
             />
           </div>
-          <h1 className="text-5xl md:text-8xl font-bold mb-4 font-professional chrome-text-readable transform hover:scale-105 transition-transform duration-300">
+          <h1 className="text-5xl md:text-8xl font-bold mb-4 font-professional chrome-text-spiky transform hover:scale-105 transition-transform duration-300">
             HECHO EN AMÉRICA
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 mb-8">
@@ -35,30 +36,59 @@ const Hero = () => {
       
       <style>
         {`
-          .chrome-text-readable {
+          .chrome-text-spiky {
             background: linear-gradient(
-              135deg,
+              45deg,
               #ffffff 0%,
-              #e0e0e0 20%,
-              #ffffff 40%,
-              #c0c0c0 60%,
-              #ffffff 80%,
-              #f0f0f0 100%
+              #e8e8e8 15%,
+              #ffffff 25%,
+              #d0d0d0 35%,
+              #ffffff 45%,
+              #c8c8c8 55%,
+              #ffffff 65%,
+              #e0e0e0 75%,
+              #ffffff 85%,
+              #f8f8f8 100%
             );
-            background-size: 200% 200%;
+            background-size: 300% 300%;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: 
-              chromeShine 4s ease-in-out infinite,
-              subtleGlow 3s ease-in-out infinite alternate;
+            animation: chromeShine 3s ease-in-out infinite;
             text-shadow: 
-              0 0 10px rgba(255, 255, 255, 0.5),
-              0 0 20px rgba(255, 255, 255, 0.3),
-              0 0 30px rgba(255, 255, 255, 0.1);
+              2px 2px 0px rgba(0, 0, 0, 0.8),
+              4px 4px 0px rgba(0, 0, 0, 0.6),
+              6px 6px 0px rgba(0, 0, 0, 0.4),
+              0 0 20px rgba(255, 255, 255, 0.6),
+              0 0 40px rgba(255, 255, 255, 0.4);
             font-weight: 900;
-            letter-spacing: 0.05em;
-            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+            letter-spacing: 0.1em;
+            filter: 
+              drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.7))
+              drop-shadow(-1px -1px 0px rgba(255, 255, 255, 0.3));
+            transform: 
+              perspective(500px) 
+              rotateX(15deg) 
+              skewX(-5deg);
+            position: relative;
+          }
+          
+          .chrome-text-spiky::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%);
+            z-index: -1;
+            clip-path: polygon(
+              0% 20%, 5% 0%, 15% 25%, 25% 5%, 35% 30%, 45% 10%, 
+              55% 35%, 65% 15%, 75% 40%, 85% 20%, 95% 45%, 100% 25%,
+              100% 75%, 95% 100%, 85% 80%, 75% 95%, 65% 85%, 55% 90%,
+              45% 85%, 35% 95%, 25% 80%, 15% 90%, 5% 75%, 0% 85%
+            );
+            animation: spikeGlow 4s ease-in-out infinite;
           }
           
           @keyframes chromeShine {
@@ -70,18 +100,14 @@ const Hero = () => {
             }
           }
           
-          @keyframes subtleGlow {
-            0% { 
-              text-shadow: 
-                0 0 10px rgba(255, 255, 255, 0.5),
-                0 0 20px rgba(255, 255, 255, 0.3),
-                0 0 30px rgba(255, 255, 255, 0.1);
+          @keyframes spikeGlow {
+            0%, 100% { 
+              opacity: 0.3;
+              transform: scale(1);
             }
-            100% { 
-              text-shadow: 
-                0 0 15px rgba(255, 255, 255, 0.7),
-                0 0 25px rgba(255, 255, 255, 0.4),
-                0 0 35px rgba(255, 255, 255, 0.2);
+            50% { 
+              opacity: 0.7;
+              transform: scale(1.05);
             }
           }
         `}
