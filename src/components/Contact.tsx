@@ -99,11 +99,11 @@ const Contact = () => {
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Name input - Classic bubble with multiple highlights */}
+              {/* Name input - Classic bubble with user emojis */}
               <div className="relative bubble-container">
-                <div className="absolute top-3 left-8 w-12 h-6 bg-white/40 rounded-full blur-sm pointer-events-none z-10" />
-                <div className="absolute top-5 right-12 w-4 h-4 bg-white/25 rounded-full blur-sm pointer-events-none z-10" />
-                <div className="absolute top-8 left-16 w-2 h-2 bg-white/30 rounded-full blur-sm pointer-events-none z-10" />
+                <div className="absolute top-3 left-8 text-2xl opacity-30 blur-sm pointer-events-none z-10">👤</div>
+                <div className="absolute top-5 right-12 text-lg opacity-20 blur-sm pointer-events-none z-10">✨</div>
+                <div className="absolute top-8 left-16 text-sm opacity-25 blur-sm pointer-events-none z-10">🌟</div>
                 <Input
                   type="text"
                   name="name"
@@ -115,11 +115,11 @@ const Contact = () => {
                 />
               </div>
 
-              {/* Email input - Elongated bubble with side reflections */}
+              {/* Email input - Elongated bubble with email emojis */}
               <div className="relative bubble-container">
-                <div className="absolute top-2 left-4 w-16 h-3 bg-white/35 rounded-full blur-sm pointer-events-none z-10" />
-                <div className="absolute top-6 right-6 w-6 h-6 bg-white/20 rounded-full blur-sm pointer-events-none z-10" />
-                <div className="absolute bottom-4 left-10 w-3 h-3 bg-white/25 rounded-full blur-sm pointer-events-none z-10" />
+                <div className="absolute top-2 left-4 text-xl opacity-25 blur-sm pointer-events-none z-10">📧</div>
+                <div className="absolute top-6 right-6 text-lg opacity-20 blur-sm pointer-events-none z-10">💌</div>
+                <div className="absolute bottom-4 left-10 text-sm opacity-30 blur-sm pointer-events-none z-10">📮</div>
                 <Input
                   type="email"
                   name="email"
@@ -132,11 +132,11 @@ const Contact = () => {
               </div>
             </div>
 
-            {/* Subject input - Soap bubble effect with rainbow edge */}
+            {/* Subject input - Soap bubble effect with topic emojis */}
             <div className="relative bubble-container">
-              <div className="absolute top-3 left-12 w-10 h-5 bg-gradient-to-r from-white/30 to-purple-200/20 rounded-full blur-sm pointer-events-none z-10" />
-              <div className="absolute top-7 right-16 w-5 h-5 bg-gradient-to-br from-pink-200/25 to-blue-200/15 rounded-full blur-sm pointer-events-none z-10" />
-              <div className="absolute bottom-5 left-20 w-2 h-2 bg-cyan-200/30 rounded-full blur-sm pointer-events-none z-10" />
+              <div className="absolute top-3 left-12 text-xl opacity-25 blur-sm pointer-events-none z-10">💭</div>
+              <div className="absolute top-7 right-16 text-lg opacity-20 blur-sm pointer-events-none z-10">🎯</div>
+              <div className="absolute bottom-5 left-20 text-sm opacity-30 blur-sm pointer-events-none z-10">📝</div>
               <Input
                 type="text"
                 name="subject"
@@ -147,13 +147,13 @@ const Contact = () => {
               />
             </div>
 
-            {/* Message textarea - Large bubble with multiple light sources */}
+            {/* Message textarea - Large bubble with communication emojis */}
             <div className="relative bubble-container">
-              <div className="absolute top-6 left-10 w-20 h-8 bg-white/35 rounded-full blur-md pointer-events-none z-10" />
-              <div className="absolute top-12 right-12 w-8 h-8 bg-white/20 rounded-full blur-sm pointer-events-none z-10" />
-              <div className="absolute top-20 left-16 w-4 h-4 bg-white/25 rounded-full blur-sm pointer-events-none z-10" />
-              <div className="absolute bottom-12 right-20 w-6 h-3 bg-white/15 rounded-full blur-sm pointer-events-none z-10" />
-              <div className="absolute bottom-6 left-24 w-3 h-3 bg-white/20 rounded-full blur-sm pointer-events-none z-10" />
+              <div className="absolute top-6 left-10 text-2xl opacity-25 blur-sm pointer-events-none z-10">💬</div>
+              <div className="absolute top-12 right-12 text-lg opacity-20 blur-sm pointer-events-none z-10">🗨️</div>
+              <div className="absolute top-20 left-16 text-md opacity-25 blur-sm pointer-events-none z-10">💡</div>
+              <div className="absolute bottom-12 right-20 text-sm opacity-15 blur-sm pointer-events-none z-10">📄</div>
+              <div className="absolute bottom-6 left-24 text-sm opacity-20 blur-sm pointer-events-none z-10">✍️</div>
               <Textarea
                 name="message"
                 value={formData.message}
@@ -165,11 +165,11 @@ const Contact = () => {
               />
             </div>
 
-            {/* Submit button - Glossy bubble with internal glow */}
+            {/* Submit button - Glossy bubble with send emojis */}
             <div className="relative bubble-container">
-              <div className="absolute top-4 left-12 w-24 h-8 bg-gradient-to-r from-white/40 to-purple-200/25 rounded-full blur-md pointer-events-none z-10" />
-              <div className="absolute top-6 right-16 w-6 h-6 bg-white/25 rounded-full blur-sm pointer-events-none z-10" />
-              <div className="absolute bottom-8 left-20 w-4 h-2 bg-white/20 rounded-full blur-sm pointer-events-none z-10" />
+              <div className="absolute top-4 left-12 text-2xl opacity-30 blur-sm pointer-events-none z-10">🚀</div>
+              <div className="absolute top-6 right-16 text-lg opacity-25 blur-sm pointer-events-none z-10">📤</div>
+              <div className="absolute bottom-8 left-20 text-md opacity-20 blur-sm pointer-events-none z-10">✉️</div>
               <Button
                 type="submit"
                 disabled={isSubmitting}
