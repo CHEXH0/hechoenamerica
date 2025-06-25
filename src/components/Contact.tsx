@@ -110,7 +110,7 @@ const Contact = () => {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Name"
-                  className="bubble-input bg-gradient-to-br from-purple-100/15 via-purple-200/10 to-purple-300/5 backdrop-blur-md border border-purple-400/30 text-white placeholder:text-purple-200/80 rounded-full px-8 py-6 h-16 shadow-[0_8px_32px_rgba(147,51,234,0.3),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)] focus:shadow-[0_12px_40px_rgba(147,51,234,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] focus:border-purple-300/50 transition-all duration-500 hover:shadow-[0_10px_36px_rgba(147,51,234,0.35)] hover:scale-[1.02]"
+                  className="bubble-input bg-gradient-to-br from-black via-gray-900 to-black backdrop-blur-md border border-purple-400/30 text-white placeholder:text-gray-300 rounded-full px-8 py-6 h-16 shadow-[0_8px_32px_rgba(147,51,234,0.3),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)] focus:shadow-[0_12px_40px_rgba(147,51,234,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] focus:border-purple-300/50 transition-all duration-500 hover:shadow-[0_10px_36px_rgba(147,51,234,0.35)] hover:scale-[1.02] focus:text-white"
                   required
                 />
               </div>
@@ -125,7 +125,7 @@ const Contact = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Email"
-                  className="bubble-input bg-gradient-to-br from-purple-100/15 via-purple-200/10 to-purple-300/5 backdrop-blur-md border border-purple-400/30 text-white placeholder:text-purple-200/80 rounded-full px-8 py-6 h-16 shadow-[0_8px_32px_rgba(147,51,234,0.3),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)] focus:shadow-[0_12px_40px_rgba(147,51,234,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] focus:border-purple-300/50 transition-all duration-500 hover:shadow-[0_10px_36px_rgba(147,51,234,0.35)] hover:scale-[1.02]"
+                  className="bubble-input bg-gradient-to-br from-black via-gray-900 to-black backdrop-blur-md border border-purple-400/30 text-white placeholder:text-gray-300 rounded-full px-8 py-6 h-16 shadow-[0_8px_32px_rgba(147,51,234,0.3),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)] focus:shadow-[0_12px_40px_rgba(147,51,234,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] focus:border-purple-300/50 transition-all duration-500 hover:shadow-[0_10px_36px_rgba(147,51,234,0.35)] hover:scale-[1.02] focus:text-white"
                   required
                 />
               </div>
@@ -141,7 +141,7 @@ const Contact = () => {
                 value={formData.subject}
                 onChange={handleChange}
                 placeholder="Subject"
-                className="bubble-input bg-gradient-to-br from-purple-100/15 via-purple-200/10 to-purple-300/5 backdrop-blur-md border border-purple-400/30 text-white placeholder:text-purple-200/80 rounded-full px-8 py-6 h-16 shadow-[0_8px_32px_rgba(147,51,234,0.3),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)] focus:shadow-[0_12px_40px_rgba(147,51,234,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] focus:border-purple-300/50 transition-all duration-500 hover:shadow-[0_10px_36px_rgba(147,51,234,0.35)] hover:scale-[1.02]"
+                className="bubble-input bg-gradient-to-br from-black via-gray-900 to-black backdrop-blur-md border border-purple-400/30 text-white placeholder:text-gray-300 rounded-full px-8 py-6 h-16 shadow-[0_8px_32px_rgba(147,51,234,0.3),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)] focus:shadow-[0_12px_40px_rgba(147,51,234,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] focus:border-purple-300/50 transition-all duration-500 hover:shadow-[0_10px_36px_rgba(147,51,234,0.35)] hover:scale-[1.02] focus:text-white"
               />
             </div>
             <div className="relative bubble-container">
@@ -156,7 +156,7 @@ const Contact = () => {
                 value={formData.message}
                 onChange={handleChange}
                 placeholder="Message"
-                className="bubble-input bg-gradient-to-br from-purple-100/15 via-purple-200/10 to-purple-300/5 backdrop-blur-md border border-purple-400/30 text-white placeholder:text-purple-200/80 rounded-3xl px-8 py-6 min-h-40 shadow-[0_8px_32px_rgba(147,51,234,0.3),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)] focus:shadow-[0_12px_40px_rgba(147,51,234,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] focus:border-purple-300/50 transition-all duration-500 resize-none hover:shadow-[0_10px_36px_rgba(147,51,234,0.35)] hover:scale-[1.01]"
+                className="bubble-input bg-gradient-to-br from-black via-gray-900 to-black backdrop-blur-md border border-purple-400/30 text-white placeholder:text-gray-300 rounded-3xl px-8 py-6 min-h-40 shadow-[0_8px_32px_rgba(147,51,234,0.3),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)] focus:shadow-[0_12px_40px_rgba(147,51,234,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] focus:border-purple-300/50 transition-all duration-500 resize-none hover:shadow-[0_10px_36px_rgba(147,51,234,0.35)] hover:scale-[1.01] focus:text-white"
                 rows={6}
                 required
               />
