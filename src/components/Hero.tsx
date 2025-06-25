@@ -1,4 +1,3 @@
-
 import React from "react";
 import Waveform from "./Waveform";
 import { motion } from "framer-motion";
@@ -24,7 +23,7 @@ const Hero = () => {
               className="w-full h-full object-contain"
             />
           </div>
-          <h1 className="text-5xl md:text-8xl font-bold mb-4 font-gothic chrome-text-readable transform hover:scale-105 transition-transform duration-300">
+          <h1 className="text-5xl md:text-8xl font-bold mb-4 font-professional chrome-text-readable transform hover:scale-105 transition-transform duration-300">
             HECHO EN AMÉRICA
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 mb-8">

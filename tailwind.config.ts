@@ -59,7 +59,7 @@ export default {
         },
       },
       fontFamily: {
-        'gothic': ['Creepster', 'cursive'],
+        'professional': ['Oswald', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",
