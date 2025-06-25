@@ -35,7 +35,7 @@ const artists = [
   },
   {
     name: "Rosella",
-    image: "/laptop-uploads/Rosella.jpg",
+    image: "/laptop-uploads/Rossella.jpg",
     country: "Playas De Tijuana, México",
     genre: "Musica Medicina",
     spotifyUrl: "https://open.spotify.com/artist/2tOG1hBhUrWO87AfSA4Ej6?si=W8l0jUgsQ9-TSxoPPWMWvA",
