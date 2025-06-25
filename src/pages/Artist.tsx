@@ -16,8 +16,8 @@ const artists = [
     genre: "Alternative R&B, Musica Medicina",
     bio: "CHEXHO is an innovative artist blending Alternative R&B with Musica Medicina, creating transformative musical experiences that heal and inspire.",
     spotifyUrl: "https://open.spotify.com/artist/51oO373JL3YH8dvT6v94xg?si=EgGVOngeRTaejIWl3TYqkA",
-    youtubeUrl: "https://music.youtube.com/channel/UC...",
-    appleMusicUrl: "https://music.apple.com/artist/...",
+    youtubeUrl: "https://music.youtube.com/channel/UC2YuThfYNq2UTfAQlRQhAhw?si=qHHq90xz8ZqsqJ1Y",
+    appleMusicUrl: "https://music.apple.com/us/artist/chexho/1777084383",
   },
   {
     id: "jiesson-diaz-santiago",
@@ -27,8 +27,8 @@ const artists = [
     genre: "Musica Medicina",
     bio: "Based in Bogotá, Jiesson Diaz Santiago crafts healing soundscapes through Musica Medicina, connecting listeners to their inner wisdom.",
     spotifyUrl: "https://open.spotify.com/artist/5MpXNiUTlKk7WmwEYhnVaC?si=BOfW5qmwRFWNMhnjhOa0Fw",
-    youtubeUrl: "https://music.youtube.com/channel/UC...",
-    appleMusicUrl: "https://music.apple.com/artist/...",
+    youtubeUrl: "https://music.youtube.com/channel/UCOzvqhVCaqNDbY7jRzqHEgQ?si=rHzk0wOj-GJ3XABc",
+    appleMusicUrl: "https://music.apple.com/us/artist/jiesson-d%C3%ADaz-santiago/1788694452",
   },
   {
     id: "nick-zinchenko",
@@ -38,19 +38,19 @@ const artists = [
     genre: "Hip Hop, Trap, R&B",
     bio: "Nick Zinchenko brings authentic Eastern European energy to Hip Hop, Trap, and R&B, creating powerful narratives through his music.",
     spotifyUrl: "https://open.spotify.com/artist/5MNMLU5i9pBJCNh9kEP9F5?si=RTt4qWrySHS2GMpaON0RBQ",
-    youtubeUrl: "https://music.youtube.com/channel/UC...",
-    appleMusicUrl: "https://music.apple.com/artist/...",
+    youtubeUrl: "https://music.youtube.com/channel/UCJbVDaqHZUbFT3Mw8kzt2Nw?si=gvwZ_8zP50I9fiOa",
+    appleMusicUrl: "https://music.apple.com/us/artist/nick-zinchenko/1674389844",
   },
   {
     id: "rosella",
     name: "Rosella",
-    image: "/laptop-uploads/Rosella.jpg",
+    image: "/laptop-uploads/Rossella.jpg",
     country: "Playas De Tijuana, México",
     genre: "Musica Medicina",
     bio: "From the borderlands of Tijuana, Rosella weaves ancient wisdom into modern Musica Medicina, bridging cultures through healing sound.",
     spotifyUrl: "https://open.spotify.com/artist/2tOG1hBhUrWO87AfSA4Ej6?si=W8l0jUgsQ9-TSxoPPWMWvA",
-    youtubeUrl: "https://music.youtube.com/channel/UC...",
-    appleMusicUrl: "https://music.apple.com/artist/...",
+    youtubeUrl: "https://music.youtube.com/channel/UCp2CGsqQbrlRYfSXAgePoww?si=ftQRH1oo63VIlfhA",
+    appleMusicUrl: "https://music.apple.com/us/artist/rossella/263293042",
   },
   {
     id: "felicidad",
@@ -61,7 +61,7 @@ const artists = [
     bio: "Felicidad combines the soulful essence of R&B with the healing power of Musica Medicina, creating uplifting musical journeys.",
     spotifyUrl: "https://open.spotify.com/artist/5hKIALJCfhcnvPE6EJR4Jc",
     youtubeUrl: "https://music.youtube.com/channel/UC...",
-    appleMusicUrl: "https://music.apple.com/artist/...",
+    appleMusicUrl: "https://music.apple.com/us/artist/felicidad/189759832",
   },
   {
     id: "christian-jones",
@@ -71,8 +71,8 @@ const artists = [
     genre: "Rap, Soul",
     bio: "Christian Jones delivers authentic Rap and Soul from California, telling stories that resonate with raw emotion and spiritual depth.",
     spotifyUrl: "https://open.spotify.com/artist/5iypl9rruEx6nUMwgGfZCJ?si=MHgV5vGtTSKTdTq3UM6NMA",
-    youtubeUrl: "https://music.youtube.com/channel/UC...",
-    appleMusicUrl: "https://music.apple.com/artist/...",
+    youtubeUrl: "https://music.apple.com/us/artist/christian-jones/106152357",
+    appleMusicUrl: "https://music.apple.com/us/artist/christian-jones/106152357",
   },
 ];
 
@@ -98,7 +98,7 @@ const Artist = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-500 via-red-500 to-orange-500 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-pink-500 via-red-500 to-pink-500 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-20 w-32 h-32 bg-white rounded-full blur-xl"></div>

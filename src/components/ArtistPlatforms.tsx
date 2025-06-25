@@ -14,7 +14,7 @@ const ArtistPlatforms = ({ spotifyUrl, youtubeUrl, appleMusicUrl }: ArtistPlatfo
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: 0.6 }}
+      transition={{ duration: 1, delay: 1 }}
       className="bg-white/10 backdrop-blur-lg p-8 rounded-3xl"
     >
       <h2 className="text-3xl font-bold mb-6 text-white">Listen On</h2>
@@ -25,7 +25,7 @@ const ArtistPlatforms = ({ spotifyUrl, youtubeUrl, appleMusicUrl }: ArtistPlatfo
           rel="noopener noreferrer"
           whileHover={{ scale: 1.05, x: 10 }}
           whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 p-5 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl"
+          className="flex items-center gap-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 p-5 rounded-2xl transition-all duration-100 shadow-lg hover:shadow-xl"
         >
           <div className="bg-white/20 p-2 rounded-full">
             <Music size={20} className="text-white" />
@@ -40,7 +40,7 @@ const ArtistPlatforms = ({ spotifyUrl, youtubeUrl, appleMusicUrl }: ArtistPlatfo
           rel="noopener noreferrer"
           whileHover={{ scale: 1.05, x: 10 }}
           whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-4 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 p-5 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl"
+          className="flex items-center gap-4 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 p-5 rounded-2xl transition-all duration-100 shadow-lg hover:shadow-xl"
         >
           <div className="bg-white/20 p-2 rounded-full">
             <Music size={20} className="text-white" />
@@ -55,7 +55,7 @@ const ArtistPlatforms = ({ spotifyUrl, youtubeUrl, appleMusicUrl }: ArtistPlatfo
           rel="noopener noreferrer"
           whileHover={{ scale: 1.05, x: 10 }}
           whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-4 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 p-5 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl"
+          className="flex items-center gap-4 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 p-5 rounded-2xl transition-all duration-100 shadow-lg hover:shadow-xl"
         >
           <div className="bg-white/20 p-2 rounded-full">
             <Music size={20} className="text-white" />
