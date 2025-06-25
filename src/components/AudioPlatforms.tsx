@@ -37,7 +37,7 @@ const platforms = [
 
 const AudioPlatforms = () => {
   return (
-    <section className="py-20 bg-gradient-to-b from-black via-gray-900 to-purple-950/60">
+    <section className="py-20 bg-gradient-to-b from-black via-purple-950/40 via-purple-900/60 to-purple-800/80">
       <div className="container mx-auto px-4">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
