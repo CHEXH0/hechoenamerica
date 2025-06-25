@@ -78,59 +78,67 @@ const Contact = () => {
   };
 
   return (
-    <section className="py-20 bg-black">
-      <div className="container mx-auto px-4">
+    <section className="py-20 bg-gradient-to-br from-purple-950 via-purple-900 to-black relative overflow-hidden">
+      {/* Purple gradient background overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-purple-900/20 to-violet-800/20" />
+      
+      {/* Floating bubble decorations */}
+      <div className="absolute top-10 left-10 w-32 h-32 bg-purple-500/10 rounded-full blur-xl animate-pulse" />
+      <div className="absolute bottom-20 right-20 w-48 h-48 bg-violet-400/10 rounded-full blur-2xl animate-pulse" />
+      <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-purple-300/10 rounded-full blur-lg animate-pulse" />
+      
+      <div className="container mx-auto px-4 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="max-w-2xl mx-auto"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-12 drop-shadow-lg">
             Get in Touch
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
+              <div className="relative">
                 <Input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Name"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-400"
+                  className="bg-purple-100/10 backdrop-blur-sm border-purple-300/30 text-white placeholder:text-purple-200/70 rounded-2xl px-6 py-4 h-14 shadow-lg shadow-purple-500/10 focus:shadow-purple-500/20 focus:border-purple-400/50 transition-all duration-300"
                   required
                 />
               </div>
-              <div>
+              <div className="relative">
                 <Input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Email"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-400"
+                  className="bg-purple-100/10 backdrop-blur-sm border-purple-300/30 text-white placeholder:text-purple-200/70 rounded-2xl px-6 py-4 h-14 shadow-lg shadow-purple-500/10 focus:shadow-purple-500/20 focus:border-purple-400/50 transition-all duration-300"
                   required
                 />
               </div>
             </div>
-            <div>
+            <div className="relative">
               <Input
                 type="text"
                 name="subject"
                 value={formData.subject}
                 onChange={handleChange}
                 placeholder="Subject"
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-400"
+                className="bg-purple-100/10 backdrop-blur-sm border-purple-300/30 text-white placeholder:text-purple-200/70 rounded-2xl px-6 py-4 h-14 shadow-lg shadow-purple-500/10 focus:shadow-purple-500/20 focus:border-purple-400/50 transition-all duration-300"
               />
             </div>
-            <div>
+            <div className="relative">
               <Textarea
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
                 placeholder="Message"
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-400"
+                className="bg-purple-100/10 backdrop-blur-sm border-purple-300/30 text-white placeholder:text-purple-200/70 rounded-2xl px-6 py-4 min-h-32 shadow-lg shadow-purple-500/10 focus:shadow-purple-500/20 focus:border-purple-400/50 transition-all duration-300 resize-none"
                 rows={6}
                 required
               />
@@ -138,7 +146,7 @@ const Contact = () => {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-studio-red hover:bg-studio-red/90 text-white"
+              className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white rounded-2xl h-14 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 transition-all duration-300 font-semibold"
             >
               {isSubmitting ? "Sending..." : "Send Message"}
             </Button>
