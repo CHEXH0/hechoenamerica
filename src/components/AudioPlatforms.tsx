@@ -19,14 +19,14 @@ const platforms = [
   },
   {
     name: "WhatsApp",
-    image: "/laptop-uploads/whatsapp.svg", // Reusing the X image for WhatsApp
-    url: "https://chat.whatsapp.com/GfhMoPNoJs49pp4nti7uwU", // Replace with actual WhatsApp contact link
+    image: "/laptop-uploads/whatsapp.svg",
+    url: "https://chat.whatsapp.com/GfhMoPNoJs49pp4nti7uwU",
     isExternal: true,
   },
   {
     name: "Sample Pack",
-    isIcon: true, // New property to indicate we're using an icon instead of an image
-    url: "/sample-pack",
+    isIcon: true,
+    url: "/coming-soon",
     isExternal: false,
   },
 ];

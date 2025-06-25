@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Music } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { 
   Pagination, 
   PaginationContent, 
@@ -13,46 +14,50 @@ import {
 
 const artists = [
   {
+    id: "chexho",
     name: "CHEXHO",
     image: "/laptop-uploads/AlbumCover.png",
     country: "California, USA",
     genre: "Alternative R&B, Musica Medicina",
-    spotifyUrl: "https://open.spotify.com/artist/51oO373JL3YH8dvT6v94xg?si=EgGVOngeRTaejIWl3TYqkA",
   },
   {
+    id: "jiesson-diaz-santiago",
     name: "Jiesson Diaz Santiago",
     image: "/laptop-uploads/Jiesson.png",
     country: "Bogotá, Colombia",
     genre: "Musica Medicina",
-    spotifyUrl: "https://open.spotify.com/artist/5MpXNiUTlKk7WmwEYhnVaC?si=BOfW5qmwRFWNMhnjhOa0Fw",
   },
   {
+    id: "nick-zinchenko",
     name: "Nick Zinchenko",
     image: "/laptop-uploads/Zinchenko.png",
     country: "Luhansk, Ukraine",
     genre: "Hip Hop, Trap, R&B",
-    spotifyUrl: "https://open.spotify.com/artist/5MNMLU5i9pBJCNh9kEP9F5?si=RTt4qWrySHS2GMpaON0RBQ",
   },
   {
+    id: "rosella",
     name: "Rosella",
     image: "/laptop-uploads/Rossella.jpg",
     country: "Playas De Tijuana, México",
     genre: "Musica Medicina",
-    spotifyUrl: "https://open.spotify.com/artist/2tOG1hBhUrWO87AfSA4Ej6?si=W8l0jUgsQ9-TSxoPPWMWvA",
   },
   {
+    id: "felicidad",
     name: "Felicidad",
     image: "/laptop-uploads/BlackJ.png",
     country: "Bogota, Colombia",
     genre: "Musica Medicina, R&B",
+<<<<<<< HEAD
     spotifyUrl: "https://open.spotify.com/artist/5lXVO49vfafQSzevboRX2H?si=CduTeslpTFGD-6zPR8DivQ",
+=======
+>>>>>>> 0185f0b8f915910c99b72b07cec60da9a51d0f0d
   },
   {
+    id: "christian-jones",
     name: "Christian Jones",
     image: "/laptop-uploads/RIVERSIDE.jpg",
     country: "California, USA",
     genre: "Rap, Soul",
-    spotifyUrl: "https://open.spotify.com/artist/5iypl9rruEx6nUMwgGfZCJ?si=MHgV5vGtTSKTdTq3UM6NMA",
   },
 ];
 
@@ -60,10 +65,11 @@ const ARTISTS_PER_PAGE = 4;
 
 const FeaturedArtists = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  const navigate = useNavigate();
   const totalPages = Math.ceil(artists.length / ARTISTS_PER_PAGE);
   
-  const handleArtistClick = (spotifyUrl: string) => {
-    window.open(spotifyUrl, "_blank", "noopener,noreferrer");
+  const handleArtistClick = (artistId: string) => {
+    navigate(`/artist/${artistId}`);
   };
   
   const indexOfLastArtist = currentPage * ARTISTS_PER_PAGE;
@@ -96,7 +102,7 @@ const FeaturedArtists = () => {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               whileHover={{ scale: 1.05 }}
               className="relative group cursor-pointer"
-              onClick={() => handleArtistClick(artist.spotifyUrl)}
+              onClick={() => handleArtistClick(artist.id)}
             >
               <div className="relative overflow-hidden rounded-lg aspect-square">
                 <img
