@@ -1,3 +1,4 @@
+
 import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -36,9 +37,9 @@ const platforms = [
 
 const AudioPlatforms = () => {
   return (
-    <section className="py-20 bg-gradient-to-b from-black via-gray-900 to-purple-950/60 relative overflow-hidden">
+    <section className="py-20 bg-gradient-to-b from-black via-black to-purple-950/60 relative overflow-hidden">
       {/* Purple gradient background overlay */}
-      <div className="absolute inset-0 bg-gradient-to-l from-black/60 to-purple-900/40" />
+      <div className="absolute inset-0 bg-gradient-to-r from-purple-900/40 to-black/60" />
       
       <div className="container mx-auto px-4 relative z-10">
         <motion.h2
