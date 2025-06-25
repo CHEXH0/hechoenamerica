@@ -61,7 +61,7 @@ const AudioPlatforms = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   whileHover={{ scale: 1.05 }}
-                  className="relative flex flex-col items-center justify-center p-6 rounded-lg bg-black/80 backdrop-blur-md border border-purple-400/20 hover:bg-black/90 hover:border-purple-400/30 transition-all duration-300 overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+                  className="relative flex flex-col items-center justify-center p-6 rounded-lg bg-black/80 backdrop-blur-md border border-purple-400/20 hover:bg-black/90 hover:border-purple-400/30 transition-all duration-100 overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
                 >
                   {/* Blurry emoji decorations */}
                   <div className="absolute top-2 left-3 text-sm opacity-25 blur-sm pointer-events-none z-10">{platform.emojis[0]}</div>
