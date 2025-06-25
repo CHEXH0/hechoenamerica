@@ -99,11 +99,11 @@ const Contact = () => {
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Name input - Classic bubble with multiple highlights */}
               <div className="relative bubble-container">
-                {/* Bubble reflection highlight */}
-                <div className="absolute top-2 left-6 w-8 h-4 bg-white/30 rounded-full blur-sm pointer-events-none z-10" />
-                {/* Secondary highlight */}
-                <div className="absolute top-3 right-8 w-3 h-3 bg-white/20 rounded-full blur-sm pointer-events-none z-10" />
+                <div className="absolute top-3 left-8 w-12 h-6 bg-white/40 rounded-full blur-sm pointer-events-none z-10" />
+                <div className="absolute top-5 right-12 w-4 h-4 bg-white/25 rounded-full blur-sm pointer-events-none z-10" />
+                <div className="absolute top-8 left-16 w-2 h-2 bg-white/30 rounded-full blur-sm pointer-events-none z-10" />
                 <Input
                   type="text"
                   name="name"
@@ -114,61 +114,66 @@ const Contact = () => {
                   required
                 />
               </div>
+
+              {/* Email input - Elongated bubble with side reflections */}
               <div className="relative bubble-container">
-                {/* Bubble reflection highlight */}
-                <div className="absolute top-2 left-6 w-8 h-4 bg-white/30 rounded-full blur-sm pointer-events-none z-10" />
-                {/* Secondary highlight */}
-                <div className="absolute top-3 right-8 w-3 h-3 bg-white/20 rounded-full blur-sm pointer-events-none z-10" />
+                <div className="absolute top-2 left-4 w-16 h-3 bg-white/35 rounded-full blur-sm pointer-events-none z-10" />
+                <div className="absolute top-6 right-6 w-6 h-6 bg-white/20 rounded-full blur-sm pointer-events-none z-10" />
+                <div className="absolute bottom-4 left-10 w-3 h-3 bg-white/25 rounded-full blur-sm pointer-events-none z-10" />
                 <Input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Email"
-                  className="bubble-input bg-gradient-to-br from-black via-gray-900 to-black backdrop-blur-md border border-purple-400/30 text-white placeholder:text-gray-300 rounded-full px-8 py-6 h-16 shadow-[0_8px_32px_rgba(147,51,234,0.3),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)] focus:shadow-[0_12px_40px_rgba(147,51,234,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] focus:border-purple-300/50 transition-all duration-500 hover:shadow-[0_10px_36px_rgba(147,51,234,0.35)] hover:scale-[1.02] focus:text-white"
+                  className="bubble-input bg-gradient-to-br from-black via-gray-800 to-gray-900 backdrop-blur-md border border-violet-400/40 text-white placeholder:text-gray-300 rounded-full px-8 py-6 h-16 shadow-[0_6px_28px_rgba(139,69,195,0.4),inset_0_2px_0_rgba(255,255,255,0.15),inset_0_-2px_0_rgba(0,0,0,0.2)] focus:shadow-[0_10px_36px_rgba(139,69,195,0.5),inset_0_2px_0_rgba(255,255,255,0.25)] focus:border-violet-300/60 transition-all duration-500 hover:shadow-[0_8px_32px_rgba(139,69,195,0.45)] hover:scale-[1.01] focus:text-white"
                   required
                 />
               </div>
             </div>
+
+            {/* Subject input - Soap bubble effect with rainbow edge */}
             <div className="relative bubble-container">
-              {/* Bubble reflection highlight */}
-              <div className="absolute top-2 left-6 w-8 h-4 bg-white/30 rounded-full blur-sm pointer-events-none z-10" />
-              {/* Secondary highlight */}
-              <div className="absolute top-3 right-8 w-3 h-3 bg-white/20 rounded-full blur-sm pointer-events-none z-10" />
+              <div className="absolute top-3 left-12 w-10 h-5 bg-gradient-to-r from-white/30 to-purple-200/20 rounded-full blur-sm pointer-events-none z-10" />
+              <div className="absolute top-7 right-16 w-5 h-5 bg-gradient-to-br from-pink-200/25 to-blue-200/15 rounded-full blur-sm pointer-events-none z-10" />
+              <div className="absolute bottom-5 left-20 w-2 h-2 bg-cyan-200/30 rounded-full blur-sm pointer-events-none z-10" />
               <Input
                 type="text"
                 name="subject"
                 value={formData.subject}
                 onChange={handleChange}
                 placeholder="Subject"
-                className="bubble-input bg-gradient-to-br from-black via-gray-900 to-black backdrop-blur-md border border-purple-400/30 text-white placeholder:text-gray-300 rounded-full px-8 py-6 h-16 shadow-[0_8px_32px_rgba(147,51,234,0.3),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)] focus:shadow-[0_12px_40px_rgba(147,51,234,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] focus:border-purple-300/50 transition-all duration-500 hover:shadow-[0_10px_36px_rgba(147,51,234,0.35)] hover:scale-[1.02] focus:text-white"
+                className="bubble-input bg-gradient-to-br from-gray-900 via-black to-gray-800 backdrop-blur-lg border-2 border-transparent bg-clip-padding shadow-[0_0_0_1px_rgba(168,85,247,0.4)] text-white placeholder:text-gray-300 rounded-full px-8 py-6 h-16 shadow-[0_10px_35px_rgba(168,85,247,0.3),inset_0_1px_0_rgba(255,255,255,0.25),inset_0_-1px_0_rgba(168,85,247,0.1)] focus:shadow-[0_15px_45px_rgba(168,85,247,0.4),inset_0_2px_0_rgba(255,255,255,0.3)] focus:bg-clip-padding transition-all duration-500 hover:shadow-[0_12px_40px_rgba(168,85,247,0.35)] hover:scale-[1.015] focus:text-white"
               />
             </div>
+
+            {/* Message textarea - Large bubble with multiple light sources */}
             <div className="relative bubble-container">
-              {/* Bubble reflection highlight - larger for textarea */}
-              <div className="absolute top-4 left-6 w-12 h-6 bg-white/30 rounded-full blur-sm pointer-events-none z-10" />
-              {/* Secondary highlight */}
-              <div className="absolute top-6 right-8 w-4 h-4 bg-white/20 rounded-full blur-sm pointer-events-none z-10" />
-              {/* Tertiary small highlight */}
-              <div className="absolute top-12 left-12 w-2 h-2 bg-white/25 rounded-full blur-sm pointer-events-none z-10" />
+              <div className="absolute top-6 left-10 w-20 h-8 bg-white/35 rounded-full blur-md pointer-events-none z-10" />
+              <div className="absolute top-12 right-12 w-8 h-8 bg-white/20 rounded-full blur-sm pointer-events-none z-10" />
+              <div className="absolute top-20 left-16 w-4 h-4 bg-white/25 rounded-full blur-sm pointer-events-none z-10" />
+              <div className="absolute bottom-12 right-20 w-6 h-3 bg-white/15 rounded-full blur-sm pointer-events-none z-10" />
+              <div className="absolute bottom-6 left-24 w-3 h-3 bg-white/20 rounded-full blur-sm pointer-events-none z-10" />
               <Textarea
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
                 placeholder="Message"
-                className="bubble-input bg-gradient-to-br from-black via-gray-900 to-black backdrop-blur-md border border-purple-400/30 text-white placeholder:text-gray-300 rounded-3xl px-8 py-6 min-h-40 shadow-[0_8px_32px_rgba(147,51,234,0.3),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)] focus:shadow-[0_12px_40px_rgba(147,51,234,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] focus:border-purple-300/50 transition-all duration-500 resize-none hover:shadow-[0_10px_36px_rgba(147,51,234,0.35)] hover:scale-[1.01] focus:text-white"
+                className="bubble-input bg-gradient-to-br from-black via-gray-900 to-black backdrop-blur-md border border-indigo-400/35 text-white placeholder:text-gray-300 rounded-3xl px-8 py-6 min-h-40 shadow-[0_12px_40px_rgba(99,102,241,0.35),inset_0_2px_0_rgba(255,255,255,0.2),inset_0_-2px_0_rgba(0,0,0,0.15)] focus:shadow-[0_16px_50px_rgba(99,102,241,0.45),inset_0_3px_0_rgba(255,255,255,0.25)] focus:border-indigo-300/50 transition-all duration-500 resize-none hover:shadow-[0_14px_45px_rgba(99,102,241,0.4)] hover:scale-[1.005] focus:text-white"
                 rows={6}
                 required
               />
             </div>
+
+            {/* Submit button - Glossy bubble with internal glow */}
             <div className="relative bubble-container">
-              {/* Button bubble reflection */}
-              <div className="absolute top-3 left-8 w-16 h-6 bg-white/30 rounded-full blur-sm pointer-events-none z-10" />
-              <div className="absolute top-4 right-12 w-4 h-4 bg-white/20 rounded-full blur-sm pointer-events-none z-10" />
+              <div className="absolute top-4 left-12 w-24 h-8 bg-gradient-to-r from-white/40 to-purple-200/25 rounded-full blur-md pointer-events-none z-10" />
+              <div className="absolute top-6 right-16 w-6 h-6 bg-white/25 rounded-full blur-sm pointer-events-none z-10" />
+              <div className="absolute bottom-8 left-20 w-4 h-2 bg-white/20 rounded-full blur-sm pointer-events-none z-10" />
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-gradient-to-br from-purple-600/80 via-purple-500/70 to-violet-600/80 hover:from-purple-500 hover:via-purple-400 hover:to-violet-500 text-white rounded-full h-16 shadow-[0_8px_32px_rgba(147,51,234,0.4),inset_0_1px_0_rgba(255,255,255,0.3),inset_0_-1px_0_rgba(0,0,0,0.2)] hover:shadow-[0_12px_40px_rgba(147,51,234,0.5)] transition-all duration-500 font-semibold text-lg backdrop-blur-sm border border-purple-400/40 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-gradient-to-br from-purple-600/90 via-purple-500/80 to-violet-600/90 hover:from-purple-500 hover:via-purple-400 hover:to-violet-500 text-white rounded-full h-16 shadow-[0_12px_40px_rgba(147,51,234,0.5),inset_0_2px_0_rgba(255,255,255,0.4),inset_0_-2px_0_rgba(0,0,0,0.25),inset_0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_16px_50px_rgba(147,51,234,0.6)] transition-all duration-500 font-semibold text-lg backdrop-blur-sm border border-purple-300/50 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? "Sending..." : "Send Message"}
               </Button>
