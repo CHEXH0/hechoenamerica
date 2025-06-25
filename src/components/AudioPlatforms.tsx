@@ -37,11 +37,8 @@ const platforms = [
 
 const AudioPlatforms = () => {
   return (
-    <section className="py-20 bg-gradient-to-b from-black via-black to-purple-950/60 relative overflow-hidden">
-      {/* Purple gradient background overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-purple-900/40 to-black/60" />
-      
-      <div className="container mx-auto px-4 relative z-10">
+    <section className="py-20 bg-gradient-to-b from-black via-gray-900 to-purple-950/60">
+      <div className="container mx-auto px-4">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
