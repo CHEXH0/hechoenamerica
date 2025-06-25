@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import ArtistHeader from "../components/ArtistHeader";
@@ -42,12 +41,12 @@ const artists = [
     appleMusicUrl: "https://music.apple.com/us/artist/nick-zinchenko/1674389844",
   },
   {
-    id: "rosella",
-    name: "Rosella",
+    id: "rossella",
+    name: "Rossella",
     image: "/laptop-uploads/Rossella.jpg",
     country: "Playas De Tijuana, México",
     genre: "Musica Medicina",
-    bio: "From the borderlands of Tijuana, Rosella weaves ancient wisdom into modern Musica Medicina, bridging cultures through healing sound.",
+    bio: "From the borderlands of Tijuana, Rossella weaves ancient wisdom into modern Musica Medicina, bridging cultures through healing sound.",
     spotifyUrl: "https://open.spotify.com/artist/2tOG1hBhUrWO87AfSA4Ej6?si=W8l0jUgsQ9-TSxoPPWMWvA",
     youtubeUrl: "https://music.youtube.com/channel/UCp2CGsqQbrlRYfSXAgePoww?si=ftQRH1oo63VIlfhA",
     appleMusicUrl: "https://music.apple.com/us/artist/rossella/263293042",

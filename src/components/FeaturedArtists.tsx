@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Music } from "lucide-react";
@@ -35,7 +34,7 @@ const artists = [
     genre: "Hip Hop, Trap, R&B",
   },
   {
-    id: "rosella",
+    id: "rossella",
     name: "Rossella",
     image: "/laptop-uploads/Rossella.jpg",
     country: "Playas De Tijuana, México",
