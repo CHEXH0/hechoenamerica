@@ -75,7 +75,7 @@ const Services = () => {
                 <img 
                   src={service.image} 
                   alt={service.title}
-                  className="w-4/5 h-4/5 object-contain group-hover:scale-110 transition-transform duration-300 rounded-xl mx-auto mt-4"
+                  className="w-5/6 h-5/6 object-contain group-hover:scale-110 transition-transform duration-300 rounded-xl mx-auto mt-4"
                 />
               </div>
               
