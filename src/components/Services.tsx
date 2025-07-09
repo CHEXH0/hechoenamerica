@@ -44,7 +44,7 @@ const Services = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               whileHover={{ scale: 1.05 }}
-              className="relative group overflow-hidden rounded-xl bg-black/60 backdrop-blur-md border border-purple-400/20 hover:border-purple-400/40 transition-all duration-300"
+              className="relative group overflow-hidden rounded-xl bg-black backdrop-blur-md border border-purple-400/20 hover:border-purple-400/40 transition-all duration-300"
             >
               <div className="aspect-square overflow-hidden">
                 <img 
