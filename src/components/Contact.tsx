@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 
 const Contact = () => {
@@ -11,6 +12,7 @@ const Contact = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    country: "",
     subject: "",
     message: ""
   });
@@ -18,6 +20,10 @@ const Contact = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCountryChange = (value: string) => {
+    setFormData(prev => ({ ...prev, country: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,6 +46,7 @@ const Contact = () => {
       const data = new FormData();
       data.append("name", formData.name);
       data.append("email", formData.email);
+      data.append("country", formData.country);
       data.append("subject", formData.subject || "New message from HechoEnAmerica website");
       data.append("message", formData.message);
       data.append("_to", "hechoenamerica369@gmail.com"); // Target email
@@ -62,6 +69,7 @@ const Contact = () => {
       setFormData({
         name: "",
         email: "",
+        country: "",
         subject: "",
         message: ""
       });
@@ -135,6 +143,46 @@ const Contact = () => {
                   required
                 />
               </div>
+            </div>
+
+            {/* Country selection - Globe bubble with country emojis */}
+            <div className="relative bubble-container">
+              <div className="absolute top-3 left-8 text-lg opacity-35 blur-sm pointer-events-none z-10">🌍</div>
+              <div className="absolute top-6 right-12 text-md opacity-30 blur-sm pointer-events-none z-10">🗺️</div>
+              <div className="absolute bottom-4 left-16 text-sm opacity-25 blur-sm pointer-events-none z-10">🌎</div>
+              <div className="absolute top-2 right-6 text-sm opacity-20 blur-sm pointer-events-none z-10">🏴</div>
+              <div className="absolute bottom-2 right-20 text-xs opacity-15 blur-sm pointer-events-none z-10">🌏</div>
+              <Select value={formData.country} onValueChange={handleCountryChange}>
+                <SelectTrigger className="bubble-input bg-black backdrop-blur-md border border-emerald-400/30 text-white rounded-full px-8 py-6 h-16 shadow-[0_8px_32px_rgba(16,185,129,0.3),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)] focus:shadow-[0_12px_40px_rgba(16,185,129,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] focus:border-emerald-300/50 transition-all duration-500 hover:shadow-[0_10px_36px_rgba(16,185,129,0.35)] hover:scale-[1.02] [&>span]:text-white [&>span]:text-left">
+                  <SelectValue placeholder="Select Country" className="text-gray-400" />
+                </SelectTrigger>
+                <SelectContent className="bg-black border border-emerald-400/30 max-h-60 z-50">
+                  <SelectItem value="us">🇺🇸 United States</SelectItem>
+                  <SelectItem value="ca">🇨🇦 Canada</SelectItem>
+                  <SelectItem value="mx">🇲🇽 Mexico</SelectItem>
+                  <SelectItem value="br">🇧🇷 Brazil</SelectItem>
+                  <SelectItem value="ar">🇦🇷 Argentina</SelectItem>
+                  <SelectItem value="co">🇨🇴 Colombia</SelectItem>
+                  <SelectItem value="ve">🇻🇪 Venezuela</SelectItem>
+                  <SelectItem value="pe">🇵🇪 Peru</SelectItem>
+                  <SelectItem value="cl">🇨🇱 Chile</SelectItem>
+                  <SelectItem value="ec">🇪🇨 Ecuador</SelectItem>
+                  <SelectItem value="cu">🇨🇺 Cuba</SelectItem>
+                  <SelectItem value="do">🇩🇴 Dominican Republic</SelectItem>
+                  <SelectItem value="pr">🇵🇷 Puerto Rico</SelectItem>
+                  <SelectItem value="cr">🇨🇷 Costa Rica</SelectItem>
+                  <SelectItem value="pa">🇵🇦 Panama</SelectItem>
+                  <SelectItem value="gt">🇬🇹 Guatemala</SelectItem>
+                  <SelectItem value="hn">🇭🇳 Honduras</SelectItem>
+                  <SelectItem value="ni">🇳🇮 Nicaragua</SelectItem>
+                  <SelectItem value="sv">🇸🇻 El Salvador</SelectItem>
+                  <SelectItem value="bo">🇧🇴 Bolivia</SelectItem>
+                  <SelectItem value="py">🇵🇾 Paraguay</SelectItem>
+                  <SelectItem value="uy">🇺🇾 Uruguay</SelectItem>
+                  <SelectItem value="es">🇪🇸 Spain</SelectItem>
+                  <SelectItem value="other">🌍 Other</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Subject input - Soap bubble effect with topic emojis */}
