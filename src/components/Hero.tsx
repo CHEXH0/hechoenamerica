@@ -1,10 +1,19 @@
 import React from "react";
 import Waveform from "./Waveform";
+import LanguageSelector from "./LanguageSelector";
 import { motion } from "framer-motion";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 const Hero = () => {
+  const { t } = useTranslation();
+  
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black text-white">
+      {/* Language Selector at the top */}
+      <div className="absolute top-4 right-4 z-20">
+        <LanguageSelector />
+      </div>
+      
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 to-black" />
       </div>
@@ -24,10 +33,10 @@ const Hero = () => {
             />
           </div>
           <h1 className="text-4xl md:text-6xl font-bold mb-4">
-            HECHO EN AMÉRICA
+            {t.hero.title}
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 mb-8">
-            LA MUSIC ES MEDICINE
+            {t.hero.subtitle}
           </p>
           <Waveform />
         </motion.div>
