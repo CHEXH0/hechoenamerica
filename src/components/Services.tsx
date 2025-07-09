@@ -11,21 +11,15 @@ const services = [
   },
   {
     icon: Headphones,
-    title: "Mixing & Mastering",
-    description: "Expert mixing and mastering to bring your tracks to life",
+    title: "Mixing",
+    description: "Expert mixing to balance and enhance your tracks",
     image: "/laptop-uploads/mixing-mastering.jpg",
   },
   {
     icon: Music,
-    title: "Music Production",
-    description: "Full music production services from concept to completion",
+    title: "Mastering",
+    description: "Professional mastering for the final polish and industry-ready sound",
     image: "/laptop-uploads/AlbumCover.png",
-  },
-  {
-    icon: Radio,
-    title: "Artist Development",
-    description: "Comprehensive artist development and career guidance",
-    image: "/laptop-uploads/RIVERSIDE.jpg",
   },
 ];
 
@@ -42,7 +36,7 @@ const Services = () => {
           Our Services
         </motion.h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {services.map((service, index) => (
             <motion.div
               key={service.title}
