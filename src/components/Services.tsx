@@ -25,7 +25,7 @@ const services = [
 
 const Services = () => {
   return (
-    <section className="py-20 bg-gradient-to-b from-purple-800/80 via-purple-900/60 to-black">
+    <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-800/80 via-purple-900/60 to-black">
       <div className="container mx-auto px-4">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
