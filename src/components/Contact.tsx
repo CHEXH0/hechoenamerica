@@ -157,30 +157,30 @@ const Contact = () => {
                   <SelectValue placeholder="Select Country" className="text-gray-400" />
                 </SelectTrigger>
                 <SelectContent className="bg-black border border-emerald-400/30 max-h-60 z-50">
-                  <SelectItem value="us">🇺🇸 United States</SelectItem>
-                  <SelectItem value="ca">🇨🇦 Canada</SelectItem>
-                  <SelectItem value="mx">🇲🇽 Mexico</SelectItem>
-                  <SelectItem value="br">🇧🇷 Brazil</SelectItem>
-                  <SelectItem value="ar">🇦🇷 Argentina</SelectItem>
-                  <SelectItem value="co">🇨🇴 Colombia</SelectItem>
-                  <SelectItem value="ve">🇻🇪 Venezuela</SelectItem>
-                  <SelectItem value="pe">🇵🇪 Peru</SelectItem>
-                  <SelectItem value="cl">🇨🇱 Chile</SelectItem>
-                  <SelectItem value="ec">🇪🇨 Ecuador</SelectItem>
-                  <SelectItem value="cu">🇨🇺 Cuba</SelectItem>
-                  <SelectItem value="do">🇩🇴 Dominican Republic</SelectItem>
-                  <SelectItem value="pr">🇵🇷 Puerto Rico</SelectItem>
-                  <SelectItem value="cr">🇨🇷 Costa Rica</SelectItem>
-                  <SelectItem value="pa">🇵🇦 Panama</SelectItem>
-                  <SelectItem value="gt">🇬🇹 Guatemala</SelectItem>
-                  <SelectItem value="hn">🇭🇳 Honduras</SelectItem>
-                  <SelectItem value="ni">🇳🇮 Nicaragua</SelectItem>
-                  <SelectItem value="sv">🇸🇻 El Salvador</SelectItem>
-                  <SelectItem value="bo">🇧🇴 Bolivia</SelectItem>
-                  <SelectItem value="py">🇵🇾 Paraguay</SelectItem>
-                  <SelectItem value="uy">🇺🇾 Uruguay</SelectItem>
-                  <SelectItem value="es">🇪🇸 Spain</SelectItem>
-                  <SelectItem value="other">🌍 Other</SelectItem>
+                  <SelectItem value="us" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇺🇸 United States</SelectItem>
+                  <SelectItem value="ca" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇨🇦 Canada</SelectItem>
+                  <SelectItem value="mx" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇲🇽 Mexico</SelectItem>
+                  <SelectItem value="br" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇧🇷 Brazil</SelectItem>
+                  <SelectItem value="ar" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇦🇷 Argentina</SelectItem>
+                  <SelectItem value="co" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇨🇴 Colombia</SelectItem>
+                  <SelectItem value="ve" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇻🇪 Venezuela</SelectItem>
+                  <SelectItem value="pe" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇵🇪 Peru</SelectItem>
+                  <SelectItem value="cl" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇨🇱 Chile</SelectItem>
+                  <SelectItem value="ec" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇪🇨 Ecuador</SelectItem>
+                  <SelectItem value="cu" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇨🇺 Cuba</SelectItem>
+                  <SelectItem value="do" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇩🇴 Dominican Republic</SelectItem>
+                  <SelectItem value="pr" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇵🇷 Puerto Rico</SelectItem>
+                  <SelectItem value="cr" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇨🇷 Costa Rica</SelectItem>
+                  <SelectItem value="pa" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇵🇦 Panama</SelectItem>
+                  <SelectItem value="gt" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇬🇹 Guatemala</SelectItem>
+                  <SelectItem value="hn" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇭🇳 Honduras</SelectItem>
+                  <SelectItem value="ni" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇳🇮 Nicaragua</SelectItem>
+                  <SelectItem value="sv" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇸🇻 El Salvador</SelectItem>
+                  <SelectItem value="bo" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇧🇴 Bolivia</SelectItem>
+                  <SelectItem value="py" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇵🇾 Paraguay</SelectItem>
+                  <SelectItem value="uy" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇺🇾 Uruguay</SelectItem>
+                  <SelectItem value="es" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇪🇸 Spain</SelectItem>
+                  <SelectItem value="other" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🌍 Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
