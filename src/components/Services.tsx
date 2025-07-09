@@ -1,29 +1,47 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Headphones, Mic, Music, Radio } from "lucide-react";
+import protoolsLogo from "@/assets/protools-logo.png";
+import cubaseLogo from "@/assets/cubase-logo.png";
+import flStudioLogo from "@/assets/fl-studio-logo.png";
 
 const services = [
   {
     icon: Mic,
     title: "Recording",
     description: "Professional recording sessions in our state-of-the-art studio",
-    platforms: ["ProTools", "Cubase", "FL Studio"],
     image: "/laptop-uploads/recording.jpg",
   },
   {
     icon: Headphones,
     title: "Mixing",
     description: "Expert mixing to balance and enhance your tracks",
-    platforms: ["ProTools", "Cubase", "FL Studio"],
     image: "/laptop-uploads/mixing-mastering.jpg",
   },
   {
     icon: Music,
     title: "Mastering",
     description: "Professional mastering for the final polish and industry-ready sound",
-    platforms: ["ProTools", "Cubase", "FL Studio"],
     image: "/laptop-uploads/AlbumCover.png",
   },
+];
+
+const platforms = [
+  {
+    name: "ProTools",
+    logo: protoolsLogo,
+    tools: ["EQ III", "Compressor", "DeEsser", "Reverb One"]
+  },
+  {
+    name: "Cubase", 
+    logo: cubaseLogo,
+    tools: ["VST Instruments", "Channel EQ", "Compressor", "Reverb"]
+  },
+  {
+    name: "FL Studio",
+    logo: flStudioLogo,
+    tools: ["Parametric EQ 2", "Fruity Compressor", "Reverb 2", "Delay 3"]
+  }
 ];
 
 const Services = () => {
@@ -64,23 +82,55 @@ const Services = () => {
                   <service.icon className="h-6 w-6 text-purple-400 mr-3" />
                   <h3 className="text-xl font-semibold text-white">{service.title}</h3>
                 </div>
-                <p className="text-gray-300 text-sm leading-relaxed mb-3">
+                <p className="text-gray-300 text-sm leading-relaxed">
                   {service.description}
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  {service.platforms.map((platform) => (
-                    <span
-                      key={platform}
-                      className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full border border-purple-400/30"
-                    >
-                      {platform}
-                    </span>
-                  ))}
-                </div>
               </div>
             </motion.div>
           ))}
         </div>
+        
+        {/* Platforms Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="mt-16"
+        >
+          <h3 className="text-2xl md:text-3xl font-bold text-center text-white mb-8">
+            Professional Tools & Platforms
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {platforms.map((platform, index) => (
+              <motion.div
+                key={platform.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="bg-black/40 backdrop-blur-md border border-purple-400/20 rounded-xl p-6 text-center hover:border-purple-400/40 transition-all duration-300"
+              >
+                <div className="w-16 h-16 mx-auto mb-4 bg-white/10 rounded-lg flex items-center justify-center">
+                  <img 
+                    src={platform.logo} 
+                    alt={`${platform.name} logo`}
+                    className="w-12 h-12 object-contain"
+                  />
+                </div>
+                <h4 className="text-lg font-semibold text-white mb-3">{platform.name}</h4>
+                <div className="space-y-1">
+                  {platform.tools.map((tool) => (
+                    <span
+                      key={tool}
+                      className="inline-block px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full border border-purple-400/30 mr-1 mb-1"
+                    >
+                      {tool}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
       </div>
     </section>
   );
