@@ -78,7 +78,7 @@ const Contact = () => {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-b from-purple-950/60 via-gray-900 to-black relative overflow-hidden">
+    <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-950/60 via-gray-900 to-black relative overflow-hidden">
       {/* Purple gradient background overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-purple-900/40" />
       
