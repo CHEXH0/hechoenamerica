@@ -15,20 +15,20 @@ const LanguageSelector = () => {
 
   return (
     <div className="relative group">
-      <button className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-background/20 backdrop-blur-md border border-border/30 hover:bg-background/30 transition-all duration-300 text-foreground">
-        <Globe className="h-4 w-4" />
-        <span className="text-sm">
+      <button className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300">
+        <Globe className="h-4 w-4 text-white" />
+        <span className="text-white text-sm">
           {languages.find(lang => lang.code === language)?.flag}
         </span>
       </button>
       
-      <div className="absolute top-full right-0 mt-2 bg-background/95 backdrop-blur-md border border-border rounded-lg overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 min-w-[150px] shadow-lg">
+      <div className="absolute top-full right-0 mt-2 bg-black/90 backdrop-blur-md border border-white/20 rounded-lg overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 min-w-[150px] shadow-lg">
         {languages.map((lang) => (
           <button
             key={lang.code}
             onClick={() => setLanguage(lang.code)}
-            className={`w-full px-4 py-2 text-left hover:bg-accent/50 transition-colors duration-200 flex items-center space-x-2 ${
-              language === lang.code ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground'
+            className={`w-full px-4 py-2 text-left hover:bg-white/10 transition-colors duration-200 flex items-center space-x-2 ${
+              language === lang.code ? 'bg-white/20 text-white' : 'text-gray-300'
             }`}
           >
             <span>{lang.flag}</span>
