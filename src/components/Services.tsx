@@ -34,18 +34,18 @@ const Services = () => {
   const platforms = [
     {
       name: "ProTools",
-      logo: protoolsLogo,
-      tools: ["EQ III", "Compressor", "DeEsser", "Reverb One"]
+      logo: "/laptop-uploads/ProTools.png",
+      tools: [`"Work with anyone, anywhere"`]
     },
     {
       name: "Cubase", 
-      logo: cubaseLogo,
-      tools: ["VST Instruments", "Channel EQ", "Compressor", "Reverb"]
+      logo: "/laptop-uploads/Cubase.png",
+      tools: [`"Keeps your creativty flowing"`]
     },
     {
       name: "FL Studio",
-      logo: flStudioLogo,
-      tools: ["Parametric EQ 2", "Fruity Compressor", "Reverb 2", "Delay 3"]
+      logo: "/laptop-uploads/FLoops.png",
+      tools: [`"Create your best music"`]
     }
   ];
 

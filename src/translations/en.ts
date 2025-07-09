@@ -16,15 +16,15 @@ export const en: Translations = {
     title: "Our Services",
     recording: {
       title: "Recording",
-      description: "Professional recording sessions in our state-of-the-art studio"
+      description: "INTERNATIONAL TRAVEL AND ONLINE"
     },
     mixing: {
       title: "Mixing",
-      description: "Expert mixing to balance and enhance your tracks"
+      description: "BALANCED AND COLLABORATIVE"
     },
     mastering: {
       title: "Mastering",
-      description: "Professional mastering for the final polish and industry-ready sound"
+      description: "PERSONALIZED SOUND DESIGN"
     }
   },
   contact: {
