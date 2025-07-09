@@ -153,34 +153,34 @@ const Contact = () => {
               <div className="absolute top-2 right-6 text-sm opacity-20 blur-sm pointer-events-none z-10">🏴</div>
               <div className="absolute bottom-2 right-20 text-xs opacity-15 blur-sm pointer-events-none z-10">🌏</div>
               <Select value={formData.country} onValueChange={handleCountryChange}>
-                <SelectTrigger className="bubble-input bg-black backdrop-blur-md border border-emerald-400/30 text-white rounded-full px-8 py-6 h-16 shadow-[0_8px_32px_rgba(16,185,129,0.3),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)] focus:shadow-[0_12px_40px_rgba(16,185,129,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] focus:border-emerald-300/50 transition-all duration-500 hover:shadow-[0_10px_36px_rgba(16,185,129,0.35)] hover:scale-[1.02] [&>span]:text-white [&>span]:text-left">
+                <SelectTrigger className="bubble-input bg-black backdrop-blur-md border border-pink-400/30 text-white rounded-full px-8 py-6 h-16 shadow-[0_8px_32px_rgba(236,72,153,0.3),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)] focus:shadow-[0_12px_40px_rgba(236,72,153,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] focus:border-pink-300/50 transition-all duration-500 hover:shadow-[0_10px_36px_rgba(236,72,153,0.35)] hover:scale-[1.02] [&>span]:text-white [&>span]:text-left">
                   <SelectValue placeholder="Select Country" className="text-gray-400" />
                 </SelectTrigger>
-                <SelectContent className="bg-black border border-emerald-400/30 max-h-60 z-50">
-                  <SelectItem value="us" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇺🇸 United States</SelectItem>
-                  <SelectItem value="ca" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇨🇦 Canada</SelectItem>
-                  <SelectItem value="mx" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇲🇽 Mexico</SelectItem>
-                  <SelectItem value="br" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇧🇷 Brazil</SelectItem>
-                  <SelectItem value="ar" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇦🇷 Argentina</SelectItem>
-                  <SelectItem value="co" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇨🇴 Colombia</SelectItem>
-                  <SelectItem value="ve" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇻🇪 Venezuela</SelectItem>
-                  <SelectItem value="pe" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇵🇪 Peru</SelectItem>
-                  <SelectItem value="cl" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇨🇱 Chile</SelectItem>
-                  <SelectItem value="ec" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇪🇨 Ecuador</SelectItem>
-                  <SelectItem value="cu" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇨🇺 Cuba</SelectItem>
-                  <SelectItem value="do" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇩🇴 Dominican Republic</SelectItem>
-                  <SelectItem value="pr" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇵🇷 Puerto Rico</SelectItem>
-                  <SelectItem value="cr" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇨🇷 Costa Rica</SelectItem>
-                  <SelectItem value="pa" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇵🇦 Panama</SelectItem>
-                  <SelectItem value="gt" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇬🇹 Guatemala</SelectItem>
-                  <SelectItem value="hn" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇭🇳 Honduras</SelectItem>
-                  <SelectItem value="ni" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇳🇮 Nicaragua</SelectItem>
-                  <SelectItem value="sv" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇸🇻 El Salvador</SelectItem>
-                  <SelectItem value="bo" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇧🇴 Bolivia</SelectItem>
-                  <SelectItem value="py" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇵🇾 Paraguay</SelectItem>
-                  <SelectItem value="uy" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇺🇾 Uruguay</SelectItem>
-                  <SelectItem value="es" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🇪🇸 Spain</SelectItem>
-                  <SelectItem value="other" className="text-white hover:bg-emerald-400/20 focus:bg-emerald-400/20">🌍 Other</SelectItem>
+                <SelectContent className="bg-black border border-pink-400/30 max-h-60 z-50">
+                  <SelectItem value="us" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇺🇸 United States</SelectItem>
+                  <SelectItem value="ca" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇨🇦 Canada</SelectItem>
+                  <SelectItem value="mx" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇲🇽 Mexico</SelectItem>
+                  <SelectItem value="br" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇧🇷 Brazil</SelectItem>
+                  <SelectItem value="ar" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇦🇷 Argentina</SelectItem>
+                  <SelectItem value="co" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇨🇴 Colombia</SelectItem>
+                  <SelectItem value="ve" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇻🇪 Venezuela</SelectItem>
+                  <SelectItem value="pe" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇵🇪 Peru</SelectItem>
+                  <SelectItem value="cl" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇨🇱 Chile</SelectItem>
+                  <SelectItem value="ec" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇪🇨 Ecuador</SelectItem>
+                  <SelectItem value="cu" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇨🇺 Cuba</SelectItem>
+                  <SelectItem value="do" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇩🇴 Dominican Republic</SelectItem>
+                  <SelectItem value="pr" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇵🇷 Puerto Rico</SelectItem>
+                  <SelectItem value="cr" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇨🇷 Costa Rica</SelectItem>
+                  <SelectItem value="pa" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇵🇦 Panama</SelectItem>
+                  <SelectItem value="gt" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇬🇹 Guatemala</SelectItem>
+                  <SelectItem value="hn" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇭🇳 Honduras</SelectItem>
+                  <SelectItem value="ni" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇳🇮 Nicaragua</SelectItem>
+                  <SelectItem value="sv" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇸🇻 El Salvador</SelectItem>
+                  <SelectItem value="bo" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇧🇴 Bolivia</SelectItem>
+                  <SelectItem value="py" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇵🇾 Paraguay</SelectItem>
+                  <SelectItem value="uy" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇺🇾 Uruguay</SelectItem>
+                  <SelectItem value="es" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🇪🇸 Spain</SelectItem>
+                  <SelectItem value="other" className="text-white hover:bg-pink-400/20 focus:bg-pink-400/20">🌍 Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
