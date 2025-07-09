@@ -11,19 +11,19 @@ const services = [
     icon: Mic,
     title: "Recording",
     description: "Professional recording sessions in our state-of-the-art studio",
-    image: "/laptop-uploads/recording.jpg",
+    image: "/laptop-uploads/Star.png",
   },
   {
     icon: Headphones,
     title: "Mixing",
     description: "Expert mixing to balance and enhance your tracks",
-    image: "/laptop-uploads/mixing-mastering.jpg",
+    image: "/laptop-uploads/Donut.png",
   },
   {
     icon: Music,
     title: "Mastering",
     description: "Professional mastering for the final polish and industry-ready sound",
-    image: "/laptop-uploads/AlbumCover.png",
+    image: "/laptop-uploads/Pill.png",
   },
 ];
 
