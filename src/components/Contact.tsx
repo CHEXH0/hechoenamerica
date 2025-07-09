@@ -44,28 +44,30 @@ const Contact = () => {
     }
 
     try {
-      // Create FormData to submit
+      // Create FormData for FormSubmit.co
       const data = new FormData();
       data.append("name", formData.name);
       data.append("email", formData.email);
       data.append("country", formData.country);
       data.append("subject", formData.subject || "New message from HechoEnAmerica website");
       data.append("message", formData.message);
-      data.append("_to", "hechoenamerica369@gmail.com"); // Target email
+      data.append("_next", window.location.origin); // Redirect back to current page
+      data.append("_captcha", "false"); // Disable captcha for now
 
-      // Use FormSubmit.co service to send the email without backend
+      // Use FormSubmit.co service - try the endpoint without no-cors first
       const response = await fetch("https://formsubmit.co/hechoenamerica369@gmail.com", {
         method: "POST",
-        body: data,
-        mode: "no-cors" // This avoids CORS issues but means we won't get a detailed response
+        body: data
       });
 
-      // Since we're using no-cors mode, we can't check response status
-      // We'll just assume it worked and show a success message
-      toast({
-        title: t.contact.messageSentTitle,
-        description: t.contact.messageSentDesc,
-      });
+      if (response.ok) {
+        toast({
+          title: t.contact.messageSentTitle,
+          description: t.contact.messageSentDesc,
+        });
+      } else {
+        throw new Error("Form submission failed");
+      }
       
       // Reset form
       setFormData({
