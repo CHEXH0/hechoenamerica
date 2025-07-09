@@ -1,51 +1,54 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Headphones, Mic, Music, Radio } from "lucide-react";
+import { useTranslation } from "@/contexts/TranslationContext";
 import protoolsLogo from "@/assets/protools-logo.png";
 import cubaseLogo from "@/assets/cubase-logo.png";
 import flStudioLogo from "@/assets/fl-studio-logo.png";
 
 
-const services = [
-  {
-    icon: Mic,
-    title: "Recording",
-    description: "Professional recording sessions in our state-of-the-art studio",
-    image: "/laptop-uploads/Star.png",
-  },
-  {
-    icon: Headphones,
-    title: "Mixing",
-    description: "Expert mixing to balance and enhance your tracks",
-    image: "/laptop-uploads/Donut.png",
-  },
-  {
-    icon: Music,
-    title: "Mastering",
-    description: "Professional mastering for the final polish and industry-ready sound",
-    image: "/laptop-uploads/Pill.png",
-  },
-];
-
-const platforms = [
-  {
-    name: "ProTools",
-    logo: protoolsLogo,
-    tools: ["EQ III", "Compressor", "DeEsser", "Reverb One"]
-  },
-  {
-    name: "Cubase", 
-    logo: cubaseLogo,
-    tools: ["VST Instruments", "Channel EQ", "Compressor", "Reverb"]
-  },
-  {
-    name: "FL Studio",
-    logo: flStudioLogo,
-    tools: ["Parametric EQ 2", "Fruity Compressor", "Reverb 2", "Delay 3"]
-  }
-];
-
 const Services = () => {
+  const { t } = useTranslation();
+  
+  const services = [
+    {
+      icon: Mic,
+      title: t.services.recording.title,
+      description: t.services.recording.description,
+      image: "/laptop-uploads/Star.png",
+    },
+    {
+      icon: Headphones,
+      title: t.services.mixing.title,
+      description: t.services.mixing.description,
+      image: "/laptop-uploads/Donut.png",
+    },
+    {
+      icon: Music,
+      title: t.services.mastering.title,
+      description: t.services.mastering.description,
+      image: "/laptop-uploads/Pill.png",
+    },
+  ];
+
+  const platforms = [
+    {
+      name: "ProTools",
+      logo: protoolsLogo,
+      tools: ["EQ III", "Compressor", "DeEsser", "Reverb One"]
+    },
+    {
+      name: "Cubase", 
+      logo: cubaseLogo,
+      tools: ["VST Instruments", "Channel EQ", "Compressor", "Reverb"]
+    },
+    {
+      name: "FL Studio",
+      logo: flStudioLogo,
+      tools: ["Parametric EQ 2", "Fruity Compressor", "Reverb 2", "Delay 3"]
+    }
+  ];
+
   return (
     <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-800/80 via-purple-900/60 to-black">
       <div className="container mx-auto px-4">
@@ -55,7 +58,7 @@ const Services = () => {
           transition={{ duration: 0.6 }}
           className="text-3xl md:text-4xl font-bold text-center text-white mb-12"
         >
-          Our Services
+          {t.services.title}
         </motion.h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

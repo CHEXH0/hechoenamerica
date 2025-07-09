@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 const Contact = () => {
+  const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -33,8 +35,8 @@ const Contact = () => {
     // Simple form validation
     if (!formData.name || !formData.email || !formData.message) {
       toast({
-        title: "Missing information",
-        description: "Please fill out all required fields",
+        title: t.contact.missingInfoTitle,
+        description: t.contact.missingInfoDesc,
         variant: "destructive"
       });
       setIsSubmitting(false);
@@ -61,8 +63,8 @@ const Contact = () => {
       // Since we're using no-cors mode, we can't check response status
       // We'll just assume it worked and show a success message
       toast({
-        title: "Message sent",
-        description: "Thank you for your message. We'll get back to you soon!",
+        title: t.contact.messageSentTitle,
+        description: t.contact.messageSentDesc,
       });
       
       // Reset form
@@ -75,8 +77,8 @@ const Contact = () => {
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "There was a problem sending your message. Please try again.",
+        title: t.contact.errorTitle,
+        description: t.contact.errorDesc,
         variant: "destructive"
       });
       console.error("Form submission error:", error);
@@ -103,7 +105,7 @@ const Contact = () => {
           className="max-w-2xl mx-auto"
         >
           <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-12 drop-shadow-lg">
-            Get in Touch
+            {t.contact.title}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -119,7 +121,7 @@ const Contact = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="Name"
+                  placeholder={t.contact.namePlaceholder}
                   className="bubble-input bg-black backdrop-blur-md border border-purple-400/30 text-white placeholder:text-gray-400 rounded-full px-8 py-6 h-16 shadow-[0_8px_32px_rgba(147,51,234,0.3),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)] focus:shadow-[0_12px_40px_rgba(147,51,234,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] focus:border-purple-300/50 transition-all duration-500 hover:shadow-[0_10px_36px_rgba(147,51,234,0.35)] hover:scale-[1.02] focus:text-white"
                   required
                 />
@@ -138,7 +140,7 @@ const Contact = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="Email"
+                  placeholder={t.contact.emailPlaceholder}
                   className="bubble-input bg-black backdrop-blur-md border border-violet-400/40 text-white placeholder:text-gray-400 rounded-full px-8 py-6 h-16 shadow-[0_6px_28px_rgba(139,69,195,0.4),inset_0_2px_0_rgba(255,255,255,0.15),inset_0_-2px_0_rgba(0,0,0,0.2)] focus:shadow-[0_10px_36px_rgba(139,69,195,0.5),inset_0_2px_0_rgba(255,255,255,0.25)] focus:border-violet-300/60 transition-all duration-500 hover:shadow-[0_8px_32px_rgba(139,69,195,0.45)] hover:scale-[1.01] focus:text-white"
                   required
                 />
@@ -154,7 +156,7 @@ const Contact = () => {
               <div className="absolute bottom-2 right-20 text-xs opacity-15 blur-sm pointer-events-none z-10">🌏</div>
               <Select value={formData.country} onValueChange={handleCountryChange}>
                 <SelectTrigger className="bubble-input bg-black backdrop-blur-md border border-purple-400/30 text-white rounded-full px-8 py-6 h-16 shadow-[0_8px_32px_rgba(147,51,234,0.3),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)] focus:shadow-[0_12px_40px_rgba(147,51,234,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] focus:border-purple-300/50 transition-all duration-500 hover:shadow-[0_10px_36px_rgba(147,51,234,0.35)] hover:scale-[1.02] [&>span]:text-white [&>span]:text-left">
-                  <SelectValue placeholder="Select Country" className="text-gray-400" />
+                  <SelectValue placeholder={t.contact.countryPlaceholder} className="text-gray-400" />
                 </SelectTrigger>
                 <SelectContent className="bg-black border border-purple-400/30 max-h-60 z-50">
                   <SelectItem value="us" className="text-white hover:bg-purple-400/20 focus:bg-purple-400/20">🇺🇸 United States</SelectItem>
@@ -199,7 +201,7 @@ const Contact = () => {
                 name="subject"
                 value={formData.subject}
                 onChange={handleChange}
-                placeholder="Subject"
+                placeholder={t.contact.subjectPlaceholder}
                 className="bubble-input bg-black backdrop-blur-lg border-2 border-transparent bg-clip-padding shadow-[0_0_0_1px_rgba(168,85,247,0.4)] text-white placeholder:text-gray-400 rounded-full px-8 py-6 h-16 shadow-[0_10px_35px_rgba(168,85,247,0.3),inset_0_1px_0_rgba(255,255,255,0.25),inset_0_-1px_0_rgba(168,85,247,0.1)] focus:shadow-[0_15px_45px_rgba(168,85,247,0.4),inset_0_2px_0_rgba(255,255,255,0.3)] focus:bg-clip-padding transition-all duration-500 hover:shadow-[0_12px_40px_rgba(168,85,247,0.35)] hover:scale-[1.015] focus:text-white"
               />
             </div>
@@ -220,7 +222,7 @@ const Contact = () => {
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
-                placeholder="Message"
+                placeholder={t.contact.messagePlaceholder}
                 className="bubble-input bg-black backdrop-blur-md border border-indigo-400/35 text-white placeholder:text-gray-400 rounded-3xl px-8 py-6 min-h-40 shadow-[0_12px_40px_rgba(99,102,241,0.35),inset_0_2px_0_rgba(255,255,255,0.2),inset_0_-2px_0_rgba(0,0,0,0.15)] focus:shadow-[0_16px_50px_rgba(99,102,241,0.45),inset_0_3px_0_rgba(255,255,255,0.25)] focus:border-indigo-300/50 transition-all duration-500 resize-none hover:shadow-[0_14px_45px_rgba(99,102,241,0.4)] hover:scale-[1.005] focus:text-white"
                 rows={6}
                 required
@@ -233,7 +235,7 @@ const Contact = () => {
               disabled={isSubmitting}
               className="w-full bg-gradient-to-br from-purple-600/90 via-purple-500/80 to-violet-600/90 hover:from-purple-500 hover:via-purple-400 hover:to-violet-500 text-white rounded-full h-16 shadow-[0_12px_40px_rgba(147,51,234,0.5),inset_0_2px_0_rgba(255,255,255,0.4),inset_0_-2px_0_rgba(0,0,0,0.25),inset_0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_16px_50px_rgba(147,51,234,0.6)] transition-all duration-500 font-semibold text-lg backdrop-blur-sm border border-purple-300/50 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? "Sending..." : "Send Message"}
+              {isSubmitting ? t.contact.sendingButton : t.contact.sendButton}
             </Button>
           </form>
         </motion.div>

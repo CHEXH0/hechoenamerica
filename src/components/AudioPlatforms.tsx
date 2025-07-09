@@ -3,39 +3,42 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-
-const platforms = [
-  {
-    name: "Instagram",
-    image: "/laptop-uploads/Instagram.png",
-    url: "https://www.instagram.com/hecho.en.america/",
-    isExternal: true,
-    emojis: ["📸", "❤️", "👥", "✨", "🔥"],
-  },
-  {
-    name: "YouTube",
-    image: "/laptop-uploads/YouTube.png",
-    url: "https://www.youtube.com/@HechoEnAmerica.",
-    isExternal: true,
-    emojis: ["📺", "🎬", "👀", "🔴", "🎵"],
-  },
-  {
-    name: "WhatsApp",
-    image: "/laptop-uploads/whatsapp.svg",
-    url: "https://chat.whatsapp.com/GfhMoPNoJs49pp4nti7uwU",
-    isExternal: true,
-    emojis: ["💬", "📱", "👥", "💚", "📞"],
-  },
-  {
-    name: "Sample Pack",
-    isIcon: true,
-    url: "/coming-soon",
-    isExternal: false,
-    emojis: ["🎧", "🎵", "🎤", "🎹", "🎶"],
-  },
-];
+import { useTranslation } from "@/contexts/TranslationContext";
 
 const AudioPlatforms = () => {
+  const { t } = useTranslation();
+  
+  const platforms = [
+    {
+      name: "Instagram",
+      image: "/laptop-uploads/Instagram.png",
+      url: "https://www.instagram.com/hecho.en.america/",
+      isExternal: true,
+      emojis: ["📸", "❤️", "👥", "✨", "🔥"],
+    },
+    {
+      name: "YouTube",
+      image: "/laptop-uploads/YouTube.png",
+      url: "https://www.youtube.com/@HechoEnAmerica.",
+      isExternal: true,
+      emojis: ["📺", "🎬", "👀", "🔴", "🎵"],
+    },
+    {
+      name: "WhatsApp",
+      image: "/laptop-uploads/whatsapp.svg",
+      url: "https://chat.whatsapp.com/GfhMoPNoJs49pp4nti7uwU",
+      isExternal: true,
+      emojis: ["💬", "📱", "👥", "💚", "📞"],
+    },
+    {
+      name: t.audioPlatforms.samplePack,
+      isIcon: true,
+      url: "/coming-soon",
+      isExternal: false,
+      emojis: ["🎧", "🎵", "🎤", "🎹", "🎶"],
+    },
+  ];
+  
   return (
     <section className="py-20 bg-gradient-to-b from-black via-purple-950/40 via-purple-900/60 to-purple-800/80">
       <div className="container mx-auto px-4">
@@ -45,7 +48,7 @@ const AudioPlatforms = () => {
           transition={{ duration: 0.6 }}
           className="text-3xl md:text-4xl font-bold text-center text-white mb-12"
         >
-          Listen Now
+          {t.audioPlatforms.title}
         </motion.h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {platforms.map((platform, index) => {
