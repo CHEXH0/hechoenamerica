@@ -4,7 +4,7 @@ import { Headphones, Mic, Music, Radio } from "lucide-react";
 import protoolsLogo from "@/assets/protools-logo.png";
 import cubaseLogo from "@/assets/cubase-logo.png";
 import flStudioLogo from "@/assets/fl-studio-logo.png";
-import tigerRoar from "@/assets/tiger-roar.png";
+
 
 const services = [
   {
@@ -98,13 +98,6 @@ const Services = () => {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="mt-16"
         >
-          <div className="flex justify-center mb-8">
-            <img 
-              src={tigerRoar} 
-              alt="Tiger"
-              className="w-24 h-24 object-contain"
-            />
-          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {platforms.map((platform, index) => (
               <motion.div
