@@ -7,18 +7,21 @@ const services = [
     icon: Mic,
     title: "Recording",
     description: "Professional recording sessions in our state-of-the-art studio",
+    platforms: ["ProTools", "Cubase", "FL Studio"],
     image: "/laptop-uploads/recording.jpg",
   },
   {
     icon: Headphones,
     title: "Mixing",
     description: "Expert mixing to balance and enhance your tracks",
+    platforms: ["ProTools", "Cubase", "FL Studio"],
     image: "/laptop-uploads/mixing-mastering.jpg",
   },
   {
     icon: Music,
     title: "Mastering",
     description: "Professional mastering for the final polish and industry-ready sound",
+    platforms: ["ProTools", "Cubase", "FL Studio"],
     image: "/laptop-uploads/AlbumCover.png",
   },
 ];
@@ -61,9 +64,19 @@ const Services = () => {
                   <service.icon className="h-6 w-6 text-purple-400 mr-3" />
                   <h3 className="text-xl font-semibold text-white">{service.title}</h3>
                 </div>
-                <p className="text-gray-300 text-sm leading-relaxed">
+                <p className="text-gray-300 text-sm leading-relaxed mb-3">
                   {service.description}
                 </p>
+                <div className="flex flex-wrap gap-2">
+                  {service.platforms.map((platform) => (
+                    <span
+                      key={platform}
+                      className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full border border-purple-400/30"
+                    >
+                      {platform}
+                    </span>
+                  ))}
+                </div>
               </div>
             </motion.div>
           ))}
