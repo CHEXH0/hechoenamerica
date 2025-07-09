@@ -45,6 +45,12 @@ interface Translations {
     errorTitle: string;
     errorDesc: string;
   };
+  artist: {
+    backToArtists: string;
+    about: string;
+    notFound: string;
+    returnToHome: string;
+  };
 }
 
 const translations: Record<Language, Translations> = {
@@ -90,6 +96,12 @@ const translations: Record<Language, Translations> = {
       messageSentDesc: "Thank you for your message. We'll get back to you soon!",
       errorTitle: "Error",
       errorDesc: "There was a problem sending your message. Please try again."
+    },
+    artist: {
+      backToArtists: "Back to Artists",
+      about: "About",
+      notFound: "Artist not found",
+      returnToHome: "Return to home"
     }
   },
   es: {
@@ -134,6 +146,12 @@ const translations: Record<Language, Translations> = {
       messageSentDesc: "Gracias por tu mensaje. Te responderemos pronto!",
       errorTitle: "Error",
       errorDesc: "Hubo un problema enviando tu mensaje. Por favor intenta de nuevo."
+    },
+    artist: {
+      backToArtists: "Volver a Artistas",
+      about: "Acerca de",
+      notFound: "Artista no encontrado",
+      returnToHome: "Volver al inicio"
     }
   },
   zh: {
@@ -178,6 +196,12 @@ const translations: Record<Language, Translations> = {
       messageSentDesc: "感谢您的消息。我们会尽快回复您！",
       errorTitle: "错误",
       errorDesc: "发送消息时出现问题。请重试。"
+    },
+    artist: {
+      backToArtists: "返回艺术家",
+      about: "关于",
+      notFound: "未找到艺术家",
+      returnToHome: "返回首页"
     }
   },
   pt: {
@@ -222,6 +246,12 @@ const translations: Record<Language, Translations> = {
       messageSentDesc: "Obrigado pela sua mensagem. Entraremos em contato em breve!",
       errorTitle: "Erro",
       errorDesc: "Houve um problema ao enviar sua mensagem. Tente novamente."
+    },
+    artist: {
+      backToArtists: "Voltar aos Artistas",
+      about: "Sobre",
+      notFound: "Artista não encontrado",
+      returnToHome: "Voltar ao início"
     }
   },
   ru: {
@@ -266,6 +296,12 @@ const translations: Record<Language, Translations> = {
       messageSentDesc: "Спасибо за ваше сообщение. Мы скоро с вами свяжемся!",
       errorTitle: "Ошибка",
       errorDesc: "Возникла проблема при отправке вашего сообщения. Попробуйте снова."
+    },
+    artist: {
+      backToArtists: "Назад к Исполнителям",
+      about: "О исполнителе",
+      notFound: "Исполнитель не найден",
+      returnToHome: "Вернуться на главную"
     }
   }
 };

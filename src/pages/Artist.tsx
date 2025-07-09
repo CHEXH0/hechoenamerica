@@ -5,6 +5,7 @@ import ArtistImage from "../components/ArtistImage";
 import ArtistInfo from "../components/ArtistInfo";
 import ArtistBio from "../components/ArtistBio";
 import ArtistPlatforms from "../components/ArtistPlatforms";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 const artists = [
   {
@@ -76,6 +77,7 @@ const artists = [
 ];
 
 const Artist = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const artist = artists.find(a => a.id === id);
 
@@ -87,9 +89,9 @@ const Artist = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 text-white flex items-center justify-center">
         <div className="text-center bg-black/30 backdrop-blur-lg p-8 rounded-3xl border border-purple-900/20">
-          <h1 className="text-2xl font-bold mb-4">Artist not found</h1>
+          <h1 className="text-2xl font-bold mb-4">{t.artist.notFound}</h1>
           <Link to="/" className="text-purple-400 hover:text-purple-300 underline">
-            Return to home
+            {t.artist.returnToHome}
           </Link>
         </div>
       </div>
