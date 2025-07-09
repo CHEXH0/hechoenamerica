@@ -118,7 +118,7 @@ const Services = () => {
                   />
                 </div>
                 <h4 className="text-lg font-semibold text-white mb-3">{platform.name}</h4>
-                <div className="space-y-1">
+                <div className="space-y-1 pb-4">
                   {platform.tools.map((tool) => (
                     <span
                       key={tool}
