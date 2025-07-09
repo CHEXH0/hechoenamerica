@@ -66,19 +66,19 @@ const Services = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               whileHover={{ scale: 1.05 }}
-              className="relative group overflow-hidden rounded-xl bg-black backdrop-blur-md border border-purple-400/20 hover:border-purple-400/40 transition-all duration-300"
+              className="relative group rounded-xl bg-black backdrop-blur-md border border-purple-400/20 hover:border-purple-400/40 transition-all duration-300 overflow-visible"
             >
-              <div className="aspect-square overflow-hidden">
+              <div className="aspect-square">
                 <img 
                   src={service.image} 
                   alt={service.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 rounded-xl"
                 />
               </div>
               
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
               
-              <div className="absolute bottom-0 left-0 right-0 p-6">
+              <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
                 <div className="flex items-center mb-3">
                   <service.icon className="h-6 w-6 text-purple-400 mr-3" />
                   <h3 className="text-xl font-semibold text-white">{service.title}</h3>
