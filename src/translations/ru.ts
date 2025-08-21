@@ -10,7 +10,7 @@ export const ru: Translations = {
   },
   audioPlatforms: {
     title: "Слушать Сейчас",
-    samplePack: "Пакет Сэмплов"
+    treats: "Лакомства"
   },
   services: {
     title: "Наши Услуги",

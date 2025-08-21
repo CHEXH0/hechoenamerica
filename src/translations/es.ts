@@ -10,7 +10,7 @@ export const es: Translations = {
   },
   audioPlatforms: {
     title: "Escucha Ahora",
-    samplePack: "Paquete de Samples"
+    treats: "Dulces"
   },
   services: {
     title: "Nuestros Servicios",

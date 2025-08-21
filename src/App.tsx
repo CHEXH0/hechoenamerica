@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { TranslationProvider } from "@/contexts/TranslationContext";
 import Index from "./pages/Index";
-import SamplePack from "./pages/SamplePack";
+import Treats from "./pages/Treats";
 import ComingSoon from "./pages/ComingSoon";
 import Artist from "./pages/Artist";
 
@@ -21,7 +21,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/sample-pack" element={<SamplePack />} />
+            <Route path="/treats" element={<Treats />} />
             <Route path="/coming-soon" element={<ComingSoon />} />
             <Route path="/artist/:id" element={<Artist />} />
           </Routes>

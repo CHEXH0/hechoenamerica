@@ -31,11 +31,11 @@ const AudioPlatforms = () => {
       emojis: ["💬", "📱", "👥", "💚", "📞"],
     },
     {
-      name: t.audioPlatforms.samplePack,
+      name: t.audioPlatforms.treats,
       isIcon: true,
-      url: "/coming-soon",
+      url: "/treats",
       isExternal: false,
-      emojis: ["🎧", "🎵", "🎤", "🎹", "🎶"],
+      emojis: ["🎧", "🎵", "🍭", "🎹", "🎶"],
     },
   ];
   

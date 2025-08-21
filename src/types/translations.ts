@@ -10,7 +10,7 @@ export interface Translations {
   };
   audioPlatforms: {
     title: string;
-    samplePack: string;
+    treats: string;
   };
   services: {
     title: string;

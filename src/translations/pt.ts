@@ -10,7 +10,7 @@ export const pt: Translations = {
   },
   audioPlatforms: {
     title: "Ouça Agora",
-    samplePack: "Pacote de Samples"
+    treats: "Doces"
   },
   services: {
     title: "Nossos Serviços",

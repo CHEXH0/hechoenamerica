@@ -10,7 +10,7 @@ export const zh: Translations = {
   },
   audioPlatforms: {
     title: "立即聆听",
-    samplePack: "样本包"
+    treats: "美食"
   },
   services: {
     title: "我们的服务",
