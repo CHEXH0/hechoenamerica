@@ -12,6 +12,8 @@ import Artist from "./pages/Artist";
 
 const queryClient = new QueryClient();
 
+// Force refresh - treats marketplace
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TranslationProvider>
