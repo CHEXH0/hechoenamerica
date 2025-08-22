@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, FileAudio, Disc3, Candy, Play, Download, ShoppingCart } from "lucide-react";
+import { ArrowLeft, FileAudio, Disc3, Candy, Play, Download, ShoppingCart, Bell, BellRing } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -61,7 +61,8 @@ const products = {
       price: "$79.99",
       description: "Premium Latin piano sounds and textures",
       image: "/laptop-uploads/Cubase.png",
-      showcase: "/laptop-uploads/mixing-mastering.jpg"
+      showcase: "/laptop-uploads/mixing-mastering.jpg",
+      hasComparison: true
     },
     {
       id: "v002", 
@@ -71,7 +72,8 @@ const products = {
       price: "$59.99",
       description: "Tropical and Caribbean synthesizer presets",
       image: "/laptop-uploads/FLoops.png",
-      showcase: "/laptop-uploads/ProTools.png"
+      showcase: "/laptop-uploads/ProTools.png",
+      hasComparison: true
     },
     {
       id: "v003",
@@ -81,7 +83,21 @@ const products = {
       price: "$89.99",
       description: "Authentic Latin percussion instruments",
       image: "/laptop-uploads/Donut.png",
-      showcase: "/laptop-uploads/Cubase.png"
+      showcase: "/laptop-uploads/Cubase.png",
+      hasComparison: false,
+      isInstrument: true
+    },
+    {
+      id: "v004",
+      name: "Reggaeton Bassline VST",
+      type: "VST3/VST", 
+      size: "2.5 GB",
+      price: "$69.99",
+      description: "Deep reggaeton bass synthesizer",
+      image: "/laptop-uploads/Star.png",
+      showcase: "/laptop-uploads/ProTools.png",
+      hasComparison: false,
+      isInstrument: true
     },
   ],
   candies: [
@@ -132,6 +148,7 @@ const Treats = () => {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [playingWaveform, setPlayingWaveform] = useState<string | null>(null);
   const [audioElements, setAudioElements] = useState<{ [key: string]: HTMLAudioElement }>({});
+  const [notifyStates, setNotifyStates] = useState<{ [key: string]: boolean }>({});
 
   // Sample audio URLs (using placeholder audio for demo)
   const sampleAudioUrls: { [key: string]: string } = {
@@ -140,8 +157,11 @@ const Treats = () => {
     's003': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-italian.mp3', 
     's004': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-german.mp3',
     'v001': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-portuguese.mp3',
+    'v001-wet': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-portuguese.mp3',
     'v002': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-russian.mp3',
+    'v002-wet': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-russian.mp3',
     'v003': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-chinese.mp3',
+    'v004': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-korean.mp3',
   };
 
   // Initialize audio elements
@@ -246,9 +266,12 @@ const Treats = () => {
         's002': 523, // C5
         's003': 659, // E5
         's004': 784, // G5
-        'v001': 349, // F4
-        'v002': 392, // G4
+        'v001': 349, // F4 - dry
+        'v001-wet': 415, // G#4 - with effect
+        'v002': 392, // G4 - dry  
+        'v002-wet': 466, // A#4 - with effect
         'v003': 494, // B4
+        'v004': 330, // E4
       };
       
       oscillator.frequency.setValueAtTime(frequencies[productId] || 440, audioContext.currentTime);
@@ -271,6 +294,21 @@ const Treats = () => {
       
     } catch (error) {
       console.error('Error creating tone:', error);
+    }
+  };
+
+  const handleNotifyMe = (productId: string) => {
+    setNotifyStates(prev => ({
+      ...prev,
+      [productId]: !prev[productId]
+    }));
+    
+    // In a real app, this would send the email to a backend service
+    if (!notifyStates[productId]) {
+      console.log(`User subscribed to notifications for product: ${productId}`);
+      // Show a toast or success message here
+    } else {
+      console.log(`User unsubscribed from notifications for product: ${productId}`);
     }
   };
 
@@ -313,7 +351,7 @@ const Treats = () => {
           </motion.div>
           
           {/* Play/Pause button overlay */}
-          {(category === 'samples' || category === 'vsts') && (
+          {(category === 'samples' || (category === 'vsts' && !product.isInstrument)) && (
             <motion.button
               onClick={() => handlePlayWaveform(product.id)}
               className={`absolute bottom-4 left-4 ${
@@ -336,6 +374,38 @@ const Treats = () => {
               )}
             </motion.button>
           )}
+
+          {/* VST Comparison buttons for first two VSTs */}
+          {category === 'vsts' && product.hasComparison && (
+            <div className="absolute bottom-4 left-4 flex gap-2">
+              <motion.button
+                onClick={() => handlePlayWaveform(product.id)}
+                className={`${
+                  playingWaveform === product.id 
+                    ? 'bg-red-500 hover:bg-red-400' 
+                    : 'bg-gray-600 hover:bg-gray-500'
+                } text-white px-3 py-2 rounded-full text-xs transition-colors duration-200 shadow-lg`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                title="Play dry signal (without VST)"
+              >
+                Dry
+              </motion.button>
+              <motion.button
+                onClick={() => handlePlayWaveform(`${product.id}-wet`)}
+                className={`${
+                  playingWaveform === `${product.id}-wet`
+                    ? 'bg-red-500 hover:bg-red-400' 
+                    : 'bg-pink-500 hover:bg-pink-400'
+                } text-white px-3 py-2 rounded-full text-xs transition-colors duration-200 shadow-lg`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                title="Play wet signal (with VST effect)"
+              >
+                Wet
+              </motion.button>
+            </div>
+          )}
         </div>
 
         <CardHeader className="pb-3">
@@ -354,11 +424,11 @@ const Treats = () => {
 
         <CardContent className="space-y-4">
           {/* Animated waveform for audio products */}
-          {(category === 'samples' || category === 'vsts') && (
+          {(category === 'samples' || (category === 'vsts' && !product.isInstrument)) && (
             <motion.div
               className="bg-black/30 rounded-lg p-3 border border-purple-500/20 relative"
               animate={{
-                borderColor: playingWaveform === product.id 
+                borderColor: (playingWaveform === product.id || playingWaveform === `${product.id}-wet`)
                   ? "rgba(236, 72, 153, 0.5)" 
                   : "rgba(168, 85, 247, 0.2)"
               }}
@@ -366,7 +436,7 @@ const Treats = () => {
             >
               <div className="relative">
                 <Waveform />
-                {playingWaveform === product.id && (
+                {(playingWaveform === product.id || playingWaveform === `${product.id}-wet`) && (
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded"
                     animate={{ opacity: [0.3, 0.7, 0.3] }}
@@ -375,12 +445,37 @@ const Treats = () => {
                 )}
               </div>
               <div className="flex justify-between items-center mt-2 text-sm">
-                <span className="text-gray-400">Preview</span>
-                <span className={`${
-                  playingWaveform === product.id ? 'text-pink-400' : 'text-gray-500'
-                } transition-colors duration-200`}>
-                  {playingWaveform === product.id ? '● Playing' : '○ Ready'}
+                <span className="text-gray-400">
+                  {product.hasComparison ? 'Comparison Preview' : 'Preview'}
                 </span>
+                <span className={`${
+                  (playingWaveform === product.id || playingWaveform === `${product.id}-wet`) 
+                    ? 'text-pink-400' : 'text-gray-500'
+                } transition-colors duration-200`}>
+                  {playingWaveform === product.id ? '● Playing (Dry)' : 
+                   playingWaveform === `${product.id}-wet` ? '● Playing (Wet)' : '○ Ready'}
+                </span>
+              </div>
+            </motion.div>
+          )}
+
+          {/* VST Instrument showcase */}
+          {category === 'vsts' && product.isInstrument && (
+            <motion.div
+              className="bg-black/30 rounded-lg p-4 border border-purple-500/20"
+              whileHover={{ borderColor: "rgba(236, 72, 153, 0.4)" }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="text-center">
+                <motion.div
+                  className="inline-block p-4 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full mb-3"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Disc3 className="h-8 w-8 text-pink-400" />
+                </motion.div>
+                <p className="text-gray-300 text-sm">VST Instrument Plugin</p>
+                <p className="text-pink-400 text-xs mt-1">No audio preview - Full instrument suite</p>
               </div>
             </motion.div>
           )}
@@ -433,7 +528,29 @@ const Treats = () => {
           </motion.span>
           
           <div className="flex gap-2">
-            {product.price === "Free" ? (
+            {category === 'candies' ? (
+              <Button
+                onClick={() => handleNotifyMe(product.id)}
+                className={`${
+                  notifyStates[product.id]
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600'
+                    : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'
+                } text-white border-0 hover-scale transition-all duration-300`}
+                size="sm"
+              >
+                {notifyStates[product.id] ? (
+                  <>
+                    <BellRing className="h-4 w-4 mr-2" />
+                    Subscribed
+                  </>
+                ) : (
+                  <>
+                    <Bell className="h-4 w-4 mr-2" />
+                    Notify Me
+                  </>
+                )}
+              </Button>
+            ) : product.price === "Free" ? (
               <Button
                 className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0 hover-scale"
                 size="sm"
