@@ -16,35 +16,17 @@ const products = {
     duration: "1:35",
     price: "Free",
     description: "High-energy Latin percussion samples",
-    image: "/laptop-uploads/recording.jpg",
+    image: "/laptop-uploads/Pill.png",
     showcase: "/laptop-uploads/ProTools.png"
   }, {
     id: "s002",
-    name: "Bass Loops Collection",
+    name: "Sample Pack - Nick Zinchenko",
     type: "WAV",
     duration: "2:20",
     price: "$19.99",
     description: "Deep bass loops for urban production",
-    image: "/laptop-uploads/FLoops.png",
-    showcase: "/laptop-uploads/Cubase.png"
-  }, {
-    id: "s003",
-    name: "Vocal Chops - Spanish Edition",
-    type: "WAV/MP3",
-    duration: "3:15",
-    price: "$14.99",
-    description: "Authentic Spanish vocal samples",
-    image: "/laptop-uploads/Star.png",
-    showcase: "/laptop-uploads/mixing-mastering.jpg"
-  }, {
-    id: "s004",
-    name: "Reggaeton Beat Pack",
-    type: "WAV",
-    duration: "2:55",
-    price: "$24.99",
-    description: "Complete reggaeton construction kits",
-    image: "/laptop-uploads/Pill.png",
-    showcase: "/laptop-uploads/ProTools.png"
+    image: "/laptop-uploads/Zinchenko.png",
+    showcase: "/laptop-uploads/FLoops.png"
   }],
   vsts: [{
     id: "v001",
@@ -57,22 +39,12 @@ const products = {
     showcase: "/laptop-uploads/mixing-mastering.jpg",
     hasComparison: true
   }, {
-    id: "v002",
-    name: "Tropical Synth Collection",
-    type: "VST3/VST",
-    size: "1.8 GB",
-    price: "$59.99",
-    description: "Tropical and Caribbean synthesizer presets",
-    image: "/laptop-uploads/FLoops.png",
-    showcase: "/laptop-uploads/ProTools.png",
-    hasComparison: true
-  }, {
     id: "v003",
-    name: "Urban Percussion VST",
+    name: "Chexho Synth VSTi",
     type: "VST3/VST",
     size: "3.2 GB",
     price: "$89.99",
-    description: "Authentic Latin percussion instruments",
+    description: "Build pschedelic sounds by your own creation",
     image: "/laptop-uploads/Donut.png",
     showcase: "/laptop-uploads/Cubase.png",
     hasComparison: false,
@@ -312,7 +284,7 @@ const Treats = () => {
     duration: 0.5,
     delay: 0.1
   }} onMouseEnter={() => setHoveredCard(product.id)} onMouseLeave={() => setHoveredCard(null)} className="group">
-      <Card className="bg-gradient-to-br from-purple-900/20 via-pink-900/10 to-red-900/20 border-purple-500/30 hover:border-pink-400/50 transition-all duration-500 hover:shadow-2xl hover:shadow-pink-500/25 backdrop-blur-md overflow-hidden h-full">
+      <Card className="bg-gradient-to-br from-purple-900/100 via-pink-900/200 to-red-900/100 border-purple-500/60 hover:border-pink-400/70 transition-all duration-300 hover:shadow-2xl hover:shadow-pink-500/25 backdrop-blur-md overflow-hidden h-full">
         {/* Product showcase image */}
         <div className="relative h-48 overflow-hidden">
           <motion.img src={product.image} alt={product.name} className="w-full h-full object-cover" whileHover={{
@@ -556,7 +528,7 @@ const Treats = () => {
         duration: 0.6
       }}>
           <Tabs defaultValue="samples" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-12 bg-black/40 backdrop-blur-md border border-purple-500/30 p-2">
+            <TabsList className="grid w-full grid-cols-3 mb-12 bg-black/40 backdrop-blur-md border border-purple-500/30">
               <TabsTrigger value="samples" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-purple-500 data-[state=active]:text-white transition-all duration-300 hover-scale">
                 <FileAudio className="h-4 w-4 mr-2" />
                 Audio Samples
