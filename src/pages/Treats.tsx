@@ -131,9 +131,147 @@ const products = {
 const Treats = () => {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [playingWaveform, setPlayingWaveform] = useState<string | null>(null);
+  const [audioElements, setAudioElements] = useState<{ [key: string]: HTMLAudioElement }>({});
 
-  const handlePlayWaveform = (productId: string) => {
-    setPlayingWaveform(playingWaveform === productId ? null : productId);
+  // Sample audio URLs (using placeholder audio for demo)
+  const sampleAudioUrls: { [key: string]: string } = {
+    's001': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-spanish.mp3',
+    's002': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-french.mp3',
+    's003': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-italian.mp3', 
+    's004': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-german.mp3',
+    'v001': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-portuguese.mp3',
+    'v002': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-russian.mp3',
+    'v003': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-chinese.mp3',
+  };
+
+  // Initialize audio elements
+  React.useEffect(() => {
+    const newAudioElements: { [key: string]: HTMLAudioElement } = {};
+    
+    Object.entries(sampleAudioUrls).forEach(([id, url]) => {
+      const audio = new Audio();
+      // Create a simple tone using Web Audio API as fallback
+      const createTone = (frequency: number) => {
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+        oscillator.type = 'sine';
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        
+        return { oscillator, audioContext, gainNode };
+      };
+
+      // Fallback to generated tone if URL fails
+      audio.addEventListener('error', () => {
+        console.log(`Failed to load audio for ${id}, using generated tone`);
+      });
+      
+      audio.preload = 'metadata';
+      audio.src = url;
+      newAudioElements[id] = audio;
+    });
+    
+    setAudioElements(newAudioElements);
+    
+    // Cleanup function
+    return () => {
+      Object.values(newAudioElements).forEach(audio => {
+        audio.pause();
+        audio.src = '';
+      });
+    };
+  }, []);
+
+  const handlePlayWaveform = async (productId: string) => {
+    try {
+      const currentAudio = audioElements[productId];
+      
+      if (playingWaveform === productId) {
+        // Stop current audio
+        if (currentAudio) {
+          currentAudio.pause();
+          currentAudio.currentTime = 0;
+        }
+        setPlayingWaveform(null);
+        return;
+      }
+
+      // Stop any currently playing audio
+      if (playingWaveform && audioElements[playingWaveform]) {
+        audioElements[playingWaveform].pause();
+        audioElements[playingWaveform].currentTime = 0;
+      }
+
+      // Play new audio or create tone
+      if (currentAudio) {
+        try {
+          await currentAudio.play();
+          setPlayingWaveform(productId);
+          
+          // Auto-stop after the audio ends
+          currentAudio.addEventListener('ended', () => {
+            setPlayingWaveform(null);
+          });
+        } catch (error) {
+          // Fallback to Web Audio API tone
+          console.log('Using Web Audio API fallback for', productId);
+          createAndPlayTone(productId);
+        }
+      } else {
+        createAndPlayTone(productId);
+      }
+    } catch (error) {
+      console.error('Error playing audio:', error);
+      createAndPlayTone(productId);
+    }
+  };
+
+  const createAndPlayTone = (productId: string) => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Different frequencies for different products
+      const frequencies: { [key: string]: number } = {
+        's001': 440, // A4
+        's002': 523, // C5
+        's003': 659, // E5
+        's004': 784, // G5
+        'v001': 349, // F4
+        'v002': 392, // G4
+        'v003': 494, // B4
+      };
+      
+      oscillator.frequency.setValueAtTime(frequencies[productId] || 440, audioContext.currentTime);
+      oscillator.type = 'sine';
+      
+      // Fade in and out
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.1);
+      gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 2);
+      
+      setPlayingWaveform(productId);
+      
+      // Auto-stop after 2 seconds
+      setTimeout(() => {
+        setPlayingWaveform(null);
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Error creating tone:', error);
+    }
   };
 
   const renderProductCard = (product: any, icon: React.ReactNode, category: string) => (
@@ -174,15 +312,28 @@ const Treats = () => {
             />
           </motion.div>
           
-          {/* Play button overlay */}
+          {/* Play/Pause button overlay */}
           {(category === 'samples' || category === 'vsts') && (
             <motion.button
               onClick={() => handlePlayWaveform(product.id)}
-              className="absolute bottom-4 left-4 bg-pink-500 hover:bg-pink-400 text-white p-3 rounded-full transition-colors duration-200"
+              className={`absolute bottom-4 left-4 ${
+                playingWaveform === product.id 
+                  ? 'bg-red-500 hover:bg-red-400' 
+                  : 'bg-pink-500 hover:bg-pink-400'
+              } text-white p-3 rounded-full transition-colors duration-200 shadow-lg`}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
+              title={playingWaveform === product.id ? 'Stop audio' : 'Play preview'}
             >
-              <Play className="h-4 w-4" />
+              {playingWaveform === product.id ? (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="w-4 h-4 bg-white rounded-sm"
+                />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
             </motion.button>
           )}
         </div>
@@ -205,7 +356,7 @@ const Treats = () => {
           {/* Animated waveform for audio products */}
           {(category === 'samples' || category === 'vsts') && (
             <motion.div
-              className="bg-black/30 rounded-lg p-3 border border-purple-500/20"
+              className="bg-black/30 rounded-lg p-3 border border-purple-500/20 relative"
               animate={{
                 borderColor: playingWaveform === product.id 
                   ? "rgba(236, 72, 153, 0.5)" 
@@ -213,7 +364,24 @@ const Treats = () => {
               }}
               transition={{ duration: 0.3 }}
             >
-              <Waveform />
+              <div className="relative">
+                <Waveform />
+                {playingWaveform === product.id && (
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded"
+                    animate={{ opacity: [0.3, 0.7, 0.3] }}
+                    transition={{ duration: 0.8, repeat: Infinity }}
+                  />
+                )}
+              </div>
+              <div className="flex justify-between items-center mt-2 text-sm">
+                <span className="text-gray-400">Preview</span>
+                <span className={`${
+                  playingWaveform === product.id ? 'text-pink-400' : 'text-gray-500'
+                } transition-colors duration-200`}>
+                  {playingWaveform === product.id ? '● Playing' : '○ Ready'}
+                </span>
+              </div>
             </motion.div>
           )}
           
