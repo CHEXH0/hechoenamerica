@@ -30,13 +30,13 @@ const products = {
   }],
   vsts: [{
     id: "v001",
-    name: "HechoEnAmerica Piano VST",
+    name: "Spice Level FX",
     type: "VST3/VST",
     size: "2.1 GB",
     price: "$79.99",
-    description: "Premium Latin piano sounds and textures",
-    image: "/laptop-uploads/Cubase.png",
-    showcase: "/laptop-uploads/mixing-mastering.jpg",
+    description: "Premium textures with added heat",
+    image: "/laptop-uploads/RIVERSIDE.jpg",
+    showcase: "/laptop-uploads/RIVERSIDE.jpg",
     hasComparison: true
   }, {
     id: "v003",
@@ -45,29 +45,18 @@ const products = {
     size: "3.2 GB",
     price: "$89.99",
     description: "Build pschedelic sounds by your own creation",
-    image: "/laptop-uploads/Donut.png",
-    showcase: "/laptop-uploads/Cubase.png",
-    hasComparison: false,
-    isInstrument: true
-  }, {
-    id: "v004",
-    name: "Reggaeton Bassline VST",
-    type: "VST3/VST",
-    size: "2.5 GB",
-    price: "$69.99",
-    description: "Deep reggaeton bass synthesizer",
-    image: "/laptop-uploads/Star.png",
-    showcase: "/laptop-uploads/ProTools.png",
+    image: "/laptop-uploads/Synth.png",
+    showcase: "/laptop-uploads/AlbumCover.png",
     hasComparison: false,
     isInstrument: true
   }],
   candies: [{
     id: "c001",
-    name: "Dulce de Leche Bonbons",
-    type: "Sweet Treat",
+    name: "Chammoy Gummy Bursts",
+    type: "Sweet & Spicy Treat",
     weight: "250g",
     price: "$12.99",
-    description: "Handcrafted dulce de leche chocolates",
+    description: "Chamoy-covered gushers",
     image: "/laptop-uploads/Donut.png",
     showcase: "/laptop-uploads/Star.png"
   }, {
@@ -94,7 +83,7 @@ const products = {
     type: "Mixed Candy",
     weight: "500g",
     price: "$24.99",
-    description: "Assorted tropical flavored candies and chocolates",
+    description: "Assorted tropical flavored gummy candies",
     image: "/laptop-uploads/Donut.png",
     showcase: "/laptop-uploads/Star.png"
   }]
