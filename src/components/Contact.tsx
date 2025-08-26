@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { useTranslation } from "@/contexts/TranslationContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const Contact = () => {
   const { t } = useTranslation();
@@ -44,30 +45,25 @@ const Contact = () => {
     }
 
     try {
-      // Create FormData for FormSubmit.co
-      const data = new FormData();
-      data.append("name", formData.name);
-      data.append("email", formData.email);
-      data.append("country", formData.country);
-      data.append("subject", formData.subject || "New message from HechoEnAmerica website");
-      data.append("message", formData.message);
-      data.append("_next", window.location.origin); // Redirect back to current page
-      data.append("_captcha", "false"); // Disable captcha for now
+      // Save to Supabase database
+      const { error } = await supabase
+        .from('contact_submissions')
+        .insert([{
+          name: formData.name,
+          email: formData.email,
+          country: formData.country || 'Not specified',
+          subject: formData.subject || "New message from HechoEnAmerica website",
+          message: formData.message
+        }]);
 
-      // Use FormSubmit.co service - try the endpoint without no-cors first
-      const response = await fetch("https://formsubmit.co/hechoenamerica369@gmail.com", {
-        method: "POST",
-        body: data
-      });
-
-      if (response.ok) {
-        toast({
-          title: t.contact.messageSentTitle,
-          description: t.contact.messageSentDesc,
-        });
-      } else {
-        throw new Error("Form submission failed");
+      if (error) {
+        throw error;
       }
+
+      toast({
+        title: t.contact.messageSentTitle,
+        description: t.contact.messageSentDesc,
+      });
       
       // Reset form
       setFormData({

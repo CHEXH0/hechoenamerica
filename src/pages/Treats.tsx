@@ -4,7 +4,10 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, FileAudio, Disc3, Candy, Play, Download, ShoppingCart, Bell, BellRing } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import Waveform from "@/components/Waveform";
 
 // Product data - in a real app, this would come from a database or API
@@ -94,7 +97,10 @@ const Treats = () => {
   const [audioElements, setAudioElements] = useState<{
     [key: string]: HTMLAudioElement;
   }>({});
-  const [notifyStates, setNotifyStates] = useState<{
+  const [notificationEmails, setNotificationEmails] = useState<{
+    [key: string]: string;
+  }>({});
+  const [subscribingStates, setSubscribingStates] = useState<{
     [key: string]: boolean;
   }>({});
 
@@ -249,18 +255,64 @@ const Treats = () => {
       console.error('Error creating tone:', error);
     }
   };
-  const handleNotifyMe = (productId: string) => {
-    setNotifyStates(prev => ({
-      ...prev,
-      [productId]: !prev[productId]
-    }));
+  const handleNotifyMe = async (productId: string, productName: string) => {
+    const email = notificationEmails[productId];
+    
+    if (!email) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    // In a real app, this would send the email to a backend service
-    if (!notifyStates[productId]) {
-      console.log(`User subscribed to notifications for product: ${productId}`);
-      // Show a toast or success message here
-    } else {
-      console.log(`User unsubscribed from notifications for product: ${productId}`);
+    if (!email.includes('@')) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSubscribingStates(prev => ({ ...prev, [productId]: true }));
+
+    try {
+      const { error } = await supabase
+        .from('product_notifications')
+        .insert([{
+          email: email,
+          product_id: productId,
+          product_name: productName
+        }]);
+
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          toast({
+            title: "Already Subscribed",
+            description: "You're already subscribed to notifications for this product.",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          title: "Subscribed! 🔔",
+          description: `You'll be notified about updates to ${productName}.`,
+        });
+        setNotificationEmails(prev => ({ ...prev, [productId]: '' }));
+      }
+    } catch (error) {
+      console.error('Error subscribing to notifications:', error);
+      toast({
+        title: "Error",
+        description: "Failed to subscribe. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubscribingStates(prev => ({ ...prev, [productId]: false }));
     }
   };
   const renderProductCard = (product: any, icon: React.ReactNode, category: string) => <motion.div key={product.id} initial={{
@@ -418,21 +470,39 @@ const Treats = () => {
           </motion.span>
           
           <div className="flex gap-2">
-            {category === 'candies' ? <Button onClick={() => handleNotifyMe(product.id)} className={`${notifyStates[product.id] ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600' : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'} text-white border-0 hover-scale transition-all duration-300`} size="sm">
-                {notifyStates[product.id] ? <>
-                    <BellRing className="h-4 w-4 mr-2" />
-                    Subscribed
-                  </> : <>
-                    <Bell className="h-4 w-4 mr-2" />
-                    Notify Me
-                  </>}
-              </Button> : product.price === "Free" ? <Button className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0 hover-scale" size="sm">
+            {category === 'candies' ? (
+              <div className="flex flex-col gap-2 w-full">
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={notificationEmails[product.id] || ''}
+                  onChange={(e) => setNotificationEmails(prev => ({ 
+                    ...prev, 
+                    [product.id]: e.target.value 
+                  }))}
+                  className="text-xs h-8 border-purple-400/30 focus:border-purple-400 bg-black/50 text-white placeholder:text-gray-400"
+                />
+                <Button 
+                  onClick={() => handleNotifyMe(product.id, product.name)} 
+                  disabled={subscribingStates[product.id]}
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 hover-scale transition-all duration-300 h-8 text-xs w-full" 
+                  size="sm"
+                >
+                  <Bell className="h-3 w-3 mr-1" />
+                  {subscribingStates[product.id] ? 'Subscribing...' : 'Notify Me'}
+                </Button>
+              </div>
+            ) : product.price === "Free" ? (
+              <Button className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0 hover-scale" size="sm">
                 <Download className="h-4 w-4 mr-2" />
                 Download
-              </Button> : <Button className="bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white border-0 hover-scale" size="sm">
+              </Button>
+            ) : (
+              <Button className="bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white border-0 hover-scale" size="sm">
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 Buy Now
-              </Button>}
+              </Button>
+            )}
           </div>
         </CardFooter>
       </Card>
