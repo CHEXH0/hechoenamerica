@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      artists: {
+        Row: {
+          apple_music_url: string | null
+          bio: string
+          country: string
+          created_at: string
+          genre: string
+          id: string
+          image: string
+          name: string
+          slug: string
+          spotify_url: string | null
+          updated_at: string
+          youtube_url: string | null
+        }
+        Insert: {
+          apple_music_url?: string | null
+          bio: string
+          country: string
+          created_at?: string
+          genre: string
+          id?: string
+          image: string
+          name: string
+          slug: string
+          spotify_url?: string | null
+          updated_at?: string
+          youtube_url?: string | null
+        }
+        Update: {
+          apple_music_url?: string | null
+          bio?: string
+          country?: string
+          created_at?: string
+          genre?: string
+          id?: string
+          image?: string
+          name?: string
+          slug?: string
+          spotify_url?: string | null
+          updated_at?: string
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           country: string | null
@@ -44,6 +89,36 @@ export type Database = {
         }
         Relationships: []
       }
+      platforms: {
+        Row: {
+          created_at: string
+          id: string
+          logo: string
+          name: string
+          sort_order: number
+          tagline: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          logo: string
+          name: string
+          sort_order?: number
+          tagline: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          logo?: string
+          name?: string
+          sort_order?: number
+          tagline?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_notifications: {
         Row: {
           created_at: string
@@ -65,6 +140,39 @@ export type Database = {
           id?: string
           product_id?: string
           product_name?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          image: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          icon: string
+          id?: string
+          image: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          image?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }

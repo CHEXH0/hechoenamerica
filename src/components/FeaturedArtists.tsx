@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Music } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "@/contexts/TranslationContext";
+import { useArtists } from "@/hooks/useArtists";
 import { 
   Pagination, 
   PaginationContent, 
@@ -12,66 +13,47 @@ import {
   PaginationPrevious 
 } from "@/components/ui/pagination";
 
-const artists = [
-  {
-    id: "chexho",
-    name: "CHEXHO",
-    image: "/laptop-uploads/AlbumCover.png",
-    country: "California, USA",
-    genre: "Alternative R&B, Musica Medicina",
-  },
-  {
-    id: "jiesson-diaz-santiago",
-    name: "Jiesson Diaz Santiago",
-    image: "/laptop-uploads/Jiesson.png",
-    country: "Bogotá, Colombia",
-    genre: "Musica Medicina",
-  },
-  {
-    id: "nick-zinchenko",
-    name: "Nick Zinchenko",
-    image: "/laptop-uploads/Zinchenko.png",
-    country: "Luhansk, Ukraine",
-    genre: "Hip Hop, Trap, R&B",
-  },
-  {
-    id: "rossella",
-    name: "Rossella",
-    image: "/laptop-uploads/Rossella.jpg",
-    country: "Playas De Tijuana, México",
-    genre: "Musica Medicina",
-  },
-  {
-    id: "felicidad",
-    name: "Felicidad",
-    image: "/laptop-uploads/BlackJ.png",
-    country: "Bogota, Colombia",
-    genre: "Musica Medicina, R&B",
-  },
-  {
-    id: "christian-jones",
-    name: "Christian Jones",
-    image: "/laptop-uploads/RIVERSIDE.jpg",
-    country: "California, USA",
-    genre: "Rap, Soul",
-  },
-];
-
 const ARTISTS_PER_PAGE = 4;
 
 const FeaturedArtists = () => {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
   const navigate = useNavigate();
+  const { data: artists = [], isLoading } = useArtists();
+  
   const totalPages = Math.ceil(artists.length / ARTISTS_PER_PAGE);
   
-  const handleArtistClick = (artistId: string) => {
-    navigate(`/artist/${artistId}`);
+  const handleArtistClick = (artistSlug: string) => {
+    navigate(`/artist/${artistSlug}`);
   };
   
   const indexOfLastArtist = currentPage * ARTISTS_PER_PAGE;
   const indexOfFirstArtist = indexOfLastArtist - ARTISTS_PER_PAGE;
   const currentArtists = artists.slice(indexOfFirstArtist, indexOfLastArtist);
+
+  if (isLoading) {
+    return (
+      <section id="featured-artists" className="py-20 bg-black">
+        <div className="container mx-auto px-4">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-3xl md:text-4xl font-bold text-center text-white mb-12"
+          >
+            {t.featuredArtists.title}
+          </motion.h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[...Array(4)].map((_, index) => (
+              <div key={index} className="animate-pulse">
+                <div className="bg-gray-800 aspect-square rounded-lg"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
   
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -99,7 +81,7 @@ const FeaturedArtists = () => {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               whileHover={{ scale: 1.05 }}
               className="relative group cursor-pointer"
-              onClick={() => handleArtistClick(artist.id)}
+              onClick={() => handleArtistClick(artist.slug)}
             >
               <div className="relative overflow-hidden rounded-lg aspect-square">
                 <img
