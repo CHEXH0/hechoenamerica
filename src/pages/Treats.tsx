@@ -40,6 +40,7 @@ const Treats = () => {
   const [subscribingStates, setSubscribingStates] = useState<{
     [key: string]: boolean;
   }>({});
+  const initializedRef = React.useRef(false);
 
   // Organize products by category
   const products = React.useMemo(() => {
@@ -86,6 +87,8 @@ const Treats = () => {
 
   // Initialize audio elements
   React.useEffect(() => {
+    if (initializedRef.current) return;
+    initializedRef.current = true;
     const newAudioElements: {
       [key: string]: HTMLAudioElement;
     } = {};
