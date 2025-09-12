@@ -11,22 +11,6 @@ import { supabase } from "@/integrations/supabase/client";
 import Waveform from "@/components/Waveform";
 import { useProducts, type Product } from "@/hooks/useProducts";
 
-// Sample audio URLs (using placeholder audio for demo) - moved outside component to prevent re-creation
-const sampleAudioUrls: {
-  [key: string]: string;
-} = {
-  's001': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-spanish.mp3',
-  's002': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-french.mp3',
-  's003': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-italian.mp3',
-  's004': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-german.mp3',
-  'v001': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-portuguese.mp3',
-  'v001-wet': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-portuguese.mp3',
-  'v002': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-russian.mp3',
-  'v002-wet': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-russian.mp3',
-  'v003': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-chinese.mp3',
-  'v004': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-korean.mp3'
-};
-
 const Treats = () => {
   const { data: allProducts, isLoading, error } = useProducts();
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
@@ -40,7 +24,6 @@ const Treats = () => {
   const [subscribingStates, setSubscribingStates] = useState<{
     [key: string]: boolean;
   }>({});
-  const initializedRef = React.useRef(false);
 
   // Organize products by category
   const products = React.useMemo(() => {
@@ -53,13 +36,55 @@ const Treats = () => {
     };
   }, [allProducts]);
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-pink-950 flex items-center justify-center">
+        <motion.div
+          animate={{
+            rotate: 360
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="w-12 h-12 border-4 border-pink-500/30 border-t-pink-400 rounded-full"
+        />
+      </div>
+    );
+  }
 
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-pink-950 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-400 mb-4">Error Loading Products</h2>
+          <p className="text-gray-300">Please try again later</p>
+        </div>
+      </div>
+    );
+  }
 
+  // Sample audio URLs (using placeholder audio for demo)
+  const sampleAudioUrls: {
+    [key: string]: string;
+  } = {
+    's001': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-spanish.mp3',
+    's002': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-french.mp3',
+    's003': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-italian.mp3',
+    's004': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-german.mp3',
+    'v001': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-portuguese.mp3',
+    'v001-wet': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-portuguese.mp3',
+    'v002': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-russian.mp3',
+    'v002-wet': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-russian.mp3',
+    'v003': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-chinese.mp3',
+    'v004': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-korean.mp3'
+  };
 
   // Initialize audio elements
   React.useEffect(() => {
-    if (initializedRef.current) return;
-    initializedRef.current = true;
     const newAudioElements: {
       [key: string]: HTMLAudioElement;
     } = {};
@@ -100,30 +125,6 @@ const Treats = () => {
       });
     };
   }, []);
-
-  // Show loading/error state AFTER hooks
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-pink-950 flex items-center justify-center">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-4 border-pink-500/30 border-t-pink-400 rounded-full"
-        />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-pink-950 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-400 mb-4">Error Loading Products</h2>
-          <p className="text-gray-300">Please try again later</p>
-        </div>
-      </div>
-    );
-  }
 
   const handlePlayWaveform = async (productId: string) => {
     try {
