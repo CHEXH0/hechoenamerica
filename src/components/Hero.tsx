@@ -1,6 +1,7 @@
 import React from "react";
 import Waveform from "./Waveform";
 import LanguageSelector from "./LanguageSelector";
+import ProfileIcon from "./ProfileIcon";
 import { motion } from "framer-motion";
 import { useTranslation } from "@/contexts/TranslationContext";
 
@@ -9,8 +10,9 @@ const Hero = () => {
   
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black text-white">
-      {/* Language Selector at the top */}
-      <div className="absolute top-4 right-4 z-20">
+      {/* Header Controls */}
+      <div className="absolute top-4 right-4 z-20 flex items-center gap-3">
+        <ProfileIcon />
         <LanguageSelector />
       </div>
       
