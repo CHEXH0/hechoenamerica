@@ -27,6 +27,22 @@ const sampleAudioUrls: {
   'v004': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-korean.mp3'
 };
 
+// Frequency mapping for audio tones (moved outside component to prevent re-creation)
+const frequencies: {
+  [key: string]: number;
+} = {
+  's001': 440, // A4
+  's002': 523, // C5
+  's003': 659, // E5
+  's004': 784, // G5
+  'v001': 349, // F4 - dry
+  'v001-wet': 415, // G#4 - with effect
+  'v002': 392, // G4 - dry  
+  'v002-wet': 466, // A#4 - with effect
+  'v003': 494, // B4
+  'v004': 330 // E4
+};
+
 const Treats = () => {
   const { data: allProducts, isLoading, error } = useProducts();
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
@@ -177,30 +193,7 @@ const Treats = () => {
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
 
-      // Different frequencies for different products
-      const frequencies: {
-        [key: string]: number;
-      } = {
-        's001': 440,
-        // A4
-        's002': 523,
-        // C5
-        's003': 659,
-        // E5
-        's004': 784,
-        // G5
-        'v001': 349,
-        // F4 - dry
-        'v001-wet': 415,
-        // G#4 - with effect
-        'v002': 392,
-        // G4 - dry  
-        'v002-wet': 466,
-        // A#4 - with effect
-        'v003': 494,
-        // B4
-        'v004': 330 // E4
-      };
+      // Use the predefined frequencies
       oscillator.frequency.setValueAtTime(frequencies[productId] || 440, audioContext.currentTime);
       oscillator.type = 'sine';
 
