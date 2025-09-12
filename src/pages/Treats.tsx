@@ -11,6 +11,22 @@ import { supabase } from "@/integrations/supabase/client";
 import Waveform from "@/components/Waveform";
 import { useProducts, type Product } from "@/hooks/useProducts";
 
+// Sample audio URLs (using placeholder audio for demo) - moved outside component to prevent re-creation
+const sampleAudioUrls: {
+  [key: string]: string;
+} = {
+  's001': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-spanish.mp3',
+  's002': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-french.mp3',
+  's003': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-italian.mp3',
+  's004': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-german.mp3',
+  'v001': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-portuguese.mp3',
+  'v001-wet': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-portuguese.mp3',
+  'v002': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-russian.mp3',
+  'v002-wet': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-russian.mp3',
+  'v003': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-chinese.mp3',
+  'v004': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-korean.mp3'
+};
+
 const Treats = () => {
   const { data: allProducts, isLoading, error } = useProducts();
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
@@ -67,21 +83,6 @@ const Treats = () => {
     );
   }
 
-  // Sample audio URLs (using placeholder audio for demo)
-  const sampleAudioUrls: {
-    [key: string]: string;
-  } = {
-    's001': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-spanish.mp3',
-    's002': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-french.mp3',
-    's003': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-italian.mp3',
-    's004': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-german.mp3',
-    'v001': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-portuguese.mp3',
-    'v001-wet': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-portuguese.mp3',
-    'v002': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-russian.mp3',
-    'v002-wet': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-russian.mp3',
-    'v003': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-chinese.mp3',
-    'v004': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-korean.mp3'
-  };
 
   // Initialize audio elements
   React.useEffect(() => {
