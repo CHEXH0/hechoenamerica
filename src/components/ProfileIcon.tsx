@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, LogIn } from 'lucide-react';
+import { User, LogIn, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -9,10 +9,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const ProfileIcon = () => {
   const { user, signOut, loading } = useAuth();
+  const navigate = useNavigate();
 
   if (loading) {
     return (
@@ -53,6 +54,13 @@ const ProfileIcon = () => {
           {user.email}
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-gray-700" />
+        <DropdownMenuItem 
+          onClick={() => navigate('/admin')}
+          className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
+        >
+          <Settings className="h-4 w-4 mr-2" />
+          My Purchases
+        </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => signOut()}
           className="text-red-400 hover:text-red-300 hover:bg-red-500/10 cursor-pointer"

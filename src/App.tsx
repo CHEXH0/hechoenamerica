@@ -11,6 +11,7 @@ import Treats from "./pages/Treats";
 import ComingSoon from "./pages/ComingSoon";
 import Artist from "./pages/Artist";
 import Auth from "./pages/Auth";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
               <Route path="/coming-soon" element={<ComingSoon />} />
               <Route path="/artist/:id" element={<Artist />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/admin" element={<Admin />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>

@@ -143,6 +143,108 @@ export type Database = {
         }
         Relationships: []
       }
+      products: {
+        Row: {
+          audio_preview_url: string | null
+          category: string
+          created_at: string
+          description: string
+          duration: string | null
+          has_comparison: boolean | null
+          id: string
+          image: string
+          is_active: boolean | null
+          is_instrument: boolean | null
+          name: string
+          price: string
+          showcase: string
+          size: string | null
+          sort_order: number | null
+          type: string
+          updated_at: string
+          weight: string | null
+        }
+        Insert: {
+          audio_preview_url?: string | null
+          category: string
+          created_at?: string
+          description: string
+          duration?: string | null
+          has_comparison?: boolean | null
+          id: string
+          image: string
+          is_active?: boolean | null
+          is_instrument?: boolean | null
+          name: string
+          price: string
+          showcase: string
+          size?: string | null
+          sort_order?: number | null
+          type: string
+          updated_at?: string
+          weight?: string | null
+        }
+        Update: {
+          audio_preview_url?: string | null
+          category?: string
+          created_at?: string
+          description?: string
+          duration?: string | null
+          has_comparison?: boolean | null
+          id?: string
+          image?: string
+          is_active?: boolean | null
+          is_instrument?: boolean | null
+          name?: string
+          price?: string
+          showcase?: string
+          size?: string | null
+          sort_order?: number | null
+          type?: string
+          updated_at?: string
+          weight?: string | null
+        }
+        Relationships: []
+      }
+      purchases: {
+        Row: {
+          created_at: string
+          id: string
+          price: string
+          product_category: string
+          product_id: string
+          product_name: string
+          product_type: string
+          purchase_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          price: string
+          product_category: string
+          product_id: string
+          product_name: string
+          product_type: string
+          purchase_date?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          price?: string
+          product_category?: string
+          product_id?: string
+          product_name?: string
+          product_type?: string
+          purchase_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           created_at: string
