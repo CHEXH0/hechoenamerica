@@ -55,6 +55,13 @@ const ProfileIcon = () => {
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-gray-700" />
         <DropdownMenuItem 
+          onClick={() => navigate('/profile')}
+          className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
+        >
+          <User className="h-4 w-4 mr-2" />
+          Profile Settings
+        </DropdownMenuItem>
+        <DropdownMenuItem 
           onClick={() => navigate('/admin')}
           className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
         >
