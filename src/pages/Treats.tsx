@@ -438,7 +438,10 @@ const Treats = () => {
                   {product.has_comparison ? 'Comparison Preview' : 'Preview'}
                 </span>
                 <span className={`${playingWaveform === product.id || playingWaveform === `${product.id}-wet` ? 'text-pink-400' : 'text-gray-500'} transition-colors duration-200`}>
-                  {playingWaveform === product.id ? '● Playing (Dry)' : playingWaveform === `${product.id}-wet` ? '● Playing (Wet)' : '○ Ready'}
+                  {playingWaveform === product.id ? 
+                    (category === 'samples' ? '● Playing' : '● Playing (Dry)') : 
+                    playingWaveform === `${product.id}-wet` ? '● Playing (Wet)' : 
+                    '○ Ready'}
                 </span>
               </div>
             </motion.div>
