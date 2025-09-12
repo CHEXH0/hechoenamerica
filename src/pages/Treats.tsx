@@ -53,36 +53,7 @@ const Treats = () => {
     };
   }, [allProducts]);
 
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-pink-950 flex items-center justify-center">
-        <motion.div
-          animate={{
-            rotate: 360
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-          className="w-12 h-12 border-4 border-pink-500/30 border-t-pink-400 rounded-full"
-        />
-      </div>
-    );
-  }
 
-  // Show error state
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-pink-950 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-400 mb-4">Error Loading Products</h2>
-          <p className="text-gray-300">Please try again later</p>
-        </div>
-      </div>
-    );
-  }
 
 
   // Initialize audio elements
@@ -129,6 +100,30 @@ const Treats = () => {
       });
     };
   }, []);
+
+  // Show loading/error state AFTER hooks
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-pink-950 flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          className="w-12 h-12 border-4 border-pink-500/30 border-t-pink-400 rounded-full"
+        />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-pink-950 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-400 mb-4">Error Loading Products</h2>
+          <p className="text-gray-300">Please try again later</p>
+        </div>
+      </div>
+    );
+  }
 
   const handlePlayWaveform = async (productId: string) => {
     try {
