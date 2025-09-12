@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, User, Mail, Lock, Trash2, Save } from "lucide-react";
 import { motion } from "framer-motion";
@@ -30,18 +30,18 @@ const Profile = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   // Update form when profile loads
-  useState(() => {
+  useEffect(() => {
     if (profile) {
       setDisplayName(profile.display_name || "");
       setBio(profile.bio || "");
     }
-  });
+  }, [profile]);
 
-  useState(() => {
+  useEffect(() => {
     if (user) {
       setNewEmail(user.email || "");
     }
-  });
+  }, [user]);
 
   if (authLoading || isLoading) {
     return (
