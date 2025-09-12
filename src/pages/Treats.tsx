@@ -780,9 +780,81 @@ const Treats = () => {
                 </h2>
                 <p className="text-gray-300 text-lg">Artisanal candies inspired by Latin American flavors</p>
               </motion.div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-                {products.candies.map(product => renderProductCard(product, <Candy className="h-6 w-6" />, 'candies'))}
-              </div>
+              
+              {/* Coming Soon Section */}
+              <motion.div 
+                className="flex flex-col items-center justify-center py-20"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <motion.div
+                  className="relative mb-8"
+                  animate={{ 
+                    rotate: [0, 5, -5, 0],
+                    scale: [1, 1.05, 1]
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <div className="w-32 h-32 bg-gradient-to-br from-red-500/20 to-pink-500/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-red-400/30">
+                    <Candy className="h-16 w-16 text-red-400" />
+                  </div>
+                  <motion.div
+                    className="absolute -inset-4 bg-gradient-to-r from-red-500/10 to-pink-500/10 rounded-full blur-xl"
+                    animate={{
+                      opacity: [0.3, 0.6, 0.3],
+                      scale: [0.8, 1.2, 0.8]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  />
+                </motion.div>
+                
+                <motion.h3 
+                  className="text-5xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent mb-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                >
+                  Coming Soon!
+                </motion.h3>
+                
+                <motion.p 
+                  className="text-xl text-gray-300 text-center max-w-2xl leading-relaxed mb-8"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.6 }}
+                >
+                  We're crafting something sweet and special! Our artisanal candy collection will feature 
+                  exotic Latin American flavors that will tantalize your taste buds. Stay tuned for an 
+                  unforgettable culinary experience.
+                </motion.p>
+                
+                <motion.div
+                  className="flex items-center gap-4 text-gray-400"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.8 }}
+                >
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                    className="w-6 h-6 border-2 border-red-400/30 border-t-red-400 rounded-full"
+                  />
+                  <span className="text-lg">Something delicious is brewing...</span>
+                </motion.div>
+              </motion.div>
             </TabsContent>
           </Tabs>
         </motion.div>
