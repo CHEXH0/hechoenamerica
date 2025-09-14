@@ -15,7 +15,6 @@ const Contact = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
     country: "",
     subject: "",
     message: ""
@@ -52,7 +51,6 @@ const Contact = () => {
         .insert([{
           name: formData.name,
           email: formData.email,
-          phone: formData.phone || 'Not provided',
           country: formData.country || 'Not specified',
           subject: formData.subject || "New message from HechoEnAmerica website",
           message: formData.message
@@ -71,7 +69,6 @@ const Contact = () => {
       setFormData({
         name: "",
         email: "",
-        phone: "",
         country: "",
         subject: "",
         message: ""
@@ -146,24 +143,6 @@ const Contact = () => {
                   required
                 />
               </div>
-            </div>
-
-            {/* Phone input - Communication bubble with phone emojis */}
-            <div className="relative bubble-container">
-              <div className="absolute top-3 left-6 text-lg opacity-35 blur-sm pointer-events-none z-10">📱</div>
-              <div className="absolute top-7 right-8 text-md opacity-30 blur-sm pointer-events-none z-10">☎️</div>
-              <div className="absolute bottom-4 left-14 text-sm opacity-25 blur-sm pointer-events-none z-10">📞</div>
-              <div className="absolute top-2 right-16 text-sm opacity-20 blur-sm pointer-events-none z-10">📲</div>
-              <div className="absolute bottom-2 right-4 text-xs opacity-15 blur-sm pointer-events-none z-10">🔔</div>
-              <div className="absolute top-6 left-24 text-xs opacity-20 blur-sm pointer-events-none z-10">📳</div>
-              <Input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="+1 909 384 2193"
-                className="bubble-input bg-black backdrop-blur-md border border-emerald-400/35 text-white placeholder:text-gray-400 rounded-full px-8 py-6 h-16 shadow-[0_8px_32px_rgba(16,185,129,0.3),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)] focus:shadow-[0_12px_40px_rgba(16,185,129,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] focus:border-emerald-300/50 transition-all duration-500 hover:shadow-[0_10px_36px_rgba(16,185,129,0.35)] hover:scale-[1.02] focus:text-white"
-              />
             </div>
 
             {/* Country selection - Globe bubble with country emojis */}
