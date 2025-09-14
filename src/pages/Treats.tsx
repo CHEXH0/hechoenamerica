@@ -670,7 +670,7 @@ const Treats = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            Discover our exclusive collection of audio samples, VST plugins, and artisanal candies. 
+            Discover our exclusive collection of audio samples, VST plugins, and more treats. 
             Each item is crafted with passion and precision to fuel your creative journey.
           </motion.p>
         </div>
