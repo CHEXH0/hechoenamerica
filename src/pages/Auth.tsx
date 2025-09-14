@@ -164,9 +164,9 @@ const Auth = () => {
           transition={{ duration: 0.8 }}
           className="w-full max-w-md"
         >
-          <Card className="bg-gradient-to-br from-purple-900/50 via-pink-900/30 to-red-900/50 border-purple-500/40 backdrop-blur-md">
+          <Card className="bg-card border border-border shadow-xl">
             <CardHeader className="text-center">
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+              <CardTitle className="text-3xl font-bold text-foreground">
                 Welcome
               </CardTitle>
               <CardDescription className="text-muted-foreground">
@@ -176,16 +176,16 @@ const Auth = () => {
 
             <CardContent>
               <Tabs defaultValue="signin" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-2 bg-background/30 backdrop-blur-md border border-border">
+                <TabsList className="grid w-full grid-cols-2 bg-muted border border-border">
                   <TabsTrigger 
                     value="signin" 
-                    className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary-foreground text-muted-foreground"
+                    className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground text-foreground"
                   >
                     Sign In
                   </TabsTrigger>
                   <TabsTrigger 
                     value="signup" 
-                    className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary-foreground text-muted-foreground"
+                    className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground text-foreground"
                   >
                     Sign Up
                   </TabsTrigger>
@@ -203,7 +203,7 @@ const Auth = () => {
                           placeholder="Enter your email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="pl-10 bg-background/50 border-border text-foreground placeholder:text-muted-foreground"
+                          className="pl-10 bg-muted border-border text-foreground placeholder:text-foreground/80"
                           required
                         />
                       </div>
@@ -218,7 +218,7 @@ const Auth = () => {
                           placeholder="Enter your password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="pl-10 pr-10 bg-background/50 border-border text-foreground placeholder:text-muted-foreground"
+                          className="pl-10 pr-10 bg-muted border-border text-foreground placeholder:text-foreground/80"
                           required
                         />
                         <Button
@@ -254,7 +254,7 @@ const Auth = () => {
                           placeholder="Enter your email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="pl-10 bg-background/50 border-border text-foreground placeholder:text-muted-foreground"
+                          className="pl-10 bg-muted border-border text-foreground placeholder:text-foreground/80"
                           required
                         />
                       </div>
@@ -269,7 +269,7 @@ const Auth = () => {
                           placeholder="Create a password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="pl-10 pr-10 bg-background/50 border-border text-foreground placeholder:text-muted-foreground"
+                          className="pl-10 pr-10 bg-muted border-border text-foreground placeholder:text-foreground/80"
                           required
                           minLength={6}
                         />
@@ -283,7 +283,7 @@ const Auth = () => {
                           {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </Button>
                       </div>
-                      <p className="text-xs text-muted-foreground">Password must be at least 6 characters</p>
+                      <p className="text-xs text-foreground/80">Password must be at least 6 characters</p>
                     </div>
                     <Button
                       type="submit"
