@@ -166,8 +166,8 @@ const Admin = () => {
                   <p className="text-muted-foreground mb-4">
                     Start exploring the treats marketplace to make your first purchase!
                   </p>
-                  <Button onClick={() => navigate('/treats')}>
-                    Browse Treats
+                  <Button onClick={() => navigate('/coming-soon')}>
+                    Browse Treats (Coming Soon)
                   </Button>
                 </div>
               ) : (

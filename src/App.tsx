@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { TranslationProvider } from "@/contexts/TranslationContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
-import Treats from "./pages/Treats";
+// import Treats from "./pages/Treats"; // TEMPORARILY DISABLED FOR EDITING
 import ComingSoon from "./pages/ComingSoon";
 import Artist from "./pages/Artist";
 import Auth from "./pages/Auth";
@@ -28,7 +28,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/treats" element={<Treats />} />
+              <Route path="/treats" element={<ComingSoon />} /> {/* TEMPORARILY REDIRECTED - TREATS PAGE UNDER CONSTRUCTION */}
               <Route path="/coming-soon" element={<ComingSoon />} />
               <Route path="/artist/:id" element={<Artist />} />
               <Route path="/auth" element={<Auth />} />
