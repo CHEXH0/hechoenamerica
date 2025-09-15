@@ -166,10 +166,10 @@ const Auth = () => {
         >
           <Card className="bg-gradient-to-br from-purple-900/50 via-pink-900/30 to-red-900/50 border-purple-500/40 backdrop-blur-md">
             <CardHeader className="text-center">
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
                 Welcome
               </CardTitle>
-              <CardDescription className="text-gray-300">
+              <CardDescription className="text-gray-000">
                 Sign in to your account or create a new one
               </CardDescription>
             </CardHeader>
@@ -179,13 +179,13 @@ const Auth = () => {
                 <TabsList className="grid w-full grid-cols-2 bg-black/30 backdrop-blur-md border border-purple-500/20">
                   <TabsTrigger 
                     value="signin" 
-                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-pink-300 text-gray-400"
+                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-pink-500 text-gray-200"
                   >
                     Sign In
                   </TabsTrigger>
                   <TabsTrigger 
                     value="signup" 
-                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-red-500/20 data-[state=active]:text-purple-300 text-gray-400"
+                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-red-500/20 data-[state=active]:text-purple-500 text-gray-200"
                   >
                     Sign Up
                   </TabsTrigger>
@@ -194,7 +194,7 @@ const Auth = () => {
                 <TabsContent value="signin">
                   <form onSubmit={handleSignIn} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signin-email" className="text-gray-300">Email</Label>
+                      <Label htmlFor="signin-email" className="text-gray-000">Email</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
@@ -209,7 +209,7 @@ const Auth = () => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signin-password" className="text-gray-300">Password</Label>
+                      <Label htmlFor="signin-password" className="text-gray-000">Password</Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
@@ -245,7 +245,7 @@ const Auth = () => {
                 <TabsContent value="signup">
                   <form onSubmit={handleSignUp} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signup-email" className="text-gray-300">Email</Label>
+                      <Label htmlFor="signup-email" className="text-gray-000">Email</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
@@ -260,7 +260,7 @@ const Auth = () => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signup-password" className="text-gray-300">Password</Label>
+                      <Label htmlFor="signup-password" className="text-gray-000">Password</Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
@@ -283,7 +283,7 @@ const Auth = () => {
                           {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </Button>
                       </div>
-                      <p className="text-xs text-gray-400">Password must be at least 6 characters</p>
+                      <p className="text-xs text-gray-000">Password must be at least 6 characters</p>
                     </div>
                     <Button
                       type="submit"

@@ -532,7 +532,7 @@ const Treats = () => {
                     scale: 1.02
                   }}
                 >
-                  <Button variant="outline" size="sm" className="border-purple-400/50 text-purple-300 hover:bg-purple-500/20 hover:border-purple-400">
+                  <Button variant="outline" size="sm" className="border-purple-400/50 text-purple-400 hover:bg-purple-500/20 hover:border-purple-400">
                     <Download className="h-4 w-4 mr-2" />
                     {product.price === 'Free' ? 'Download' : 'Buy'}
                   </Button>
@@ -685,21 +685,21 @@ const Treats = () => {
             <TabsList className="grid w-full grid-cols-3 bg-black/30 backdrop-blur-md border border-purple-500/20">
               <TabsTrigger 
                 value="samples" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-pink-300 text-gray-400 transition-all duration-300"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-pink-400 text-gray-400 transition-all duration-300"
               >
                 <FileAudio className="h-5 w-5 mr-2" />
                 Audio Samples
               </TabsTrigger>
               <TabsTrigger 
                 value="vsts" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-red-500/20 data-[state=active]:text-purple-300 text-gray-400 transition-all duration-300"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-red-500/20 data-[state=active]:text-purple-400 text-gray-400 transition-all duration-300"
               >
                 <Disc3 className="h-5 w-5 mr-2" />
                 VST Plugins
               </TabsTrigger>
               <TabsTrigger 
                 value="candies" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-red-300 text-gray-400 transition-all duration-300"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-red-400 text-gray-400 transition-all duration-300"
               >
                 <Candy className="h-5 w-5 mr-2" />
                 Sweet Treats

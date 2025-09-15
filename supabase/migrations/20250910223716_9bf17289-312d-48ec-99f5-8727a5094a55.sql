@@ -61,12 +61,15 @@ USING (bucket_id = 'product-assets' AND auth.role() = 'authenticated');
 -- Insert sample data from the existing hardcoded products
 INSERT INTO public.products (id, name, type, category, price, description, image, showcase, duration, sort_order) VALUES
 -- Audio Samples
-('s001', 'Drum Kit - Latino Heat', 'WAV', 'samples', 'Free', 'High-energy Latin percussion samples', '/laptop-uploads/Pill.png', '/laptop-uploads/ProTools.png', '1:35', 1),
-('s002', 'Sample Pack - Nick Zinchenko', 'WAV', 'samples', '$19.99', 'Deep bass loops for urban production', '/laptop-uploads/Zinchenko.png', '/laptop-uploads/FLoops.png', '2:20', 2),
+('s001', 'MY Keys Sound Pack - Nick Zinchenko', 'WAV', 'samples', '$19.99', 'ONE Shot Key Sounds – 37 Handpicked WAV Samples from My Own Collection ', '/laptop-uploads/Zinchenko.png', '/laptop-uploads/Nick.png', '45MB', 1),
 
 -- VST Plugins
-('v001', 'Spice Level FX', 'VST3/VST', 'vsts', '$79.99', 'Premium textures with added heat', '/laptop-uploads/RIVERSIDE.jpg', '/laptop-uploads/RIVERSIDE.jpg', NULL, 1),
-('v003', 'Chexho Synth VSTi', 'VST3/VST', 'vsts', '$89.99', 'Build pschedelic sounds by your own creation', '/laptop-uploads/Synth.png', '/laptop-uploads/AlbumCover.png', NULL, 2),
+('v001', 'Chexho Synth VSTi', 'VST3/VST', 'vsts', '$15.99', 'Build pschedelic sounds by your own creation', '/laptop-uploads/Synth.png', '/laptop-uploads/AlbumCover.png', NULL, 1),
+('v002', 'The God Particle', 'VST3/VST/AXX', 'vsts', 'Free', 'The God Paricle. Beyond the super analog', '/laptop-uploads/God Particle.jpg', '/laptop-uploads/Cradle_logo.jpg', NULL, 2),
+('v003', 'NARCOTIC', 'VST3/VST/AXX', 'vsts', 'Free', 'Narcotic is the ultimate way to add motion, movement and pulse to your sounds', '/laptop-uploads/Narcotic.webp', '/laptop-uploads/narcotic_logo.png', NULL, 3),
+('v004', 'SUGAR', 'VST3/VST/AXX', 'vsts', 'Free', 'This full spectrum enhancer will add punch, thickness, depth, warmth, edge and grit to all your tracks', '/laptop-uploads/sugar.jpg', '/laptop-uploads/process_logo.jpg', NULL, 4),
+('v004', 'soothe2', 'VST3/VST/AXX', 'vsts', 'Free', 'soothe harshness so your EQ doesn’t have to', '/laptop-uploads/sugar.jpg', '/laptop-uploads/RIVERSIDE.jpg', NULL, 5),
+('v004', 'SUGAR', 'VST3/VST/AXX', 'vsts', 'Free', 'This full spectrum enhancer will add punch, thickness, depth, warmth, edge and grit to all your tracks', '/laptop-uploads/sugar.jpg', '/laptop-uploads/oeksound_logo.jpg', NULL, 6),
 
 -- Candies
 ('c001', 'Chammoy Gummy Bursts', 'Sweet & Spicy Treat', 'candies', '$12.99', 'Chamoy-covered gushers', '/laptop-uploads/Donut.png', '/laptop-uploads/Star.png', NULL, 1),
@@ -75,8 +78,7 @@ INSERT INTO public.products (id, name, type, category, price, description, image
 ('c004', 'Tropical Mix Variety Pack', 'Mixed Candy', 'candies', '$24.99', 'Assorted tropical flavored gummy candies', '/laptop-uploads/Donut.png', '/laptop-uploads/Star.png', NULL, 4);
 
 -- Update VST-specific fields
-UPDATE public.products SET size = '2.1 GB', has_comparison = true WHERE id = 'v001';
-UPDATE public.products SET size = '3.2 GB', has_comparison = false, is_instrument = true WHERE id = 'v003';
+UPDATE public.products SET size = '3.2 GB', has_comparison = false, is_instrument = true WHERE id = 'v001';
 
 -- Update candy-specific fields
 UPDATE public.products SET weight = '250g' WHERE id = 'c001';
