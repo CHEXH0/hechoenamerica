@@ -13,6 +13,7 @@ import Artist from "./pages/Artist";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/payment-success" element={<PaymentSuccess />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>

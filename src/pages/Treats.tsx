@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, FileAudio, Disc3, Candy, Play, Download, ShoppingCart, Bell, BellRing, RefreshCw } from "lucide-react";
+import { ArrowLeft, FileAudio, Disc3, Candy, Play, Download, ShoppingCart, Bell, BellRing, RefreshCw, Plus } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,9 @@ import Waveform from "@/components/Waveform";
 import { useProducts, type Product } from "@/hooks/useProducts";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { useAuth } from "@/contexts/AuthContext";
+import { Cart } from "@/components/Cart";
+import { useCart } from "@/hooks/useCart";
+import { Badge } from "@/components/ui/badge";
 
 // Generate audio URLs from Supabase storage for VST wet versions
 const getWetAudioUrl = (productId: string) => {
@@ -37,6 +40,7 @@ const frequencies: {
 const Treats = () => {
   const { data: allProducts, isLoading, error } = useProducts();
   const { user } = useAuth();
+  const { addItem, getItemCount } = useCart();
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [playingWaveform, setPlayingWaveform] = useState<string | null>(null);
   const [audioElements, setAudioElements] = useState<{
@@ -51,6 +55,7 @@ const Treats = () => {
   const [vstCurrentPage, setVstCurrentPage] = useState(1);
   const vstItemsPerPage = 6;
   const [syncingProducts, setSyncingProducts] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
 
   // Organize products by category
   const products = React.useMemo(() => {
@@ -265,6 +270,84 @@ const Treats = () => {
       });
     } finally {
       setSubscribingStates(prev => ({ ...prev, [productId]: false }));
+    }
+  };
+
+  const handleAddToCart = (product: Product) => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to add items to your cart.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Don't add candies to cart since they're notify-only
+    if (product.category === 'candies') {
+      toast({
+        title: "Coming Soon",
+        description: "This treat will be available soon. Use 'Notify Me' to get updates!",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    addItem(product);
+    toast({
+      title: "Added to Cart! 🛒",
+      description: `${product.name} has been added to your cart.`,
+    });
+  };
+
+  const handleBuyNow = async (product: Product) => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to make a purchase.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Don't allow buying candies
+    if (product.category === 'candies') {
+      toast({
+        title: "Coming Soon",
+        description: "This treat will be available soon. Use 'Notify Me' to get updates!",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
+          items: [{
+            product_id: product.id,
+            quantity: 1
+          }]
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.url) {
+        window.open(data.url, '_blank');
+        toast({
+          title: "Redirecting to Checkout",
+          description: "Opening Stripe checkout in a new tab...",
+        });
+      }
+    } catch (error) {
+      console.error('Buy now error:', error);
+      toast({
+        title: "Purchase Failed",
+        description: error instanceof Error ? error.message : "Please try again or sync products to Stripe first.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -564,12 +647,21 @@ const Treats = () => {
                     scale: 1.02
                   }}
                 >
-                  <Button variant="outline" size="sm" className="border-purple-400/50 text-purple-400 hover:bg-purple-500/20 hover:border-purple-400">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => handleBuyNow(product)}
+                    className="border-purple-400/50 text-purple-400 hover:bg-purple-500/20 hover:border-purple-400"
+                  >
                     <Download className="h-4 w-4 mr-2" />
-                    {product.price === 'Free' ? 'Download' : 'Buy'}
+                    Buy Now
                   </Button>
-                  <Button size="sm" className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white border-0">
-                    <ShoppingCart className="h-4 w-4 mr-2" />
+                  <Button 
+                    size="sm" 
+                    onClick={() => handleAddToCart(product)}
+                    className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white border-0"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
                     Add to Cart
                   </Button>
                 </motion.div>
@@ -687,10 +779,10 @@ const Treats = () => {
           Back to Home
         </Link>
 
-        {/* Sync to Stripe button for authenticated users */}
+        {/* Sync to Stripe button and Cart button for authenticated users */}
         {user && (
           <motion.div
-            className="mb-6"
+            className="mb-6 flex gap-4 items-center"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.2 }}
@@ -713,6 +805,20 @@ const Treats = () => {
                 <RefreshCw className="h-4 w-4 mr-2" />
               )}
               {syncingProducts ? 'Syncing...' : 'Sync Products to Stripe'}
+            </Button>
+
+            <Button
+              onClick={() => setCartOpen(true)}
+              variant="outline"
+              className="border-pink-400/50 text-pink-400 hover:bg-pink-500/20 hover:border-pink-400 relative"
+            >
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Cart
+              {getItemCount() > 0 && (
+                <Badge className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs px-1.5 py-0.5">
+                  {getItemCount()}
+                </Badge>
+              )}
             </Button>
           </motion.div>
         )}
@@ -1011,6 +1117,9 @@ const Treats = () => {
           </Card>
         </motion.div>
       </motion.div>
+
+      {/* Cart Component */}
+      <Cart isOpen={cartOpen} onClose={() => setCartOpen(false)} />
     </div>
   );
 };
