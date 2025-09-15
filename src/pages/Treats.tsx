@@ -12,20 +12,9 @@ import Waveform from "@/components/Waveform";
 import { useProducts, type Product } from "@/hooks/useProducts";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
-// Sample audio URLs (moved outside component to prevent re-creation)
-const sampleAudioUrls: {
-  [key: string]: string;
-} = {
-  's001': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-spanish.mp3',
-  's002': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-french.mp3',
-  's003': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-italian.mp3',
-  's004': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-german.mp3',
-  'v001': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-portuguese.mp3',
-  'v001-wet': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-portuguese.mp3',
-  'v002': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-russian.mp3',
-  'v002-wet': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-russian.mp3',
-  'v003': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-chinese.mp3',
-  'v004': 'https://www.soundjay.com/misc/sounds-of-google-translate/google-translate-korean.mp3'
+// Generate audio URLs from Supabase storage for VST wet versions
+const getWetAudioUrl = (productId: string) => {
+  return `https://eapbuoqkhckqaswfjexv.supabase.co/storage/v1/object/public/audio-samples/${productId}-wet.mp3`;
 };
 
 // Frequency mapping for audio tones (moved outside component to prevent re-creation)
@@ -81,33 +70,26 @@ const Treats = () => {
     const newAudioElements: {
       [key: string]: HTMLAudioElement;
     } = {};
-    Object.entries(sampleAudioUrls).forEach(([id, url]) => {
-      const audio = new Audio();
-      // Create a simple tone using Web Audio API as fallback
-      const createTone = (frequency: number) => {
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-        oscillator.type = 'sine';
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-        return {
-          oscillator,
-          audioContext,
-          gainNode
-        };
-      };
-
-      // Fallback to generated tone if URL fails
-      audio.addEventListener('error', () => {
-        console.log(`Failed to load audio for ${id}, using generated tone`);
+    
+    // Initialize audio elements for all products with audio preview URLs
+    if (allProducts) {
+      allProducts.forEach(product => {
+        if (product.audio_preview_url) {
+          // Add dry version
+          const audio = new Audio(product.audio_preview_url);
+          audio.preload = 'metadata';
+          newAudioElements[product.id] = audio;
+          
+          // Add wet version for VSTs
+          if (product.category === 'vsts') {
+            const wetAudio = new Audio(getWetAudioUrl(product.id));
+            wetAudio.preload = 'metadata';
+            newAudioElements[`${product.id}-wet`] = wetAudio;
+          }
+        }
       });
-      audio.preload = 'metadata';
-      audio.src = url;
-      newAudioElements[id] = audio;
-    });
+    }
+    
     setAudioElements(newAudioElements);
 
     // Cleanup function
@@ -117,7 +99,7 @@ const Treats = () => {
         audio.src = '';
       });
     };
-  }, []);
+  }, [allProducts]);
 
   // Show loading state
   if (isLoading) {
