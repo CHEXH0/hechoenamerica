@@ -65,11 +65,11 @@ INSERT INTO public.products (id, name, type, category, price, description, image
 
 -- VST Plugins
 ('v001', 'Chexho Synth VSTi', 'VST3/VST', 'vsts', '$15.99', 'Build pschedelic sounds by your own creation', '/laptop-uploads/Synth.png', '/laptop-uploads/AlbumCover.png', NULL, 1),
-('v002', 'The God Particle', 'VST3/VST/AXX', 'vsts', 'Free', 'The God Paricle. Beyond the super analog', '/laptop-uploads/God Particle.jpg', '/laptop-uploads/Cradle_logo.jpg', NULL, 2),
-('v003', 'NARCOTIC', 'VST3/VST/AXX', 'vsts', 'Free', 'Narcotic is the ultimate way to add motion, movement and pulse to your sounds', '/laptop-uploads/Narcotic.webp', '/laptop-uploads/narcotic_logo.png', NULL, 3),
+('v002', 'The God Particle', 'VST3/VST/AXX', 'vsts', 'Free', 'The God Paricle. Beyond the super analog', '/laptop-uploads/God_Particle.jpg', '/laptop-uploads/Cradle_logo.jpg', NULL, 2),
+('v003', 'NARCOTIC', 'VST3/VST/AXX', 'vsts', 'Free', 'Narcotic is the ultimate way to add motion, movement and pulse to your sounds', '/laptop-uploads/Narcotic.webp', '/laptop-uploads/narcotic_logo.jpg', NULL, 3),
 ('v004', 'SUGAR', 'VST3/VST/AXX', 'vsts', 'Free', 'This full spectrum enhancer will add punch, thickness, depth, warmth, edge and grit to all your tracks', '/laptop-uploads/sugar.jpg', '/laptop-uploads/process_logo.jpg', NULL, 4),
-('v005', 'soothe2', 'VST3/VST/AXX', 'vsts', 'Free', 'soothe harshness so your EQ doesn’t have to', '/laptop-uploads/sugar.jpg', '/laptop-uploads/RIVERSIDE.jpg', NULL, 5),
-('v006', 'spiff', 'VST3/VST/AXX', 'vsts', 'Free', 'This full spectrum enhancer will add punch, thickness, depth, warmth, edge and grit to all your tracks', '/laptop-uploads/sugar.jpg', '/laptop-uploads/oeksound_logo.jpg', NULL, 6),
+('v005', 'soothe2', 'VST3/VST/AXX', 'vsts', 'Free', 'Soothe harshness so your EQ doesn’t have to', '/laptop-uploads/soothe2.png', '/laptop-uploads/oeksound_logo.jpg', NULL, 5),
+('v006', 'spiff', 'VST3/VST/AXX', 'vsts', 'Free', 'Cut or boost transients where it matters', '/laptop-uploads/spiff.png', '/laptop-uploads/oeksound_logo.jpg', NULL, 6),
 
 -- Candies
 ('c001', 'Chammoy Gummy Bursts', 'Sweet & Spicy Treat', 'candies', '$12.99', 'Chamoy-covered gushers', '/laptop-uploads/Donut.png', '/laptop-uploads/Star.png', NULL, 1),
