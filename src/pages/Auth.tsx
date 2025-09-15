@@ -144,7 +144,7 @@ const Auth = () => {
       >
         <Link 
           to="/" 
-          className="inline-flex items-center text-primary hover:text-primary/80 transition-colors duration-200 mb-8 group"
+          className="inline-flex items-center text-pink-400 hover:text-pink-300 transition-colors duration-200 mb-8 group"
         >
           <motion.div
             whileHover={{ x: -5 }}
@@ -169,23 +169,23 @@ const Auth = () => {
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
                 Welcome
               </CardTitle>
-              <CardDescription className="text-muted-foreground">
+              <CardDescription className="text-gray-300">
                 Sign in to your account or create a new one
               </CardDescription>
             </CardHeader>
 
             <CardContent>
               <Tabs defaultValue="signin" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-2 bg-background/30 backdrop-blur-md border border-border">
+                <TabsList className="grid w-full grid-cols-2 bg-black/30 backdrop-blur-md border border-purple-500/20">
                   <TabsTrigger 
                     value="signin" 
-                    className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary-foreground text-muted-foreground"
+                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-pink-300 text-gray-400"
                   >
                     Sign In
                   </TabsTrigger>
                   <TabsTrigger 
                     value="signup" 
-                    className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary-foreground text-muted-foreground"
+                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-red-500/20 data-[state=active]:text-purple-300 text-gray-400"
                   >
                     Sign Up
                   </TabsTrigger>
@@ -194,31 +194,31 @@ const Auth = () => {
                 <TabsContent value="signin">
                   <form onSubmit={handleSignIn} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signin-email" className="text-foreground">Email</Label>
+                      <Label htmlFor="signin-email" className="text-gray-300">Email</Label>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
                           id="signin-email"
                           type="email"
                           placeholder="Enter your email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="pl-10 bg-background/50 border-border text-foreground placeholder:text-muted-foreground"
+                          className="pl-10 bg-black/50 border-purple-400/30 text-white placeholder:text-gray-400"
                           required
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signin-password" className="text-foreground">Password</Label>
+                      <Label htmlFor="signin-password" className="text-gray-300">Password</Label>
                       <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
                           id="signin-password"
                           type={showPassword ? "text" : "password"}
                           placeholder="Enter your password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="pl-10 pr-10 bg-background/50 border-border text-foreground placeholder:text-muted-foreground"
+                          className="pl-10 pr-10 bg-black/50 border-purple-400/30 text-white placeholder:text-gray-400"
                           required
                         />
                         <Button
@@ -245,31 +245,31 @@ const Auth = () => {
                 <TabsContent value="signup">
                   <form onSubmit={handleSignUp} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signup-email" className="text-foreground">Email</Label>
+                      <Label htmlFor="signup-email" className="text-gray-300">Email</Label>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
                           id="signup-email"
                           type="email"
                           placeholder="Enter your email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="pl-10 bg-background/50 border-border text-foreground placeholder:text-muted-foreground"
+                          className="pl-10 bg-black/50 border-purple-400/30 text-white placeholder:text-gray-400"
                           required
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signup-password" className="text-foreground">Password</Label>
+                      <Label htmlFor="signup-password" className="text-gray-300">Password</Label>
                       <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
                           id="signup-password"
                           type={showPassword ? "text" : "password"}
                           placeholder="Create a password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="pl-10 pr-10 bg-background/50 border-border text-foreground placeholder:text-muted-foreground"
+                          className="pl-10 pr-10 bg-black/50 border-purple-400/30 text-white placeholder:text-gray-400"
                           required
                           minLength={6}
                         />
@@ -283,7 +283,7 @@ const Auth = () => {
                           {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </Button>
                       </div>
-                      <p className="text-xs text-muted-foreground">Password must be at least 6 characters</p>
+                      <p className="text-xs text-gray-400">Password must be at least 6 characters</p>
                     </div>
                     <Button
                       type="submit"

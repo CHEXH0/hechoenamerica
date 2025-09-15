@@ -33,7 +33,7 @@ const AudioPlatforms = () => {
     {
       name: t.audioPlatforms.treats,
       isIcon: true,
-      url: "/coming-soon", // TEMPORARILY REDIRECTED - TREATS PAGE UNDER CONSTRUCTION
+      url: "/treats",
       isExternal: false,
       emojis: ["🎧", "🎵", "🍭", "🎹", "🎶"],
     },
