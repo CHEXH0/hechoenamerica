@@ -1,1 +1,4 @@
 project_id = "eapbuoqkhckqaswfjexv"
+
+[functions.sync-products-to-stripe]
+verify_jwt = true

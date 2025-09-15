@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, FileAudio, Disc3, Candy, Play, Download, ShoppingCart, Bell, BellRing } from "lucide-react";
+import { ArrowLeft, FileAudio, Disc3, Candy, Play, Download, ShoppingCart, Bell, BellRing, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Waveform from "@/components/Waveform";
 import { useProducts, type Product } from "@/hooks/useProducts";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Generate audio URLs from Supabase storage for VST wet versions
 const getWetAudioUrl = (productId: string) => {
@@ -35,6 +36,7 @@ const frequencies: {
 
 const Treats = () => {
   const { data: allProducts, isLoading, error } = useProducts();
+  const { user } = useAuth();
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [playingWaveform, setPlayingWaveform] = useState<string | null>(null);
   const [audioElements, setAudioElements] = useState<{
@@ -48,6 +50,7 @@ const Treats = () => {
   }>({});
   const [vstCurrentPage, setVstCurrentPage] = useState(1);
   const vstItemsPerPage = 6;
+  const [syncingProducts, setSyncingProducts] = useState(false);
 
   // Organize products by category
   const products = React.useMemo(() => {
@@ -262,6 +265,45 @@ const Treats = () => {
       });
     } finally {
       setSubscribingStates(prev => ({ ...prev, [productId]: false }));
+    }
+  };
+
+  const handleSyncToStripe = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to sync products to Stripe.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSyncingProducts(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-products-to-stripe');
+
+      if (error) {
+        throw error;
+      }
+
+      const results = data?.results || [];
+      const successful = results.filter((r: any) => r.status === 'success').length;
+      const errors = results.filter((r: any) => r.status === 'error').length;
+
+      toast({
+        title: "Sync Completed! ✅",
+        description: `${successful} products synced successfully${errors > 0 ? `, ${errors} errors` : ''}.`,
+      });
+    } catch (error) {
+      console.error('Error syncing products:', error);
+      toast({
+        title: "Sync Failed",
+        description: "Failed to sync products to Stripe. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSyncingProducts(false);
     }
   };
 
@@ -644,6 +686,36 @@ const Treats = () => {
           </motion.div>
           Back to Home
         </Link>
+
+        {/* Sync to Stripe button for authenticated users */}
+        {user && (
+          <motion.div
+            className="mb-6"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+          >
+            <Button
+              onClick={handleSyncToStripe}
+              disabled={syncingProducts}
+              variant="outline"
+              className="border-purple-400/50 text-purple-400 hover:bg-purple-500/20 hover:border-purple-400"
+            >
+              {syncingProducts ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  className="mr-2"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </motion.div>
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              {syncingProducts ? 'Syncing...' : 'Sync Products to Stripe'}
+            </Button>
+          </motion.div>
+        )}
 
         <div className="text-center mb-16">
           <motion.h1 
