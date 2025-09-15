@@ -10,6 +10,7 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Waveform from "@/components/Waveform";
 import { useProducts, type Product } from "@/hooks/useProducts";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 // Sample audio URLs (moved outside component to prevent re-creation)
 const sampleAudioUrls: {
@@ -56,17 +57,24 @@ const Treats = () => {
   const [subscribingStates, setSubscribingStates] = useState<{
     [key: string]: boolean;
   }>({});
+  const [vstCurrentPage, setVstCurrentPage] = useState(1);
+  const vstItemsPerPage = 6;
 
   // Organize products by category
   const products = React.useMemo(() => {
-    if (!allProducts) return { samples: [], vsts: [], candies: [] };
+    if (!allProducts) return { samples: [], vsts: [], candies: [], vstsPaginated: [] };
+    
+    const vsts = allProducts.filter(p => p.category === 'vsts');
+    const startIndex = (vstCurrentPage - 1) * vstItemsPerPage;
+    const vstsPaginated = vsts.slice(startIndex, startIndex + vstItemsPerPage);
     
     return {
       samples: allProducts.filter(p => p.category === 'samples'),
-      vsts: allProducts.filter(p => p.category === 'vsts'),
-      candies: allProducts.filter(p => p.category === 'candies')
+      vsts,
+      candies: allProducts.filter(p => p.category === 'candies'),
+      vstsPaginated
     };
-  }, [allProducts]);
+  }, [allProducts, vstCurrentPage]);
 
   // Initialize audio elements - MUST be called before any conditional returns
   React.useEffect(() => {
@@ -750,10 +758,63 @@ const Treats = () => {
                   VST Plugins
                 </h2>
                 <p className="text-gray-300 text-lg">Professional VST3 and VST instruments for your DAW</p>
+                {products.vsts.length > vstItemsPerPage && (
+                  <p className="text-gray-400 text-sm mt-2">
+                    Showing {((vstCurrentPage - 1) * vstItemsPerPage) + 1}-{Math.min(vstCurrentPage * vstItemsPerPage, products.vsts.length)} of {products.vsts.length} plugins
+                  </p>
+                )}
               </motion.div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-                {products.vsts.map(product => renderProductCard(product, <Disc3 className="h-6 w-6" />, 'vsts'))}
+                {products.vstsPaginated.map(product => renderProductCard(product, <Disc3 className="h-6 w-6" />, 'vsts'))}
               </div>
+              
+              {/* Pagination for VSTs */}
+              {products.vsts.length > vstItemsPerPage && (
+                <motion.div 
+                  className="flex justify-center mt-12"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <Pagination>
+                    <PaginationContent className="gap-2">
+                      {vstCurrentPage > 1 && (
+                        <PaginationItem>
+                          <PaginationPrevious 
+                            onClick={() => setVstCurrentPage(prev => prev - 1)}
+                            className="cursor-pointer bg-purple-900/30 border-purple-500/50 text-purple-300 hover:bg-purple-800/40 hover:text-purple-200"
+                          />
+                        </PaginationItem>
+                      )}
+                      
+                      {Array.from({ length: Math.ceil(products.vsts.length / vstItemsPerPage) }, (_, i) => i + 1).map(page => (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => setVstCurrentPage(page)}
+                            isActive={vstCurrentPage === page}
+                            className={`cursor-pointer ${
+                              vstCurrentPage === page 
+                                ? 'bg-gradient-to-r from-purple-500/20 to-red-500/20 border-purple-400 text-purple-300' 
+                                : 'bg-black/30 border-purple-500/30 text-gray-400 hover:bg-purple-900/20 hover:text-purple-300'
+                            }`}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+                      
+                      {vstCurrentPage < Math.ceil(products.vsts.length / vstItemsPerPage) && (
+                        <PaginationItem>
+                          <PaginationNext 
+                            onClick={() => setVstCurrentPage(prev => prev + 1)}
+                            className="cursor-pointer bg-purple-900/30 border-purple-500/50 text-purple-300 hover:bg-purple-800/40 hover:text-purple-200"
+                          />
+                        </PaginationItem>
+                      )}
+                    </PaginationContent>
+                  </Pagination>
+                </motion.div>
+              )}
             </TabsContent>
 
             <TabsContent value="candies" className="space-y-8">
