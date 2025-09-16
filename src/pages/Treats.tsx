@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Waveform from "@/components/Waveform";
-import AudioPreview from "@/components/AudioPreview";
+
 import { useProducts, type Product } from "@/hooks/useProducts";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { useAuth } from "@/contexts/AuthContext";
@@ -86,17 +86,9 @@ const Treats = () => {
     if (allProducts) {
       allProducts.forEach(product => {
         if (product.audio_preview_url) {
-          // Add dry version
           const audio = new Audio(product.audio_preview_url);
           audio.preload = 'metadata';
           newAudioElements[product.id] = audio;
-          
-          // Add wet version for VSTs
-          if (product.category === 'vsts') {
-            const wetAudio = new Audio(getWetAudioUrl(product.id));
-            wetAudio.preload = 'metadata';
-            newAudioElements[`${product.id}-wet`] = wetAudio;
-          }
         }
       });
     }
@@ -445,7 +437,7 @@ const Treats = () => {
           </motion.div>
           
           {/* Play/Pause button overlay */}
-          {(category === 'samples' || (category === 'vsts' && !product.is_instrument && !product.has_comparison)) && 
+          {product.audio_preview_url && 
             <motion.button 
               onClick={() => handlePlayWaveform(product.id)} 
               className={`absolute bottom-4 left-4 ${playingWaveform === product.id ? 'bg-red-500 hover:bg-red-400' : 'bg-pink-500 hover:bg-pink-400'} text-white p-3 rounded-full transition-colors duration-200 shadow-lg`} 
@@ -472,37 +464,6 @@ const Treats = () => {
             </motion.button>
           }
 
-          {/* VST Comparison buttons */}
-          {category === 'vsts' && product.has_comparison && 
-            <div className="absolute bottom-4 left-4 flex gap-2">
-              <motion.button 
-                onClick={() => handlePlayWaveform(product.id)} 
-                className={`${playingWaveform === product.id ? 'bg-red-500 hover:bg-red-400' : 'bg-gray-600 hover:bg-gray-500'} text-white px-3 py-2 rounded-full text-xs transition-colors duration-200 shadow-lg`} 
-                whileHover={{
-                  scale: 1.05
-                }} 
-                whileTap={{
-                  scale: 0.95
-                }} 
-                title="Play dry signal (without VST)"
-              >
-                Dry
-              </motion.button>
-              <motion.button 
-                onClick={() => handlePlayWaveform(`${product.id}-wet`)} 
-                className={`${playingWaveform === `${product.id}-wet` ? 'bg-red-500 hover:bg-red-400' : 'bg-pink-500 hover:bg-pink-400'} text-white px-3 py-2 rounded-full text-xs transition-colors duration-200 shadow-lg`} 
-                whileHover={{
-                  scale: 1.05
-                }} 
-                whileTap={{
-                  scale: 0.95
-                }} 
-                title="Play wet signal (with VST effect)"
-              >
-                Wet
-              </motion.button>
-            </div>
-          }
         </div>
 
         <CardHeader className="pb-3">
@@ -520,18 +481,6 @@ const Treats = () => {
         </CardHeader>
 
         <CardContent className="space-y-4">
-          {/* Audio Preview Component */}
-          {(category === 'samples' || (category === 'vsts' && !product.is_instrument)) && (
-            <AudioPreview
-              productName={product.name}
-              hasComparison={product.has_comparison}
-              audioPreviewUrl={product.audio_preview_url}
-              audioPreviewDry={product.audio_preview_dry}
-              audioPreviewWet={product.audio_preview_wet}
-              audioPreviewComparison={product.audio_preview_comparison}
-              className="bg-black/30 border-purple-500/20"
-            />
-          )}
 
           {/* VST Instrument showcase */}
           {category === 'vsts' && product.is_instrument && 
