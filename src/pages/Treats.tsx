@@ -423,8 +423,8 @@ const Treats = () => {
             <img src={product.showcase} alt="Showcase" className="w-full h-full object-cover" />
           </motion.div>
           
-          {/* Play/Pause button overlay */}
-          {product.audio_preview_url && 
+          {/* Play/Pause button overlay - only for audio samples */}
+          {product.category === 'samples' && product.audio_preview_url &&
             <motion.button 
               onClick={() => handlePlayWaveform(product.id)} 
               className={`absolute bottom-4 left-4 ${playingWaveform === product.id ? 'bg-red-500 hover:bg-red-400' : 'bg-pink-500 hover:bg-pink-400'} text-white p-3 rounded-full transition-colors duration-200 shadow-lg`} 
