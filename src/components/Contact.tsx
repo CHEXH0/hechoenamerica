@@ -61,6 +61,19 @@ const Contact = () => {
         throw error;
       }
 
+      // Send email via Edge Function (non-blocking for UX)
+      await supabase.functions
+        .invoke('send-contact-email', {
+          body: {
+            name: formData.name.trim(),
+            email: formData.email.trim(),
+            country: formData.country || 'Not specified',
+            subject: formData.subject.trim() || "New message from HechoEnAmerica website",
+            message: formData.message.trim()
+          }
+        })
+        .catch((err) => console.error('Email send error:', err));
+
       toast({
         title: t.contact.messageSentTitle,
         description: t.contact.messageSentDesc,
