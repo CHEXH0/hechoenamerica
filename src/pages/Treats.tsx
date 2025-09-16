@@ -40,6 +40,7 @@ const frequencies: {
 const Treats = () => {
   const { data: allProducts, isLoading, error } = useProducts();
   const { user } = useAuth();
+  const isAdmin = user?.email === 'hechoenamerica369@gmail.com';
   const { addItem, getItemCount } = useCart();
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [playingWaveform, setPlayingWaveform] = useState<string | null>(null);
@@ -787,25 +788,28 @@ const Treats = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.2 }}
           >
-            <Button
-              onClick={handleSyncToStripe}
-              disabled={syncingProducts}
-              variant="outline"
-              className="border-purple-400/50 text-purple-400 hover:bg-purple-500/20 hover:border-purple-400"
-            >
-              {syncingProducts ? (
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  className="mr-2"
-                >
-                  <RefreshCw className="h-4 w-4" />
-                </motion.div>
-              ) : (
-                <RefreshCw className="h-4 w-4 mr-2" />
-              )}
-              {syncingProducts ? 'Syncing...' : 'Sync Products to Stripe'}
-            </Button>
+            {isAdmin && (
+              <Button
+                onClick={handleSyncToStripe}
+                disabled={syncingProducts}
+                variant="outline"
+                className="border-purple-400/50 text-purple-400 hover:bg-purple-500/20 hover:border-purple-400"
+              >
+                {syncingProducts ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="mr-2"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </motion.div>
+                ) : (
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                )}
+                {syncingProducts ? 'Syncing...' : 'Sync Products to Stripe'}
+              </Button>
+            )}
+
 
             <Button
               onClick={() => setCartOpen(true)}

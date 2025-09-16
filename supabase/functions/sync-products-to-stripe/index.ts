@@ -33,6 +33,31 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
+    // Require authenticated admin user
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      });
+    }
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+    if (userError || !userData.user?.email) {
+      return new Response(JSON.stringify({ error: "Invalid user" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      });
+    }
+
+    const isAdmin = userData.user.email === "hechoenamerica369@gmail.com";
+    if (!isAdmin) {
+      return new Response(JSON.stringify({ error: "Forbidden: Admins only" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 403,
+      });
+    }
+
     // Get all active products from Supabase
     const { data: products, error: productsError } = await supabaseClient
       .from('products')

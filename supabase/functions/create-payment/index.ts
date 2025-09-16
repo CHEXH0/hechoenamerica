@@ -90,18 +90,58 @@ serve(async (req) => {
         query: `metadata['supabase_product_id']:'${item.product_id}' AND active:'true'`,
       });
 
+      let priceId: string;
       if (prices.data.length === 0) {
-        throw new Error(`No Stripe price found for product ${item.product_id}. Please sync products to Stripe first.`);
+        // No price found - create Stripe product and price on the fly based on Supabase product
+        logStep("No existing Stripe price found, creating...", { productId: item.product_id });
+
+        // Find or create Stripe product first
+        const existingProducts = await stripe.products.search({
+          query: `metadata['supabase_id']:'${product.id}'`,
+        });
+
+        let stripeProduct = existingProducts.data[0];
+        if (!stripeProduct) {
+          stripeProduct = await stripe.products.create({
+            name: product.name,
+            description: product.description,
+            images: product.image ? [product.image] : [],
+            metadata: {
+              supabase_id: product.id,
+              category: product.category,
+              type: product.type,
+            },
+          });
+          logStep("Created Stripe product on-the-fly", { stripeProductId: stripeProduct.id });
+        }
+
+        // Parse amount from product.price like "$12.99"
+        const priceStr = String(product.price).replace(/[$,]/g, '');
+        const priceAmount = Math.round(parseFloat(priceStr) * 100);
+        if (!Number.isFinite(priceAmount) || priceAmount <= 0) {
+          throw new Error(`Invalid product price for ${product.id}: ${product.price}`);
+        }
+
+        const newPrice = await stripe.prices.create({
+          product: stripeProduct.id,
+          unit_amount: priceAmount,
+          currency: 'usd',
+          metadata: { supabase_product_id: product.id },
+        });
+        priceId = newPrice.id;
+        logStep("Created Stripe price on-the-fly", { priceId });
+      } else {
+        priceId = prices.data[0].id;
       }
 
       lineItems.push({
-        price: prices.data[0].id,
+        price: priceId,
         quantity: item.quantity || 1,
       });
 
       logStep("Added line item", { 
         productId: item.product_id, 
-        priceId: prices.data[0].id, 
+        priceId, 
         quantity: item.quantity || 1 
       });
     }
