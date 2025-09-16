@@ -1058,7 +1058,7 @@ const Treats = () => {
                             href="tel:+1234567890" 
                             className="text-muted-foreground hover:text-primary transition-colors"
                           >
-                            +1 (234) 567-8900
+                            +1 (909) 384-2193
                           </a>
                         </div>
                       </motion.div>
@@ -1078,7 +1078,7 @@ const Treats = () => {
                             href="mailto:contact@hechoenamarica.com" 
                             className="text-muted-foreground hover:text-primary transition-colors"
                           >
-                            contact@hechoenamarica.com
+                            hechoenamerica369@gmail.com
                           </a>
                         </div>
                       </motion.div>
