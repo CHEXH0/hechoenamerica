@@ -23,10 +23,37 @@ export const useCart = () => {
     }
   }, []);
 
-  // Save cart to localStorage whenever items change
+  // Save cart to localStorage and broadcast updates whenever items change
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(items));
+    // Notify other components in this tab
+    window.dispatchEvent(new CustomEvent('cart:updated', { detail: items }));
   }, [items]);
+
+  // Listen for cart updates from other components or tabs
+  useEffect(() => {
+    const onCartUpdated = (e: Event) => {
+      try {
+        const detail = (e as CustomEvent<CartItem[]>).detail;
+        if (Array.isArray(detail)) {
+          setItems(detail);
+        }
+      } catch (_) {}
+    };
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'cart' && e.newValue) {
+        try {
+          setItems(JSON.parse(e.newValue));
+        } catch (_) {}
+      }
+    };
+    window.addEventListener('cart:updated', onCartUpdated as EventListener);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener('cart:updated', onCartUpdated as EventListener);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []);
 
   const addItem = (product: Product, quantity: number = 1) => {
     setItems(prevItems => {
