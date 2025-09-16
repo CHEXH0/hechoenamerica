@@ -85,14 +85,52 @@ serve(async (req) => {
         throw new Error(`Product ${item.product_id} not found or inactive`);
       }
 
-      // Search for Stripe price with matching supabase product id
+      // Search for Stripe price with matching supabase product id (fetch all, we'll validate activity)
       const prices = await stripe.prices.search({
-        query: `metadata['supabase_product_id']:'${item.product_id}' AND active:'true'`,
+        query: `metadata['supabase_product_id']:'${item.product_id}'`,
       });
 
       let priceId: string;
-      if (prices.data.length === 0) {
-        // No price found - create Stripe product and price on the fly based on Supabase product
+      const activePrice = prices.data.find((p: any) => p.active);
+
+      if (activePrice) {
+        // Use the active price directly
+        priceId = activePrice.id;
+      } else if (prices.data.length > 0) {
+        // We have prices but none are active -> either reactivate if amount matches or create a fresh active price
+        // Parse amount from product.price like "$12.99" or "Free"
+        const priceStr = String(product.price).replace(/[$,]/g, '');
+        let desiredAmount: number;
+
+        if (/^free$/i.test(priceStr.trim())) {
+          desiredAmount = 0; // Free items are $0.00
+        } else {
+          desiredAmount = Math.round(parseFloat(priceStr) * 100);
+          if (!Number.isFinite(desiredAmount) || desiredAmount < 0) {
+            throw new Error(`Invalid product price for ${product.id}: ${product.price}`);
+          }
+        }
+
+        const anyPrice: any = prices.data[0];
+        if (typeof anyPrice.unit_amount === 'number' && anyPrice.unit_amount === desiredAmount) {
+          // Same amount: try reactivating the existing price
+          await stripe.prices.update(anyPrice.id, { active: true });
+          priceId = anyPrice.id;
+          logStep("Reactivated existing Stripe price", { priceId, amount: desiredAmount });
+        } else {
+          // Different amount or missing: create a new active price under the same Stripe product
+          const stripeProductId = typeof anyPrice.product === 'string' ? anyPrice.product : anyPrice.product.id;
+          const newPrice = await stripe.prices.create({
+            product: stripeProductId,
+            unit_amount: desiredAmount,
+            currency: 'usd',
+            metadata: { supabase_product_id: product.id },
+          });
+          priceId = newPrice.id;
+          logStep("Created new active Stripe price (no active found)", { priceId, amount: desiredAmount });
+        }
+      } else {
+        // No price found at all - create Stripe product and price on the fly based on Supabase product
         logStep("No existing Stripe price found, creating...", { productId: item.product_id });
 
         // Find or create Stripe product first
@@ -154,8 +192,6 @@ serve(async (req) => {
         });
         priceId = newPrice.id;
         logStep("Created Stripe price on-the-fly", { priceId });
-      } else {
-        priceId = prices.data[0].id;
       }
 
       lineItems.push({

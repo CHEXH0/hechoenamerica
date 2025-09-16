@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-
+import { supabase } from "@/integrations/supabase/client";
 const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
@@ -54,25 +54,30 @@ const Admin = () => {
   const handleSyncProducts = async () => {
     setIsSyncing(true);
     try {
-      const response = await fetch('/api/functions/v1/sync-products-to-stripe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ user_email: user.email }),
+      const { data, error } = await supabase.functions.invoke('sync-products-to-stripe', {
+        body: {},
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to sync products');
-      }
+      if (error) throw error;
 
-      const data = await response.json();
+      const payload: any = data || {};
+      const results = Array.isArray(payload.results) ? payload.results : [];
+      const successCount = results.filter((r: any) => r.status === 'success').length;
+      const errorCount = results.filter((r: any) => r.status === 'error').length;
+
       toast({
-        title: "Sync Successful",
-        description: `Successfully synced ${data.synced_count || 0} products to Stripe.`,
+        title: payload.success ? "Sync Successful" : "Sync Completed",
+        description: `${payload.message || 'Finished syncing.'} ${successCount ? `✓ ${successCount} ok.` : ''} ${errorCount ? `⚠️ ${errorCount} with issues.` : ''}`.trim(),
       });
-    } catch (error) {
-      console.error('Sync error:', error);
+
+      if (errorCount) {
+        toast({
+          title: "Tips to fix issues",
+          description: "Ensure product prices are numeric (e.g., 49.99) or 'Free', then run sync again.",
+        });
+      }
+    } catch (err) {
+      console.error('Sync error:', err);
       toast({
         title: "Sync Failed",
         description: "Failed to sync products to Stripe. Please try again.",
@@ -82,7 +87,6 @@ const Admin = () => {
       setIsSyncing(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20">
       {/* Background Effects */}
