@@ -62,12 +62,21 @@ const ProfileIcon = () => {
           Profile Settings
         </DropdownMenuItem>
         <DropdownMenuItem 
-          onClick={() => navigate('/admin')}
+          onClick={() => navigate('/purchases')}
           className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
         >
           <Settings className="h-4 w-4 mr-2" />
           My Purchases
         </DropdownMenuItem>
+        {user.email === 'hechoenamerica369@gmail.com' && (
+          <DropdownMenuItem 
+            onClick={() => navigate('/admin')}
+            className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
+          >
+            <Settings className="h-4 w-4 mr-2" />
+            Admin Panel
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem 
           onClick={() => signOut()}
           className="text-red-400 hover:text-red-300 hover:bg-red-500/10 cursor-pointer"
