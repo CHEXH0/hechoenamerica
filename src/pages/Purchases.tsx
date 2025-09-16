@@ -70,10 +70,40 @@ const Purchases = () => {
 
   const handleDownload = async (productId: string, productName: string) => {
     try {
-      // Get signed URL for the product asset
+      // First, try to list available files for this product
+      const { data: files, error: listError } = await supabase.storage
+        .from('product-assets')
+        .list(productId, {
+          limit: 100,
+          sortBy: { column: 'name', order: 'asc' }
+        });
+
+      if (listError) {
+        console.error('Error listing files:', listError);
+        throw new Error('Unable to find download files');
+      }
+
+      if (!files || files.length === 0) {
+        throw new Error('No download files available for this product');
+      }
+
+      // Find the main download file (prioritize .zip, then audio files)
+      const downloadFile = files.find(file => 
+        file.name.endsWith('.zip') || 
+        file.name.endsWith('.wav') || 
+        file.name.endsWith('.mp3') || 
+        file.name.endsWith('.flac') || 
+        file.name.endsWith('.aiff')
+      );
+
+      if (!downloadFile) {
+        throw new Error('No compatible download files found');
+      }
+
+      // Get signed URL for the specific file
       const { data, error } = await supabase.storage
         .from('product-assets')
-        .createSignedUrl(`${productId}/${productId}.zip`, 3600); // 1 hour expiry
+        .createSignedUrl(`${productId}/${downloadFile.name}`, 3600); // 1 hour expiry
 
       if (error) {
         throw error;
@@ -83,21 +113,21 @@ const Purchases = () => {
         // Create a temporary link and trigger download
         const link = document.createElement('a');
         link.href = data.signedUrl;
-        link.download = `${productName}.zip`;
+        link.download = downloadFile.name;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
 
         toast({
           title: "Download Started",
-          description: `${productName} is now downloading.`,
+          description: `${downloadFile.name} is now downloading.`,
         });
       }
     } catch (error) {
       console.error('Download error:', error);
       toast({
         title: "Download Failed",
-        description: "Unable to download this item. Please try again or contact support.",
+        description: error instanceof Error ? error.message : "Unable to download this item. Please try again or contact support.",
         variant: "destructive",
       });
     }
