@@ -87,11 +87,27 @@ serve(async (req) => {
           stripeProduct = existingProducts.data[0];
           logStep("Found existing Stripe product", { stripeId: stripeProduct.id });
         } else {
-          // Create new Stripe product
+          // Create new Stripe product with safe image handling
+          const origin = req.headers.get("origin") ?? "";
+          let images: string[] = [];
+          if (product.image) {
+            const img = String(product.image);
+            if (img.startsWith("http://") || img.startsWith("https://")) {
+              images = [img];
+            } else if (origin && img.startsWith("/")) {
+              try {
+                const absolute = new URL(img, origin).href;
+                images = [absolute];
+              } catch (_) {
+                // ignore invalid URL
+              }
+            }
+          }
+
           stripeProduct = await stripe.products.create({
             name: product.name,
             description: product.description,
-            images: product.image ? [product.image] : [],
+            ...(images.length ? { images } : {}),
             metadata: {
               supabase_id: product.id,
               category: product.category,

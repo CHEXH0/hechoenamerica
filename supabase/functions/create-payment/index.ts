@@ -102,10 +102,28 @@ serve(async (req) => {
 
         let stripeProduct = existingProducts.data[0];
         if (!stripeProduct) {
+          // Build a safe images array only if we have a valid absolute URL
+          const origin = req.headers.get("origin") ?? "";
+          let images: string[] = [];
+          if (product.image) {
+            const img = String(product.image);
+            if (img.startsWith("http://") || img.startsWith("https://")) {
+              images = [img];
+            } else if (origin && img.startsWith("/")) {
+              try {
+                const absolute = new URL(img, origin).href;
+                images = [absolute];
+              } catch (_) {
+                // Ignore invalid image URL
+              }
+            }
+          }
+
           stripeProduct = await stripe.products.create({
             name: product.name,
             description: product.description,
-            images: product.image ? [product.image] : [],
+            // Only pass images if valid
+            ...(images.length ? { images } : {}),
             metadata: {
               supabase_id: product.id,
               category: product.category,
@@ -147,12 +165,17 @@ serve(async (req) => {
     }
 
     // Create checkout session
+    const forwardedProto = req.headers.get("x-forwarded-proto") ?? "https";
+    const forwardedHost = req.headers.get("x-forwarded-host") ?? "";
+    const originHeader = req.headers.get("origin");
+    const origin = originHeader || (forwardedHost ? `${forwardedProto}://${forwardedHost}` : "");
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: lineItems,
       mode: "payment",
-      success_url: `${req.headers.get("origin")}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/treats`,
+      success_url: `${origin}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/treats`,
       metadata: {
         supabase_user_id: user.id,
         cart_items: JSON.stringify(items)
