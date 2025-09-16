@@ -83,27 +83,41 @@ serve(async (req) => {
 
         let stripeProduct;
         
+        // Prepare image URLs for product
+        const origin = req.headers.get("origin") ?? "";
+        let images: string[] = [];
+        if (product.image) {
+          const img = String(product.image);
+          if (img.startsWith("http://") || img.startsWith("https://")) {
+            images = [img];
+          } else if (origin && img.startsWith("/")) {
+            try {
+              const absolute = new URL(img, origin).href;
+              images = [absolute];
+            } catch (_) {
+              // ignore invalid URL
+            }
+          }
+        }
+
         if (existingProducts.data.length > 0) {
           stripeProduct = existingProducts.data[0];
           logStep("Found existing Stripe product", { stripeId: stripeProduct.id });
+          
+          // Update existing product with current data
+          stripeProduct = await stripe.products.update(stripeProduct.id, {
+            name: product.name,
+            description: product.description,
+            ...(images.length ? { images } : {}),
+            metadata: {
+              supabase_id: product.id,
+              category: product.category,
+              type: product.type,
+            },
+          });
+          logStep("Updated existing Stripe product", { stripeId: stripeProduct.id });
         } else {
-          // Create new Stripe product with safe image handling
-          const origin = req.headers.get("origin") ?? "";
-          let images: string[] = [];
-          if (product.image) {
-            const img = String(product.image);
-            if (img.startsWith("http://") || img.startsWith("https://")) {
-              images = [img];
-            } else if (origin && img.startsWith("/")) {
-              try {
-                const absolute = new URL(img, origin).href;
-                images = [absolute];
-              } catch (_) {
-                // ignore invalid URL
-              }
-            }
-          }
-
+          // Create new Stripe product
           stripeProduct = await stripe.products.create({
             name: product.name,
             description: product.description,
@@ -117,6 +131,10 @@ serve(async (req) => {
           logStep("Created new Stripe product", { stripeId: stripeProduct.id });
         }
 
+        // Parse current price from Supabase
+        const priceStr = product.price.replace(/[$,]/g, '');
+        const currentPriceAmount = Math.round(parseFloat(priceStr) * 100); // Convert to cents
+
         // Check if price already exists for this product
         const existingPrices = await stripe.prices.list({
           product: stripeProduct.id,
@@ -126,23 +144,38 @@ serve(async (req) => {
         let stripePrice;
         
         if (existingPrices.data.length > 0) {
-          stripePrice = existingPrices.data[0];
-          logStep("Found existing Stripe price", { priceId: stripePrice.id });
+          const existingPrice = existingPrices.data[0];
+          
+          // Check if price has changed
+          if (existingPrice.unit_amount === currentPriceAmount) {
+            stripePrice = existingPrice;
+            logStep("Found existing Stripe price (unchanged)", { priceId: stripePrice.id, amount: currentPriceAmount });
+          } else {
+            // Price has changed - deactivate old price and create new one
+            await stripe.prices.update(existingPrice.id, { active: false });
+            logStep("Deactivated old price", { oldPriceId: existingPrice.id, oldAmount: existingPrice.unit_amount });
+            
+            stripePrice = await stripe.prices.create({
+              product: stripeProduct.id,
+              unit_amount: currentPriceAmount,
+              currency: 'usd',
+              metadata: {
+                supabase_product_id: product.id,
+              },
+            });
+            logStep("Created new Stripe price (price changed)", { priceId: stripePrice.id, newAmount: currentPriceAmount });
+          }
         } else {
-          // Parse price from string (assuming format like "$12.99")
-          const priceStr = product.price.replace(/[$,]/g, '');
-          const priceAmount = Math.round(parseFloat(priceStr) * 100); // Convert to cents
-
           // Create new Stripe price
           stripePrice = await stripe.prices.create({
             product: stripeProduct.id,
-            unit_amount: priceAmount,
+            unit_amount: currentPriceAmount,
             currency: 'usd',
             metadata: {
               supabase_product_id: product.id,
             },
           });
-          logStep("Created new Stripe price", { priceId: stripePrice.id, amount: priceAmount });
+          logStep("Created new Stripe price", { priceId: stripePrice.id, amount: currentPriceAmount });
         }
 
         results.push({
