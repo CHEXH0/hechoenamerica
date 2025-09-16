@@ -468,10 +468,13 @@ const Treats = () => {
         </CardHeader>
 
         <CardContent className="space-y-4">
-          {/* Waveform animation - always visible */}
-          <div className="bg-black/30 rounded-lg p-4 border border-purple-500/20">
-            <Waveform />
-          </div>
+          {/* Waveform animation - only for samples and non-instrument VSTs with audio */}
+          {(product.category === 'samples' || 
+            (product.category === 'vsts' && !product.is_instrument && (product.audio_preview_dry || product.audio_preview_wet || product.audio_preview_url))) && (
+            <div className="bg-black/30 rounded-lg p-4 border border-purple-500/20">
+              <Waveform />
+            </div>
+          )}
 
           {/* VST Instrument showcase */}
           {category === 'vsts' && product.is_instrument && 
