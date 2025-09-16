@@ -1022,7 +1022,7 @@ const Treats = () => {
           <Card className="bg-gradient-to-br from-purple-900/50 via-pink-900/30 to-red-900/50 border-purple-500/40 backdrop-blur-md max-w-4xl mx-auto">
             <CardHeader>
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text mb-4">
-                Need Something Custom? 🎵
+                Need Something Custom?
               </CardTitle>
               <CardDescription className="text-gray-800 text-lg leading-relaxed">
                 Looking for bespoke audio production, custom VST development, or something else? 
