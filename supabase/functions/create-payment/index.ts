@@ -77,8 +77,72 @@ serve(async (req) => {
 
     logStep("Fetched product details", { productCount: products?.length });
 
+    // If total is zero (all items free), bypass Stripe and grant purchases immediately
+    try {
+      let totalCents = 0;
+      for (const item of items) {
+        const product = products?.find(p => p.id === item.product_id);
+        if (!product) {
+          throw new Error(`Product ${item.product_id} not found`);
+        }
+        const raw = String(product.price ?? '').trim();
+        const cents = /^free$/i.test(raw)
+          ? 0
+          : (() => {
+              const num = parseFloat(raw.replace(/[$,]/g, ''));
+              return Number.isFinite(num) ? Math.round(num * 100) : 0;
+            })();
+        totalCents += cents * (item.quantity || 1);
+      }
+
+      if (totalCents === 0) {
+        logStep("All items are free, creating purchases without Stripe", { count: items.length });
+
+        // Use service role for secure inserts
+        const serviceClient = createClient(
+          Deno.env.get("SUPABASE_URL") ?? "",
+          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+          { auth: { persistSession: false } }
+        );
+
+        const purchaseRecords = items.map((item: any) => {
+          const product = products!.find(p => p.id === item.product_id)!;
+          return {
+            user_id: user.id,
+            product_id: product.id,
+            product_name: product.name,
+            product_type: product.type,
+            product_category: product.category,
+            price: product.price,
+            purchase_date: new Date().toISOString(),
+          };
+        });
+
+        const { error: insertError } = await serviceClient
+          .from('purchases')
+          .insert(purchaseRecords);
+
+        if (insertError) {
+          throw new Error(`Failed to create free purchase records: ${insertError.message}`);
+        }
+
+        logStep("Granted free purchases", { recordCount: purchaseRecords.length });
+
+        return new Response(JSON.stringify({
+          free: true,
+          purchases: purchaseRecords,
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+    } catch (freeErr) {
+      // Fallthrough to Stripe path if any issue occurs in free-branch logic
+      logStep("Free purchase path error (will try Stripe)", { message: freeErr instanceof Error ? freeErr.message : String(freeErr) });
+    }
+
     // Find corresponding Stripe prices for each product
-    const lineItems = [];
+    const lineItems = [] as Array<{ price: string; quantity: number }>;
     for (const item of items) {
       const product = products?.find(p => p.id === item.product_id);
       if (!product) {

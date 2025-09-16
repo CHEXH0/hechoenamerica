@@ -335,12 +335,24 @@ const Treats = () => {
         throw error;
       }
 
+      // Handle free purchases (no Stripe)
+      if (data?.free) {
+        toast({
+          title: "Unlocked! 🎉",
+          description: `${product.name} has been added to your purchases.`,
+        });
+        window.location.href = '/purchases';
+        return;
+      }
+
       if (data?.url) {
         window.open(data.url, '_blank');
         toast({
           title: "Redirecting to Checkout",
           description: "Opening Stripe checkout in a new tab...",
         });
+      } else {
+        throw new Error('No checkout URL received');
       }
     } catch (error) {
       console.error('Buy now error:', error);
