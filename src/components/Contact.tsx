@@ -45,18 +45,19 @@ const Contact = () => {
     }
 
     try {
-      // Save to Supabase database
+      // Save to Supabase database - works for all users (authenticated and guests)
       const { error } = await supabase
         .from('contact_submissions')
         .insert([{
-          name: formData.name,
-          email: formData.email,
+          name: formData.name.trim(),
+          email: formData.email.trim(),
           country: formData.country || 'Not specified',
-          subject: formData.subject || "New message from HechoEnAmerica website",
-          message: formData.message
+          subject: formData.subject.trim() || "New message from HechoEnAmerica website",
+          message: formData.message.trim()
         }]);
 
       if (error) {
+        console.error("Database error:", error);
         throw error;
       }
 
