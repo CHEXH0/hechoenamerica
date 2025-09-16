@@ -133,7 +133,15 @@ serve(async (req) => {
 
         // Parse current price from Supabase
         const priceStr = product.price.replace(/[$,]/g, '');
-        const currentPriceAmount = Math.round(parseFloat(priceStr) * 100); // Convert to cents
+        let currentPriceAmount;
+        
+        // Handle "Free" products by setting price to 0
+        if (priceStr.toLowerCase() === 'free' || isNaN(parseFloat(priceStr))) {
+          currentPriceAmount = 0;
+          logStep("Setting free product price to 0", { productId: product.id, originalPrice: product.price });
+        } else {
+          currentPriceAmount = Math.round(parseFloat(priceStr) * 100); // Convert to cents
+        }
 
         // Check if price already exists for this product
         const existingPrices = await stripe.prices.list({
