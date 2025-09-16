@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Package, Calendar, DollarSign, Music, Mic, Candy } from "lucide-react";
+import { ArrowLeft, Package, Calendar, DollarSign, Music, Mic, Candy, Download } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePurchases } from "@/hooks/usePurchases";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -65,6 +67,41 @@ const Purchases = () => {
     const price = parseFloat(purchase.price.replace('$', ''));
     return total + (isNaN(price) ? 0 : price);
   }, 0) || 0;
+
+  const handleDownload = async (productId: string, productName: string) => {
+    try {
+      // Get signed URL for the product asset
+      const { data, error } = await supabase.storage
+        .from('product-assets')
+        .createSignedUrl(`${productId}/${productId}.zip`, 3600); // 1 hour expiry
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.signedUrl) {
+        // Create a temporary link and trigger download
+        const link = document.createElement('a');
+        link.href = data.signedUrl;
+        link.download = `${productName}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        toast({
+          title: "Download Started",
+          description: `${productName} is now downloading.`,
+        });
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({
+        title: "Download Failed",
+        description: "Unable to download this item. Please try again or contact support.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20">
@@ -172,16 +209,17 @@ const Purchases = () => {
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Product</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Price</TableHead>
-                        <TableHead>Date</TableHead>
-                      </TableRow>
-                    </TableHeader>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Product</TableHead>
+                          <TableHead>Category</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Price</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Download</TableHead>
+                        </TableRow>
+                      </TableHeader>
                     <TableBody>
                       {purchases.map((purchase) => (
                         <TableRow key={purchase.id}>
@@ -205,6 +243,17 @@ const Purchases = () => {
                           </TableCell>
                           <TableCell>
                             {new Date(purchase.purchase_date).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDownload(purchase.product_id, purchase.product_name)}
+                              className="hover:bg-primary/10 hover:border-primary/20 hover:text-primary"
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              Download
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}
