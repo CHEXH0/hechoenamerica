@@ -34,6 +34,13 @@ export const ContactFormEmail = ({
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
+          <Img
+            src="https://eapbuoqkhckqaswfjexv.supabase.co/storage/v1/object/public/assets/hechoenamerica-logo-white.png"
+            alt="HechoEnAmerica Logo"
+            width="80"
+            height="80"
+            style={logoStyle}
+          />
           <Heading style={h1}>HECHO EN AMÉRICA</Heading>
           <Text style={tagline}>LA MÚSICA ES MEDICINA</Text>
         </Section>
@@ -88,9 +95,9 @@ export const ContactFormEmail = ({
 
 export default ContactFormEmail
 
-// Styles using Treats page colors (purple-pink-red gradient theme)
+// Styles using Treats page colors (purple-pink-red gradient theme) with improved contrast
 const main = {
-  backgroundColor: '#0a0a0a',
+  backgroundColor: '#000000',
   color: '#ffffff',
   fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
 }
@@ -103,11 +110,17 @@ const container = {
 
 const header = {
   textAlign: 'center' as const,
-  padding: '30px 20px',
-  background: 'linear-gradient(135deg, #581c87 0%, #be185d 50%, #991b1b 100%)',
-  borderRadius: '12px 12px 0 0',
+  padding: '40px 20px',
+  background: 'linear-gradient(135deg, #4c1d95 0%, #be185d 50%, #dc2626 100%)',
+  borderRadius: '16px 16px 0 0',
   marginBottom: '0',
   position: 'relative' as const,
+}
+
+const logoStyle = {
+  margin: '0 auto 16px',
+  display: 'block',
+  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
 }
 
 const h1 = {
@@ -115,32 +128,33 @@ const h1 = {
   fontSize: '32px',
   fontWeight: '700',
   margin: '0 0 12px',
-  textShadow: '0 4px 8px rgba(0,0,0,0.4)',
-  letterSpacing: '1px',
+  textShadow: '0 4px 8px rgba(0,0,0,0.5)',
+  letterSpacing: '1.5px',
 }
 
 const tagline = {
-  color: '#e879f9',
+  color: '#fde68a',
   fontSize: '16px',
   margin: '0',
   fontStyle: 'italic',
-  textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-  fontWeight: '300',
+  textShadow: '0 2px 4px rgba(0,0,0,0.4)',
+  fontWeight: '400',
 }
 
 const h2 = {
-  color: '#f472b6',
+  color: '#fbbf24',
   fontSize: '24px',
   fontWeight: '600',
   margin: '0 0 24px',
   textAlign: 'center' as const,
+  textShadow: '0 2px 4px rgba(0,0,0,0.3)',
 }
 
 const content = {
-  backgroundColor: '#1f1f23',
+  backgroundColor: '#1a1a1a',
   padding: '32px',
-  borderRadius: '0 0 12px 12px',
-  border: '1px solid #7c3aed',
+  borderRadius: '0 0 16px 16px',
+  border: '2px solid #7c3aed',
 }
 
 const infoSection = {
@@ -148,7 +162,7 @@ const infoSection = {
 }
 
 const label = {
-  color: '#c084fc',
+  color: '#fbbf24',
   fontSize: '13px',
   fontWeight: '600',
   margin: '0 0 6px',
@@ -157,7 +171,7 @@ const label = {
 }
 
 const value = {
-  color: '#ffffff',
+  color: '#f3f4f6',
   fontSize: '16px',
   margin: '0 0 20px',
   lineHeight: '1.5',
@@ -169,37 +183,40 @@ const messageSection = {
 }
 
 const messageText = {
-  color: '#ffffff',
+  color: '#f9fafb',
   fontSize: '16px',
   margin: '0',
   lineHeight: '1.7',
   whiteSpace: 'pre-wrap' as const,
-  backgroundColor: '#2d1b69',
+  backgroundColor: '#374151',
   padding: '24px',
-  borderRadius: '8px',
-  border: '1px solid #be185d',
-  borderLeft: '4px solid #f472b6',
+  borderRadius: '12px',
+  border: '2px solid #be185d',
+  borderLeft: '6px solid #fbbf24',
 }
 
 const hr = {
   borderColor: '#be185d',
   margin: '24px 0',
+  borderWidth: '1px',
 }
 
 const lightHr = {
   borderColor: '#7c3aed',
   margin: '20px 0',
+  borderWidth: '1px',
 }
 
 const footer = {
   textAlign: 'center' as const,
   padding: '24px 20px',
-  backgroundColor: '#0f0f23',
-  borderRadius: '0 0 12px 12px',
+  backgroundColor: '#111827',
+  borderRadius: '0 0 16px 16px',
+  borderTop: '1px solid #374151',
 }
 
 const footerText = {
-  color: '#a1a1aa',
+  color: '#d1d5db',
   fontSize: '13px',
   lineHeight: '1.5',
   margin: '6px 0',
