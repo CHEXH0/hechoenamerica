@@ -1,5 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import React from 'npm:react@18.3.1';
+import { renderAsync } from 'npm:@react-email/components@0.0.22';
+import { ContactFormEmail } from './_templates/contact-form.tsx';
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -42,16 +45,16 @@ serve(async (req: Request) => {
 
     const toAddress = "hechoenamerica369@gmail.com"; // destination inbox
 
-    const html = `
-      <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; line-height: 1.6;">
-        <h2 style="margin: 0 0 12px;">New Contact Form Submission</h2>
-        <p style="margin: 0 0 8px;"><strong>Name:</strong> ${name}</p>
-        <p style="margin: 0 0 8px;"><strong>Email:</strong> ${email}</p>
-        <p style="margin: 0 0 8px;"><strong>Country:</strong> ${country ?? "Not specified"}</p>
-        <p style="margin: 16px 0 8px;"><strong>Subject:</strong> ${subject || "New message from HechoEnAmerica website"}</p>
-        <p style="white-space: pre-wrap; margin: 8px 0 0;">${message}</p>
-      </div>
-    `;
+    // Render React Email template
+    const html = await renderAsync(
+      React.createElement(ContactFormEmail, {
+        name,
+        email,
+        country: country ?? "Not specified",
+        subject: subject || "New message from HechoEnAmerica website",
+        message,
+      })
+    );
 
     const { data, error } = await resend.emails.send({
       from: "Hecho En America <onboarding@resend.dev>",
