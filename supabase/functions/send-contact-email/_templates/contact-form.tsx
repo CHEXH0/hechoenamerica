@@ -88,11 +88,11 @@ export const ContactFormEmail = ({
 
 export default ContactFormEmail
 
-// Styles using brand colors
+// Styles using Treats page colors (purple-pink-red gradient theme)
 const main = {
   backgroundColor: '#0a0a0a',
   color: '#ffffff',
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
 }
 
 const container = {
@@ -103,96 +103,105 @@ const container = {
 
 const header = {
   textAlign: 'center' as const,
-  padding: '20px 0',
-  background: 'linear-gradient(135deg, #ea384c 0%, #FFD700 100%)',
-  borderRadius: '8px 8px 0 0',
+  padding: '30px 20px',
+  background: 'linear-gradient(135deg, #581c87 0%, #be185d 50%, #991b1b 100%)',
+  borderRadius: '12px 12px 0 0',
   marginBottom: '0',
+  position: 'relative' as const,
 }
 
 const h1 = {
   color: '#ffffff',
-  fontSize: '28px',
-  fontWeight: 'bold',
-  margin: '0 0 8px',
-  textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+  fontSize: '32px',
+  fontWeight: '700',
+  margin: '0 0 12px',
+  textShadow: '0 4px 8px rgba(0,0,0,0.4)',
+  letterSpacing: '1px',
 }
 
 const tagline = {
-  color: '#ffffff',
-  fontSize: '14px',
+  color: '#e879f9',
+  fontSize: '16px',
   margin: '0',
   fontStyle: 'italic',
-  textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+  textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+  fontWeight: '300',
 }
 
 const h2 = {
-  color: '#ea384c',
-  fontSize: '22px',
-  fontWeight: 'bold',
-  margin: '0 0 20px',
+  color: '#f472b6',
+  fontSize: '24px',
+  fontWeight: '600',
+  margin: '0 0 24px',
   textAlign: 'center' as const,
 }
 
 const content = {
-  backgroundColor: '#1a1a1a',
-  padding: '30px',
-  borderRadius: '0 0 8px 8px',
+  backgroundColor: '#1f1f23',
+  padding: '32px',
+  borderRadius: '0 0 12px 12px',
+  border: '1px solid #7c3aed',
 }
 
 const infoSection = {
-  marginBottom: '16px',
+  marginBottom: '20px',
 }
 
 const label = {
-  color: '#FFD700',
-  fontSize: '14px',
-  fontWeight: 'bold',
-  margin: '0 0 4px',
+  color: '#c084fc',
+  fontSize: '13px',
+  fontWeight: '600',
+  margin: '0 0 6px',
   textTransform: 'uppercase' as const,
-  letterSpacing: '0.5px',
+  letterSpacing: '1px',
 }
 
 const value = {
   color: '#ffffff',
   fontSize: '16px',
-  margin: '0 0 16px',
-  lineHeight: '1.4',
+  margin: '0 0 20px',
+  lineHeight: '1.5',
+  fontWeight: '400',
 }
 
 const messageSection = {
-  marginTop: '20px',
+  marginTop: '24px',
 }
 
 const messageText = {
   color: '#ffffff',
   fontSize: '16px',
   margin: '0',
-  lineHeight: '1.6',
+  lineHeight: '1.7',
   whiteSpace: 'pre-wrap' as const,
-  backgroundColor: '#2a2a2a',
-  padding: '20px',
-  borderRadius: '6px',
-  border: '1px solid #ea384c',
+  backgroundColor: '#2d1b69',
+  padding: '24px',
+  borderRadius: '8px',
+  border: '1px solid #be185d',
+  borderLeft: '4px solid #f472b6',
 }
 
 const hr = {
-  borderColor: '#ea384c',
-  margin: '20px 0',
+  borderColor: '#be185d',
+  margin: '24px 0',
 }
 
 const lightHr = {
-  borderColor: '#333333',
-  margin: '16px 0',
+  borderColor: '#7c3aed',
+  margin: '20px 0',
 }
 
 const footer = {
   textAlign: 'center' as const,
-  padding: '20px 0',
+  padding: '24px 20px',
+  backgroundColor: '#0f0f23',
+  borderRadius: '0 0 12px 12px',
 }
 
 const footerText = {
-  color: '#888888',
-  fontSize: '12px',
-  lineHeight: '1.4',
-  margin: '4px 0',
+  color: '#a1a1aa',
+  fontSize: '13px',
+  lineHeight: '1.5',
+  margin: '6px 0',
+  fontWeight: '300',
 }
