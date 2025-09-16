@@ -451,13 +451,6 @@ const Treats = () => {
             </motion.button>
           }
 
-          {/* Waveform animation when playing */}
-          {product.audio_preview_url && playingWaveform === product.id && (
-            <div className="absolute bottom-4 right-4">
-              <Waveform />
-            </div>
-          )}
-
         </div>
 
         <CardHeader className="pb-3">
@@ -475,6 +468,12 @@ const Treats = () => {
         </CardHeader>
 
         <CardContent className="space-y-4">
+          {/* Waveform animation when playing */}
+          {product.audio_preview_url && playingWaveform === product.id && (
+            <div className="bg-black/30 rounded-lg p-4 border border-purple-500/20">
+              <Waveform />
+            </div>
+          )}
 
           {/* VST Instrument showcase */}
           {category === 'vsts' && product.is_instrument && 
