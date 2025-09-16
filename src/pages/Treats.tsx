@@ -451,6 +451,13 @@ const Treats = () => {
             </motion.button>
           }
 
+          {/* Waveform animation when playing */}
+          {product.audio_preview_url && playingWaveform === product.id && (
+            <div className="absolute bottom-4 right-4">
+              <Waveform />
+            </div>
+          )}
+
         </div>
 
         <CardHeader className="pb-3">
