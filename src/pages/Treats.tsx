@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Waveform from "@/components/Waveform";
+import AudioPreview from "@/components/AudioPreview";
 import { useProducts, type Product } from "@/hooks/useProducts";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { useAuth } from "@/contexts/AuthContext";
@@ -519,45 +520,18 @@ const Treats = () => {
         </CardHeader>
 
         <CardContent className="space-y-4">
-          {/* Animated waveform for audio products */}
-          {(category === 'samples' || category === 'vsts' && !product.is_instrument) && 
-            <motion.div 
-              className="bg-black/30 rounded-lg p-3 border border-purple-500/20 relative" 
-              animate={{
-                borderColor: playingWaveform === product.id || playingWaveform === `${product.id}-wet` ? "rgba(236, 72, 153, 0.5)" : "rgba(168, 85, 247, 0.2)"
-              }} 
-              transition={{
-                duration: 0.3
-              }}
-            >
-              <div className="relative">
-                <Waveform />
-                {(playingWaveform === product.id || playingWaveform === `${product.id}-wet`) && 
-                  <motion.div 
-                    className="absolute inset-0 bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded" 
-                    animate={{
-                      opacity: [0.3, 0.7, 0.3]
-                    }} 
-                    transition={{
-                      duration: 0.8,
-                      repeat: Infinity
-                    }} 
-                  />
-                }
-              </div>
-              <div className="flex justify-between items-center mt-2 text-sm">
-                <span className="text-gray-400">
-                  {product.has_comparison ? 'Comparison Preview' : 'Preview'}
-                </span>
-                <span className={`${playingWaveform === product.id || playingWaveform === `${product.id}-wet` ? 'text-pink-400' : 'text-gray-500'} transition-colors duration-200`}>
-                  {playingWaveform === product.id ? 
-                    (category === 'samples' ? '● Playing' : '● Playing (Dry)') : 
-                    playingWaveform === `${product.id}-wet` ? '● Playing (Wet)' : 
-                    '○ Ready'}
-                </span>
-              </div>
-            </motion.div>
-          }
+          {/* Audio Preview Component */}
+          {(category === 'samples' || (category === 'vsts' && !product.is_instrument)) && (
+            <AudioPreview
+              productName={product.name}
+              hasComparison={product.has_comparison}
+              audioPreviewUrl={product.audio_preview_url}
+              audioPreviewDry={product.audio_preview_dry}
+              audioPreviewWet={product.audio_preview_wet}
+              audioPreviewComparison={product.audio_preview_comparison}
+              className="bg-black/30 border-purple-500/20"
+            />
+          )}
 
           {/* VST Instrument showcase */}
           {category === 'vsts' && product.is_instrument && 

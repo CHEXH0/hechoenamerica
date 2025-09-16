@@ -145,7 +145,10 @@ export type Database = {
       }
       products: {
         Row: {
+          audio_preview_comparison: string | null
+          audio_preview_dry: string | null
           audio_preview_url: string | null
+          audio_preview_wet: string | null
           category: string
           created_at: string
           description: string
@@ -165,7 +168,10 @@ export type Database = {
           weight: string | null
         }
         Insert: {
+          audio_preview_comparison?: string | null
+          audio_preview_dry?: string | null
           audio_preview_url?: string | null
+          audio_preview_wet?: string | null
           category: string
           created_at?: string
           description: string
@@ -185,7 +191,10 @@ export type Database = {
           weight?: string | null
         }
         Update: {
+          audio_preview_comparison?: string | null
+          audio_preview_dry?: string | null
           audio_preview_url?: string | null
+          audio_preview_wet?: string | null
           category?: string
           created_at?: string
           description?: string

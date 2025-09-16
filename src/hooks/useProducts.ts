@@ -16,6 +16,9 @@ export type Product = {
   has_comparison: boolean;
   is_instrument: boolean;
   audio_preview_url?: string | null;
+  audio_preview_dry?: string | null;
+  audio_preview_wet?: string | null;
+  audio_preview_comparison?: string | null;
   sort_order: number;
   is_active: boolean;
   created_at: string;
