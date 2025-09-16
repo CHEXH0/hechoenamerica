@@ -40,7 +40,7 @@ const Purchases = () => {
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'samples':
-        return <Music className="h-4 w-4" />;
+        return <Music className="h-8 w-4" />;
       case 'vsts':
         return <Mic className="h-4 w-4" />;
       case 'candies':
