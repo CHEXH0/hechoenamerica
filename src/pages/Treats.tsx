@@ -552,86 +552,87 @@ const Treats = () => {
         <CardFooter className="pt-4">
           {/* Price and action buttons */}
           <div className="w-full space-y-3">
-            <div className="flex justify-between items-center">
-              <motion.span 
-                className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent" 
+            <motion.div 
+              className="text-center"
+              whileHover={{
+                scale: 1.05
+              }}
+            >
+              <span className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+                {product.price}
+              </span>
+            </motion.div>
+            
+            {category !== 'candies' && 
+              <motion.div 
+                className="flex flex-col gap-2 w-full" 
                 whileHover={{
-                  scale: 1.05
+                  scale: 1.02
                 }}
               >
-                {product.price}
-              </motion.span>
-              {category !== 'candies' && 
-                <motion.div 
-                  className="flex gap-2" 
-                  whileHover={{
-                    scale: 1.02
-                  }}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleBuyNow(product)}
+                  className="border-purple-400/50 text-purple-400 hover:bg-purple-500/20 hover:border-purple-400 w-full"
                 >
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => handleBuyNow(product)}
-                    className="border-purple-400/50 text-purple-400 hover:bg-purple-500/20 hover:border-purple-400"
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Buy Now
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    onClick={() => handleAddToCart(product)}
-                    className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white border-0"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add to Cart
-                  </Button>
-                </motion.div>
-              }
-              {category === 'candies' && 
-                <motion.div 
-                  className="space-y-2" 
-                  whileHover={{
-                    scale: 1.02
-                  }}
+                  <Download className="h-4 w-4 mr-2" />
+                  Buy Now
+                </Button>
+                <Button 
+                  size="sm" 
+                  onClick={() => handleAddToCart(product)}
+                  className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white border-0 w-full"
                 >
-                  <div className="flex gap-2">
-                    <Input 
-                      placeholder="Enter email for updates" 
-                      value={notificationEmails[product.id] || ''} 
-                      onChange={(e) => setNotificationEmails(prev => ({
-                        ...prev,
-                        [product.id]: e.target.value
-                      }))} 
-                      className="bg-black/50 border-purple-400/30 text-white placeholder:text-gray-400 text-sm" 
-                    />
-                    <Button 
-                      onClick={() => handleNotifyMe(product.id, product.name)} 
-                      disabled={subscribingStates[product.id]} 
-                      size="sm" 
-                      className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white border-0 whitespace-nowrap"
-                    >
-                      {subscribingStates[product.id] ? 
-                        <motion.div 
-                          animate={{
-                            rotate: 360
-                          }} 
-                          transition={{
-                            duration: 1,
-                            repeat: Infinity,
-                            ease: "linear"
-                          }} 
-                          className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" 
-                        /> : 
-                        <>
-                          <Bell className="h-4 w-4 mr-1" />
-                          Notify Me
-                        </>
-                      }
-                    </Button>
-                  </div>
-                </motion.div>
-              }
-            </div>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add to Cart
+                </Button>
+              </motion.div>
+            }
+            {category === 'candies' && 
+              <motion.div 
+                className="space-y-2" 
+                whileHover={{
+                  scale: 1.02
+                }}
+              >
+                <div className="flex gap-2">
+                  <Input 
+                    placeholder="Enter email for updates" 
+                    value={notificationEmails[product.id] || ''} 
+                    onChange={(e) => setNotificationEmails(prev => ({
+                      ...prev,
+                      [product.id]: e.target.value
+                    }))} 
+                    className="bg-black/50 border-purple-400/30 text-white placeholder:text-gray-400 text-sm" 
+                  />
+                  <Button 
+                    onClick={() => handleNotifyMe(product.id, product.name)} 
+                    disabled={subscribingStates[product.id]} 
+                    size="sm" 
+                    className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white border-0 whitespace-nowrap"
+                  >
+                    {subscribingStates[product.id] ? 
+                      <motion.div 
+                        animate={{
+                          rotate: 360
+                        }} 
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          ease: "linear"
+                        }} 
+                        className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" 
+                      /> : 
+                      <>
+                        <Bell className="h-4 w-4 mr-1" />
+                        Notify Me
+                      </>
+                    }
+                  </Button>
+                </div>
+              </motion.div>
+            }
           </div>
         </CardFooter>
       </Card>
