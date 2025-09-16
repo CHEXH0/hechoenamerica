@@ -18,26 +18,6 @@ import { Cart } from "@/components/Cart";
 import { useCart } from "@/hooks/useCart";
 import { Badge } from "@/components/ui/badge";
 
-// Generate audio URLs from Supabase storage for VST wet versions
-const getWetAudioUrl = (productId: string) => {
-  return `https://eapbuoqkhckqaswfjexv.supabase.co/storage/v1/object/public/audio-samples/${productId}-wet.mp3`;
-};
-
-// Frequency mapping for audio tones (moved outside component to prevent re-creation)
-const frequencies: {
-  [key: string]: number;
-} = {
-  's001': 440, // A4
-  's002': 523, // C5
-  's003': 659, // E5
-  's004': 784, // G5
-  'v001': 349, // F4 - dry
-  'v001-wet': 415, // G#4 - with effect
-  'v002': 392, // G4 - dry  
-  'v002-wet': 466, // A#4 - with effect
-  'v003': 494, // B4
-  'v004': 330 // E4
-};
 
 const Treats = () => {
   const { data: allProducts, isLoading, error } = useProducts();
@@ -138,12 +118,15 @@ const Treats = () => {
   const handlePlayWaveform = async (productId: string) => {
     try {
       const currentAudio = audioElements[productId];
+      if (!currentAudio) {
+        console.log('No audio found for product:', productId);
+        return;
+      }
+
       if (playingWaveform === productId) {
         // Stop current audio
-        if (currentAudio) {
-          currentAudio.pause();
-          currentAudio.currentTime = 0;
-        }
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
         setPlayingWaveform(null);
         return;
       }
@@ -154,58 +137,25 @@ const Treats = () => {
         audioElements[playingWaveform].currentTime = 0;
       }
 
-      // Play new audio or create tone
-      if (currentAudio) {
-        try {
-          await currentAudio.play();
-          setPlayingWaveform(productId);
-
-          // Auto-stop after the audio ends
-          currentAudio.addEventListener('ended', () => {
-            setPlayingWaveform(null);
-          });
-        } catch (error) {
-          // Fallback to Web Audio API tone
-          console.log('Using Web Audio API fallback for', productId);
-          createAndPlayTone(productId);
-        }
-      } else {
-        createAndPlayTone(productId);
-      }
-    } catch (error) {
-      console.error('Error playing audio:', error);
-      createAndPlayTone(productId);
-    }
-  };
-
-  const createAndPlayTone = (productId: string) => {
-    try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-
-      // Use the predefined frequencies
-      oscillator.frequency.setValueAtTime(frequencies[productId] || 440, audioContext.currentTime);
-      oscillator.type = 'sine';
-
-      // Fade in and out
-      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.1);
-      gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 2);
+      // Play the audio file
+      await currentAudio.play();
       setPlayingWaveform(productId);
 
-      // Auto-stop after 2 seconds
-      setTimeout(() => {
+      // Auto-stop after the audio ends
+      currentAudio.addEventListener('ended', () => {
         setPlayingWaveform(null);
-      }, 2000);
+      }, { once: true });
+
     } catch (error) {
-      console.error('Error creating tone:', error);
+      console.error('Error playing audio:', error);
+      toast({
+        title: "Audio Error",
+        description: "Could not play audio file.",
+        variant: "destructive",
+      });
     }
   };
+
 
   const handleNotifyMe = async (productId: string, productName: string) => {
     const email = notificationEmails[productId];
