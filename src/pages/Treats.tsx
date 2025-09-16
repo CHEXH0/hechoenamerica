@@ -395,7 +395,7 @@ const Treats = () => {
     >
       <Card className="bg-gradient-to-br from-purple-900/100 via-pink-900/200 to-red-900/100 border-purple-500/60 hover:border-pink-400/70 transition-all duration-300 hover:shadow-2xl hover:shadow-pink-500/25 backdrop-blur-md overflow-hidden h-full">
         {/* Product showcase image */}
-        <div className="relative h-48 overflow-hidden">
+        <div className="relative h-32 sm:h-40 md:h-48 overflow-hidden">
           <motion.img 
             src={product.image} 
             alt={product.name} 
@@ -768,33 +768,36 @@ const Treats = () => {
         </div>
 
         <motion.div 
-          className="max-w-7xl mx-auto"
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
         >
           <Tabs defaultValue="samples" className="space-y-12">
-            <TabsList className="grid w-full grid-cols-3 bg-black/30 backdrop-blur-md border border-purple-500/20">
+            <TabsList className="grid w-full grid-cols-3 bg-black/30 backdrop-blur-md border border-purple-500/20 text-xs sm:text-sm">
               <TabsTrigger 
                 value="samples" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-pink-400 text-gray-400 transition-all duration-300"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-pink-400 text-gray-400 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
               >
-                <FileAudio className="h-5 w-5 mr-2" />
-                Audio Samples
+                <FileAudio className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="hidden sm:inline">Audio Samples</span>
+                <span className="sm:hidden">Samples</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="vsts" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-red-500/20 data-[state=active]:text-purple-400 text-gray-400 transition-all duration-300"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-red-500/20 data-[state=active]:text-purple-400 text-gray-400 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
               >
-                <Disc3 className="h-5 w-5 mr-2" />
-                VST Plugins
+                <Disc3 className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="hidden sm:inline">VST Plugins</span>
+                <span className="sm:hidden">VSTs</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="candies" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-red-400 text-gray-400 transition-all duration-300"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-red-400 text-gray-400 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
               >
-                <Candy className="h-5 w-5 mr-2" />
-                Sweet Treats
+                <Candy className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="hidden sm:inline">Sweet Treats</span>
+                <span className="sm:hidden">Treats</span>
               </TabsTrigger>
             </TabsList>
 
@@ -818,7 +821,7 @@ const Treats = () => {
                 </h2>
                 <p className="text-gray-300 text-lg">High-quality samples for your next hit production</p>
               </motion.div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 md:gap-8 px-4 sm:px-0">
                 {products.samples.map(product => renderProductCard(product, <FileAudio className="h-6 w-6" />, 'samples'))}
               </div>
             </TabsContent>
@@ -848,7 +851,7 @@ const Treats = () => {
                   </p>
                 )}
               </motion.div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 md:gap-8 px-4 sm:px-0">
                 {products.vstsPaginated.map(product => renderProductCard(product, <Disc3 className="h-6 w-6" />, 'vsts'))}
               </div>
               
