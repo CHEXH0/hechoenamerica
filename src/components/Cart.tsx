@@ -56,19 +56,6 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
         throw error;
       }
 
-      // Handle free-only carts (no Stripe)
-      if (data?.free) {
-        // Clear cart and navigate to purchases
-        clearCart();
-        onClose();
-        toast({
-          title: "Unlocked! 🎉",
-          description: "Your free items have been added to your purchases.",
-        });
-        window.location.href = '/purchases';
-        return;
-      }
-
       if (data?.url) {
         // Open Stripe checkout in new tab
         window.open(data.url, '_blank');

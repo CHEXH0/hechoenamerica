@@ -335,16 +335,6 @@ const Treats = () => {
         throw error;
       }
 
-      // Handle free purchases (no Stripe)
-      if (data?.free) {
-        toast({
-          title: "Unlocked! 🎉",
-          description: `${product.name} has been added to your purchases.`,
-        });
-        window.location.href = '/purchases';
-        return;
-      }
-
       if (data?.url) {
         window.open(data.url, '_blank');
         toast({
