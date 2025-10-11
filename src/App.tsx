@@ -16,6 +16,7 @@ import Profile from "./pages/Profile";
 import Purchases from "./pages/Purchases";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PurchaseConfirmation from "./pages/PurchaseConfirmation";
+import GenerateSong from "./pages/GenerateSong";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/purchases" element={<Purchases />} />
               <Route path="/payment-success" element={<PaymentSuccess />} />
               <Route path="/purchase-confirmation" element={<PurchaseConfirmation />} />
+              <Route path="/generate-song" element={<GenerateSong />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
