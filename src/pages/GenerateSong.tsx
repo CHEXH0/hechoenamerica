@@ -1,50 +1,44 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useTransform } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const tiers = ["Free", "Demo", "Artist", "Industry"];
 
-const tierDescriptions = {
-  Free: "Get started with basic features",
-  Demo: "Try out professional tools",
-  Artist: "Full access to artist features",
-  Industry: "Enterprise-level capabilities"
-};
-
-const tierColors = {
-  Free: "from-blue-500 to-cyan-500",
-  Demo: "from-purple-500 to-pink-500",
-  Artist: "from-orange-500 to-red-500",
-  Industry: "from-yellow-500 to-amber-500"
-};
-
 const GenerateSong = () => {
   const [sliderValue, setSliderValue] = useState([0]);
   const [idea, setIdea] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const currentTier = tiers[sliderValue[0]];
-  const currentDescription = tierDescriptions[currentTier as keyof typeof tierDescriptions];
-  const currentGradient = tierColors[currentTier as keyof typeof tierColors];
+  
+  // Smooth color transitions using motion values
+  const gradientStart = useTransform(
+    useMotionValue(sliderValue[0]),
+    [0, 1, 2, 3],
+    ["280deg", "320deg", "0deg", "30deg"] // purple -> magenta -> red -> orange
+  );
+  
+  const gradientEnd = useTransform(
+    useMotionValue(sliderValue[0]),
+    [0, 1, 2, 3],
+    ["220deg", "280deg", "340deg", "20deg"]
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !email || !idea) {
+    if (!idea) {
       toast({
         title: "Missing information",
-        description: "Please fill in all fields",
+        description: "Please share your idea",
         variant: "destructive"
       });
       return;
@@ -55,8 +49,8 @@ const GenerateSong = () => {
     try {
       const { error } = await supabase.functions.invoke('send-contact-email', {
         body: {
-          name,
-          email,
+          name: "Song Generation Request",
+          email: "hechoenamerica369@gmail.com",
           subject: `Song Generation Request - ${currentTier} Tier`,
           message: `Tier: ${currentTier}\n\nIdea: ${idea}`
         }
@@ -76,15 +70,42 @@ const GenerateSong = () => {
     }
   };
 
+  // Generate smooth gradient colors based on slider position
+  const getGradientColors = () => {
+    const position = sliderValue[0];
+    const colors = [
+      { start: "hsl(280, 70%, 40%)", end: "hsl(220, 70%, 50%)" }, // Purple-blue (Free)
+      { start: "hsl(320, 70%, 50%)", end: "hsl(280, 70%, 60%)" }, // Magenta-purple (Demo)
+      { start: "hsl(0, 70%, 50%)", end: "hsl(340, 70%, 50%)" },   // Red (Artist)
+      { start: "hsl(30, 80%, 50%)", end: "hsl(20, 80%, 50%)" }    // Orange (Industry)
+    ];
+    return colors[position];
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-pink-800 flex items-center justify-center p-4">
+    <motion.div 
+      className="relative min-h-screen flex items-center justify-center overflow-hidden p-4"
+      animate={{
+        background: `linear-gradient(135deg, ${getGradientColors().start}, ${getGradientColors().end})`
+      }}
+      transition={{ duration: 0.6, ease: "easeInOut" }}
+    >
+      <div className="absolute inset-0 bg-black/20" />
+      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="max-w-2xl w-full"
+        className="max-w-2xl w-full z-10"
       >
-        <div className="text-center mb-8">
+        <div className="text-center mb-12">
+          <div className="w-32 h-32 mx-auto mb-8">
+            <img
+              src="/lovable-uploads/d5eed490-6d34-4af5-8428-15981ab0f9c3.png"
+              alt="HechoEnAmerica Logo"
+              className="w-full h-full object-contain"
+            />
+          </div>
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
             Generate Your Song. HEA
           </h1>
@@ -94,18 +115,10 @@ const GenerateSong = () => {
         </div>
 
         <motion.div
-          key={currentTier}
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className={`bg-gradient-to-br ${currentGradient} rounded-2xl p-8 shadow-2xl mb-6`}
+          layout
+          className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl mb-6"
         >
-          <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 mb-6">
-            <h2 className="text-3xl font-bold text-white mb-2">{currentTier}</h2>
-            <p className="text-white/80 text-lg">{currentDescription}</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-8">
             <div className="space-y-4">
               <Label className="text-white text-lg font-semibold">
                 Select Your Tier
@@ -117,40 +130,11 @@ const GenerateSong = () => {
                 step={1}
                 className="w-full"
               />
-              <div className="flex justify-between text-white/70 text-sm">
+              <div className="flex justify-between text-white/90 text-sm font-medium">
                 {tiers.map((tier) => (
                   <span key={tier}>{tier}</span>
                 ))}
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-white text-lg font-semibold">
-                Name
-              </Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                placeholder="Your name"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-white text-lg font-semibold">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                placeholder="your@email.com"
-                required
-              />
             </div>
 
             <div className="space-y-2">
@@ -170,7 +154,7 @@ const GenerateSong = () => {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-white text-purple-900 hover:bg-white/90 font-bold text-lg py-6"
+              className="w-full bg-white text-black hover:bg-white/90 font-bold text-lg py-6"
               size="lg"
             >
               {isSubmitting ? "Submitting..." : "Submit Your Song Idea"}
@@ -188,7 +172,7 @@ const GenerateSong = () => {
           </Button>
         </div>
       </motion.div>
-    </div>
+    </motion.div>
   );
 };
 
