@@ -1,36 +1,32 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Upload } from "lucide-react";
 
 const tiers = ["Free", "Demo", "Artist", "Industry"];
 
 const GenerateSong = () => {
   const [sliderValue, setSliderValue] = useState([0]);
   const [idea, setIdea] = useState("");
+  const [files, setFiles] = useState<FileList | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const currentTier = tiers[sliderValue[0]];
-  
-  // Smooth color transitions using motion values
-  const gradientStart = useTransform(
-    useMotionValue(sliderValue[0]),
-    [0, 1, 2, 3],
-    ["280deg", "320deg", "0deg", "30deg"] // purple -> magenta -> red -> orange
-  );
-  
-  const gradientEnd = useTransform(
-    useMotionValue(sliderValue[0]),
-    [0, 1, 2, 3],
-    ["220deg", "280deg", "340deg", "20deg"]
-  );
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFiles(e.target.files);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,12 +43,20 @@ const GenerateSong = () => {
     setIsSubmitting(true);
 
     try {
+      let fileInfo = "";
+      if (files && files.length > 0) {
+        fileInfo = "\n\nAttached Files:\n";
+        for (let i = 0; i < files.length; i++) {
+          fileInfo += `- ${files[i].name} (${(files[i].size / 1024 / 1024).toFixed(2)} MB)\n`;
+        }
+      }
+
       const { error } = await supabase.functions.invoke('send-contact-email', {
         body: {
           name: "Song Generation Request",
           email: "hechoenamerica369@gmail.com",
           subject: `Song Generation Request - ${currentTier} Tier`,
-          message: `Tier: ${currentTier}\n\nIdea: ${idea}`
+          message: `Tier: ${currentTier}\n\nIdea: ${idea}${fileInfo}`
         }
       });
 
@@ -78,6 +82,18 @@ const GenerateSong = () => {
       { start: "hsl(320, 70%, 50%)", end: "hsl(280, 70%, 60%)" }, // Magenta-purple (Demo)
       { start: "hsl(0, 70%, 50%)", end: "hsl(340, 70%, 50%)" },   // Red (Artist)
       { start: "hsl(30, 80%, 50%)", end: "hsl(20, 80%, 50%)" }    // Orange (Industry)
+    ];
+    return colors[position];
+  };
+
+  // Get slider color based on position
+  const getSliderColor = () => {
+    const position = sliderValue[0];
+    const colors = [
+      "hsl(280, 70%, 50%)", // Purple (Free)
+      "hsl(320, 70%, 60%)", // Magenta (Demo)
+      "hsl(0, 70%, 60%)",   // Red (Artist)
+      "hsl(30, 80%, 60%)"   // Orange (Industry)
     ];
     return colors[position];
   };
@@ -128,8 +144,17 @@ const GenerateSong = () => {
                 onValueChange={setSliderValue}
                 max={3}
                 step={1}
-                className="w-full"
+                className="w-full [&_[role=slider]]:border-white [&_[role=slider]]:bg-white"
+                style={{
+                  // @ts-ignore - Custom CSS variable
+                  "--slider-color": getSliderColor(),
+                } as React.CSSProperties}
               />
+              <style>{`
+                .generate-song-slider [data-radix-collection-item] {
+                  background: var(--slider-color) !important;
+                }
+              `}</style>
               <div className="flex justify-between text-white/90 text-sm font-medium">
                 {tiers.map((tier) => (
                   <span key={tier}>{tier}</span>
@@ -148,6 +173,48 @@ const GenerateSong = () => {
                 placeholder="Like AI but better,"
                 className="bg-white/20 border-white/30 text-white placeholder:text-white/50 min-h-[120px]"
                 required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="files" className="text-white text-lg font-semibold">
+                Upload Files (Optional)
+              </Label>
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="bg-white/20 border-2 border-dashed border-white/30 rounded-lg p-6 text-center cursor-pointer hover:bg-white/30 transition-colors"
+              >
+                <Upload className="w-8 h-8 mx-auto mb-2 text-white" />
+                <p className="text-white/90 text-sm font-medium mb-1">
+                  Click to upload files
+                </p>
+                <p className="text-white/60 text-xs">
+                  Audio (.mp3, .wav), Images, or Folders
+                </p>
+                {files && files.length > 0 && (
+                  <div className="mt-3 text-left">
+                    <p className="text-white font-semibold text-sm mb-2">
+                      {files.length} file(s) selected:
+                    </p>
+                    <ul className="text-white/80 text-xs space-y-1">
+                      {Array.from(files).map((file, i) => (
+                        <li key={i} className="truncate">
+                          {file.name}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                id="files"
+                multiple
+                accept=".mp3,.wav,.jpg,.jpeg,.png,.gif,.webp,.pdf,.zip,.rar"
+                onChange={handleFileChange}
+                className="hidden"
+                {...({ webkitdirectory: "", directory: "" } as any)}
               />
             </div>
 
