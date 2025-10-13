@@ -9,19 +9,20 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Upload, Plus } from "lucide-react";
+import FileDeleter from "@/components/FileDeleter";
 const tiers = [
-  { label: "$0", price: 0, description: "Free basic generation", priceId: null },
-  { label: "$25", price: 25, description: "Demo quality production", priceId: "price_1SHdNFQchHjxRXODM3DJdjEE" },
-  { label: "$125", price: 125, description: "Artist-grade quality", priceId: "price_1SHdNVQchHjxRXODn3lW4vDj" },
-  { label: "$250", price: 250, description: "Industry standard", priceId: "price_1SHdNmQchHjxRXODgqWhW9TO" }
+  { label: "$0", price: 0, description: "Free AI Generated - for comparison", priceId: null },
+  { label: "$25", price: 25, description: "Demo Project - for ideas (30sec)", priceId: "price_1SHdNFQchHjxRXODM3DJdjEE" },
+  { label: "$125", price: 125, description: "Artist-grade quality - for production (180sec)", priceId: "price_1SHdNVQchHjxRXODn3lW4vDj" },
+  { label: "$250", price: 250, description: "Industry standard - for masterpiece (300sec)", priceId: "price_1SHdNmQchHjxRXODgqWhW9TO" }
 ];
 
 const GenerateSong = () => {
   const [sliderValue, setSliderValue] = useState([0]);
   const [idea, setIdea] = useState("");
-  const [files, setFiles] = useState<FileList | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -38,13 +39,18 @@ const GenerateSong = () => {
       localStorage.removeItem('pendingSongRequest');
       toast({
         title: "Welcome back!",
-        description: "Continue with your song generation",
+        description: "Processing your song generation request...",
       });
+      // Auto-submit the form after restoring state
+      setTimeout(() => {
+        const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
+        handleSubmit(fakeEvent);
+      }, 1500);
     }
   }, [user, toast]);
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setFiles(e.target.files);
+      setFiles(prevFiles => [...prevFiles, ...Array.from(e.target.files)]);
     }
   };
   const handleSubmit = async (e: React.FormEvent) => {
@@ -87,8 +93,8 @@ const GenerateSong = () => {
           body: {
             name: "Song Generation Request",
             email: user.email,
-            subject: `Song Generation Request - Free Tier`,
-            message: `Tier: Free\n\nIdea: ${idea}${fileInfo}`
+            subject: `Song Generation Request - Free AI Generated`,
+            message: `Idea: Free\n\nIdea: ${idea}${fileInfo}`
           }
         });
         
@@ -155,13 +161,13 @@ const GenerateSong = () => {
   // Get slider color based on position
   const getSliderColor = () => {
     const position = sliderValue[0];
-    const colors = ["hsl(280, 70%, 50%)",
-    // Purple (Free)
-    "hsl(320, 70%, 60%)",
-    // Magenta (Demo)
-    "hsl(0, 70%, 60%)",
-    // Red (Artist)
-    "hsl(30, 80%, 60%)" // Orange (Industry)
+    const colors = ["linear-gradient(90deg, hsl(280, 70%, 50%), hsl(220, 70%, 50%))",
+    // Purple-blue gradient (Free)
+    "linear-gradient(90deg, hsl(320, 70%, 60%), hsl(280, 70%, 60%))",
+    // Magenta-purple gradient (Demo)
+    "linear-gradient(90deg, hsl(0, 70%, 60%), hsl(340, 70%, 60%))",
+    // Red-pink gradient (Artist)
+    "linear-gradient(90deg, hsl(30, 80%, 60%), hsl(20, 80%, 60%))" // Orange gradient (Industry)
     ];
     return colors[position];
   };
@@ -199,37 +205,36 @@ const GenerateSong = () => {
                 Select Price
               </Label>
               <div className="relative">
-                <Slider 
-                  value={sliderValue} 
+                <Slider
+                  value={sliderValue}
                   onValueChange={(value) => {
                     setSliderValue(value);
                     setShowTooltip(true);
-                    setTimeout(() => setShowTooltip(false), 2000);
                   }}
-                  max={3} 
-                  step={1} 
-                  className="w-full [&_[role=slider]]:border-white [&_[role=slider]]:bg-white" 
+                  max={3}
+                  step={1}
+                  className="w-full [&_[role=slider]]:border-white :bg-[var(--slider-color)] cursor-pointer"
                   style={{
                     // @ts-ignore - Custom CSS variable
                     "--slider-color": getSliderColor()
-                  } as React.CSSProperties} 
+                  } as React.CSSProperties}
                 />
-                <AnimatePresence>
-                  {showTooltip && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white text-black px-4 py-2 rounded-lg shadow-lg text-sm font-medium whitespace-nowrap"
-                    >
-                      {currentTier.description}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </div>
               <div className="flex justify-between text-white/90 text-sm font-medium">
                 {tiers.map(tier => <span key={tier.label}>{tier.label}</span>)}
               </div>
+              <AnimatePresence>
+                {showTooltip && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="text-white/90 text-sm mt-2"
+                  >
+                    {currentTier.description}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <div className="space-y-2">
@@ -257,9 +262,7 @@ const GenerateSong = () => {
                 {files && files.length > 0 && (
                   <div className="text-white/80 text-sm space-y-1">
                     <p className="font-medium">Selected files:</p>
-                    {Array.from(files).map((file, index) => (
-                      <p key={index} className="text-xs">• {file.name}</p>
-                    ))}
+                    <FileDeleter files={files} onDelete={(index) => setFiles(files.filter((_, i) => i !== index))} />
                   </div>
                 )}
               </div>
@@ -274,7 +277,7 @@ const GenerateSong = () => {
         </motion.div>
 
         <div className="text-center">
-          <Button variant="ghost" onClick={() => navigate("/")} className="text-white">
+          <Button variant="ghost" onClick={() => navigate("/")} className="text-white/80 hover:text-white hover:bg-transparent">
             Back to Home
           </Button>
         </div>
