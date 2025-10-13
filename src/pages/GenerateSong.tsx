@@ -1,25 +1,47 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Upload, Plus } from "lucide-react";
-const tiers = ["$0", "$25", "$125", "$250"];
+const tiers = [
+  { label: "$0", price: 0, description: "Free basic generation", priceId: null },
+  { label: "$25", price: 25, description: "Demo quality production", priceId: "price_1SHdNFQchHjxRXODM3DJdjEE" },
+  { label: "$125", price: 125, description: "Artist-grade quality", priceId: "price_1SHdNVQchHjxRXODn3lW4vDj" },
+  { label: "$250", price: 250, description: "Industry standard", priceId: "price_1SHdNmQchHjxRXODgqWhW9TO" }
+];
+
 const GenerateSong = () => {
   const [sliderValue, setSliderValue] = useState([0]);
   const [idea, setIdea] = useState("");
   const [files, setFiles] = useState<FileList | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const currentTier = tiers[sliderValue[0]];
+
+  // Check if returning from auth with pending request
+  useEffect(() => {
+    const pendingRequest = localStorage.getItem('pendingSongRequest');
+    if (pendingRequest && user) {
+      const { idea: savedIdea, tier: savedTier } = JSON.parse(pendingRequest);
+      setIdea(savedIdea);
+      setSliderValue([savedTier]);
+      localStorage.removeItem('pendingSongRequest');
+      toast({
+        title: "Welcome back!",
+        description: "Continue with your song generation",
+      });
+    }
+  }, [user, toast]);
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setFiles(e.target.files);
@@ -27,6 +49,7 @@ const GenerateSong = () => {
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!idea) {
       toast({
         title: "Missing information",
@@ -35,27 +58,62 @@ const GenerateSong = () => {
       });
       return;
     }
+
+    // Check if user is authenticated
+    if (!user) {
+      // Save form state and redirect to auth
+      localStorage.setItem('pendingSongRequest', JSON.stringify({
+        idea,
+        tier: sliderValue[0]
+      }));
+      navigate("/auth");
+      return;
+    }
+
     setIsSubmitting(true);
+    
     try {
-      let fileInfo = "";
-      if (files && files.length > 0) {
-        fileInfo = "\n\nAttached Files:\n";
-        for (let i = 0; i < files.length; i++) {
-          fileInfo += `- ${files[i].name} (${(files[i].size / 1024 / 1024).toFixed(2)} MB)\n`;
+      // For free tier, just send email
+      if (currentTier.price === 0) {
+        let fileInfo = "";
+        if (files && files.length > 0) {
+          fileInfo = "\n\nAttached Files:\n";
+          for (let i = 0; i < files.length; i++) {
+            fileInfo += `- ${files[i].name} (${(files[i].size / 1024 / 1024).toFixed(2)} MB)\n`;
+          }
+        }
+        
+        const { error } = await supabase.functions.invoke('send-contact-email', {
+          body: {
+            name: "Song Generation Request",
+            email: user.email,
+            subject: `Song Generation Request - Free Tier`,
+            message: `Tier: Free\n\nIdea: ${idea}${fileInfo}`
+          }
+        });
+        
+        if (error) throw error;
+        navigate("/purchase-confirmation");
+      } else {
+        // For paid tiers, create Stripe checkout session
+        const { data: sessionData, error } = await supabase.functions.invoke('create-song-checkout', {
+          body: {
+            priceId: currentTier.priceId,
+            tier: currentTier.label,
+            idea
+          }
+        });
+
+        if (error) throw error;
+        
+        if (sessionData?.url) {
+          window.open(sessionData.url, '_blank');
+          toast({
+            title: "Redirecting to payment",
+            description: "Complete your payment in the new tab",
+          });
         }
       }
-      const {
-        error
-      } = await supabase.functions.invoke('send-contact-email', {
-        body: {
-          name: "Song Generation Request",
-          email: "hechoenamerica369@gmail.com",
-          subject: `Song Generation Request - ${currentTier} Tier`,
-          message: `Tier: ${currentTier}\n\nIdea: ${idea}${fileInfo}`
-        }
-      });
-      if (error) throw error;
-      navigate("/purchase-confirmation");
     } catch (error) {
       console.error("Error:", error);
       toast({
@@ -63,6 +121,7 @@ const GenerateSong = () => {
         description: "Failed to submit. Please try again.",
         variant: "destructive"
       });
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -135,21 +194,41 @@ const GenerateSong = () => {
 
         <motion.div layout className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl mb-0">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-4">
+            <div className="space-y-4 relative">
               <Label className="text-white text-lg font-semibold">
                 Select Price
               </Label>
-              <Slider value={sliderValue} onValueChange={setSliderValue} max={3} step={1} className="w-full [&_[role=slider]]:border-white [&_[role=slider]]:bg-white" style={{
-              // @ts-ignore - Custom CSS variable
-              "--slider-color": getSliderColor()
-            } as React.CSSProperties} />
-              <style>{`
-                .generate-song-slider [data-radix-collection-item] {
-                  background: var(--slider-color) !important;
-                }
-              `}</style>
+              <div className="relative">
+                <Slider 
+                  value={sliderValue} 
+                  onValueChange={(value) => {
+                    setSliderValue(value);
+                    setShowTooltip(true);
+                    setTimeout(() => setShowTooltip(false), 2000);
+                  }}
+                  max={3} 
+                  step={1} 
+                  className="w-full [&_[role=slider]]:border-white [&_[role=slider]]:bg-white" 
+                  style={{
+                    // @ts-ignore - Custom CSS variable
+                    "--slider-color": getSliderColor()
+                  } as React.CSSProperties} 
+                />
+                <AnimatePresence>
+                  {showTooltip && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white text-black px-4 py-2 rounded-lg shadow-lg text-sm font-medium whitespace-nowrap"
+                    >
+                      {currentTier.description}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
               <div className="flex justify-between text-white/90 text-sm font-medium">
-                {tiers.map(tier => <span key={tier}>{tier}</span>)}
+                {tiers.map(tier => <span key={tier.label}>{tier.label}</span>)}
               </div>
             </div>
 
@@ -165,12 +244,25 @@ const GenerateSong = () => {
               <p className="text-white/60 text-xs">
                   Audio (.mp3, .wav), Images, or Folders
               </p>
-              <div className="space-y-0">
-              <input ref={fileInputRef} type="file" id="files" multiple accept=".mp3,.wav,.jpg,.jpeg,.png,.gif,.webp,.pdf,.zip,.rar" onChange={handleFileChange} className="hidden" {...{
-              webkitdirectory: "",
-              directory: ""
-            } as any} />
-            </div>
+              <div className="space-y-2">
+                <input 
+                  ref={fileInputRef} 
+                  type="file" 
+                  id="files" 
+                  multiple 
+                  accept=".mp3,.wav,.m4a,.flac,.aac,.ogg,.wma,.jpg,.jpeg,.png,.gif,.webp,.bmp,.tiff,.svg,.pdf,.zip,.rar,.7z" 
+                  onChange={handleFileChange} 
+                  className="hidden"
+                />
+                {files && files.length > 0 && (
+                  <div className="text-white/80 text-sm space-y-1">
+                    <p className="font-medium">Selected files:</p>
+                    {Array.from(files).map((file, index) => (
+                      <p key={index} className="text-xs">• {file.name}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             

@@ -3,14 +3,42 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const PurchaseConfirmation = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [countdown, setCountdown] = useState(5);
+  const { user } = useAuth();
+  const [countdown, setCountdown] = useState(10);
+  const [emailSent, setEmailSent] = useState(false);
+  const sessionId = searchParams.get('session_id');
 
+  // Send confirmation email
   useEffect(() => {
-    // Redirect after 5 seconds
+    const sendConfirmationEmail = async () => {
+      if (!user?.email || emailSent) return;
+
+      try {
+        await supabase.functions.invoke('send-contact-email', {
+          body: {
+            name: "Song Purchase",
+            email: user.email,
+            subject: "Song Generation Purchase Confirmed",
+            message: `Thank you for your purchase!\n\nYour song generation request has been received and we'll get started on it right away.\n\nSession ID: ${sessionId || 'N/A'}\n\nWe'll send you updates to this email address.`
+          }
+        });
+        setEmailSent(true);
+      } catch (error) {
+        console.error("Failed to send confirmation email:", error);
+      }
+    };
+
+    sendConfirmationEmail();
+  }, [user, emailSent, sessionId]);
+
+  // Countdown timer
+  useEffect(() => {
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
@@ -54,6 +82,11 @@ const PurchaseConfirmation = () => {
           <p className="text-white/80 text-lg">
             Thank you for your purchase. Your order has been confirmed.
           </p>
+          {user?.email && (
+            <p className="text-white/70 text-sm">
+              A confirmation email has been sent to {user.email}
+            </p>
+          )}
         </div>
 
         <div className="bg-white/5 rounded-lg p-4 border border-white/10">
