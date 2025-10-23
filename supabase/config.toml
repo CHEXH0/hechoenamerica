@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.update-purchase-status]
 verify_jwt = true
+
+[functions.assign-user-role]
+verify_jwt = true

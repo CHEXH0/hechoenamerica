@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload } from "lucide-react";
+import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Purchase } from "@/hooks/usePurchases";
 
 const Admin = () => {
@@ -23,12 +24,18 @@ const Admin = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [pendingPurchases, setPendingPurchases] = useState<Purchase[]>([]);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [users, setUsers] = useState<any[]>([]);
+  const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
+  const [assigningRole, setAssigningRole] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) {
       navigate('/auth');
     } else if (userRole?.hasAccess) {
       fetchPendingPurchases();
+      if (userRole?.isAdmin) {
+        fetchUsers();
+      }
     }
   }, [user, navigate, userRole]);
 
@@ -44,6 +51,61 @@ const Admin = () => {
       setPendingPurchases(data || []);
     } catch (error) {
       console.error("Error fetching pending purchases:", error);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, display_name')
+        .order('display_name');
+      
+      if (profilesError) throw profilesError;
+
+      const { data: rolesData, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role');
+      
+      if (rolesError) throw rolesError;
+
+      const rolesMap: Record<string, string[]> = {};
+      rolesData?.forEach(r => {
+        if (!rolesMap[r.user_id]) rolesMap[r.user_id] = [];
+        rolesMap[r.user_id].push(r.role);
+      });
+
+      setUsers(profilesData || []);
+      setUserRoles(rolesMap);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  const handleAssignRole = async (userId: string, role: string, action: 'add' | 'remove') => {
+    setAssigningRole(userId);
+    try {
+      const { data, error } = await supabase.functions.invoke('assign-user-role', {
+        body: { userId, role, action }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: data.message,
+      });
+
+      fetchUsers();
+    } catch (error) {
+      console.error("Error assigning role:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update user role. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setAssigningRole(null);
     }
   };
 
@@ -305,47 +367,123 @@ const Admin = () => {
           </Card>
 
           {isAdmin && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <>
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <RefreshCw className="h-5 w-5" />
-                    Stripe Integration
+                    <Users className="h-5 w-5" />
+                    User Role Management
                   </CardTitle>
+                  <CardDescription>
+                    Assign producer or admin roles to users
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground mb-4">
-                    Sync products from Supabase to Stripe for payment processing.
-                  </p>
-                  <Button 
-                    onClick={handleSyncProducts}
-                    disabled={isSyncing}
-                    className="w-full"
-                  >
-                    <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                    {isSyncing ? "Syncing..." : "Sync Products to Stripe"}
-                  </Button>
+                  {users.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">No users found</p>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>User</TableHead>
+                          <TableHead>Current Roles</TableHead>
+                          <TableHead>Assign Role</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {users.map((usr) => (
+                          <TableRow key={usr.id}>
+                            <TableCell>
+                              {usr.display_name || usr.id.substring(0, 8) + '...'}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-1 flex-wrap">
+                                {(userRoles[usr.id] || ['user']).map(role => (
+                                  <Badge key={role} variant="secondary" className="capitalize">
+                                    {role}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <Select
+                                  disabled={assigningRole === usr.id}
+                                  onValueChange={(value) => {
+                                    const [role, action] = value.split(':');
+                                    handleAssignRole(usr.id, role, action as 'add' | 'remove');
+                                  }}
+                                >
+                                  <SelectTrigger className="w-40">
+                                    <SelectValue placeholder="Select action" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {!userRoles[usr.id]?.includes('producer') && (
+                                      <SelectItem value="producer:add">Add Producer</SelectItem>
+                                    )}
+                                    {userRoles[usr.id]?.includes('producer') && (
+                                      <SelectItem value="producer:remove">Remove Producer</SelectItem>
+                                    )}
+                                    {!userRoles[usr.id]?.includes('admin') && (
+                                      <SelectItem value="admin:add">Add Admin</SelectItem>
+                                    )}
+                                    {userRoles[usr.id]?.includes('admin') && (
+                                      <SelectItem value="admin:remove">Remove Admin</SelectItem>
+                                    )}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5" />
-                    System Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground mb-4">
-                    Configure system-wide settings and preferences.
-                  </p>
-                  <Button variant="outline" className="w-full" disabled>
-                    <Settings className="mr-2 h-4 w-4" />
-                    Coming Soon
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <RefreshCw className="h-5 w-5" />
+                      Stripe Integration
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground mb-4">
+                      Sync products from Supabase to Stripe for payment processing.
+                    </p>
+                    <Button 
+                      onClick={handleSyncProducts}
+                      disabled={isSyncing}
+                      className="w-full"
+                    >
+                      <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                      {isSyncing ? "Syncing..." : "Sync Products to Stripe"}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings className="h-5 w-5" />
+                      System Settings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground mb-4">
+                      Configure system-wide settings and preferences.
+                    </p>
+                    <Button variant="outline" className="w-full" disabled>
+                      <Settings className="mr-2 h-4 w-4" />
+                      Coming Soon
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </>
           )}
         </motion.div>
       </div>
