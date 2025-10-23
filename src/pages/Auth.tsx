@@ -22,7 +22,13 @@ const Auth = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (user) {
-      navigate('/');
+      // Check if there's a pending song request
+      const pendingSongRequest = localStorage.getItem('pendingSongRequest');
+      if (pendingSongRequest) {
+        navigate('/generate-song');
+      } else {
+        navigate('/');
+      }
     }
   }, [user, navigate]);
 
