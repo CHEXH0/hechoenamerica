@@ -113,11 +113,8 @@ const GenerateSong = () => {
         if (error) throw error;
         
         if (sessionData?.url) {
-          window.open(sessionData.url, '_blank');
-          toast({
-            title: "Redirecting to payment",
-            description: "Complete your payment in the new tab",
-          });
+          // Redirect to Stripe checkout in the same window
+          window.location.href = sessionData.url;
         }
       }
     } catch (error) {
