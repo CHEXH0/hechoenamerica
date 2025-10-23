@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
+import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload, Users, User } from "lucide-react";
+import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload, Users, User, Database, TrendingUp, DollarSign, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -28,6 +29,15 @@ const Admin = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
   const [assigningRole, setAssigningRole] = useState<string | null>(null);
+  const [systemStats, setSystemStats] = useState({
+    totalUsers: 0,
+    totalPurchases: 0,
+    pendingPurchases: 0,
+    totalRevenue: 0,
+    totalProducts: 0,
+    totalArtists: 0,
+    storageUsed: 0,
+  });
 
   useEffect(() => {
     if (!user) {
@@ -36,6 +46,7 @@ const Admin = () => {
       fetchPendingPurchases();
       if (userRole?.isAdmin) {
         fetchUsers();
+        fetchSystemStats();
       }
     }
   }, [user, navigate, userRole]);
@@ -52,6 +63,58 @@ const Admin = () => {
       setPendingPurchases(data || []);
     } catch (error) {
       console.error("Error fetching pending purchases:", error);
+    }
+  };
+
+  const fetchSystemStats = async () => {
+    try {
+      // Fetch total users
+      const { count: usersCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch all purchases for stats
+      const { data: purchasesData } = await supabase
+        .from('purchases')
+        .select('price, status');
+
+      const totalPurchases = purchasesData?.length || 0;
+      const pendingCount = purchasesData?.filter(p => p.status === 'pending').length || 0;
+      
+      // Calculate total revenue (convert string prices to numbers)
+      const totalRevenue = purchasesData?.reduce((sum, purchase) => {
+        const price = parseFloat(purchase.price) || 0;
+        return sum + price;
+      }, 0) || 0;
+
+      // Fetch products count
+      const { count: productsCount } = await supabase
+        .from('products')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch artists count
+      const { count: artistsCount } = await supabase
+        .from('artists')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch storage usage (approximate from product-assets bucket)
+      const { data: storageFiles } = await supabase.storage
+        .from('product-assets')
+        .list();
+      
+      const storageUsed = storageFiles?.length || 0;
+
+      setSystemStats({
+        totalUsers: usersCount || 0,
+        totalPurchases,
+        pendingPurchases: pendingCount,
+        totalRevenue,
+        totalProducts: productsCount || 0,
+        totalArtists: artistsCount || 0,
+        storageUsed,
+      });
+    } catch (error) {
+      console.error("Error fetching system stats:", error);
     }
   };
 
@@ -491,18 +554,74 @@ const Admin = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Settings className="h-5 w-5" />
-                      System Settings
+                      <Database className="h-5 w-5" />
+                      System Overview
                     </CardTitle>
+                    <CardDescription>
+                      Key metrics and system statistics
+                    </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground mb-4">
-                      Configure system-wide settings and preferences.
-                    </p>
-                    <Button variant="outline" className="w-full" disabled>
-                      <Settings className="mr-2 h-4 w-4" />
-                      Coming Soon
-                    </Button>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                          <Users className="h-4 w-4" />
+                          Total Users
+                        </div>
+                        <p className="text-2xl font-bold">{systemStats.totalUsers}</p>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                          <FileText className="h-4 w-4" />
+                          Total Purchases
+                        </div>
+                        <p className="text-2xl font-bold">{systemStats.totalPurchases}</p>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                          <DollarSign className="h-4 w-4" />
+                          Total Revenue
+                        </div>
+                        <p className="text-2xl font-bold">${systemStats.totalRevenue.toFixed(2)}</p>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                          <TrendingUp className="h-4 w-4" />
+                          Pending Orders
+                        </div>
+                        <p className="text-2xl font-bold">{systemStats.pendingPurchases}</p>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                          <Music className="h-4 w-4" />
+                          Total Products
+                        </div>
+                        <p className="text-2xl font-bold">{systemStats.totalProducts}</p>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                          <User className="h-4 w-4" />
+                          Total Artists
+                        </div>
+                        <p className="text-2xl font-bold">{systemStats.totalArtists}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="pt-4 border-t">
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={fetchSystemStats}
+                      >
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Refresh Statistics
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
