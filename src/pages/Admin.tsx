@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload, Users } from "lucide-react";
+import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload, Users, User } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -58,8 +59,8 @@ const Admin = () => {
     try {
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, display_name')
-        .order('display_name');
+        .select('id, display_name, avatar_url, created_at')
+        .order('created_at', { ascending: false });
       
       if (profilesError) throw profilesError;
 
@@ -386,6 +387,8 @@ const Admin = () => {
                       <TableHeader>
                         <TableRow>
                           <TableHead>User</TableHead>
+                          <TableHead>User ID</TableHead>
+                          <TableHead>Joined</TableHead>
                           <TableHead>Current Roles</TableHead>
                           <TableHead>Assign Role</TableHead>
                         </TableRow>
@@ -394,7 +397,27 @@ const Admin = () => {
                         {users.map((usr) => (
                           <TableRow key={usr.id}>
                             <TableCell>
-                              {usr.display_name || usr.id.substring(0, 8) + '...'}
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarImage src={usr.avatar_url || undefined} />
+                                  <AvatarFallback>
+                                    <User className="h-4 w-4" />
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="font-medium">
+                                  {usr.display_name || 'No Name'}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <code className="text-xs text-muted-foreground">
+                                {usr.id.substring(0, 8)}...
+                              </code>
+                            </TableCell>
+                            <TableCell>
+                              <span className="text-sm text-muted-foreground">
+                                {new Date(usr.created_at).toLocaleDateString()}
+                              </span>
                             </TableCell>
                             <TableCell>
                               <div className="flex gap-1 flex-wrap">
