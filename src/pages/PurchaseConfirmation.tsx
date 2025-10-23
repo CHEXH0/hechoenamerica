@@ -12,30 +12,32 @@ const PurchaseConfirmation = () => {
   const { user } = useAuth();
   const [countdown, setCountdown] = useState(10);
   const [emailSent, setEmailSent] = useState(false);
+  const [purchaseDetails, setPurchaseDetails] = useState<any>(null);
   const sessionId = searchParams.get('session_id');
 
-  // Send confirmation email
+  // Verify payment and send confirmation email
   useEffect(() => {
-    const sendConfirmationEmail = async () => {
-      if (!user?.email || emailSent) return;
+    const verifyAndSendEmail = async () => {
+      if (emailSent || !sessionId) return;
 
       try {
-        await supabase.functions.invoke('send-contact-email', {
-          body: {
-            name: "Song Purchase",
-            email: user.email,
-            subject: "Song Generation Purchase Confirmed",
-            message: `Thank you for your purchase!\n\nYour song generation request has been received and we'll get started on it right away.\n\nSession ID: ${sessionId || 'N/A'}\n\nWe'll send you updates to this email address.`
-          }
+        const { data, error } = await supabase.functions.invoke('verify-song-payment', {
+          body: { session_id: sessionId }
         });
+
+        if (error) throw error;
+
+        if (data?.purchaseDetails) {
+          setPurchaseDetails(data.purchaseDetails);
+        }
         setEmailSent(true);
       } catch (error) {
-        console.error("Failed to send confirmation email:", error);
+        console.error("Failed to verify payment and send email:", error);
       }
     };
 
-    sendConfirmationEmail();
-  }, [user, emailSent, sessionId]);
+    verifyAndSendEmail();
+  }, [emailSent, sessionId]);
 
   // Countdown timer
   useEffect(() => {
@@ -82,9 +84,17 @@ const PurchaseConfirmation = () => {
           <p className="text-white/80 text-lg">
             Thank you for your purchase. Your order has been confirmed.
           </p>
-          {user?.email && (
+          {purchaseDetails && (
+            <div className="bg-white/5 rounded-lg p-4 border border-white/10 mt-4 text-left">
+              <h3 className="text-white font-semibold mb-2">Purchase Details:</h3>
+              <p className="text-white/70 text-sm"><strong>Tier:</strong> {purchaseDetails.tier}</p>
+              <p className="text-white/70 text-sm"><strong>Product:</strong> {purchaseDetails.productName}</p>
+              <p className="text-white/70 text-sm"><strong>Amount:</strong> {purchaseDetails.amount}</p>
+            </div>
+          )}
+          {purchaseDetails?.email && (
             <p className="text-white/70 text-sm">
-              A confirmation email has been sent to {user.email}
+              A confirmation email has been sent to {purchaseDetails.email}
             </p>
           )}
         </div>
