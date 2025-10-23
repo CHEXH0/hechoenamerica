@@ -68,10 +68,9 @@ const Admin = () => {
 
   const fetchSystemStats = async () => {
     try {
-      // Fetch total users
-      const { count: usersCount } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
+      // Fetch total users from auth
+      const { data: allUsersData } = await supabase.functions.invoke('get-all-users');
+      const usersCount = allUsersData?.users?.length || 0;
 
       // Fetch all purchases for stats
       const { data: purchasesData } = await supabase
@@ -120,29 +119,26 @@ const Admin = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, display_name, avatar_url, created_at')
-        .order('created_at', { ascending: false });
-      
-      if (profilesError) throw profilesError;
+      const { data, error } = await supabase.functions.invoke('get-all-users');
 
-      const { data: rolesData, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('user_id, role');
-      
-      if (rolesError) throw rolesError;
+      if (error) throw error;
 
       const rolesMap: Record<string, string[]> = {};
-      rolesData?.forEach(r => {
-        if (!rolesMap[r.user_id]) rolesMap[r.user_id] = [];
-        rolesMap[r.user_id].push(r.role);
+      data.users?.forEach((u: any) => {
+        if (u.roles) {
+          rolesMap[u.id] = u.roles;
+        }
       });
 
-      setUsers(profilesData || []);
+      setUsers(data.users || []);
       setUserRoles(rolesMap);
     } catch (error) {
       console.error("Error fetching users:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch users. Please refresh the page.",
+        variant: "destructive",
+      });
     }
   };
 
