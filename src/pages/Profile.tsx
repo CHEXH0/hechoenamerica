@@ -65,16 +65,19 @@ const Profile = () => {
   };
 
   const handleChangePassword = () => {
-    if (newPassword !== confirmPassword) {
-      return;
-    }
     if (newPassword.length < 6) {
       return;
     }
-    changePassword.mutate(newPassword);
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+    if (newPassword !== confirmPassword) {
+      return;
+    }
+    changePassword.mutate(newPassword, {
+      onSuccess: () => {
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      }
+    });
   };
 
   const handleUpdateEmail = () => {

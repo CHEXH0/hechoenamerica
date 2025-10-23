@@ -68,6 +68,10 @@ export const useChangePassword = () => {
 
   return useMutation({
     mutationFn: async (newPassword: string) => {
+      if (newPassword.length < 6) {
+        throw new Error('Password must be at least 6 characters long');
+      }
+
       const { error } = await supabase.auth.updateUser({
         password: newPassword
       });
@@ -81,9 +85,10 @@ export const useChangePassword = () => {
       });
     },
     onError: (error) => {
+      console.error('Change password error:', error);
       toast({
         title: "Error",
-        description: "Failed to change password. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to change password. Please try again.",
         variant: "destructive",
       });
     },
@@ -95,6 +100,12 @@ export const useUpdateEmail = () => {
 
   return useMutation({
     mutationFn: async (newEmail: string) => {
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(newEmail)) {
+        throw new Error('Please enter a valid email address');
+      }
+
       const { error } = await supabase.auth.updateUser({
         email: newEmail
       });
@@ -108,9 +119,10 @@ export const useUpdateEmail = () => {
       });
     },
     onError: (error) => {
+      console.error('Update email error:', error);
       toast({
         title: "Error",
-        description: "Failed to update email. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to update email. Please try again.",
         variant: "destructive",
       });
     },
@@ -122,22 +134,46 @@ export const useDeleteAccount = () => {
 
   return useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.auth.admin.deleteUser(
-        (await supabase.auth.getUser()).data.user?.id || ''
-      );
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (error) throw error;
+      if (!session) {
+        throw new Error('No active session');
+      }
+
+      const response = await fetch(
+        `https://eapbuoqkhckqaswfjexv.supabase.co/functions/v1/delete-user-account`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete account');
+      }
+
+      // Sign out after successful deletion
+      await supabase.auth.signOut();
     },
     onSuccess: () => {
       toast({
         title: "Account deleted",
         description: "Your account has been permanently deleted.",
       });
+      // Redirect to home page after a brief delay
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1500);
     },
     onError: (error) => {
+      console.error('Delete account error:', error);
       toast({
         title: "Error",
-        description: "Failed to delete account. Please contact support.",
+        description: error instanceof Error ? error.message : "Failed to delete account. Please contact support.",
         variant: "destructive",
       });
     },
