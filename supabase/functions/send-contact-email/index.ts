@@ -17,6 +17,7 @@ interface ContactPayload {
   country?: string;
   subject?: string;
   message: string;
+  fileUrls?: string[];
 }
 
 serve(async (req: Request) => {
@@ -34,7 +35,7 @@ serve(async (req: Request) => {
 
   try {
     const body = (await req.json()) as ContactPayload;
-    const { name, email, country, subject, message } = body;
+    const { name, email, country, subject, message, fileUrls } = body;
 
     if (!name || !email || !message) {
       return new Response(
@@ -45,34 +46,71 @@ serve(async (req: Request) => {
 
     const toAddress = "hechoenamerica369@gmail.com"; // destination inbox
 
-    // Render React Email template
-    const html = await renderAsync(
+    // Add file links to message if provided
+    let fullMessage = message;
+    if (fileUrls && fileUrls.length > 0) {
+      fullMessage += "\n\n=== Attached Files ===\n";
+      fileUrls.forEach((url, index) => {
+        const fileName = url.split('/').pop() || `File ${index + 1}`;
+        fullMessage += `\n${index + 1}. ${fileName}\n   Download: ${url}`;
+      });
+    }
+
+    // Render React Email template for business
+    const businessHtml = await renderAsync(
       React.createElement(ContactFormEmail, {
         name,
         email,
         country: country ?? "Not specified",
         subject: subject || "New message from HechoEnAmerica website",
-        message,
+        message: fullMessage,
       })
     );
 
-    const { data, error } = await resend.emails.send({
+    // Send to business email
+    const { error: businessError } = await resend.emails.send({
       from: "Hecho En America <onboarding@resend.dev>",
       to: [toAddress],
       reply_to: email,
       subject: subject || `New contact form message from ${name}`,
-      html,
+      html: businessHtml,
     });
 
-    if (error) {
-      console.error("Resend send error:", error);
-      return new Response(JSON.stringify({ error: String(error) }), {
+    if (businessError) {
+      console.error("Resend send error (business):", businessError);
+      return new Response(JSON.stringify({ error: String(businessError) }), {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
 
-    return new Response(JSON.stringify({ ok: true, id: data?.id }), {
+    // Send confirmation to user
+    const userMessage = `Thank you for your submission!\n\nWe've received your request:\n\n${message}`;
+    const userHtml = await renderAsync(
+      React.createElement(ContactFormEmail, {
+        name: "HechoEnAmerica Team",
+        email: toAddress,
+        country: "Confirmation",
+        subject: "Request Received - HechoEnAmerica",
+        message: fileUrls && fileUrls.length > 0 
+          ? `${userMessage}\n\nYour uploaded files:\n${fileUrls.map((url, i) => `${i + 1}. ${url}`).join('\n')}`
+          : userMessage,
+      })
+    );
+
+    const { error: userError } = await resend.emails.send({
+      from: "Hecho En America <onboarding@resend.dev>",
+      to: [email],
+      subject: "Your Request Has Been Received",
+      html: userHtml,
+    });
+
+    if (userError) {
+      console.error("User confirmation email failed:", userError);
+      // Don't fail the request if user email fails
+    }
+
+    return new Response(JSON.stringify({ ok: true, sentToUser: !userError }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });

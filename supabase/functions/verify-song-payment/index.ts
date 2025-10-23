@@ -49,6 +49,8 @@ serve(async (req) => {
     // Get purchase details from session
     const tier = session.metadata?.tier || 'Unknown Tier';
     const idea = session.metadata?.idea || 'No idea provided';
+    const fileUrlsStr = session.metadata?.file_urls || "";
+    const fileUrls = fileUrlsStr ? JSON.parse(fileUrlsStr) : [];
     const customerEmail = session.customer_details?.email || session.customer_email;
     const amountTotal = session.amount_total ? (session.amount_total / 100).toFixed(2) : '0.00';
     const currency = session.currency?.toUpperCase() || 'USD';
@@ -60,7 +62,8 @@ serve(async (req) => {
     logStep("Purchase details retrieved", { 
       tier, 
       customerEmail, 
-      amount: `${amountTotal} ${currency}` 
+      amount: `${amountTotal} ${currency}`,
+      fileCount: fileUrls.length 
     });
 
     // Send confirmation email using Resend
@@ -106,6 +109,16 @@ serve(async (req) => {
               <p style="color: #78350f; white-space: pre-wrap;">${idea}</p>
             </div>
 
+            ${fileUrls.length > 0 ? `
+              <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: #075985;">Your Uploaded Files:</h3>
+                ${fileUrls.map((url: string, index: number) => {
+                  const fileName = url.split('/').pop() || `File ${index + 1}`;
+                  return `<p style="margin: 8px 0;"><a href="${url}" style="color: #0284c7; text-decoration: none;" target="_blank">${index + 1}. ${decodeURIComponent(fileName)}</a></p>`;
+                }).join('')}
+              </div>
+            ` : ''}
+
             <p>We'll start working on your song right away. You'll receive updates at this email address.</p>
             
             <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
@@ -123,16 +136,79 @@ serve(async (req) => {
       throw new Error(`Failed to send email: ${emailError}`);
     }
 
-    logStep("Confirmation email sent successfully");
+    logStep("Confirmation email sent to user successfully");
+
+    // Send notification to business email
+    const businessEmailResponse = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${resendKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'HechoEnAmerica <onboarding@resend.dev>',
+        to: ['hechoenamerica369@gmail.com'],
+        subject: `New Song Purchase - ${tier}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #8b5cf6;">🎶 New Song Generation Purchase 🎶</h1>
+            
+            <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h2 style="margin-top: 0; color: #374151;">Order Details</h2>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #d1d5db;"><strong>Customer:</strong></td>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #d1d5db;">${customerEmail}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #d1d5db;"><strong>Tier:</strong></td>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #d1d5db;">${tier}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #d1d5db;"><strong>Product:</strong></td>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #d1d5db;">${productName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0;"><strong>Amount Paid:</strong></td>
+                  <td style="padding: 8px 0;"><strong>${currency} ${amountTotal}</strong></td>
+                </tr>
+              </table>
+            </div>
+
+            <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="margin-top: 0; color: #92400e;">Customer's Song Idea:</h3>
+              <p style="color: #78350f; white-space: pre-wrap;">${idea}</p>
+            </div>
+
+            ${fileUrls.length > 0 ? `
+              <div style="background: #dbeafe; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: #1e40af;">Uploaded Files (${fileUrls.length}):</h3>
+                ${fileUrls.map((url: string, index: number) => {
+                  const fileName = url.split('/').pop() || `File ${index + 1}`;
+                  return `<p style="margin: 8px 0;"><a href="${url}" style="color: #2563eb; text-decoration: none; font-weight: 500;" target="_blank">${index + 1}. Download: ${decodeURIComponent(fileName)}</a></p>`;
+                }).join('')}
+              </div>
+            ` : '<p style="color: #6b7280;">No files were uploaded with this order.</p>'}
+          </div>
+        `,
+      }),
+    });
+
+    if (!businessEmailResponse.ok) {
+      logStep("Failed to send business notification email");
+    } else {
+      logStep("Business notification email sent successfully");
+    }
 
     return new Response(JSON.stringify({ 
       success: true, 
-      message: 'Payment verified and confirmation email sent',
+      message: 'Payment verified and confirmation emails sent',
       purchaseDetails: {
         tier,
         productName,
         amount: `${currency} ${amountTotal}`,
-        email: customerEmail
+        email: customerEmail,
+        filesIncluded: fileUrls.length > 0
       }
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

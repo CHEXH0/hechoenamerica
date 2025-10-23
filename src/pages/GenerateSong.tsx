@@ -79,34 +79,66 @@ const GenerateSong = () => {
     setIsSubmitting(true);
     
     try {
-      // For free tier, just send email
-      if (currentTier.price === 0) {
-        let fileInfo = "";
-        if (files && files.length > 0) {
-          fileInfo = "\n\nAttached Files:\n";
-          for (let i = 0; i < files.length; i++) {
-            fileInfo += `- ${files[i].name} (${(files[i].size / 1024 / 1024).toFixed(2)} MB)\n`;
+      // Upload files to storage if any
+      let fileUrls: string[] = [];
+      if (files && files.length > 0) {
+        toast({
+          title: "Uploading files...",
+          description: "Please wait while we upload your files",
+        });
+
+        for (const file of files) {
+          const timestamp = Date.now();
+          const fileName = `${user.id}/${timestamp}_${file.name}`;
+          
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('product-assets')
+            .upload(fileName, file, {
+              cacheControl: '3600',
+              upsert: false
+            });
+
+          if (uploadError) {
+            console.error("Upload error:", uploadError);
+            throw new Error(`Failed to upload ${file.name}`);
           }
+
+          // Get signed URL (valid for 1 year)
+          const { data: signedData, error: signError } = await supabase.storage
+            .from('product-assets')
+            .createSignedUrl(fileName, 31536000); // 1 year expiry
+
+          if (signError || !signedData) {
+            console.error("Signed URL error:", signError);
+            throw new Error(`Failed to create download link for ${file.name}`);
+          }
+          
+          fileUrls.push(signedData.signedUrl);
         }
-        
+      }
+
+      // For free tier, send email with file links
+      if (currentTier.price === 0) {
         const { error } = await supabase.functions.invoke('send-contact-email', {
           body: {
             name: "Song Generation Request",
             email: user.email,
             subject: `Song Generation Request - Free AI Generated`,
-            message: `Idea: Free\n\nIdea: ${idea}${fileInfo}`
+            message: idea,
+            fileUrls: fileUrls
           }
         });
         
         if (error) throw error;
         navigate("/purchase-confirmation");
       } else {
-        // For paid tiers, create Stripe checkout session
+        // For paid tiers, create Stripe checkout session with file URLs
         const { data: sessionData, error } = await supabase.functions.invoke('create-song-checkout', {
           body: {
             priceId: currentTier.priceId,
             tier: currentTier.label,
-            idea
+            idea,
+            fileUrls: fileUrls
           }
         });
 
@@ -121,7 +153,7 @@ const GenerateSong = () => {
       console.error("Error:", error);
       toast({
         title: "Error",
-        description: "Failed to submit. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to submit. Please try again.",
         variant: "destructive"
       });
     } finally {
