@@ -12,6 +12,10 @@ export type Purchase = {
   purchase_date: string;
   created_at: string;
   updated_at: string;
+  status?: string;
+  download_url?: string;
+  song_idea?: string;
+  file_urls?: string[];
 };
 
 export const usePurchases = () => {

@@ -1,18 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Settings, RefreshCw, Shield } from "lucide-react";
+import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import type { Purchase } from "@/hooks/usePurchases";
+
 const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [isSyncing, setIsSyncing] = useState(false);
+  const [pendingPurchases, setPendingPurchases] = useState<Purchase[]>([]);
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/auth');
+    } else {
+      fetchPendingPurchases();
+    }
+  }, [user, navigate]);
+
+  const fetchPendingPurchases = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('purchases')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setPendingPurchases(data || []);
+    } catch (error) {
+      console.error("Error fetching pending purchases:", error);
+    }
+  };
 
   if (authLoading) {
     return (
@@ -23,7 +54,6 @@ const Admin = () => {
   }
 
   if (!user) {
-    navigate('/auth');
     return null;
   }
 
@@ -50,6 +80,55 @@ const Admin = () => {
       </div>
     );
   }
+
+  const handleFileUpload = async (purchaseId: string, file: File) => {
+    setUploadingId(purchaseId);
+    try {
+      const timestamp = Date.now();
+      const fileName = `songs/${purchaseId}/${timestamp}_${file.name}`;
+      
+      // Upload file to storage
+      const { error: uploadError } = await supabase.storage
+        .from('product-assets')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get signed URL (valid for 10 years)
+      const { data: signedData, error: signError } = await supabase.storage
+        .from('product-assets')
+        .createSignedUrl(fileName, 315360000);
+
+      if (signError || !signedData) throw signError;
+
+      // Update purchase with download URL
+      const { error: updateError } = await supabase.functions.invoke('update-purchase-status', {
+        body: {
+          purchaseId,
+          downloadUrl: signedData.signedUrl,
+          status: 'ready',
+        }
+      });
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Success",
+        description: "Song uploaded and purchase updated!",
+      });
+
+      fetchPendingPurchases();
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      toast({
+        title: "Error",
+        description: "Failed to upload song. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingId(null);
+    }
+  };
 
   const handleSyncProducts = async () => {
     setIsSyncing(true);
@@ -124,47 +203,132 @@ const Admin = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
+          className="space-y-6"
         >
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <RefreshCw className="h-5 w-5" />
-                Stripe Integration
+                <Music className="h-5 w-5" />
+                Pending Song Generations
               </CardTitle>
+              <CardDescription>
+                Upload completed songs for customers
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground mb-4">
-                Sync products from Supabase to Stripe for payment processing.
-              </p>
-              <Button 
-                onClick={handleSyncProducts}
-                disabled={isSyncing}
-                className="w-full"
-              >
-                <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                {isSyncing ? "Syncing..." : "Sync Products to Stripe"}
-              </Button>
+              {pendingPurchases.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">No pending purchases</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Tier</TableHead>
+                      <TableHead>Idea</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pendingPurchases.map((purchase) => (
+                      <TableRow key={purchase.id}>
+                        <TableCell>
+                          {purchase.user_id?.substring(0, 8)}...
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="bg-orange-500/10 text-orange-600">
+                            {purchase.product_category}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="max-w-xs truncate">
+                          {purchase.song_idea || 'N/A'}
+                        </TableCell>
+                        <TableCell>
+                          {new Date(purchase.created_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <Label htmlFor={`upload-${purchase.id}`} className="cursor-pointer">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={uploadingId === purchase.id}
+                              asChild
+                            >
+                              <span>
+                                {uploadingId === purchase.id ? (
+                                  <>
+                                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                                    Uploading...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    Upload Song
+                                  </>
+                                )}
+                              </span>
+                            </Button>
+                          </Label>
+                          <Input
+                            id={`upload-${purchase.id}`}
+                            type="file"
+                            accept=".mp3,.wav,.m4a,.flac"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleFileUpload(purchase.id, file);
+                            }}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                System Settings
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">
-                Configure system-wide settings and preferences.
-              </p>
-              <Button variant="outline" className="w-full" disabled>
-                <Settings className="mr-2 h-4 w-4" />
-                Coming Soon
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <RefreshCw className="h-5 w-5" />
+                  Stripe Integration
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-4">
+                  Sync products from Supabase to Stripe for payment processing.
+                </p>
+                <Button 
+                  onClick={handleSyncProducts}
+                  disabled={isSyncing}
+                  className="w-full"
+                >
+                  <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                  {isSyncing ? "Syncing..." : "Sync Products to Stripe"}
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  System Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-4">
+                  Configure system-wide settings and preferences.
+                </p>
+                <Button variant="outline" className="w-full" disabled>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Coming Soon
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </motion.div>
       </div>
     </div>

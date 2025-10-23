@@ -63,12 +63,42 @@ const Purchases = () => {
     }
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'bg-orange-500/10 text-orange-600 border-orange-500/20';
+      case 'ready':
+        return 'bg-green-500/10 text-green-600 border-green-500/20';
+      case 'completed':
+        return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
+      default:
+        return 'bg-gray-500/10 text-gray-600 border-gray-500/20';
+    }
+  };
+
   const totalSpent = purchases?.reduce((total, purchase) => {
     const price = parseFloat(purchase.price.replace('$', ''));
     return total + (isNaN(price) ? 0 : price);
   }, 0) || 0;
 
-  const handleDownload = async (productId: string, productName: string) => {
+  const handleDownload = async (productId: string, productName: string, downloadUrl?: string) => {
+    // If there's a direct download URL (for completed songs), use it
+    if (downloadUrl) {
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${productName}.mp3`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Download Started",
+        description: `Downloading ${productName}`,
+      });
+      return;
+    }
+
+    // Original download logic for regular products
     try {
       // First, try to list available files for this product
       const { data: files, error: listError } = await supabase.storage
@@ -244,7 +274,7 @@ const Purchases = () => {
                         <TableRow>
                           <TableHead>Product</TableHead>
                           <TableHead>Category</TableHead>
-                          <TableHead>Type</TableHead>
+                          <TableHead>Status</TableHead>
                           <TableHead>Price</TableHead>
                           <TableHead>Date</TableHead>
                           <TableHead>Download</TableHead>
@@ -266,7 +296,12 @@ const Purchases = () => {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <span className="capitalize">{purchase.product_type}</span>
+                            <Badge 
+                              variant="outline" 
+                              className={getStatusColor(purchase.status || 'completed')}
+                            >
+                              <span className="capitalize">{purchase.status || 'completed'}</span>
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             <span className="font-medium">{purchase.price}</span>
@@ -275,15 +310,19 @@ const Purchases = () => {
                             {new Date(purchase.purchase_date).toLocaleDateString()}
                           </TableCell>
                           <TableCell>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDownload(purchase.product_id, purchase.product_name)}
-                              className="hover:bg-primary/10 hover:border-primary/20 hover:text-primary"
-                            >
-                              <Download className="h-4 w-4 mr-2" />
-                              Download
-                            </Button>
+                            {purchase.status === 'pending' ? (
+                              <span className="text-sm text-muted-foreground">Processing...</span>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDownload(purchase.product_id, purchase.product_name, purchase.download_url)}
+                                className="hover:bg-primary/10 hover:border-primary/20 hover:text-primary"
+                              >
+                                <Download className="h-4 w-4 mr-2" />
+                                Download
+                              </Button>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}

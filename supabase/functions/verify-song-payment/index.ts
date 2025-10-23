@@ -200,6 +200,36 @@ serve(async (req) => {
       logStep("Business notification email sent successfully");
     }
 
+    logStep("All emails sent successfully");
+
+    // Create purchase record with pending status
+    const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.57.2");
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    const { error: purchaseError } = await supabaseAdmin
+      .from('purchases')
+      .insert({
+        user_id: session.client_reference_id,
+        product_id: session.id,
+        product_name: productName || 'Song Generation',
+        product_type: 'Song Generation',
+        product_category: tier || 'Custom',
+        price: `${currency} ${amountTotal}`,
+        status: 'pending',
+        song_idea: idea,
+        file_urls: fileUrls,
+        purchase_date: new Date().toISOString(),
+      });
+
+    if (purchaseError) {
+      logStep("Error creating purchase record", { error: purchaseError });
+    } else {
+      logStep("Purchase record created successfully");
+    }
+
     return new Response(JSON.stringify({ 
       success: true, 
       message: 'Payment verified and confirmation emails sent',

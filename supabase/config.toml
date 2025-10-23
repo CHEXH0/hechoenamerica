@@ -17,3 +17,6 @@ verify_jwt = true
 
 [functions.verify-song-payment]
 verify_jwt = false
+
+[functions.update-purchase-status]
+verify_jwt = true

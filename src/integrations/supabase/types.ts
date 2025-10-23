@@ -245,6 +245,8 @@ export type Database = {
       purchases: {
         Row: {
           created_at: string
+          download_url: string | null
+          file_urls: string[] | null
           id: string
           price: string
           product_category: string
@@ -252,11 +254,15 @@ export type Database = {
           product_name: string
           product_type: string
           purchase_date: string
+          song_idea: string | null
+          status: string
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          download_url?: string | null
+          file_urls?: string[] | null
           id?: string
           price: string
           product_category: string
@@ -264,11 +270,15 @@ export type Database = {
           product_name: string
           product_type: string
           purchase_date?: string
+          song_idea?: string | null
+          status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          download_url?: string | null
+          file_urls?: string[] | null
           id?: string
           price?: string
           product_category?: string
@@ -276,6 +286,8 @@ export type Database = {
           product_name?: string
           product_type?: string
           purchase_date?: string
+          song_idea?: string | null
+          status?: string
           updated_at?: string
           user_id?: string
         }
