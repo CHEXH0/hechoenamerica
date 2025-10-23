@@ -33,9 +33,26 @@ const GenerateSong = () => {
   useEffect(() => {
     const pendingRequest = localStorage.getItem('pendingSongRequest');
     if (pendingRequest && user) {
-      const { idea: savedIdea, tier: savedTier } = JSON.parse(pendingRequest);
+      const { idea: savedIdea, tier: savedTier, files: savedFiles } = JSON.parse(pendingRequest);
       setIdea(savedIdea);
       setSliderValue([savedTier]);
+      
+      // Restore files from base64
+      if (savedFiles && savedFiles.length > 0) {
+        const restoredFiles = savedFiles.map((fileData: any) => {
+          const byteString = atob(fileData.data.split(',')[1]);
+          const mimeString = fileData.data.split(',')[0].split(':')[1].split(';')[0];
+          const ab = new ArrayBuffer(byteString.length);
+          const ia = new Uint8Array(ab);
+          for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+          }
+          const blob = new Blob([ab], { type: mimeString });
+          return new File([blob], fileData.name, { type: mimeString });
+        });
+        setFiles(restoredFiles);
+      }
+      
       localStorage.removeItem('pendingSongRequest');
       toast({
         title: "Welcome back!",
@@ -68,11 +85,29 @@ const GenerateSong = () => {
     // Check if user is authenticated
     if (!user) {
       // Save form state and redirect to auth
-      localStorage.setItem('pendingSongRequest', JSON.stringify({
-        idea,
-        tier: sliderValue[0]
-      }));
-      navigate("/auth");
+      // Convert files to base64 for storage
+      const filePromises = files.map(file => {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            resolve({
+              name: file.name,
+              type: file.type,
+              data: reader.result
+            });
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+
+      Promise.all(filePromises).then((filesData) => {
+        localStorage.setItem('pendingSongRequest', JSON.stringify({
+          idea,
+          tier: sliderValue[0],
+          files: filesData
+        }));
+        navigate("/auth");
+      });
       return;
     }
 
@@ -276,7 +311,7 @@ const GenerateSong = () => {
                 <Plus className="w-3 h-3 text-white" />
               </div>
               <p className="text-white/60 text-xs">
-                  Audio (.mp3, .wav), Images, or Folders
+                  Audio (.mp3, .wav), Images (.jpg, .png, .heic, etc.), Archives (.zip, .rar)
               </p>
               <div className="space-y-2">
                 <input 
@@ -284,7 +319,7 @@ const GenerateSong = () => {
                   type="file" 
                   id="files" 
                   multiple 
-                  accept=".mp3,.wav,.m4a,.flac,.aac,.ogg,.wma,.jpg,.jpeg,.png,.gif,.webp,.bmp,.tiff,.svg,.pdf,.zip,.rar,.7z" 
+                  accept=".mp3,.wav,.m4a,.flac,.aac,.ogg,.wma,.jpg,.jpeg,.png,.gif,.webp,.bmp,.tiff,.svg,.heic,.heif,.raw,.cr2,.nef,.arw,.dng,.pdf,.zip,.rar,.7z" 
                   onChange={handleFileChange} 
                   className="hidden"
                 />
