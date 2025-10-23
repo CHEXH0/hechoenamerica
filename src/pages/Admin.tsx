@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,6 +18,7 @@ import type { Purchase } from "@/hooks/usePurchases";
 const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { data: userRole, isLoading: roleLoading } = useUserRole();
   const { toast } = useToast();
   const [isSyncing, setIsSyncing] = useState(false);
   const [pendingPurchases, setPendingPurchases] = useState<Purchase[]>([]);
@@ -25,10 +27,10 @@ const Admin = () => {
   useEffect(() => {
     if (!user) {
       navigate('/auth');
-    } else {
+    } else if (userRole?.hasAccess) {
       fetchPendingPurchases();
     }
-  }, [user, navigate]);
+  }, [user, navigate, userRole]);
 
   const fetchPendingPurchases = async () => {
     try {
@@ -45,7 +47,7 @@ const Admin = () => {
     }
   };
 
-  if (authLoading) {
+  if (authLoading || roleLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20 flex items-center justify-center">
         <Skeleton className="h-8 w-48" />
@@ -57,10 +59,12 @@ const Admin = () => {
     return null;
   }
 
-  // Check if user is admin
-  const isAdmin = user?.email === 'hechoenamerica369@gmail.com';
+  // Check if user has admin or producer access
+  const hasAccess = userRole?.hasAccess || false;
+  const isAdmin = userRole?.isAdmin || false;
+  const isProducer = userRole?.isProducer || false;
 
-  if (!isAdmin) {
+  if (!hasAccess) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20 flex items-center justify-center">
         <Card>
@@ -191,11 +195,23 @@ const Admin = () => {
           </Button>
           
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent mb-2">
-            Admin Dashboard
+            {isProducer && !isAdmin ? 'Producer Dashboard' : 'Admin Dashboard'}
           </h1>
           <p className="text-muted-foreground">
-            Manage system settings and configurations
+            {isProducer && !isAdmin 
+              ? 'Upload completed songs for client purchases' 
+              : 'Manage system settings and configurations'
+            }
           </p>
+          {userRole && (
+            <div className="flex gap-2 mt-2">
+              {userRole.roles.map(role => (
+                <Badge key={role} variant="secondary" className="capitalize">
+                  {role}
+                </Badge>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         {/* Admin Actions */}
@@ -288,47 +304,49 @@ const Admin = () => {
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <RefreshCw className="h-5 w-5" />
-                  Stripe Integration
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  Sync products from Supabase to Stripe for payment processing.
-                </p>
-                <Button 
-                  onClick={handleSyncProducts}
-                  disabled={isSyncing}
-                  className="w-full"
-                >
-                  <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                  {isSyncing ? "Syncing..." : "Sync Products to Stripe"}
-                </Button>
-              </CardContent>
-            </Card>
+          {isAdmin && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <RefreshCw className="h-5 w-5" />
+                    Stripe Integration
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground mb-4">
+                    Sync products from Supabase to Stripe for payment processing.
+                  </p>
+                  <Button 
+                    onClick={handleSyncProducts}
+                    disabled={isSyncing}
+                    className="w-full"
+                  >
+                    <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                    {isSyncing ? "Syncing..." : "Sync Products to Stripe"}
+                  </Button>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  System Settings
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  Configure system-wide settings and preferences.
-                </p>
-                <Button variant="outline" className="w-full" disabled>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Coming Soon
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="h-5 w-5" />
+                    System Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground mb-4">
+                    Configure system-wide settings and preferences.
+                  </p>
+                  <Button variant="outline" className="w-full" disabled>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Coming Soon
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </motion.div>
       </div>
     </div>
