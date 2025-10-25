@@ -1,57 +1,49 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Headphones, Mic, Music, Radio } from "lucide-react";
+import { Headphones, Mic, Music } from "lucide-react";
 import { useTranslation } from "@/contexts/TranslationContext";
-import { useServices } from "@/hooks/useServices";
-import { usePlatforms } from "@/hooks/usePlatforms";
-
 
 const Services = () => {
   const { t } = useTranslation();
-  const { data: servicesData = [], isLoading: servicesLoading } = useServices();
-  const { data: platformsData = [], isLoading: platformsLoading } = usePlatforms();
 
-  // Map icons from string to components
-  const iconMap = {
-    Mic,
-    Headphones,
-    Music,
-    Radio,
-  };
+  const services = [
+    {
+      title: "Recording",
+      description: "Professional recording services available online and in-person",
+      image: "/laptop-uploads/Star.png",
+      icon: Mic,
+    },
+    {
+      title: "Mixing",
+      description: "Expert mixing to bring your tracks to life",
+      image: "/laptop-uploads/Donut.png",
+      icon: Headphones,
+    },
+    {
+      title: "Mastering",
+      description: "Final polish to make your music shine",
+      image: "/laptop-uploads/Pill.png",
+      icon: Music,
+    },
+  ];
 
-  const services = servicesData.map(service => ({
-    ...service,
-    icon: iconMap[service.icon as keyof typeof iconMap] || Music,
-  }));
-
-  const platforms = platformsData.map(platform => ({
-    ...platform,
-    tools: [`"${platform.tagline}"`]
-  }));
-
-  if (servicesLoading || platformsLoading) {
-    return (
-      <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-800/80 via-purple-900/60 to-black">
-        <div className="container mx-auto px-4">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-3xl md:text-4xl font-bold text-center text-white mb-12"
-          >
-            {t.services.title}
-          </motion.h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[...Array(3)].map((_, index) => (
-              <div key={index} className="animate-pulse">
-                <div className="bg-gray-800 aspect-square rounded-xl"></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
+  const platforms = [
+    {
+      name: "ProTools",
+      logo: "/laptop-uploads/ProTools.png",
+      tools: ['"Work with anyone, anywhere"'],
+    },
+    {
+      name: "Cubase",
+      logo: "/laptop-uploads/Cubase.png",
+      tools: ['"Keeps your creativty flowing"'],
+    },
+    {
+      name: "FL Studio",
+      logo: "/laptop-uploads/FLoops.png",
+      tools: ['"Create your best music"'],
+    },
+  ];
 
   return (
     <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-800/80 via-purple-900/60 to-black">
