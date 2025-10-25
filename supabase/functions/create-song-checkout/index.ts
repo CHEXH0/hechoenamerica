@@ -64,7 +64,6 @@ serve(async (req) => {
         tier,
         idea: idea?.substring(0, 500) || "",
         user_id: user.id,
-        file_urls: fileUrls && fileUrls.length > 0 ? JSON.stringify(fileUrls) : "",
         request_id: requestId || "",
       },
       success_url: `${req.headers.get("origin")}/purchase-confirmation?session_id={CHECKOUT_SESSION_ID}`,
