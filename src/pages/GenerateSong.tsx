@@ -152,19 +152,30 @@ const GenerateSong = () => {
         }
       }
 
-      // For free tier, send email with file links
+      // Create purchase record in database with file URLs
       if (currentTier.price === 0) {
-        const { error } = await supabase.functions.invoke('send-contact-email', {
-          body: {
-            name: "Song Generation Request",
-            email: user.email,
-            subject: `Song Generation Request - Free AI Generated`,
-            message: idea,
-            fileUrls: fileUrls
-          }
+        // For free tier, create a pending purchase record
+        const { error: insertError } = await supabase
+          .from('purchases')
+          .insert({
+            user_id: user.id,
+            product_id: 'song-generation-free',
+            product_name: 'Free AI Generated Song',
+            product_type: 'song',
+            product_category: 'generation',
+            price: '$0',
+            status: 'pending',
+            song_idea: idea,
+            file_urls: fileUrls.length > 0 ? fileUrls : null
+          });
+        
+        if (insertError) throw insertError;
+        
+        toast({
+          title: "Request submitted!",
+          description: "Your song generation request has been submitted successfully.",
         });
         
-        if (error) throw error;
         navigate("/purchase-confirmation");
       } else {
         // For paid tiers, create Stripe checkout session with file URLs
