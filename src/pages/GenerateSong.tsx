@@ -82,14 +82,17 @@ const GenerateSong = () => {
       // Upload files to storage if any
       let fileUrls: string[] = [];
       if (files && files.length > 0) {
+        console.log(`Starting upload of ${files.length} files...`);
         toast({
           title: "Uploading files...",
-          description: "Please wait while we upload your files",
+          description: `Uploading ${files.length} file(s) to Supabase storage`,
         });
 
         for (const file of files) {
           const timestamp = Date.now();
           const fileName = `${user.id}/${timestamp}_${file.name}`;
+          
+          console.log(`Uploading file: ${file.name} (${file.size} bytes)`);
           
           const { data: uploadData, error: uploadError } = await supabase.storage
             .from('product-assets')
@@ -100,8 +103,10 @@ const GenerateSong = () => {
 
           if (uploadError) {
             console.error("Upload error:", uploadError);
-            throw new Error(`Failed to upload ${file.name}`);
+            throw new Error(`Failed to upload ${file.name}: ${uploadError.message}`);
           }
+
+          console.log(`File uploaded successfully: ${fileName}`);
 
           // Get signed URL (valid for 1 year)
           const { data: signedData, error: signError } = await supabase.storage
@@ -113,14 +118,18 @@ const GenerateSong = () => {
             throw new Error(`Failed to create download link for ${file.name}`);
           }
           
+          console.log(`Created signed URL for: ${fileName}`);
           fileUrls.push(signedData.signedUrl);
         }
+        
+        console.log(`All files uploaded. Total URLs: ${fileUrls.length}`);
       }
 
       // Create song request record in database
       if (currentTier.price === 0) {
         // For free tier, create a pending request
-        const { error: insertError } = await supabase
+        console.log("Creating free tier song request...");
+        const { data: requestData, error: insertError } = await supabase
           .from('song_requests')
           .insert({
             user_id: user.id,
@@ -130,18 +139,26 @@ const GenerateSong = () => {
             price: currentTier.label,
             status: 'pending',
             file_urls: fileUrls.length > 0 ? fileUrls : null
-          });
+          })
+          .select()
+          .single();
         
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error("Database insert error:", insertError);
+          throw insertError;
+        }
+        
+        console.log("Song request created:", requestData?.id);
         
         toast({
           title: "Request submitted!",
-          description: "Your song generation request has been submitted successfully.",
+          description: `Your song request has been saved with ${fileUrls.length} file(s).`,
         });
         
         navigate("/purchase-confirmation");
       } else {
         // For paid tiers, create song request first, then Stripe checkout
+        console.log("Creating paid tier song request...");
         const { data: requestData, error: insertError } = await supabase
           .from('song_requests')
           .insert({
@@ -156,7 +173,13 @@ const GenerateSong = () => {
           .select()
           .single();
 
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error("Database insert error:", insertError);
+          throw insertError;
+        }
+
+        console.log("Song request created:", requestData?.id);
+        console.log("Initiating Stripe checkout...");
 
         const { data: sessionData, error } = await supabase.functions.invoke('create-song-checkout', {
           body: {
@@ -168,15 +191,19 @@ const GenerateSong = () => {
           }
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error("Stripe checkout error:", error);
+          throw error;
+        }
         
         if (sessionData?.url) {
+          console.log("Redirecting to Stripe checkout...");
           // Redirect to Stripe checkout in the same window
           window.location.href = sessionData.url;
         }
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Submission error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to submit. Please try again.",
