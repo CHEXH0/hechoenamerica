@@ -33,36 +33,15 @@ const GenerateSong = () => {
   useEffect(() => {
     const pendingRequest = localStorage.getItem('pendingSongRequest');
     if (pendingRequest && user) {
-      const { idea: savedIdea, tier: savedTier, files: savedFiles } = JSON.parse(pendingRequest);
+      const { idea: savedIdea, tier: savedTier } = JSON.parse(pendingRequest);
       setIdea(savedIdea);
       setSliderValue([savedTier]);
-      
-      // Restore files from base64
-      if (savedFiles && savedFiles.length > 0) {
-        const restoredFiles = savedFiles.map((fileData: any) => {
-          const byteString = atob(fileData.data.split(',')[1]);
-          const mimeString = fileData.data.split(',')[0].split(':')[1].split(';')[0];
-          const ab = new ArrayBuffer(byteString.length);
-          const ia = new Uint8Array(ab);
-          for (let i = 0; i < byteString.length; i++) {
-            ia[i] = byteString.charCodeAt(i);
-          }
-          const blob = new Blob([ab], { type: mimeString });
-          return new File([blob], fileData.name, { type: mimeString });
-        });
-        setFiles(restoredFiles);
-      }
       
       localStorage.removeItem('pendingSongRequest');
       toast({
         title: "Welcome back!",
-        description: "Processing your song generation request...",
+        description: "You can now submit your song request.",
       });
-      // Auto-submit the form after restoring state
-      setTimeout(() => {
-        const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
-        handleSubmit(fakeEvent);
-      }, 1500);
     }
   }, [user, toast]);
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,30 +63,16 @@ const GenerateSong = () => {
 
     // Check if user is authenticated
     if (!user) {
-      // Save form state and redirect to auth
-      // Convert files to base64 for storage
-      const filePromises = files.map(file => {
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            resolve({
-              name: file.name,
-              type: file.type,
-              data: reader.result
-            });
-          };
-          reader.readAsDataURL(file);
-        });
+      // Save form state (excluding files) and redirect to auth
+      localStorage.setItem('pendingSongRequest', JSON.stringify({
+        idea,
+        tier: sliderValue[0]
+      }));
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to submit your song request. Note: You'll need to re-upload any files after signing in.",
       });
-
-      Promise.all(filePromises).then((filesData) => {
-        localStorage.setItem('pendingSongRequest', JSON.stringify({
-          idea,
-          tier: sliderValue[0],
-          files: filesData
-        }));
-        navigate("/auth");
-      });
+      navigate("/auth");
       return;
     }
 
