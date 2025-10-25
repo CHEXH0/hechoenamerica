@@ -51,6 +51,8 @@ serve(async (req) => {
     const idea = session.metadata?.idea || 'No idea provided';
     const fileUrlsStr = session.metadata?.file_urls || "";
     const fileUrls = fileUrlsStr ? JSON.parse(fileUrlsStr) : [];
+    const requestId = session.metadata?.request_id || "";
+    const userId = session.metadata?.user_id || "";
     const customerEmail = session.customer_details?.email || session.customer_email;
     const amountTotal = session.amount_total ? (session.amount_total / 100).toFixed(2) : '0.00';
     const currency = session.currency?.toUpperCase() || 'USD';
@@ -202,32 +204,47 @@ serve(async (req) => {
 
     logStep("All emails sent successfully");
 
-    // Create purchase record with pending status
+    // Update song request status to completed
     const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.57.2");
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const { error: purchaseError } = await supabaseAdmin
-      .from('purchases')
-      .insert({
-        user_id: session.client_reference_id,
-        product_id: session.id,
-        product_name: productName || 'Song Generation',
-        product_type: 'Song Generation',
-        product_category: tier || 'Custom',
-        price: `${currency} ${amountTotal}`,
-        status: 'pending',
-        song_idea: idea,
-        file_urls: fileUrls,
-        purchase_date: new Date().toISOString(),
-      });
+    if (requestId) {
+      const { error: updateError } = await supabaseAdmin
+        .from('song_requests')
+        .update({
+          status: 'paid',
+          stripe_session_id: session_id,
+        })
+        .eq('id', requestId);
 
-    if (purchaseError) {
-      logStep("Error creating purchase record", { error: purchaseError });
-    } else {
-      logStep("Purchase record created successfully");
+      if (updateError) {
+        logStep("Error updating song request", { error: updateError });
+      } else {
+        logStep("Song request updated to paid status");
+      }
+    } else if (userId) {
+      // Fallback: create new request if no requestId
+      const { error: insertError } = await supabaseAdmin
+        .from('song_requests')
+        .insert({
+          user_id: userId,
+          user_email: customerEmail,
+          song_idea: idea,
+          tier: tier,
+          price: `${currency} ${amountTotal}`,
+          status: 'paid',
+          file_urls: fileUrls.length > 0 ? fileUrls : null,
+          stripe_session_id: session_id,
+        });
+
+      if (insertError) {
+        logStep("Error creating song request record", { error: insertError });
+      } else {
+        logStep("Song request record created successfully");
+      }
     }
 
     return new Response(JSON.stringify({ 

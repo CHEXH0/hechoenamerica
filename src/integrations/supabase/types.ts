@@ -326,6 +326,56 @@ export type Database = {
         }
         Relationships: []
       }
+      song_requests: {
+        Row: {
+          created_at: string
+          file_urls: string[] | null
+          id: string
+          price: string
+          song_idea: string
+          status: string
+          stripe_session_id: string | null
+          tier: string
+          updated_at: string
+          user_email: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_urls?: string[] | null
+          id?: string
+          price: string
+          song_idea: string
+          status?: string
+          stripe_session_id?: string | null
+          tier: string
+          updated_at?: string
+          user_email: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_urls?: string[] | null
+          id?: string
+          price?: string
+          song_idea?: string
+          status?: string
+          stripe_session_id?: string | null
+          tier?: string
+          updated_at?: string
+          user_email?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "song_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string

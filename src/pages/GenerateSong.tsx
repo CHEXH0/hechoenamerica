@@ -152,20 +152,18 @@ const GenerateSong = () => {
         }
       }
 
-      // Create purchase record in database with file URLs
+      // Create song request record in database
       if (currentTier.price === 0) {
-        // For free tier, create a pending purchase record
+        // For free tier, create a pending request
         const { error: insertError } = await supabase
-          .from('purchases')
+          .from('song_requests')
           .insert({
             user_id: user.id,
-            product_id: 'song-generation-free',
-            product_name: 'Free AI Generated Song',
-            product_type: 'song',
-            product_category: 'generation',
-            price: '$0',
-            status: 'pending',
+            user_email: user.email || '',
             song_idea: idea,
+            tier: currentTier.label,
+            price: currentTier.label,
+            status: 'pending',
             file_urls: fileUrls.length > 0 ? fileUrls : null
           });
         
@@ -178,13 +176,30 @@ const GenerateSong = () => {
         
         navigate("/purchase-confirmation");
       } else {
-        // For paid tiers, create Stripe checkout session with file URLs
+        // For paid tiers, create song request first, then Stripe checkout
+        const { data: requestData, error: insertError } = await supabase
+          .from('song_requests')
+          .insert({
+            user_id: user.id,
+            user_email: user.email || '',
+            song_idea: idea,
+            tier: currentTier.label,
+            price: currentTier.label,
+            status: 'pending_payment',
+            file_urls: fileUrls.length > 0 ? fileUrls : null
+          })
+          .select()
+          .single();
+
+        if (insertError) throw insertError;
+
         const { data: sessionData, error } = await supabase.functions.invoke('create-song-checkout', {
           body: {
             priceId: currentTier.priceId,
             tier: currentTier.label,
             idea,
-            fileUrls: fileUrls
+            fileUrls: fileUrls,
+            requestId: requestData.id
           }
         });
 

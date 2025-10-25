@@ -32,8 +32,8 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { priceId, tier, idea, fileUrls } = await req.json();
-    logStep("Request body received", { priceId, tier, idea: idea?.substring(0, 50), fileCount: fileUrls?.length || 0 });
+    const { priceId, tier, idea, fileUrls, requestId } = await req.json();
+    logStep("Request body received", { priceId, tier, idea: idea?.substring(0, 50), fileCount: fileUrls?.length || 0, requestId });
 
     if (!priceId || !tier) {
       throw new Error("Missing required fields: priceId and tier");
@@ -65,6 +65,7 @@ serve(async (req) => {
         idea: idea?.substring(0, 500) || "",
         user_id: user.id,
         file_urls: fileUrls && fileUrls.length > 0 ? JSON.stringify(fileUrls) : "",
+        request_id: requestId || "",
       },
       success_url: `${req.headers.get("origin")}/purchase-confirmation?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/generate-song`,
