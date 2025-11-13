@@ -121,7 +121,7 @@ const Treats = () => {
       let currentAudio = audioElements[productId];
       const product = allProducts?.find(p => p.id === productId);
       const preferredUrl = productId === 's001'
-        ? 'https://supabase.hechoenamericastudio.com/storage/v1/object/public/audio-samples/s001/MY%20keys%20audio.mp3'
+        ? 'https://eapbuoqkhckqaswfjexv.supabase.co/storage/v1/object/public/audio-samples/s001/MY%20keys%20audio.mp3'
         : (product?.audio_preview_url || null);
 
       if (!currentAudio && preferredUrl) {
@@ -158,7 +158,7 @@ const Treats = () => {
       } catch (err) {
         // If s001 fails, try the alternate storage path "MY keys audio.mp3"
         if (productId === 's001') {
-          const altUrl1 = 'https://supabase.hechoenamericastudio.com/storage/v1/object/public/audio-samples/s001/MY%20keys%20audio.mp3';
+          const altUrl1 = 'https://eapbuoqkhckqaswfjexv.supabase.co/storage/v1/object/public/audio-samples/s001/MY%20keys%20audio.mp3';
           try {
             currentAudio.src = altUrl1;
             currentAudio.load();
@@ -170,7 +170,7 @@ const Treats = () => {
           } catch (err2) {
             console.error('First fallback failed, trying root path...', err2);
             try {
-              const altUrl2 = 'https://supabase.hechoenamericastudio.com/storage/v1/object/public/audio-samples/MY%20keys%20audio.mp3';
+              const altUrl2 = 'https://eapbuoqkhckqaswfjexv.supabase.co/storage/v1/object/public/audio-samples/MY%20keys%20audio.mp3';
               currentAudio.src = altUrl2;
               await currentAudio.play();
               setPlayingWaveform(productId);

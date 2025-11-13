@@ -140,12 +140,20 @@ export const useDeleteAccount = () => {
         throw new Error('No active session');
       }
 
-      const { data, error } = await supabase.functions.invoke('delete-user-account', {
-        body: {}
-      });
+      const response = await fetch(
+        `https://eapbuoqkhckqaswfjexv.supabase.co/functions/v1/delete-user-account`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-      if (error) {
-        throw new Error(error.message || 'Failed to delete account');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete account');
       }
 
       // Sign out after successful deletion

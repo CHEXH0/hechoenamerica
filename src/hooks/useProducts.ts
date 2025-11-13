@@ -30,10 +30,10 @@ export const useProducts = () => {
     queryKey: ['products'],
     queryFn: async () => {
       // Direct REST API call to fetch products
-      const response = await fetch(`https://supabase.hechoenamericastudio.com/rest/v1/products?select=*&is_active=eq.true&order=category.asc,sort_order.asc`, {
+      const response = await fetch(`https://eapbuoqkhckqaswfjexv.supabase.co/rest/v1/products?select=*&is_active=eq.true&order=category.asc,sort_order.asc`, {
         headers: {
-          'apikey': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc2MjE0NjQ4MCwiZXhwIjo0OTE3ODIwMDgwLCJyb2xlIjoiYW5vbiJ9.vn3eKDv8DrLGoxqWnu4PYBx_rlRWT1BHfu-N5mq6nK4',
-          'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc2MjE0NjQ4MCwiZXhwIjo0OTE3ODIwMDgwLCJyb2xlIjoiYW5vbiJ9.vn3eKDv8DrLGoxqWnu4PYBx_rlRWT1BHfu-N5mq6nK4'
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhcGJ1b3FraGNrcWFzd2ZqZXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU4NzM0NjMsImV4cCI6MjA3MTQ0OTQ2M30.oybb51fqUbvPklFND2ah5ko3PVUDRUIulSIojuPfoWE',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhcGJ1b3FraGNrcWFzd2ZqZXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU4NzM0NjMsImV4cCI6MjA3MTQ0OTQ2M30.oybb51fqUbvPklFND2ah5ko3PVUDRUIulSIojuPfoWE'
         }
       });
       

@@ -85,7 +85,7 @@ const GenerateSong = () => {
         console.log(`Starting upload of ${files.length} files...`);
         toast({
           title: "Uploading files...",
-          description: `Uploading ${files.length} file(s)`,
+          description: `Uploading ${files.length} file(s) to Supabase storage`,
         });
 
         for (const file of files) {
@@ -128,7 +128,7 @@ const GenerateSong = () => {
       // Create song request record in database
       if (currentTier.price === 0) {
         // For free tier, create a pending request
-        console.log("Creating free song request...");
+        console.log("Creating free tier song request...");
         const { data: requestData, error: insertError } = await supabase
           .from('song_requests')
           .insert({
@@ -158,7 +158,7 @@ const GenerateSong = () => {
         navigate("/purchase-confirmation");
       } else {
         // For paid tiers, create song request first, then Stripe checkout
-        console.log("Creating paid song request...");
+        console.log("Creating paid tier song request...");
         const { data: requestData, error: insertError } = await supabase
           .from('song_requests')
           .insert({

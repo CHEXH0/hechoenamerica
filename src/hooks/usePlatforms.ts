@@ -4,11 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 export interface Platform {
   id: string;
   name: string;
-  icon: string;
-  url: string;
-  artist_id: string;
-  created_at: string;
-  updated_at: string;
+  logo: string;
+  tagline: string;
+  sort_order: number;
 }
 
 export const usePlatforms = () => {
@@ -18,7 +16,7 @@ export const usePlatforms = () => {
       const { data, error } = await supabase
         .from("platforms")
         .select("*")
-        .order("name", { ascending: true });
+        .order("sort_order", { ascending: true });
 
       if (error) throw error;
       return data as Platform[];
