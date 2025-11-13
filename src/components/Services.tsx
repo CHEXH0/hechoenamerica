@@ -8,8 +8,8 @@ const Services = () => {
 
   const services = [
     {
-      title: "Recording",
-      description: "Professional recording services available online and in-person",
+      title: "Audios",
+      description: "Enhancing your audios and submissions for quality production",
       image: "/laptop-uploads/Star.png",
       icon: Mic,
     },
@@ -56,7 +56,7 @@ const Services = () => {
         >
           {t.services.title}
         </motion.h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {services.map((service, index) => (
             <motion.div
@@ -68,28 +68,26 @@ const Services = () => {
               className="relative group rounded-xl bg-black backdrop-blur-md border border-purple-400/20 hover:border-purple-400/40 transition-all duration-300 overflow-visible"
             >
               <div className="aspect-square">
-                <img 
-                  src={service.image} 
+                <img
+                  src={service.image}
                   alt={service.title}
                   className="w-5/6 h-5/6 object-contain group-hover:scale-110 transition-transform duration-300 rounded-xl mx-auto mt-4"
                 />
               </div>
-              
+
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-              
+
               <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
                 <div className="flex items-center mb-3">
                   <service.icon className="h-6 w-6 text-purple-400 mr-3" />
                   <h3 className="text-xl font-semibold text-white">{service.title}</h3>
                 </div>
-                <p className="text-gray-300 text-sm leading-relaxed">
-                  {service.description}
-                </p>
+                <p className="text-gray-300 text-sm leading-relaxed">{service.description}</p>
               </div>
             </motion.div>
           ))}
         </div>
-        
+
         {/* Platforms Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -107,11 +105,7 @@ const Services = () => {
                 className="bg-black/40 backdrop-blur-md border border-purple-400/20 rounded-xl p-6 text-center hover:border-purple-400/40 transition-all duration-300"
               >
                 <div className="w-16 h-16 mx-auto mb-4 bg-white/10 rounded-lg flex items-center justify-center">
-                  <img 
-                    src={platform.logo} 
-                    alt={`${platform.name} logo`}
-                    className="w-12 h-12 object-contain"
-                  />
+                  <img src={platform.logo} alt={`${platform.name} logo`} className="w-12 h-12 object-contain" />
                 </div>
                 <h4 className="text-lg font-semibold text-white mb-3">{platform.name}</h4>
                 <div className="space-y-1 pb-4">
