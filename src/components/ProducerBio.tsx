@@ -1,13 +1,12 @@
-
 import React from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "@/contexts/TranslationContext";
 
-interface ArtistBioProps {
+interface ProducerBioProps {
   bio: string;
 }
 
-const ArtistBio = ({ bio }: ArtistBioProps) => {
+const ProducerBio = ({ bio }: ProducerBioProps) => {
   const { t } = useTranslation();
   
   return (
@@ -17,10 +16,10 @@ const ArtistBio = ({ bio }: ArtistBioProps) => {
       transition={{ duration: 0.6, delay: 0.4 }}
       className="bg-white/10 backdrop-blur-lg p-8 rounded-3xl"
     >
-      <h2 className="text-3xl font-bold mb-4 text-white">{t.artist.about}</h2>
+      <h2 className="text-3xl font-bold mb-4 text-white">{t.producer.about}</h2>
       <p className="text-white/90 leading-relaxed text-lg">{bio}</p>
     </motion.div>
   );
 };
 
-export default ArtistBio;
+export default ProducerBio;

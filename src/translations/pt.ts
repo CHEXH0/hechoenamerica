@@ -5,11 +5,11 @@ export const pt: Translations = {
     title: "FEITO NA AMÉRICA",
     subtitle: "A MÚSICA É MEDICINA"
   },
-  featuredArtists: {
-    title: "Artistas em Destaque"
+  featuredProducers: {
+    title: "Produtores em Destaque"
   },
   audioPlatforms: {
-    title: "Ouça Agora",
+    title: "Comunidade",
     treats: "Doces"
   },
   services: {
@@ -43,10 +43,10 @@ export const pt: Translations = {
     errorTitle: "Erro",
     errorDesc: "Houve um problema ao enviar sua mensagem. Tente novamente."
   },
-  artist: {
-    backToArtists: "Voltar aos Artistas",
+  producer: {
+    backToProducers: "Voltar aos Produtores",
     about: "Sobre",
-    notFound: "Artista não encontrado",
+    notFound: "Produtor não encontrado",
     returnToHome: "Voltar ao início"
   }
 };

@@ -1,15 +1,14 @@
-
 import React from "react";
 import { motion } from "framer-motion";
 import { ExternalLink, Music } from "lucide-react";
 
-interface ArtistPlatformsProps {
+interface ProducerPlatformsProps {
   spotifyUrl: string;
   youtubeUrl: string;
   appleMusicUrl: string;
 }
 
-const ArtistPlatforms = ({ spotifyUrl, youtubeUrl, appleMusicUrl }: ArtistPlatformsProps) => {
+const ProducerPlatforms = ({ spotifyUrl, youtubeUrl, appleMusicUrl }: ProducerPlatformsProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -68,4 +67,4 @@ const ArtistPlatforms = ({ spotifyUrl, youtubeUrl, appleMusicUrl }: ArtistPlatfo
   );
 };
 
-export default ArtistPlatforms;
+export default ProducerPlatforms;

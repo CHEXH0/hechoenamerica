@@ -1,15 +1,14 @@
-
 import React from "react";
 import { motion } from "framer-motion";
 import { MapPin } from "lucide-react";
 
-interface ArtistInfoProps {
+interface ProducerInfoProps {
   name: string;
   country: string;
   genre: string;
 }
 
-const ArtistInfo = ({ name, country, genre }: ArtistInfoProps) => {
+const ProducerInfo = ({ name, country, genre }: ProducerInfoProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, x: 50 }}
@@ -29,4 +28,4 @@ const ArtistInfo = ({ name, country, genre }: ArtistInfoProps) => {
   );
 };
 
-export default ArtistInfo;
+export default ProducerInfo;

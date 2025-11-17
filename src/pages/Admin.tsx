@@ -35,7 +35,7 @@ const Admin = () => {
     pendingPurchases: 0,
     totalRevenue: 0,
     totalProducts: 0,
-    totalArtists: 0,
+    totalProducers: 0,
     storageUsed: 0,
   });
 
@@ -91,9 +91,9 @@ const Admin = () => {
         .from('products')
         .select('*', { count: 'exact', head: true });
 
-      // Fetch artists count
-      const { count: artistsCount } = await supabase
-        .from('artists')
+      // Fetch producers count
+      const { count: producersCount } = await supabase
+        .from('producers')
         .select('*', { count: 'exact', head: true });
 
       // Fetch storage usage (approximate from product-assets bucket)
@@ -109,7 +109,7 @@ const Admin = () => {
         pendingPurchases: pendingCount,
         totalRevenue,
         totalProducts: productsCount || 0,
-        totalArtists: artistsCount || 0,
+        totalProducers: producersCount || 0,
         storageUsed,
       });
     } catch (error) {
@@ -602,9 +602,9 @@ const Admin = () => {
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-muted-foreground text-sm">
                           <User className="h-4 w-4" />
-                          Total Artists
+                          Total Producers
                         </div>
-                        <p className="text-2xl font-bold">{systemStats.totalArtists}</p>
+                        <p className="text-2xl font-bold">{systemStats.totalProducers}</p>
                       </div>
                     </div>
                     

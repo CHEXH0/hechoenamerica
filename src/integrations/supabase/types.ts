@@ -14,51 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      artists: {
-        Row: {
-          apple_music_url: string | null
-          bio: string
-          country: string
-          created_at: string
-          genre: string
-          id: string
-          image: string
-          name: string
-          slug: string
-          spotify_url: string | null
-          updated_at: string
-          youtube_url: string | null
-        }
-        Insert: {
-          apple_music_url?: string | null
-          bio: string
-          country: string
-          created_at?: string
-          genre: string
-          id?: string
-          image: string
-          name: string
-          slug: string
-          spotify_url?: string | null
-          updated_at?: string
-          youtube_url?: string | null
-        }
-        Update: {
-          apple_music_url?: string | null
-          bio?: string
-          country?: string
-          created_at?: string
-          genre?: string
-          id?: string
-          image?: string
-          name?: string
-          slug?: string
-          spotify_url?: string | null
-          updated_at?: string
-          youtube_url?: string | null
-        }
-        Relationships: []
-      }
       contact_submissions: {
         Row: {
           country: string | null
@@ -116,6 +71,51 @@ export type Database = {
           name?: string
           updated_at?: string
           url?: string
+        }
+        Relationships: []
+      }
+      producers: {
+        Row: {
+          apple_music_url: string | null
+          bio: string
+          country: string
+          created_at: string
+          genre: string
+          id: string
+          image: string
+          name: string
+          slug: string
+          spotify_url: string | null
+          updated_at: string
+          youtube_url: string | null
+        }
+        Insert: {
+          apple_music_url?: string | null
+          bio: string
+          country: string
+          created_at?: string
+          genre: string
+          id?: string
+          image: string
+          name: string
+          slug: string
+          spotify_url?: string | null
+          updated_at?: string
+          youtube_url?: string | null
+        }
+        Update: {
+          apple_music_url?: string | null
+          bio?: string
+          country?: string
+          created_at?: string
+          genre?: string
+          id?: string
+          image?: string
+          name?: string
+          slug?: string
+          spotify_url?: string | null
+          updated_at?: string
+          youtube_url?: string | null
         }
         Relationships: []
       }

@@ -5,11 +5,11 @@ export const zh: Translations = {
     title: "美国制造",
     subtitle: "音乐是良药"
   },
-  featuredArtists: {
-    title: "特色艺术家"
+  featuredProducers: {
+    title: "特色制作人"
   },
   audioPlatforms: {
-    title: "立即聆听",
+    title: "社区",
     treats: "美食"
   },
   services: {
@@ -43,10 +43,10 @@ export const zh: Translations = {
     errorTitle: "错误",
     errorDesc: "发送消息时出现问题。请重试。"
   },
-  artist: {
-    backToArtists: "返回艺术家",
+  producer: {
+    backToProducers: "返回制作人",
     about: "关于",
-    notFound: "未找到艺术家",
+    notFound: "未找到制作人",
     returnToHome: "返回首页"
   }
 };

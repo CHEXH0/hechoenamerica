@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export interface Artist {
+export interface Producer {
   id: string;
   slug: string;
   name: string;
@@ -14,33 +14,33 @@ export interface Artist {
   apple_music_url?: string;
 }
 
-export const useArtists = () => {
+export const useProducers = () => {
   return useQuery({
-    queryKey: ["artists"],
+    queryKey: ["producers"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("artists")
+        .from("producers")
         .select("*")
         .order("created_at", { ascending: true });
 
       if (error) throw error;
-      return data as Artist[];
+      return data as Producer[];
     },
   });
 };
 
-export const useArtist = (slug: string) => {
+export const useProducer = (slug: string) => {
   return useQuery({
-    queryKey: ["artist", slug],
+    queryKey: ["producer", slug],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("artists")
+        .from("producers")
         .select("*")
         .eq("slug", slug)
         .maybeSingle();
 
       if (error) throw error;
-      return data as Artist | null;
+      return data as Producer | null;
     },
     enabled: !!slug,
   });

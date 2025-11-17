@@ -1,17 +1,17 @@
 import React, { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import ArtistHeader from "../components/ArtistHeader";
-import ArtistImage from "../components/ArtistImage";
-import ArtistInfo from "../components/ArtistInfo";
-import ArtistBio from "../components/ArtistBio";
-import ArtistPlatforms from "../components/ArtistPlatforms";
+import ProducerHeader from "../components/ProducerHeader";
+import ProducerImage from "../components/ProducerImage";
+import ProducerInfo from "../components/ProducerInfo";
+import ProducerBio from "../components/ProducerBio";
+import ProducerPlatforms from "../components/ProducerPlatforms";
 import { useTranslation } from "@/contexts/TranslationContext";
-import { useArtist } from "@/hooks/useArtists";
+import { useProducer } from "@/hooks/useProducers";
 
-const Artist = () => {
+const Producer = () => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { data: artist, isLoading } = useArtist(id!);
+  const { data: producer, isLoading } = useProducer(id!);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -21,19 +21,19 @@ const Artist = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 text-white flex items-center justify-center">
         <div className="text-center bg-black/30 backdrop-blur-lg p-8 rounded-3xl border border-purple-900/20">
-          <div className="animate-pulse">Loading artist...</div>
+          <div className="animate-pulse">Loading producer...</div>
         </div>
       </div>
     );
   }
 
-  if (!artist) {
+  if (!producer) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 text-white flex items-center justify-center">
         <div className="text-center bg-black/30 backdrop-blur-lg p-8 rounded-3xl border border-purple-900/20">
-          <h1 className="text-2xl font-bold mb-4">{t.artist.notFound}</h1>
+          <h1 className="text-2xl font-bold mb-4">{t.producer.notFound}</h1>
           <Link to="/" className="text-purple-400 hover:text-purple-300 underline">
-            {t.artist.returnToHome}
+            {t.producer.returnToHome}
           </Link>
         </div>
       </div>
@@ -53,24 +53,24 @@ const Artist = () => {
       <div className="absolute inset-0 bg-black/40"></div>
 
       <div className="container mx-auto px-4 py-8 relative z-10">
-        <ArtistHeader />
+        <ProducerHeader />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <ArtistImage image={artist.image} name={artist.name} />
+          <ProducerImage image={producer.image} name={producer.name} />
 
           <div className="space-y-8">
-            <ArtistInfo 
-              name={artist.name}
-              country={artist.country}
-              genre={artist.genre}
+            <ProducerInfo 
+              name={producer.name}
+              country={producer.country}
+              genre={producer.genre}
             />
 
-            <ArtistBio bio={artist.bio} />
+            <ProducerBio bio={producer.bio} />
 
-            <ArtistPlatforms
-              spotifyUrl={artist.spotify_url}
-              youtubeUrl={artist.youtube_url}
-              appleMusicUrl={artist.apple_music_url}
+            <ProducerPlatforms
+              spotifyUrl={producer.spotify_url}
+              youtubeUrl={producer.youtube_url}
+              appleMusicUrl={producer.apple_music_url}
             />
           </div>
         </div>
@@ -79,4 +79,4 @@ const Artist = () => {
   );
 };
 
-export default Artist;
+export default Producer;
