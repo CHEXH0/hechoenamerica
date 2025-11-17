@@ -16,7 +16,7 @@ const ProducerPlatforms = ({ spotifyUrl, youtubeUrl, appleMusicUrl }: ProducerPl
       transition={{ duration: 1, delay: 1 }}
       className="bg-white/10 backdrop-blur-lg p-8 rounded-3xl"
     >
-      <h2 className="text-3xl font-bold mb-6 text-white">Listen On</h2>
+      <h2 className="text-3xl font-bold mb-6 text-white">Discover</h2>
       <div className="space-y-4">
         <motion.a
           href={spotifyUrl}
