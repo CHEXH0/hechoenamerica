@@ -5,6 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,6 +24,9 @@ const GenerateSong = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showTooltip, setShowTooltip] = useState(true);
+  const [numberOfRevisions, setNumberOfRevisions] = useState(0);
+  const [wantsRecordedStems, setWantsRecordedStems] = useState(false);
+  const [wantsAnalog, setWantsAnalog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -138,7 +142,10 @@ const GenerateSong = () => {
             tier: currentTier.label,
             price: currentTier.label,
             status: 'pending',
-            file_urls: fileUrls.length > 0 ? fileUrls : null
+            file_urls: fileUrls.length > 0 ? fileUrls : null,
+            number_of_revisions: numberOfRevisions,
+            wants_recorded_stems: wantsRecordedStems,
+            wants_analog: wantsAnalog
           })
           .select()
           .single();
@@ -168,7 +175,10 @@ const GenerateSong = () => {
             tier: currentTier.label,
             price: currentTier.label,
             status: 'pending_payment',
-            file_urls: fileUrls.length > 0 ? fileUrls : null
+            file_urls: fileUrls.length > 0 ? fileUrls : null,
+            number_of_revisions: numberOfRevisions,
+            wants_recorded_stems: wantsRecordedStems,
+            wants_analog: wantsAnalog
           })
           .select()
           .single();
@@ -350,8 +360,67 @@ const GenerateSong = () => {
               </div>
             </div>
 
-            
+            <div className="space-y-3">
+              <Label className="text-white text-lg font-semibold">
+                Additional Options
+              </Label>
+              
+              <div className="space-y-4 bg-white/10 p-4 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <Checkbox 
+                    id="stems" 
+                    checked={wantsRecordedStems}
+                    onCheckedChange={(checked) => setWantsRecordedStems(checked as boolean)}
+                    className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
+                  />
+                  <label
+                    htmlFor="stems"
+                    className="text-white text-sm font-medium leading-none cursor-pointer"
+                  >
+                    Provide recorded stems
+                  </label>
+                </div>
 
+                <div className="flex items-center space-x-3">
+                  <Checkbox 
+                    id="analog" 
+                    checked={wantsAnalog}
+                    onCheckedChange={(checked) => setWantsAnalog(checked as boolean)}
+                    className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
+                  />
+                  <label
+                    htmlFor="analog"
+                    className="text-white text-sm font-medium leading-none cursor-pointer"
+                  >
+                    Use analog equipment
+                  </label>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="revisions" className="text-white text-sm font-medium">
+                    Number of revisions: {numberOfRevisions}
+                  </Label>
+                  <Slider
+                    id="revisions"
+                    value={[numberOfRevisions]}
+                    onValueChange={(value) => setNumberOfRevisions(value[0])}
+                    max={5}
+                    step={1}
+                    className="[&_[role=slider]]:border-white [&_[role=slider]]:bg-white"
+                  />
+                  <div className="flex justify-between text-white/70 text-xs">
+                    <span>0</span>
+                    <span>1</span>
+                    <span>2</span>
+                    <span>3</span>
+                    <span>4</span>
+                    <span>5</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            
             <Button type="submit" disabled={isSubmitting} className="w-full bg-white/50 text-black hover:bg-white font-bold text-lg py-6" size="lg">
               {isSubmitting ? "Submitting..." : "Submit Your Song Idea"}
             </Button>

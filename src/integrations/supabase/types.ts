@@ -340,6 +340,7 @@ export type Database = {
           created_at: string
           file_urls: string[] | null
           id: string
+          number_of_revisions: number | null
           price: string
           song_idea: string
           status: string
@@ -348,11 +349,14 @@ export type Database = {
           updated_at: string
           user_email: string
           user_id: string
+          wants_analog: boolean | null
+          wants_recorded_stems: boolean | null
         }
         Insert: {
           created_at?: string
           file_urls?: string[] | null
           id?: string
+          number_of_revisions?: number | null
           price: string
           song_idea: string
           status?: string
@@ -361,11 +365,14 @@ export type Database = {
           updated_at?: string
           user_email: string
           user_id: string
+          wants_analog?: boolean | null
+          wants_recorded_stems?: boolean | null
         }
         Update: {
           created_at?: string
           file_urls?: string[] | null
           id?: string
+          number_of_revisions?: number | null
           price?: string
           song_idea?: string
           status?: string
@@ -374,6 +381,8 @@ export type Database = {
           updated_at?: string
           user_email?: string
           user_id?: string
+          wants_analog?: boolean | null
+          wants_recorded_stems?: boolean | null
         }
         Relationships: [
           {
