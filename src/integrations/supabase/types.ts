@@ -337,8 +337,11 @@ export type Database = {
       }
       song_requests: {
         Row: {
+          assigned_producer_id: string | null
+          complexity_level: string | null
           created_at: string
           file_urls: string[] | null
+          genre_category: string | null
           id: string
           number_of_revisions: number | null
           price: string
@@ -355,8 +358,11 @@ export type Database = {
           wants_recorded_stems: boolean | null
         }
         Insert: {
+          assigned_producer_id?: string | null
+          complexity_level?: string | null
           created_at?: string
           file_urls?: string[] | null
+          genre_category?: string | null
           id?: string
           number_of_revisions?: number | null
           price: string
@@ -373,8 +379,11 @@ export type Database = {
           wants_recorded_stems?: boolean | null
         }
         Update: {
+          assigned_producer_id?: string | null
+          complexity_level?: string | null
           created_at?: string
           file_urls?: string[] | null
+          genre_category?: string | null
           id?: string
           number_of_revisions?: number | null
           price?: string
@@ -391,6 +400,13 @@ export type Database = {
           wants_recorded_stems?: boolean | null
         }
         Relationships: [
+          {
+            foreignKeyName: "song_requests_assigned_producer_id_fkey"
+            columns: ["assigned_producer_id"]
+            isOneToOne: false
+            referencedRelation: "producers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "song_requests_user_id_fkey"
             columns: ["user_id"]

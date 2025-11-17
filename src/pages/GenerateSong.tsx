@@ -163,6 +163,24 @@ const GenerateSong = () => {
         
         console.log("Song request created:", requestData?.id);
         
+        // Send Discord notification
+        try {
+          await supabase.functions.invoke('send-discord-notification', {
+            body: {
+              requestId: requestData?.id,
+              requestData: {
+                tier: currentTier.label,
+                idea,
+                fileCount: fileUrls.length
+              }
+            }
+          });
+          console.log("Discord notification sent");
+        } catch (notifError) {
+          console.error("Failed to send Discord notification:", notifError);
+          // Don't fail the submission if Discord notification fails
+        }
+        
         toast({
           title: "Request submitted!",
           description: `Your song request has been saved with ${fileUrls.length} file(s).`,
@@ -197,6 +215,25 @@ const GenerateSong = () => {
         }
 
         console.log("Song request created:", requestData?.id);
+        
+        // Send Discord notification
+        try {
+          await supabase.functions.invoke('send-discord-notification', {
+            body: {
+              requestId: requestData?.id,
+              requestData: {
+                tier: currentTier.label,
+                idea,
+                fileCount: fileUrls.length
+              }
+            }
+          });
+          console.log("Discord notification sent");
+        } catch (notifError) {
+          console.error("Failed to send Discord notification:", notifError);
+          // Don't fail the submission if Discord notification fails
+        }
+        
         console.log("Initiating Stripe checkout...");
 
         const { data: sessionData, error } = await supabase.functions.invoke('create-song-checkout', {

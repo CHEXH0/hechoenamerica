@@ -224,6 +224,28 @@ serve(async (req) => {
         logStep("Error updating song request", { error: updateError });
       } else {
         logStep("Song request updated to paid status");
+        
+        // Send Discord notification for paid request
+        try {
+          const { error: notifError } = await supabaseAdmin.functions.invoke('send-discord-notification', {
+            body: {
+              requestId: requestId,
+              requestData: {
+                tier,
+                idea,
+                fileCount: fileUrls.length
+              }
+            }
+          });
+          
+          if (notifError) {
+            logStep("Failed to send Discord notification", { error: notifError });
+          } else {
+            logStep("Discord notification sent successfully");
+          }
+        } catch (notifError) {
+          logStep("Error sending Discord notification", { error: notifError });
+        }
       }
     } else if (userId) {
       // Fallback: create new request if no requestId
