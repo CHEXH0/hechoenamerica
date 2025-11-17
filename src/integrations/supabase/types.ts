@@ -350,6 +350,8 @@ export type Database = {
           user_email: string
           user_id: string
           wants_analog: boolean | null
+          wants_mastering: boolean | null
+          wants_mixing: boolean | null
           wants_recorded_stems: boolean | null
         }
         Insert: {
@@ -366,6 +368,8 @@ export type Database = {
           user_email: string
           user_id: string
           wants_analog?: boolean | null
+          wants_mastering?: boolean | null
+          wants_mixing?: boolean | null
           wants_recorded_stems?: boolean | null
         }
         Update: {
@@ -382,6 +386,8 @@ export type Database = {
           user_email?: string
           user_id?: string
           wants_analog?: boolean | null
+          wants_mastering?: boolean | null
+          wants_mixing?: boolean | null
           wants_recorded_stems?: boolean | null
         }
         Relationships: [
