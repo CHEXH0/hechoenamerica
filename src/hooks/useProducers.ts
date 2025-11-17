@@ -12,6 +12,9 @@ export interface Producer {
   spotify_url?: string;
   youtube_url?: string;
   apple_music_url?: string;
+  youtube_channel_url?: string;
+  instagram_url?: string;
+  website_url?: string;
 }
 
 export const useProducers = () => {

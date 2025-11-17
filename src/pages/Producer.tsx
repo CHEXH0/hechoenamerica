@@ -71,6 +71,9 @@ const Producer = () => {
               spotifyUrl={producer.spotify_url}
               youtubeUrl={producer.youtube_url}
               appleMusicUrl={producer.apple_music_url}
+              youtubeChannelUrl={producer.youtube_channel_url}
+              instagramUrl={producer.instagram_url}
+              websiteUrl={producer.website_url}
             />
           </div>
         </div>

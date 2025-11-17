@@ -83,10 +83,13 @@ export type Database = {
           genre: string
           id: string
           image: string
+          instagram_url: string | null
           name: string
           slug: string
           spotify_url: string | null
           updated_at: string
+          website_url: string | null
+          youtube_channel_url: string | null
           youtube_url: string | null
         }
         Insert: {
@@ -97,10 +100,13 @@ export type Database = {
           genre: string
           id?: string
           image: string
+          instagram_url?: string | null
           name: string
           slug: string
           spotify_url?: string | null
           updated_at?: string
+          website_url?: string | null
+          youtube_channel_url?: string | null
           youtube_url?: string | null
         }
         Update: {
@@ -111,10 +117,13 @@ export type Database = {
           genre?: string
           id?: string
           image?: string
+          instagram_url?: string | null
           name?: string
           slug?: string
           spotify_url?: string | null
           updated_at?: string
+          website_url?: string | null
+          youtube_channel_url?: string | null
           youtube_url?: string | null
         }
         Relationships: []
