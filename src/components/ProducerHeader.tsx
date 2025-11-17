@@ -1,11 +1,10 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "@/contexts/TranslationContext";
 
-const ArtistHeader = () => {
+const ProducerHeader = () => {
   const { t } = useTranslation();
   
   return (
@@ -19,10 +18,10 @@ const ArtistHeader = () => {
         className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-8 transition-all duration-300 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full hover:bg-white/20"
       >
         <ArrowLeft size={20} />
-        {t.artist.backToArtists}
+        {t.producer.backToProducers}
       </Link>
     </motion.div>
   );
 };
 
-export default ArtistHeader;
+export default ProducerHeader;

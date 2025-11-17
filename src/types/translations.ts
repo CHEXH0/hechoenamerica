@@ -5,7 +5,7 @@ export interface Translations {
     title: string;
     subtitle: string;
   };
-  featuredArtists: {
+  featuredProducers: {
     title: string;
   };
   audioPlatforms: {
@@ -43,8 +43,8 @@ export interface Translations {
     errorTitle: string;
     errorDesc: string;
   };
-  artist: {
-    backToArtists: string;
+  producer: {
+    backToProducers: string;
     about: string;
     notFound: string;
     returnToHome: string;

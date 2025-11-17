@@ -1,13 +1,12 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
-interface ArtistImageProps {
+interface ProducerImageProps {
   image: string;
   name: string;
 }
 
-const ArtistImage = ({ image, name }: ArtistImageProps) => {
+const ProducerImage = ({ image, name }: ProducerImageProps) => {
   const [showAngel, setShowAngel] = useState(true);
 
   useEffect(() => {
@@ -63,4 +62,4 @@ const ArtistImage = ({ image, name }: ArtistImageProps) => {
   );
 };
 
-export default ArtistImage;
+export default ProducerImage;

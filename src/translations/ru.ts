@@ -5,11 +5,11 @@ export const ru: Translations = {
     title: "СДЕЛАНО В АМЕРИКЕ",
     subtitle: "МУЗЫКА - ЭТО ЛЕКАРСТВО"
   },
-  featuredArtists: {
-    title: "Рекомендуемые Исполнители"
+  featuredProducers: {
+    title: "Рекомендуемые Продюсеры"
   },
   audioPlatforms: {
-    title: "Слушать Сейчас",
+    title: "Сообщество",
     treats: "Лакомства"
   },
   services: {
@@ -43,10 +43,10 @@ export const ru: Translations = {
     errorTitle: "Ошибка",
     errorDesc: "Возникла проблема при отправке вашего сообщения. Попробуйте снова."
   },
-  artist: {
-    backToArtists: "Назад к Исполнителям",
-    about: "О исполнителе",
-    notFound: "Исполнитель не найден",
+  producer: {
+    backToProducers: "Назад к Продюсерам",
+    about: "О продюсере",
+    notFound: "Продюсер не найден",
     returnToHome: "Вернуться на главную"
   }
 };
