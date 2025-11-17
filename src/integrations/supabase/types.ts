@@ -91,31 +91,31 @@ export type Database = {
       }
       platforms: {
         Row: {
+          artist_id: string
           created_at: string
+          icon: string
           id: string
-          logo: string
           name: string
-          sort_order: number
-          tagline: string
           updated_at: string
+          url: string
         }
         Insert: {
+          artist_id: string
           created_at?: string
+          icon: string
           id?: string
-          logo: string
           name: string
-          sort_order?: number
-          tagline: string
           updated_at?: string
+          url: string
         }
         Update: {
+          artist_id?: string
           created_at?: string
+          icon?: string
           id?: string
-          logo?: string
           name?: string
-          sort_order?: number
-          tagline?: string
           updated_at?: string
+          url?: string
         }
         Relationships: []
       }
