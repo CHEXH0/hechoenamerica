@@ -126,7 +126,7 @@ serve(async (req) => {
       });
     }
 
-    // Send to Discord
+    // Send to Discord (with thread_name for forum channels)
     const discordResponse = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
@@ -134,7 +134,8 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         content: "🚨 New song request requires producer assignment!",
-        embeds: [embed]
+        embeds: [embed],
+        thread_name: `Song Request ${songRequest.tier} - ${requestId.substring(0, 8)}`
       })
     });
 
