@@ -24,6 +24,10 @@ serve(async (req) => {
   try {
     const { requestId, songIdea, userEmail }: GenerateMusicRequest = await req.json();
 
+    if (!requestId || !songIdea || !userEmail) {
+      throw new Error("Missing required fields: requestId, songIdea, or userEmail");
+    }
+
     console.log("Starting music generation for request:", requestId);
 
     // Initialize Supabase client
@@ -35,7 +39,12 @@ serve(async (req) => {
     // Get Hugging Face API key
     const hfApiKey = Deno.env.get("HUGGING_FACE_API_KEY");
     if (!hfApiKey) {
-      throw new Error("HUGGING_FACE_API_KEY not configured");
+      console.error("HUGGING_FACE_API_KEY not configured");
+      await supabaseClient
+        .from("song_requests")
+        .update({ status: "failed", updated_at: new Date().toISOString() })
+        .eq("id", requestId);
+      throw new Error("AI service not configured. Please contact support.");
     }
 
     // Initialize Hugging Face Inference client
@@ -43,15 +52,24 @@ serve(async (req) => {
     const hf = new HfInference(hfApiKey);
 
     // Generate music using MusicGen
-    const audioBlob = await hf.textToAudio({
-      model: "facebook/musicgen-large",
-      inputs: songIdea,
-      parameters: {
-        max_new_tokens: 256, // Roughly 10 seconds of audio
-      }
-    });
-
-    console.log("Music generation complete");
+    let audioBlob;
+    try {
+      audioBlob = await hf.textToAudio({
+        model: "facebook/musicgen-large",
+        inputs: songIdea,
+        parameters: {
+          max_new_tokens: 256, // Roughly 10 seconds of audio
+        }
+      });
+      console.log("Music generation complete");
+    } catch (hfError) {
+      console.error("Hugging Face API error:", hfError);
+      await supabaseClient
+        .from("song_requests")
+        .update({ status: "failed", updated_at: new Date().toISOString() })
+        .eq("id", requestId);
+      throw new Error("Failed to generate music. Please try again later.");
+    }
 
     // Convert blob to base64 for storage
     const arrayBuffer = await audioBlob.arrayBuffer();
@@ -72,7 +90,11 @@ serve(async (req) => {
 
     if (uploadError) {
       console.error("Error uploading to storage:", uploadError);
-      throw uploadError;
+      await supabaseClient
+        .from("song_requests")
+        .update({ status: "failed", updated_at: new Date().toISOString() })
+        .eq("id", requestId);
+      throw new Error("Failed to save generated song. Please contact support.");
     }
 
     // Get public URL
@@ -117,33 +139,37 @@ serve(async (req) => {
 
     // Send email with song link
     console.log("Sending email to:", userEmail);
-    const emailResponse = await resend.emails.send({
-      from: "HEA Music <onboarding@resend.dev>",
-      to: [userEmail],
-      subject: "Your AI Generated Song is Ready! 🎵",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #333;">Your Song is Ready!</h1>
-          <p>Great news! Your AI-generated song has been created based on your idea:</p>
-          <blockquote style="background: #f5f5f5; padding: 15px; border-left: 4px solid #9b87f5; margin: 20px 0;">
-            "${songIdea}"
-          </blockquote>
-          <p>Click the button below to listen and download your song:</p>
-          <a href="${publicSongUrl}" style="display: inline-block; background: #9b87f5; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0;">
-            🎧 Listen to Your Song
-          </a>
-          <p style="color: #666; font-size: 14px; margin-top: 30px;">
-            This song was generated using AI as part of our free tier service. Enjoy your music!
-          </p>
-          <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-          <p style="color: #999; font-size: 12px;">
-            Want more features? Upgrade to a paid tier for professional production, mixing, mastering, and more!
-          </p>
-        </div>
-      `,
-    });
-
-    console.log("Email sent:", emailResponse);
+    try {
+      const emailResponse = await resend.emails.send({
+        from: "HEA Music <onboarding@resend.dev>",
+        to: [userEmail],
+        subject: "Your AI Generated Song is Ready! 🎵",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #333;">Your Song is Ready!</h1>
+            <p>Great news! Your AI-generated song has been created based on your idea:</p>
+            <blockquote style="background: #f5f5f5; padding: 15px; border-left: 4px solid #9b87f5; margin: 20px 0;">
+              "${songIdea}"
+            </blockquote>
+            <p>Click the button below to listen and download your song:</p>
+            <a href="${publicSongUrl}" style="display: inline-block; background: #9b87f5; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0;">
+              🎧 Listen to Your Song
+            </a>
+            <p style="color: #666; font-size: 14px; margin-top: 30px;">
+              This song was generated using AI as part of our free tier service. Enjoy your music!
+            </p>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+            <p style="color: #999; font-size: 12px;">
+              Want more features? Upgrade to a paid tier for professional production, mixing, mastering, and more!
+            </p>
+          </div>
+        `,
+      });
+      console.log("Email sent:", emailResponse);
+    } catch (emailError) {
+      console.error("Error sending email:", emailError);
+      // Don't fail the whole process if email fails
+    }
 
     return new Response(
       JSON.stringify({ 
