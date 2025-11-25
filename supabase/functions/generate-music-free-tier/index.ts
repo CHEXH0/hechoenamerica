@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "npm:resend@2.0.0";
+import { InferenceClient } from "https://esm.sh/@huggingface/inference@2.3.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -46,36 +47,21 @@ serve(async (req) => {
       throw new Error("AI service not configured. Please contact support.");
     }
 
-    // Generate music using direct HTTP call to Hugging Face API
-    console.log("Calling Hugging Face Inference API...");
+    // Generate audio using Hugging Face InferenceClient (text-to-speech)
+    console.log("Calling Hugging Face Inference API via InferenceClient...");
     
-    let audioBlob;
+    let audioBlob: Blob;
     try {
-      const hfResponse = await fetch(
-        "https://router.huggingface.co/models/facebook/musicgen-small",
-        {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${hfApiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            inputs: songIdea,
-            parameters: {
-              max_new_tokens: 256, // Roughly 10 seconds of audio
-            }
-          })
-        }
-      );
+      const hfClient = new InferenceClient(hfApiKey);
 
-      if (!hfResponse.ok) {
-        const errorText = await hfResponse.text();
-        console.error("Hugging Face API error:", hfResponse.status, errorText);
-        throw new Error(`Hugging Face API error: ${hfResponse.status}`);
-      }
+      const result = await hfClient.textToSpeech({
+        model: "facebook/mms-tts",
+        inputs: songIdea,
+      });
 
-      audioBlob = await hfResponse.blob();
-      console.log("Music generation complete, blob size:", audioBlob.size);
+      // textToSpeech returns a Blob in the browser/Fetch-compatible environments
+      audioBlob = result as Blob;
+      console.log("Audio generation complete, blob size:", (audioBlob as any).size ?? "unknown");
     } catch (hfError) {
       console.error("Hugging Face API error:", hfError);
       await supabaseClient
