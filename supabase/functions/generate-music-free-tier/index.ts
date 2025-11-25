@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "npm:resend@2.0.0";
+import { HfInference } from "https://esm.sh/@huggingface/inference@2.3.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -31,81 +32,56 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Get Suno API key
-    const sunoApiKey = Deno.env.get("SUNO_API_KEY");
-    if (!sunoApiKey) {
-      throw new Error("SUNO_API_KEY not configured");
+    // Get Hugging Face API key
+    const hfApiKey = Deno.env.get("HUGGING_FACE_API_KEY");
+    if (!hfApiKey) {
+      throw new Error("HUGGING_FACE_API_KEY not configured");
     }
 
-    // Call Suno AI to generate music
-    console.log("Calling Suno AI API...");
-    const generateResponse = await fetch("https://api.sunoaiapi.com/api/v1/gateway/generate/music", {
-      method: "POST",
-      headers: {
-        "api-key": sunoApiKey,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: songIdea.substring(0, 80), // Limit title length
-        tags: "free tier, ai generated",
-        prompt: songIdea,
-        mv: "chirp-v3-5", // Latest Suno model
-        continue_at: 0,
-        continue_clip_id: null
-      }),
+    // Initialize Hugging Face Inference client
+    console.log("Calling Hugging Face Inference API...");
+    const hf = new HfInference(hfApiKey);
+
+    // Generate music using MusicGen
+    const audioBlob = await hf.textToAudio({
+      model: "facebook/musicgen-large",
+      inputs: songIdea,
+      parameters: {
+        max_new_tokens: 256, // Roughly 10 seconds of audio
+      }
     });
 
-    if (!generateResponse.ok) {
-      const errorText = await generateResponse.text();
-      console.error("Suno API error:", errorText);
-      throw new Error(`Suno API failed: ${generateResponse.status} - ${errorText}`);
-    }
+    console.log("Music generation complete");
 
-    const generateData = await generateResponse.json();
-    console.log("Generation started:", generateData);
+    // Convert blob to base64 for storage
+    const arrayBuffer = await audioBlob.arrayBuffer();
+    const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    
+    // Create a data URL
+    const songUrl = `data:audio/wav;base64,${base64Audio}`;
 
-    const taskIds = generateData.data?.task_id || generateData.data?.map((item: any) => item.id);
-    if (!taskIds || taskIds.length === 0) {
-      throw new Error("No task ID returned from Suno API");
-    }
-
-    const taskId = Array.isArray(taskIds) ? taskIds[0] : taskIds;
-
-    // Poll for completion (max 5 minutes, check every 10 seconds)
-    console.log("Polling for completion, task ID:", taskId);
-    let songUrl = null;
-    let attempts = 0;
-    const maxAttempts = 30; // 5 minutes
-
-    while (!songUrl && attempts < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, 10000)); // Wait 10 seconds
-      attempts++;
-
-      const statusResponse = await fetch(`https://api.sunoaiapi.com/api/v1/gateway/query?ids=${taskId}`, {
-        method: "GET",
-        headers: {
-          "api-key": sunoApiKey,
-        },
+    // Upload to Supabase Storage for permanent storage
+    const fileName = `free-tier-${requestId}.wav`;
+    const { data: uploadData, error: uploadError } = await supabaseClient
+      .storage
+      .from('audio-samples')
+      .upload(fileName, audioBlob, {
+        contentType: 'audio/wav',
+        upsert: true
       });
 
-      if (statusResponse.ok) {
-        const statusData = await statusResponse.json();
-        console.log(`Poll attempt ${attempts}:`, statusData);
-
-        const songs = Array.isArray(statusData) ? statusData : [statusData];
-        const completedSong = songs.find((s: any) => s.status === "complete" && s.audio_url);
-
-        if (completedSong) {
-          songUrl = completedSong.audio_url;
-          console.log("Song generation complete:", songUrl);
-          break;
-        }
-      }
+    if (uploadError) {
+      console.error("Error uploading to storage:", uploadError);
+      throw uploadError;
     }
 
-    if (!songUrl) {
-      throw new Error("Song generation timed out or failed");
-    }
+    // Get public URL
+    const { data: urlData } = supabaseClient
+      .storage
+      .from('audio-samples')
+      .getPublicUrl(fileName);
+    
+    const publicSongUrl = urlData.publicUrl;
 
     // Update song request with download URL
     const { error: updateError } = await supabaseClient
@@ -130,7 +106,7 @@ serve(async (req) => {
         product_category: "song",
         product_type: "digital",
         price: "0",
-        download_url: songUrl,
+        download_url: publicSongUrl,
         song_idea: songIdea,
         status: "completed",
       });
@@ -153,7 +129,7 @@ serve(async (req) => {
             "${songIdea}"
           </blockquote>
           <p>Click the button below to listen and download your song:</p>
-          <a href="${songUrl}" style="display: inline-block; background: #9b87f5; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0;">
+          <a href="${publicSongUrl}" style="display: inline-block; background: #9b87f5; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0;">
             🎧 Listen to Your Song
           </a>
           <p style="color: #666; font-size: 14px; margin-top: 30px;">
@@ -173,7 +149,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         message: "Song generated and email sent successfully",
-        songUrl 
+        songUrl: publicSongUrl 
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
