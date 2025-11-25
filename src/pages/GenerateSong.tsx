@@ -204,10 +204,10 @@ const GenerateSong = () => {
         
         toast({
           title: "Song Generation Started!",
-          description: "Your song is being generated. You'll receive an email when it's ready!",
+          description: "Your song is being generated. Check the Purchases page for progress updates!",
         });
         
-        navigate("/purchase-confirmation");
+        navigate("/purchases");
       } else {
         // For paid tiers, create song request first, then Stripe checkout
         console.log("Creating paid tier song request...");
