@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "npm:resend@2.0.0";
-import { HfInference } from "https://esm.sh/@huggingface/inference@2.3.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -47,21 +46,36 @@ serve(async (req) => {
       throw new Error("AI service not configured. Please contact support.");
     }
 
-    // Initialize Hugging Face Inference client
+    // Generate music using direct HTTP call to Hugging Face API
     console.log("Calling Hugging Face Inference API...");
-    const hf = new HfInference(hfApiKey);
-
-    // Generate music using MusicGen
+    
     let audioBlob;
     try {
-      audioBlob = await hf.textToAudio({
-        model: "facebook/musicgen-large",
-        inputs: songIdea,
-        parameters: {
-          max_new_tokens: 256, // Roughly 10 seconds of audio
+      const hfResponse = await fetch(
+        "https://api-inference.huggingface.co/models/facebook/musicgen-small",
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${hfApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            inputs: songIdea,
+            parameters: {
+              max_new_tokens: 256, // Roughly 10 seconds of audio
+            }
+          })
         }
-      });
-      console.log("Music generation complete");
+      );
+
+      if (!hfResponse.ok) {
+        const errorText = await hfResponse.text();
+        console.error("Hugging Face API error:", hfResponse.status, errorText);
+        throw new Error(`Hugging Face API error: ${hfResponse.status}`);
+      }
+
+      audioBlob = await hfResponse.blob();
+      console.log("Music generation complete, blob size:", audioBlob.size);
     } catch (hfError) {
       console.error("Hugging Face API error:", hfError);
       await supabaseClient
