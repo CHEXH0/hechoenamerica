@@ -135,7 +135,7 @@ const GenerateSong = () => {
 
       // Create song request record in database
       if (currentTier.price === 0) {
-        // For free tier, create a pending request
+        // For free tier, create a generating request
         console.log("Creating free tier song request...");
         const { data: requestData, error: insertError } = await supabase
           .from('song_requests')
@@ -145,7 +145,7 @@ const GenerateSong = () => {
             song_idea: idea,
             tier: currentTier.label,
             price: currentTier.label,
-            status: 'pending',
+            status: 'generating',
             file_urls: fileUrls.length > 0 ? fileUrls : null,
             number_of_revisions: numberOfRevisions,
             wants_recorded_stems: wantsRecordedStems,
@@ -162,6 +162,27 @@ const GenerateSong = () => {
         }
         
         console.log("Song request created:", requestData?.id);
+        
+        // Show initial toast
+        toast({
+          title: "Generating Your Song! 🎵",
+          description: "Please wait while we create your AI-generated song. This may take a few minutes...",
+        });
+
+        // Trigger AI music generation (runs in background)
+        supabase.functions.invoke('generate-music-free-tier', {
+          body: { 
+            requestId: requestData.id,
+            songIdea: idea,
+            userEmail: user.email || ''
+          }
+        }).then(({ data, error }) => {
+          if (error) {
+            console.error('Music generation error:', error);
+          } else {
+            console.log('Music generation started:', data);
+          }
+        });
         
         // Send Discord notification
         try {
@@ -182,8 +203,8 @@ const GenerateSong = () => {
         }
         
         toast({
-          title: "Request submitted!",
-          description: `Your song request has been saved with ${fileUrls.length} file(s).`,
+          title: "Song Generation Started!",
+          description: "Your song is being generated. You'll receive an email when it's ready!",
         });
         
         navigate("/purchase-confirmation");
