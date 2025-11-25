@@ -52,7 +52,7 @@ serve(async (req) => {
     let audioBlob;
     try {
       const hfResponse = await fetch(
-        "https://api-inference.huggingface.co/models/facebook/musicgen-small",
+        "https://router.huggingface.co/models/facebook/musicgen-small",
         {
           method: "POST",
           headers: {
