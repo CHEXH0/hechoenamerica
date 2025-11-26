@@ -1,18 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Package, Calendar, DollarSign, Music, Mic, Candy, Download } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePurchases } from "@/hooks/usePurchases";
-import { useSongRequests } from "@/hooks/useSongRequests";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SongGenerationProgress } from "@/components/SongGenerationProgress";
 import {
   Table,
   TableBody,
@@ -26,33 +23,6 @@ const Purchases = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { data: purchases, isLoading, error } = usePurchases();
-  const { data: songRequests, isLoading: isLoadingSongs, refetch: refetchSongRequests } = useSongRequests();
-
-  // Set up real-time subscription for song requests
-  useEffect(() => {
-    if (!user) return;
-
-    const channel = supabase
-      .channel('song_requests_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'song_requests',
-          filter: `user_id=eq.${user.id}`
-        },
-        (payload) => {
-          console.log('Song request updated:', payload);
-          refetchSongRequests();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user, refetchSongRequests]);
 
   if (authLoading) {
     return (
@@ -265,7 +235,7 @@ const Purchases = () => {
           </Card>
         </motion.div>
 
-        {/* Purchases and Song Requests */}
+        {/* Purchases Table */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -273,68 +243,9 @@ const Purchases = () => {
         >
           <Card>
             <CardHeader>
-              <CardTitle>My Orders</CardTitle>
+              <CardTitle>Purchase History</CardTitle>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="songs" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="songs">Song Requests</TabsTrigger>
-                  <TabsTrigger value="products">Product Purchases</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="songs" className="space-y-4">
-                  {isLoadingSongs ? (
-                    <div className="space-y-4">
-                      {[...Array(3)].map((_, i) => (
-                        <Skeleton key={i} className="h-32 w-full" />
-                      ))}
-                    </div>
-                  ) : !songRequests || songRequests.length === 0 ? (
-                    <div className="text-center py-12">
-                      <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No song requests yet</h3>
-                      <p className="text-muted-foreground mb-4">
-                        Create your first AI-generated song!
-                      </p>
-                      <Button onClick={() => navigate('/generate-song')}>
-                        Generate Song
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {songRequests.map((request) => {
-                        // Find matching purchase for download URL
-                        const matchingPurchase = purchases?.find(
-                          p => p.song_idea === request.song_idea && p.download_url
-                        );
-
-                        return (
-                          <SongGenerationProgress
-                            key={request.id}
-                            status={request.status}
-                            songIdea={request.song_idea}
-                            tier={request.tier}
-                            requestId={request.id}
-                            onDownload={matchingPurchase?.download_url ? () => {
-                              const link = document.createElement('a');
-                              link.href = matchingPurchase.download_url!;
-                              link.download = 'song.wav';
-                              document.body.appendChild(link);
-                              link.click();
-                              document.body.removeChild(link);
-                              toast({
-                                title: "Download Started",
-                                description: "Your song is downloading...",
-                              });
-                            } : undefined}
-                          />
-                        );
-                      })}
-                    </div>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="products">
               {isLoading ? (
                 <div className="space-y-4">
                   {[...Array(5)].map((_, i) => (
@@ -419,8 +330,6 @@ const Purchases = () => {
                   </Table>
                 </div>
               )}
-                </TabsContent>
-              </Tabs>
             </CardContent>
           </Card>
         </motion.div>

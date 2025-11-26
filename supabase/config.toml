@@ -32,6 +32,3 @@ verify_jwt = true
 
 [functions.send-discord-notification]
 verify_jwt = true
-
-[functions.generate-music-free-tier]
-verify_jwt = true
