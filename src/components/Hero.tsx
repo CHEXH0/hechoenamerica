@@ -35,8 +35,11 @@ const Hero = () => {
             />
           </div>
           <h1 className="text-4xl md:text-6xl font-bold mb-4">
-            {t.hero.title}
+            Hecho En America Studio
           </h1>
+          <p className="text-lg md:text-xl text-gray-400 mb-2">
+            {t.hero.title}
+          </p>
           <p className="text-xl md:text-2xl text-gray-300 mb-8">
             {t.hero.subtitle}
           </p>
