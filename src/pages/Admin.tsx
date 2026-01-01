@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload, Users, User, Database, TrendingUp, DollarSign, FileText } from "lucide-react";
+import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload, Users, User, Database, TrendingUp, DollarSign, FileText, HardDrive } from "lucide-react";
+import { GoogleDriveConnect } from "@/components/GoogleDriveConnect";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -425,6 +426,9 @@ const Admin = () => {
               )}
             </CardContent>
           </Card>
+
+          {/* Google Drive Integration for producers */}
+          <GoogleDriveConnect />
 
           {isAdmin && (
             <>
