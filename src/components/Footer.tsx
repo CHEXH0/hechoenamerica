@@ -7,11 +7,11 @@ const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-center md:text-left">
-            <h3 className="text-xl font-bold text-white mb-2">Hecho En América</h3>
+            <h3 className="text-xl font-bold text-white mb-2">Hecho En America Studio</h3>
             <p className="text-gray-400 text-sm max-w-md">
-              A production management platform that allows producers to seamlessly 
-              upload project files directly to their personal Google Drive for secure 
-              storage and organization.
+              A secure production portal using Google Drive integration to allow authorized 
+              producers to upload high-resolution media assets directly to their own secure 
+              cloud storage.
             </p>
           </div>
           
