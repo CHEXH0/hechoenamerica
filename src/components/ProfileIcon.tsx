@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, LogIn, Settings } from 'lucide-react';
+import { User, LogIn, Settings, Music, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -62,10 +62,17 @@ const ProfileIcon = () => {
           Profile Settings
         </DropdownMenuItem>
         <DropdownMenuItem 
+          onClick={() => navigate('/my-projects')}
+          className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
+        >
+          <Music className="h-4 w-4 mr-2" />
+          My Projects
+        </DropdownMenuItem>
+        <DropdownMenuItem 
           onClick={() => navigate('/purchases')}
           className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
         >
-          <Settings className="h-4 w-4 mr-2" />
+          <ShoppingBag className="h-4 w-4 mr-2" />
           My Purchases
         </DropdownMenuItem>
         {user.email === 'hechoenamerica369@gmail.com' && (
