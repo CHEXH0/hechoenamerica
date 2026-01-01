@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload, Users, User, Database, TrendingUp, DollarSign, FileText, HardDrive } from "lucide-react";
 import { GoogleDriveConnect } from "@/components/GoogleDriveConnect";
+import { ProducerProjects } from "@/components/ProducerProjects";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -344,88 +345,8 @@ const Admin = () => {
           transition={{ delay: 0.1 }}
           className="space-y-6"
         >
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Music className="h-5 w-5" />
-                Pending Song Generations
-              </CardTitle>
-              <CardDescription>
-                Upload completed songs for customers
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {pendingPurchases.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">No pending purchases</p>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Customer</TableHead>
-                      <TableHead>Tier</TableHead>
-                      <TableHead>Idea</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {pendingPurchases.map((purchase) => (
-                      <TableRow key={purchase.id}>
-                        <TableCell>
-                          {purchase.user_id?.substring(0, 8)}...
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="bg-orange-500/10 text-orange-600">
-                            {purchase.product_category}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="max-w-xs truncate">
-                          {purchase.song_idea || 'N/A'}
-                        </TableCell>
-                        <TableCell>
-                          {new Date(purchase.created_at).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
-                          <Label htmlFor={`upload-${purchase.id}`} className="cursor-pointer">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              disabled={uploadingId === purchase.id}
-                              asChild
-                            >
-                              <span>
-                                {uploadingId === purchase.id ? (
-                                  <>
-                                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                                    Uploading...
-                                  </>
-                                ) : (
-                                  <>
-                                    <Upload className="mr-2 h-4 w-4" />
-                                    Upload Song
-                                  </>
-                                )}
-                              </span>
-                            </Button>
-                          </Label>
-                          <Input
-                            id={`upload-${purchase.id}`}
-                            type="file"
-                            accept=".mp3,.wav,.m4a,.flac"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) handleFileUpload(purchase.id, file);
-                            }}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
+          {/* Producer Projects - shows assigned song requests */}
+          <ProducerProjects />
 
           {/* Google Drive Integration for producers */}
           <GoogleDriveConnect />
