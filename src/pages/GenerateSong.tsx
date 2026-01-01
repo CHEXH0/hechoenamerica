@@ -7,11 +7,24 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Upload, Plus, ChevronDown } from "lucide-react";
 import FileDeleter from "@/components/FileDeleter";
+
+const genreCategories = [
+  { value: "hip-hop", label: "Hip Hop / Trap / Rap" },
+  { value: "rnb", label: "R&B / Soul" },
+  { value: "reggae", label: "Reggae / Dancehall" },
+  { value: "latin", label: "Latin / Reggaeton" },
+  { value: "electronic", label: "Electronic / EDM" },
+  { value: "pop", label: "Pop / Alternative" },
+  { value: "rock", label: "Rock / Indie" },
+  { value: "world", label: "World / Indigenous / Medicina" },
+  { value: "other", label: "Other / Mixed" },
+];
 const tiers = [
   { label: "$0", price: 0, description: "Free AI Generated - for comparison", priceId: null },
   { label: "$25", price: 25, description: "Demo Project - for ideas (30sec)", priceId: "price_1SHdNFQchHjxRXODM3DJdjEE" },
@@ -31,6 +44,7 @@ const GenerateSong = () => {
   const [wantsMixing, setWantsMixing] = useState(false);
   const [wantsMastering, setWantsMastering] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const [selectedGenre, setSelectedGenre] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -151,7 +165,8 @@ const GenerateSong = () => {
             wants_recorded_stems: wantsRecordedStems,
             wants_analog: wantsAnalog,
             wants_mixing: wantsMixing,
-            wants_mastering: wantsMastering
+            wants_mastering: wantsMastering,
+            genre_category: selectedGenre || null
           })
           .select()
           .single();
@@ -163,6 +178,16 @@ const GenerateSong = () => {
         
         console.log("Song request created:", requestData?.id);
         
+        // Auto-match producer based on genre
+        try {
+          const { data: matchData } = await supabase.functions.invoke('auto-match-producer', {
+            body: { requestId: requestData?.id }
+          });
+          console.log("Producer matched:", matchData?.producerName);
+        } catch (matchError) {
+          console.error("Failed to auto-match producer:", matchError);
+        }
+
         // Send Discord notification
         try {
           await supabase.functions.invoke('send-discord-notification', {
@@ -178,7 +203,6 @@ const GenerateSong = () => {
           console.log("Discord notification sent");
         } catch (notifError) {
           console.error("Failed to send Discord notification:", notifError);
-          // Don't fail the submission if Discord notification fails
         }
         
         toast({
@@ -204,7 +228,8 @@ const GenerateSong = () => {
             wants_recorded_stems: wantsRecordedStems,
             wants_analog: wantsAnalog,
             wants_mixing: wantsMixing,
-            wants_mastering: wantsMastering
+            wants_mastering: wantsMastering,
+            genre_category: selectedGenre || null
           })
           .select()
           .single();
@@ -216,6 +241,16 @@ const GenerateSong = () => {
 
         console.log("Song request created:", requestData?.id);
         
+        // Auto-match producer based on genre
+        try {
+          const { data: matchData } = await supabase.functions.invoke('auto-match-producer', {
+            body: { requestId: requestData?.id }
+          });
+          console.log("Producer matched:", matchData?.producerName);
+        } catch (matchError) {
+          console.error("Failed to auto-match producer:", matchError);
+        }
+
         // Send Discord notification
         try {
           await supabase.functions.invoke('send-discord-notification', {
@@ -231,7 +266,6 @@ const GenerateSong = () => {
           console.log("Discord notification sent");
         } catch (notifError) {
           console.error("Failed to send Discord notification:", notifError);
-          // Don't fail the submission if Discord notification fails
         }
         
         console.log("Initiating Stripe checkout...");
@@ -372,6 +406,27 @@ const GenerateSong = () => {
                   </motion.div>
                 )}
               </AnimatePresence>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-white text-lg font-semibold">
+                Genre / Style
+              </Label>
+              <Select value={selectedGenre} onValueChange={setSelectedGenre}>
+                <SelectTrigger className="bg-white/20 border-white/30 text-white">
+                  <SelectValue placeholder="Select your preferred genre" />
+                </SelectTrigger>
+                <SelectContent>
+                  {genreCategories.map((genre) => (
+                    <SelectItem key={genre.value} value={genre.value}>
+                      {genre.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-white/60 text-xs">
+                We'll match you with a producer who specializes in this style
+              </p>
             </div>
 
             <div className="space-y-2">
