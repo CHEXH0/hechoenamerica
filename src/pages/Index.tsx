@@ -4,6 +4,7 @@ import Hero from "@/components/Hero";
 import FeaturedProducers from "@/components/FeaturedProducers";
 import AudioPlatforms from "@/components/AudioPlatforms";
 import Services from "@/components/Services";
+import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
@@ -29,6 +30,23 @@ const Index = () => {
           </Button>
         </div>
       </section>
+      
+      {/* Google Drive Integration Section */}
+      <section className="py-16 bg-black">
+        <div className="container mx-auto px-4 text-center max-w-3xl">
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">
+            Seamless File Delivery
+          </h2>
+          <p className="text-gray-300 text-lg leading-relaxed">
+            HEA is a production management platform that allows producers to seamlessly 
+            upload project files directly to their personal Google Drive for secure 
+            storage and organization. Your finished tracks and stems are delivered 
+            straight to your cloud storage, making collaboration effortless.
+          </p>
+        </div>
+      </section>
+      
+      <Footer />
     </div>
   );
 };
