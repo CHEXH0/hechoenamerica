@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Music, Download, Clock, CheckCircle, Loader2, FileAudio, Calendar, User } from "lucide-react";
+import { ArrowLeft, Music, Download, Clock, CheckCircle, Loader2, FileAudio, Calendar, User, Wifi } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
 
 interface SongRequest {
   id: string;
@@ -78,6 +79,8 @@ const MyProjects = () => {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [producers, setProducers] = useState<Record<string, Producer>>({});
   const [loading, setLoading] = useState(true);
+  const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -90,6 +93,87 @@ const MyProjects = () => {
       fetchProjects();
     }
   }, [user]);
+
+  // Real-time subscription for song_requests updates
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('my-projects-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'song_requests',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('Real-time update received:', payload);
+          const updatedProject = payload.new as SongRequest;
+          
+          setProjects((prev) =>
+            prev.map((p) =>
+              p.id === updatedProject.id ? { ...p, ...updatedProject } : p
+            )
+          );
+
+          // Show toast for status changes
+          toast({
+            title: "Project Updated",
+            description: `Your project status changed to: ${statusLabels[updatedProject.status] || updatedProject.status}`,
+          });
+
+          // If a producer was assigned, fetch their info
+          if (updatedProject.assigned_producer_id && !producers[updatedProject.assigned_producer_id]) {
+            supabase
+              .from("producers")
+              .select("id, name, image")
+              .eq("id", updatedProject.assigned_producer_id)
+              .single()
+              .then(({ data }) => {
+                if (data) {
+                  setProducers((prev) => ({ ...prev, [data.id]: data }));
+                }
+              });
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'purchases',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('Purchase update received:', payload);
+          const updatedPurchase = payload.new as Purchase;
+          
+          setPurchases((prev) =>
+            prev.map((p) =>
+              p.id === updatedPurchase.id ? { ...p, ...updatedPurchase } : p
+            )
+          );
+
+          if (updatedPurchase.download_url) {
+            toast({
+              title: "🎉 Your Song is Ready!",
+              description: "Your completed song is now available for download.",
+            });
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('Realtime subscription status:', status);
+        setIsRealtimeConnected(status === 'SUBSCRIBED');
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, toast]);
 
   const fetchProjects = async () => {
     try {
@@ -199,12 +283,24 @@ const MyProjects = () => {
             Back to Home
           </Button>
 
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent mb-2">
-            My Projects
-          </h1>
-          <p className="text-muted-foreground">
-            Track the progress of your song requests
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent mb-2">
+                My Projects
+              </h1>
+              <p className="text-muted-foreground">
+                Track the progress of your song requests
+              </p>
+            </div>
+            {/* Real-time connection indicator */}
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${isRealtimeConnected ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+              <span className="text-xs text-muted-foreground">
+                {isRealtimeConnected ? 'Live updates' : 'Connecting...'}
+              </span>
+              <Wifi className={`h-4 w-4 ${isRealtimeConnected ? 'text-green-500' : 'text-muted-foreground'}`} />
+            </div>
+          </div>
         </motion.div>
 
         {/* Projects List */}
