@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import Waveform from "./Waveform";
 import LanguageSelector from "./LanguageSelector";
 import ProfileIcon from "./ProfileIcon";
@@ -37,13 +38,26 @@ const Hero = () => {
           <h1 className="text-4xl md:text-6xl font-bold mb-4">
             Hecho En America Studio
           </h1>
-          <p className="text-lg md:text-xl text-gray-400 mb-2">
-            {t.hero.title}
+          <p className="text-lg md:text-xl text-gray-300 mb-6 max-w-3xl mx-auto">
+            A secure production portal using Google Drive integration to allow authorized 
+            producers to upload high-resolution media assets directly to their own secure 
+            cloud storage.
           </p>
-          <p className="text-xl md:text-2xl text-gray-300 mb-8">
+          <p className="text-base md:text-lg text-gray-400 mb-8">
             {t.hero.subtitle}
           </p>
           <Waveform />
+          
+          {/* Privacy Policy Link for Google Verification */}
+          <div className="mt-8 text-sm text-gray-500">
+            <Link to="/privacy-policy" className="hover:text-white transition-colors underline">
+              Privacy Policy
+            </Link>
+            <span className="mx-2">•</span>
+            <Link to="/terms-of-service" className="hover:text-white transition-colors underline">
+              Terms of Service
+            </Link>
+          </div>
         </motion.div>
       </div>
     </section>
