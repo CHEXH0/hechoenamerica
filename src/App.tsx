@@ -17,6 +17,8 @@ import Purchases from "./pages/Purchases";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PurchaseConfirmation from "./pages/PurchaseConfirmation";
 import GenerateSong from "./pages/GenerateSong";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +44,8 @@ const App = () => (
               <Route path="/payment-success" element={<PaymentSuccess />} />
               <Route path="/purchase-confirmation" element={<PurchaseConfirmation />} />
               <Route path="/generate-song" element={<GenerateSong />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-of-service" element={<TermsOfService />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
