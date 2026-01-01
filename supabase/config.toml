@@ -32,3 +32,12 @@ verify_jwt = true
 
 [functions.send-discord-notification]
 verify_jwt = true
+
+[functions.google-auth-start]
+verify_jwt = true
+
+[functions.google-auth-callback]
+verify_jwt = false
+
+[functions.upload-to-google-drive]
+verify_jwt = true
