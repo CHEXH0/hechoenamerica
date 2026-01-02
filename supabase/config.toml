@@ -1,21 +1,6 @@
 project_id = "eapbuoqkhckqaswfjexv"
 
-[functions.sync-products-to-stripe]
-verify_jwt = true
-
-[functions.create-payment]
-verify_jwt = true
-
-[functions.verify-payment]
-verify_jwt = false
-
 [functions.send-contact-email]
-verify_jwt = false
-
-[functions.create-song-checkout]
-verify_jwt = true
-
-[functions.verify-song-payment]
 verify_jwt = false
 
 [functions.update-purchase-status]
