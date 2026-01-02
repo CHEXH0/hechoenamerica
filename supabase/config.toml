@@ -44,3 +44,6 @@ verify_jwt = true
 
 [functions.auto-match-producer]
 verify_jwt = true
+
+[functions.generate-music]
+verify_jwt = true
