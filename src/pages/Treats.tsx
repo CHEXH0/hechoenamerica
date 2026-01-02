@@ -37,7 +37,7 @@ const Treats = () => {
   }>({});
   const [vstCurrentPage, setVstCurrentPage] = useState(1);
   const vstItemsPerPage = 6;
-  
+  const [syncingProducts, setSyncingProducts] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
 
   // Organize products by category
@@ -320,7 +320,7 @@ const Treats = () => {
         window.open(data.url, '_blank');
         toast({
           title: "Redirecting to Checkout",
-          description: "Opening checkout in a new tab...",
+          description: "Opening Stripe checkout in a new tab...",
         });
       } else {
         throw new Error('No checkout URL received');
@@ -329,12 +329,50 @@ const Treats = () => {
       console.error('Buy now error:', error);
       toast({
         title: "Purchase Failed",
-        description: error instanceof Error ? error.message : "Please try again later.",
+        description: error instanceof Error ? error.message : "Please try again or sync products to Stripe first.",
         variant: "destructive",
       });
     }
   };
 
+  const handleSyncToStripe = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to sync products to Stripe.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSyncingProducts(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-products-to-stripe');
+
+      if (error) {
+        throw error;
+      }
+
+      const results = data?.results || [];
+      const successful = results.filter((r: any) => r.status === 'success').length;
+      const errors = results.filter((r: any) => r.status === 'error').length;
+
+      toast({
+        title: "Sync Completed! ✅",
+        description: `${successful} products synced successfully${errors > 0 ? `, ${errors} errors` : ''}.`,
+      });
+    } catch (error) {
+      console.error('Error syncing products:', error);
+      toast({
+        title: "Sync Failed",
+        description: "Failed to sync products to Stripe. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSyncingProducts(false);
+    }
+  };
 
   const renderProductCard = (product: Product, icon: React.ReactNode, category: string) => (
     <motion.div 
@@ -663,7 +701,7 @@ const Treats = () => {
           Back to Home
         </Link>
 
-        {/* Cart button for authenticated users */}
+        {/* Sync to Stripe button and Cart button for authenticated users */}
         {user && (
           <motion.div
             className="mb-6 flex gap-4 items-center"
@@ -671,6 +709,29 @@ const Treats = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.2 }}
           >
+            {isAdmin && (
+              <Button
+                onClick={handleSyncToStripe}
+                disabled={syncingProducts}
+                variant="outline"
+                className="border-purple-400/50 text-purple-400 hover:bg-purple-500/20 hover:border-purple-400"
+              >
+                {syncingProducts ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="mr-2"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </motion.div>
+                ) : (
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                )}
+                {syncingProducts ? 'Syncing...' : 'Sync Products to Stripe'}
+              </Button>
+            )}
+
+
             <Button
               onClick={() => setCartOpen(true)}
               variant="outline"

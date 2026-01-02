@@ -2,10 +2,13 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart, X, Plus, Minus, Trash2, CreditCard } from 'lucide-react';
 import { Button } from './ui/button';
+import { Input } from './ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
+import { Separator } from './ui/separator';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 interface CartProps {
@@ -16,6 +19,7 @@ interface CartProps {
 export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
   const { items, updateQuantity, removeItem, clearCart, getItemCount, getTotalPrice } = useCart();
   const { user } = useAuth();
+  const [isCheckingOut, setIsCheckingOut] = React.useState(false);
 
   const handleCheckout = async () => {
     if (!user) {
@@ -36,11 +40,48 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
       return;
     }
 
-    // Payment integration coming soon
-    toast({
-      title: "Payment Coming Soon",
-      description: "Our payment system is being updated. Please check back soon!",
-    });
+    setIsCheckingOut(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
+          items: items.map(item => ({
+            product_id: item.product_id,
+            quantity: item.quantity
+          }))
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.url) {
+        // Open Stripe checkout in new tab
+        window.open(data.url, '_blank');
+        
+        // Clear cart after successful checkout initiation
+        clearCart();
+        onClose();
+        
+        toast({
+          title: "Redirecting to Checkout",
+          description: "Opening Stripe checkout in a new tab...",
+        });
+      } else {
+        throw new Error('No checkout URL received');
+      }
+
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast({
+        title: "Checkout Failed",
+        description: error instanceof Error ? error.message : "Please try again or sync products to Stripe first.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCheckingOut(false);
+    }
   };
 
   return (
@@ -180,10 +221,21 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                     
                     <Button
                       onClick={handleCheckout}
+                      disabled={isCheckingOut}
                       className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white border-0 py-6"
                     >
-                      <CreditCard className="h-5 w-5 mr-2" />
-                      Checkout
+                      {isCheckingOut ? (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          className="mr-2"
+                        >
+                          <CreditCard className="h-5 w-5" />
+                        </motion.div>
+                      ) : (
+                        <CreditCard className="h-5 w-5 mr-2" />
+                      )}
+                      {isCheckingOut ? 'Processing...' : 'Checkout with Stripe'}
                     </Button>
                     
                     <Button

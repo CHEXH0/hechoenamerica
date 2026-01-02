@@ -25,7 +25,7 @@ const Admin = () => {
   const { user, loading: authLoading } = useAuth();
   const { data: userRole, isLoading: roleLoading } = useUserRole();
   const { toast } = useToast();
-  
+  const [isSyncing, setIsSyncing] = useState(false);
   const [pendingPurchases, setPendingPurchases] = useState<Purchase[]>([]);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [users, setUsers] = useState<any[]>([]);
@@ -257,6 +257,43 @@ const Admin = () => {
       setUploadingId(null);
     }
   };
+
+  const handleSyncProducts = async () => {
+    setIsSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-products-to-stripe', {
+        body: {},
+      });
+
+      if (error) throw error;
+
+      const payload: any = data || {};
+      const results = Array.isArray(payload.results) ? payload.results : [];
+      const successCount = results.filter((r: any) => r.status === 'success').length;
+      const errorCount = results.filter((r: any) => r.status === 'error').length;
+
+      toast({
+        title: payload.success ? "Sync Successful" : "Sync Completed",
+        description: `${payload.message || 'Finished syncing.'} ${successCount ? `✓ ${successCount} ok.` : ''} ${errorCount ? `⚠️ ${errorCount} with issues.` : ''}`.trim(),
+      });
+
+      if (errorCount) {
+        toast({
+          title: "Tips to fix issues",
+          description: "Ensure product prices are numeric (e.g., 49.99) or 'Free', then run sync again.",
+        });
+      }
+    } catch (err) {
+      console.error('Sync error:', err);
+      toast({
+        title: "Sync Failed",
+        description: "Failed to sync products to Stripe. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20">
       {/* Background Effects */}
@@ -412,7 +449,28 @@ const Admin = () => {
                 </CardContent>
               </Card>
 
-              <div className="grid grid-cols-1 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <RefreshCw className="h-5 w-5" />
+                      Stripe Integration
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground mb-4">
+                      Sync products from Supabase to Stripe for payment processing.
+                    </p>
+                    <Button 
+                      onClick={handleSyncProducts}
+                      disabled={isSyncing}
+                      className="w-full"
+                    >
+                      <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                      {isSyncing ? "Syncing..." : "Sync Products to Stripe"}
+                    </Button>
+                  </CardContent>
+                </Card>
 
                 <Card>
                   <CardHeader>
