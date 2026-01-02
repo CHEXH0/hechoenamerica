@@ -26,10 +26,10 @@ const genreCategories = [
   { value: "other", label: "Other / Mixed" },
 ];
 const tiers = [
-  { label: "$0", price: 0, description: "Free AI Generated - for comparison", priceId: null },
-  { label: "$25", price: 25, description: "Demo Project - for ideas (30sec)", priceId: "price_1SHdNFQchHjxRXODM3DJdjEE" },
-  { label: "$125", price: 125, description: "Artist-grade quality - for production (180sec)", priceId: "price_1SHdNVQchHjxRXODn3lW4vDj" },
-  { label: "$250", price: 250, description: "Industry standard - for masterpiece (300sec)", priceId: "price_1SHdNmQchHjxRXODgqWhW9TO" }
+  { label: "$0", price: 0, description: "Free AI Generated - for comparison" },
+  { label: "$25", price: 25, description: "Demo Project - for ideas (30sec)" },
+  { label: "$125", price: 125, description: "Artist-grade quality - for production (180sec)" },
+  { label: "$250", price: 250, description: "Industry standard - for masterpiece (300sec)" }
 ];
 
 const GenerateSong = () => {
@@ -212,7 +212,7 @@ const GenerateSong = () => {
         
         navigate("/purchase-confirmation");
       } else {
-        // For paid tiers, create song request first, then Stripe checkout
+        // For paid tiers, create song request and mark as pending_payment
         console.log("Creating paid tier song request...");
         const { data: requestData, error: insertError } = await supabase
           .from('song_requests')
@@ -268,28 +268,13 @@ const GenerateSong = () => {
           console.error("Failed to send Discord notification:", notifError);
         }
         
-        console.log("Initiating Stripe checkout...");
-
-        const { data: sessionData, error } = await supabase.functions.invoke('create-song-checkout', {
-          body: {
-            priceId: currentTier.priceId,
-            tier: currentTier.label,
-            idea,
-            fileUrls: fileUrls,
-            requestId: requestData.id
-          }
+        // TODO: Payment integration will be added here
+        toast({
+          title: "Request submitted!",
+          description: "Your song request has been saved. Payment integration coming soon.",
         });
-
-        if (error) {
-          console.error("Stripe checkout error:", error);
-          throw error;
-        }
         
-        if (sessionData?.url) {
-          console.log("Redirecting to Stripe checkout...");
-          // Redirect to Stripe checkout in the same window
-          window.location.href = sessionData.url;
-        }
+        navigate("/my-projects");
       }
     } catch (error) {
       console.error("Submission error:", error);

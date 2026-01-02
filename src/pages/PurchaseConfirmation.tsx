@@ -1,43 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 
 const PurchaseConfirmation = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const [countdown, setCountdown] = useState(10);
-  const [emailSent, setEmailSent] = useState(false);
-  const [purchaseDetails, setPurchaseDetails] = useState<any>(null);
-  const sessionId = searchParams.get('session_id');
-
-  // Verify payment and send confirmation email
-  useEffect(() => {
-    const verifyAndSendEmail = async () => {
-      if (emailSent || !sessionId) return;
-
-      try {
-        const { data, error } = await supabase.functions.invoke('verify-song-payment', {
-          body: { session_id: sessionId }
-        });
-
-        if (error) throw error;
-
-        if (data?.purchaseDetails) {
-          setPurchaseDetails(data.purchaseDetails);
-        }
-        setEmailSent(true);
-      } catch (error) {
-        console.error("Failed to verify payment and send email:", error);
-      }
-    };
-
-    verifyAndSendEmail();
-  }, [emailSent, sessionId]);
 
   // Countdown timer
   useEffect(() => {
@@ -79,24 +50,11 @@ const PurchaseConfirmation = () => {
 
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-white">
-            Purchase Successful!
+            Request Submitted!
           </h1>
           <p className="text-white/80 text-lg">
-            Thank you for your purchase. Your order has been confirmed.
+            Thank you for your request. We'll be in touch soon.
           </p>
-          {purchaseDetails && (
-            <div className="bg-white/5 rounded-lg p-4 border border-white/10 mt-4 text-left">
-              <h3 className="text-white font-semibold mb-2">Purchase Details:</h3>
-              <p className="text-white/70 text-sm"><strong>Tier:</strong> {purchaseDetails.tier}</p>
-              <p className="text-white/70 text-sm"><strong>Product:</strong> {purchaseDetails.productName}</p>
-              <p className="text-white/70 text-sm"><strong>Amount:</strong> {purchaseDetails.amount}</p>
-            </div>
-          )}
-          {purchaseDetails?.email && (
-            <p className="text-white/70 text-sm">
-              A confirmation email has been sent to {purchaseDetails.email}
-            </p>
-          )}
         </div>
 
         <div className="bg-white/5 rounded-lg p-4 border border-white/10">
@@ -117,7 +75,7 @@ const PurchaseConfirmation = () => {
         </Button>
 
         <p className="text-white/60 text-sm">
-          Check your email for order details and download links.
+          Check your email for updates on your request.
         </p>
       </motion.div>
     </div>
