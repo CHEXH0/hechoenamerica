@@ -45,6 +45,9 @@ const GenerateSong = () => {
   const [wantsMastering, setWantsMastering] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState("");
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [aiProgress, setAiProgress] = useState("");
+  const [generatedAudioUrl, setGeneratedAudioUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -149,68 +152,113 @@ const GenerateSong = () => {
 
       // Create song request record in database
       if (currentTier.price === 0) {
-        // For free tier, create a pending request
-        console.log("Creating free tier song request...");
-        const { data: requestData, error: insertError } = await supabase
-          .from('song_requests')
-          .insert({
-            user_id: user.id,
-            user_email: user.email || '',
-            song_idea: idea,
-            tier: currentTier.label,
-            price: currentTier.label,
-            status: 'pending',
-            file_urls: fileUrls.length > 0 ? fileUrls : null,
-            number_of_revisions: numberOfRevisions,
-            wants_recorded_stems: wantsRecordedStems,
-            wants_analog: wantsAnalog,
-            wants_mixing: wantsMixing,
-            wants_mastering: wantsMastering,
-            genre_category: selectedGenre || null
-          })
-          .select()
-          .single();
+        // For free tier, generate AI music with MusicGen
+        console.log("Starting AI music generation...");
+        setIsGeneratingAI(true);
+        setAiProgress("Starting AI generation...");
         
-        if (insertError) {
-          console.error("Database insert error:", insertError);
-          throw insertError;
-        }
-        
-        console.log("Song request created:", requestData?.id);
-        
-        // Auto-match producer based on genre
         try {
-          const { data: matchData } = await supabase.functions.invoke('auto-match-producer', {
-            body: { requestId: requestData?.id }
-          });
-          console.log("Producer matched:", matchData?.producerName);
-        } catch (matchError) {
-          console.error("Failed to auto-match producer:", matchError);
-        }
-
-        // Send Discord notification
-        try {
-          await supabase.functions.invoke('send-discord-notification', {
-            body: {
-              requestId: requestData?.id,
-              requestData: {
-                tier: currentTier.label,
-                idea,
-                fileCount: fileUrls.length
-              }
+          // Build a descriptive prompt combining genre and idea
+          const genreLabel = genreCategories.find(g => g.value === selectedGenre)?.label || "";
+          const musicPrompt = `${genreLabel ? genreLabel + " style. " : ""}${idea}`;
+          
+          // Start the generation
+          setAiProgress("Sending request to AI...");
+          const { data: startData, error: startError } = await supabase.functions.invoke('generate-music', {
+            body: { 
+              prompt: musicPrompt,
+              duration: 15 // 15 seconds for free tier
             }
           });
-          console.log("Discord notification sent");
-        } catch (notifError) {
-          console.error("Failed to send Discord notification:", notifError);
+
+          if (startError) {
+            console.error("AI generation error:", startError);
+            throw new Error(startError.message || "Failed to start AI generation");
+          }
+
+          console.log("Generation response:", startData);
+
+          // If completed immediately
+          if (startData.status === 'succeeded' && startData.output) {
+            setGeneratedAudioUrl(startData.output);
+            setAiProgress("Generation complete!");
+            toast({
+              title: "🎵 AI Song Generated!",
+              description: "Your free AI-generated song is ready to play.",
+            });
+          } else if (startData.predictionId) {
+            // Poll for completion
+            setAiProgress("Generating your music... (this may take 30-60 seconds)");
+            
+            let attempts = 0;
+            const maxAttempts = 60; // 2 minutes max
+            
+            const pollInterval = setInterval(async () => {
+              attempts++;
+              
+              try {
+                const { data: statusData, error: statusError } = await supabase.functions.invoke('generate-music', {
+                  body: { predictionId: startData.predictionId }
+                });
+
+                if (statusError) {
+                  clearInterval(pollInterval);
+                  throw new Error(statusError.message);
+                }
+
+                console.log("Poll status:", statusData.status);
+                setAiProgress(`Generating... (${Math.min(attempts * 2, 95)}%)`);
+
+                if (statusData.status === 'succeeded') {
+                  clearInterval(pollInterval);
+                  setGeneratedAudioUrl(statusData.output);
+                  setAiProgress("Generation complete!");
+                  setIsGeneratingAI(false);
+                  toast({
+                    title: "🎵 AI Song Generated!",
+                    description: "Your free AI-generated song is ready to play.",
+                  });
+                } else if (statusData.status === 'failed') {
+                  clearInterval(pollInterval);
+                  setIsGeneratingAI(false);
+                  setAiProgress("");
+                  toast({
+                    title: "Generation failed",
+                    description: "The AI couldn't generate your song. Please try again.",
+                    variant: "destructive"
+                  });
+                } else if (attempts >= maxAttempts) {
+                  clearInterval(pollInterval);
+                  setIsGeneratingAI(false);
+                  setAiProgress("");
+                  toast({
+                    title: "Generation timeout",
+                    description: "The generation took too long. Please try again.",
+                    variant: "destructive"
+                  });
+                }
+              } catch (pollError) {
+                console.error("Polling error:", pollError);
+                clearInterval(pollInterval);
+                setIsGeneratingAI(false);
+                setAiProgress("");
+              }
+            }, 2000); // Poll every 2 seconds
+          }
+        } catch (aiError) {
+          console.error("AI generation error:", aiError);
+          setIsGeneratingAI(false);
+          setAiProgress("");
+          toast({
+            title: "AI Generation Failed",
+            description: aiError instanceof Error ? aiError.message : "Failed to generate AI music",
+            variant: "destructive"
+          });
+        } finally {
+          setIsSubmitting(false);
         }
         
-        toast({
-          title: "Request submitted!",
-          description: `Your song request has been saved with ${fileUrls.length} file(s).`,
-        });
-        
-        navigate("/purchase-confirmation");
+        return; // Don't navigate away for free tier
       } else {
         // For paid tiers, create song request first, then Stripe checkout
         console.log("Creating paid tier song request...");
@@ -559,9 +607,72 @@ const GenerateSong = () => {
               </CollapsibleContent>
             </Collapsible>
 
+            {/* AI Generation Progress */}
+            <AnimatePresence>
+              {(isGeneratingAI || generatedAudioUrl) && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-3"
+                >
+                  <div className="bg-white/20 rounded-lg p-4">
+                    {isGeneratingAI && (
+                      <div className="flex items-center gap-3">
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                        <span className="text-white font-medium">{aiProgress}</span>
+                      </div>
+                    )}
+                    
+                    {generatedAudioUrl && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-white font-semibold">🎵 Your AI-Generated Song</span>
+                        </div>
+                        <audio 
+                          controls 
+                          src={generatedAudioUrl} 
+                          className="w-full"
+                        />
+                        <div className="flex gap-2">
+                          <a 
+                            href={generatedAudioUrl} 
+                            download="ai-generated-song.mp3"
+                            className="flex-1"
+                          >
+                            <Button variant="secondary" className="w-full">
+                              Download MP3
+                            </Button>
+                          </a>
+                          <Button 
+                            variant="outline" 
+                            onClick={() => {
+                              setGeneratedAudioUrl(null);
+                              setAiProgress("");
+                            }}
+                            className="text-white border-white/50 hover:bg-white/20"
+                          >
+                            Generate New
+                          </Button>
+                        </div>
+                        <p className="text-white/70 text-xs text-center">
+                          Want a professional human-produced version? Select a paid tier above!
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             
-            <Button type="submit" disabled={isSubmitting} className="w-full bg-white/50 text-black hover:bg-white font-bold text-lg py-6" size="lg">
-              {isSubmitting ? "Submitting..." : "Submit Your Song Idea"}
+            <Button 
+              type="submit" 
+              disabled={isSubmitting || isGeneratingAI} 
+              className="w-full bg-white/50 text-black hover:bg-white font-bold text-lg py-6" 
+              size="lg"
+            >
+              {isSubmitting ? "Submitting..." : isGeneratingAI ? "Generating..." : currentTier.price === 0 ? "Generate Free AI Song" : "Submit Your Song Idea"}
             </Button>
           </form>
         </motion.div>
