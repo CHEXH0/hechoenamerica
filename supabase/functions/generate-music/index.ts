@@ -56,7 +56,7 @@ serve(async (req) => {
     
     // Start prediction (async mode for longer generations)
     const prediction = await replicate.predictions.create({
-      version: "671ac645ce5e552cc63a54a2bbff63fcf798043ac68f86b6f89e4d8f06d84c09",
+      version: "671ac645ce5e552cc63a54a2bbff63fcf798043055d2dac5fc9e36a837eedcfb",
       input: {
         prompt: body.prompt,
         duration: duration,
