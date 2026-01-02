@@ -473,7 +473,9 @@ const GenerateSong = () => {
                 </SelectContent>
               </Select>
               <p className="text-white/60 text-xs">
-                We'll match you with a producer who specializes in this style
+                {currentTier.price === 0 
+                  ? "This style will guide the AI music generation"
+                  : "We'll match you with a producer who specializes in this style"}
               </p>
             </div>
 
@@ -483,42 +485,52 @@ const GenerateSong = () => {
               </Label>
               <Textarea id="idea" value={idea} onChange={e => setIdea(e.target.value)} placeholder="Better than AI. Made by human hehe.." className="bg-white/20 border-white/30 text-white placeholder:text-white/50 min-h-[120px]" required 
               />
-              <div onClick={() => fileInputRef.current?.click()} className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors">
-                <Plus className="w-3 h-3 text-white" />
-              </div>
-              <p className="text-white/60 text-xs">
-                  Audio (.mp3, .wav), Images (.jpg, .png, .heic, etc.), Archives (.zip, .rar)
-              </p>
-              <div className="space-y-2">
-                <input 
-                  ref={fileInputRef} 
-                  type="file" 
-                  id="files" 
-                  multiple 
-                  accept=".mp3,.wav,.m4a,.flac,.aac,.ogg,.wma,.jpg,.jpeg,.png,.gif,.webp,.bmp,.tiff,.svg,.heic,.heif,.raw,.cr2,.nef,.arw,.dng,.pdf,.zip,.rar,.7z" 
-                  onChange={handleFileChange} 
-                  className="hidden"
-                />
-                {files && files.length > 0 && (
-                  <div className="text-white/80 text-sm space-y-1">
-                    <p className="font-medium">Selected files:</p>
-                    <FileDeleter files={files} onDelete={(index) => setFiles(files.filter((_, i) => i !== index))} />
+              {currentTier.price > 0 && (
+                <>
+                  <div onClick={() => fileInputRef.current?.click()} className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors">
+                    <Plus className="w-3 h-3 text-white" />
                   </div>
-                )}
-              </div>
+                  <p className="text-white/60 text-xs">
+                      Audio (.mp3, .wav), Images (.jpg, .png, .heic, etc.), Archives (.zip, .rar)
+                  </p>
+                  <div className="space-y-2">
+                    <input 
+                      ref={fileInputRef} 
+                      type="file" 
+                      id="files" 
+                      multiple 
+                      accept=".mp3,.wav,.m4a,.flac,.aac,.ogg,.wma,.jpg,.jpeg,.png,.gif,.webp,.bmp,.tiff,.svg,.heic,.heif,.raw,.cr2,.nef,.arw,.dng,.pdf,.zip,.rar,.7z" 
+                      onChange={handleFileChange} 
+                      className="hidden"
+                    />
+                    {files && files.length > 0 && (
+                      <div className="text-white/80 text-sm space-y-1">
+                        <p className="font-medium">Selected files:</p>
+                        <FileDeleter files={files} onDelete={(index) => setFiles(files.filter((_, i) => i !== index))} />
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+              {currentTier.price === 0 && (
+                <p className="text-white/60 text-xs italic">
+                  File uploads are only available for paid tiers with human producers
+                </p>
+              )}
             </div>
 
-            <Collapsible open={isOptionsOpen} onOpenChange={setIsOptionsOpen} className="space-y-2">
-              <CollapsibleTrigger asChild>
-                <Button 
-                  type="button"
-                  variant="ghost" 
-                  className="w-full justify-between bg-white/10 hover:bg-white/20 text-white p-4 rounded-lg"
-                >
-                  <span className="text-lg font-semibold">Additional Options</span>
-                  <ChevronDown className={`h-5 w-5 transition-transform ${isOptionsOpen ? 'rotate-180' : ''}`} />
-                </Button>
-              </CollapsibleTrigger>
+            {currentTier.price > 0 && (
+              <Collapsible open={isOptionsOpen} onOpenChange={setIsOptionsOpen} className="space-y-2">
+                <CollapsibleTrigger asChild>
+                  <Button 
+                    type="button"
+                    variant="ghost" 
+                    className="w-full justify-between bg-white/10 hover:bg-white/20 text-white p-4 rounded-lg"
+                  >
+                    <span className="text-lg font-semibold">Additional Options</span>
+                    <ChevronDown className={`h-5 w-5 transition-transform ${isOptionsOpen ? 'rotate-180' : ''}`} />
+                  </Button>
+                </CollapsibleTrigger>
               
               <CollapsibleContent className="space-y-2">
                 <div className="space-y-4 bg-white/10 p-4 rounded-lg">
@@ -605,7 +617,8 @@ const GenerateSong = () => {
                   </div>
                 </div>
               </CollapsibleContent>
-            </Collapsible>
+              </Collapsible>
+            )}
 
             {/* AI Generation Progress */}
             <AnimatePresence>
