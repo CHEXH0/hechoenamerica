@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_song_generations: {
+        Row: {
+          created_at: string
+          genre: string | null
+          id: string
+          prompt: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          genre?: string | null
+          id?: string
+          prompt: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          genre?: string | null
+          id?: string
+          prompt?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           country: string | null
