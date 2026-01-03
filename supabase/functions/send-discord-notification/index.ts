@@ -6,6 +6,35 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Genre to Discord Role ID mapping
+// Users need to create these roles in Discord and add their IDs here
+const genreRoleMap: Record<string, string> = {
+  'electronic': 'EDM-Producers',
+  'hip-hop': 'Hip-Hop-Producers', 
+  'pop': 'Pop-Producers',
+  'rock': 'Rock-Producers',
+  'latin': 'Latin-Producers',
+  'rnb': 'RnB-Producers',
+  'country': 'Country-Producers',
+  'jazz': 'Jazz-Producers',
+  'classical': 'Classical-Producers',
+  'other': 'All-Producers'
+};
+
+// Status colors for embeds
+const statusColorMap: Record<string, number> = {
+  'pending': 0xFFA500,      // Orange
+  'pending_payment': 0xFFD700, // Gold
+  'paid': 0x3498DB,         // Blue
+  'in_progress': 0x9B59B6,  // Purple
+  'review': 0x1ABC9C,       // Teal
+  'revision': 0xE67E22,     // Dark Orange
+  'completed': 0x2ECC71,    // Green
+  'cancelled': 0xE74C3C     // Red
+};
+
+const APP_URL = 'https://eapbuoqkhckqaswfjexv.lovableproject.com';
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -22,9 +51,9 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
     
-    const { requestId, requestData } = await req.json();
+    const { requestId, requestData, notificationType = 'new_request', oldStatus, newStatus } = await req.json();
     
-    console.log('Processing Discord notification for request:', requestId);
+    console.log('Processing Discord notification:', { requestId, notificationType, oldStatus, newStatus });
 
     // Fetch the full request details from the database
     const { data: songRequest, error: fetchError } = await supabase
@@ -38,104 +67,39 @@ serve(async (req) => {
       throw fetchError;
     }
 
-    // Determine complexity level based on tier
-    const complexityMap: Record<string, string> = {
-      'free': 'basic',
-      'basic': 'standard',
-      'premium': 'premium',
-      'custom': 'custom'
-    };
-    const complexityLevel = complexityMap[songRequest.tier.toLowerCase()] || 'standard';
+    let embed;
+    let content;
 
-    // Create Discord embed
-    const embed = {
-      title: "🎵 New Song Request",
-      color: 0x7C3AED, // Purple color
-      fields: [
-        {
-          name: "Request ID",
-          value: `\`${requestId}\``,
-          inline: true
-        },
-        {
-          name: "Tier",
-          value: songRequest.tier.toUpperCase(),
-          inline: true
-        },
-        {
-          name: "Price",
-          value: songRequest.price,
-          inline: true
-        },
-        {
-          name: "Complexity",
-          value: complexityLevel,
-          inline: true
-        },
-        {
-          name: "Status",
-          value: songRequest.status,
-          inline: true
-        },
-        {
-          name: "Customer Email",
-          value: songRequest.user_email,
-          inline: true
-        },
-        {
-          name: "Song Idea",
-          value: songRequest.song_idea.substring(0, 1024) // Discord has a 1024 char limit per field
-        }
-      ],
-      timestamp: new Date().toISOString()
-    };
-
-    // Add additional options if present
-    const additionalOptions = [];
-    if (songRequest.wants_recorded_stems) additionalOptions.push("✅ Recorded Stems");
-    if (songRequest.wants_analog) additionalOptions.push("✅ Analog");
-    if (songRequest.wants_mixing) additionalOptions.push("✅ Mixing");
-    if (songRequest.wants_mastering) additionalOptions.push("✅ Mastering");
-    if (songRequest.number_of_revisions > 0) {
-      additionalOptions.push(`🔄 ${songRequest.number_of_revisions} Revisions`);
+    if (notificationType === 'status_change') {
+      // Status change notification
+      embed = createStatusChangeEmbed(songRequest, oldStatus, newStatus, requestId);
+      content = `📊 Project status updated: **${oldStatus}** → **${newStatus}**`;
+    } else if (notificationType === 'producer_assigned') {
+      // Producer assigned notification
+      embed = createProducerAssignedEmbed(songRequest, requestId);
+      content = `🎧 Producer has been assigned to a project!`;
+    } else {
+      // New request notification (default)
+      embed = createNewRequestEmbed(songRequest, requestId);
+      
+      // Add genre-based role mention
+      const genreKey = songRequest.genre_category?.toLowerCase() || 'other';
+      const roleMention = genreRoleMap[genreKey] || genreRoleMap['other'];
+      content = `🚨 **@${roleMention}** - New ${songRequest.tier.toUpperCase()} song request needs a producer!`;
     }
 
-    if (additionalOptions.length > 0) {
-      embed.fields.push({
-        name: "Additional Options",
-        value: additionalOptions.join("\n"),
-        inline: false
-      });
-    }
-
-    // Add file information if present
-    if (songRequest.file_urls && songRequest.file_urls.length > 0) {
-      embed.fields.push({
-        name: "Uploaded Files",
-        value: `${songRequest.file_urls.length} file(s) attached`,
-        inline: true
-      });
-    }
-
-    // Add genre category for producer assignment
-    if (songRequest.genre_category) {
-      embed.fields.push({
-        name: "Genre",
-        value: songRequest.genre_category,
-        inline: true
-      });
-    }
-
-    // Send to Discord (with thread_name for forum channels)
+    // Send to Discord
     const discordResponse = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        content: "🚨 New song request requires producer assignment!",
+        content,
         embeds: [embed],
-        thread_name: `Song Request ${songRequest.tier} - ${requestId.substring(0, 8)}`
+        thread_name: notificationType === 'new_request' 
+          ? `🎵 ${songRequest.tier.toUpperCase()} - ${requestId.substring(0, 8)}`
+          : undefined
       })
     });
 
@@ -169,3 +133,174 @@ serve(async (req) => {
     );
   }
 });
+
+function createNewRequestEmbed(songRequest: any, requestId: string) {
+  const complexityMap: Record<string, string> = {
+    'free': '🟢 Basic',
+    'basic': '🟡 Standard',
+    'premium': '🟠 Premium',
+    'custom': '🔴 Custom'
+  };
+  const complexityLevel = complexityMap[songRequest.tier.toLowerCase()] || '🟡 Standard';
+
+  const embed = {
+    title: "🎵 New Song Request",
+    color: 0x7C3AED,
+    fields: [
+      {
+        name: "📋 Request ID",
+        value: `\`${requestId.substring(0, 8)}...\``,
+        inline: true
+      },
+      {
+        name: "🎯 Tier",
+        value: songRequest.tier.toUpperCase(),
+        inline: true
+      },
+      {
+        name: "💰 Price",
+        value: songRequest.price,
+        inline: true
+      },
+      {
+        name: "⚡ Complexity",
+        value: complexityLevel,
+        inline: true
+      },
+      {
+        name: "📧 Customer",
+        value: songRequest.user_email,
+        inline: true
+      },
+      {
+        name: "🎸 Genre",
+        value: songRequest.genre_category || 'Not specified',
+        inline: true
+      },
+      {
+        name: "💡 Song Idea",
+        value: songRequest.song_idea.substring(0, 500) + (songRequest.song_idea.length > 500 ? '...' : '')
+      }
+    ],
+    timestamp: new Date().toISOString(),
+    footer: {
+      text: "Click the link below to manage this project"
+    }
+  };
+
+  // Add additional options
+  const additionalOptions = [];
+  if (songRequest.wants_recorded_stems) additionalOptions.push("🎹 Recorded Stems");
+  if (songRequest.wants_analog) additionalOptions.push("📻 Analog");
+  if (songRequest.wants_mixing) additionalOptions.push("🎚️ Mixing");
+  if (songRequest.wants_mastering) additionalOptions.push("🔊 Mastering");
+  if (songRequest.number_of_revisions > 0) {
+    additionalOptions.push(`🔄 ${songRequest.number_of_revisions} Revisions`);
+  }
+
+  if (additionalOptions.length > 0) {
+    embed.fields.push({
+      name: "✨ Add-ons",
+      value: additionalOptions.join(" • "),
+      inline: false
+    });
+  }
+
+  if (songRequest.file_urls && songRequest.file_urls.length > 0) {
+    embed.fields.push({
+      name: "📎 Files",
+      value: `${songRequest.file_urls.length} file(s) attached`,
+      inline: true
+    });
+  }
+
+  // Add admin dashboard link
+  embed.fields.push({
+    name: "🔗 Quick Actions",
+    value: `[View in Admin Dashboard](${APP_URL}/admin)`,
+    inline: false
+  });
+
+  return embed;
+}
+
+function createStatusChangeEmbed(songRequest: any, oldStatus: string, newStatus: string, requestId: string) {
+  const statusEmoji: Record<string, string> = {
+    'pending': '⏳',
+    'pending_payment': '💳',
+    'paid': '✅',
+    'in_progress': '🎹',
+    'review': '👀',
+    'revision': '🔄',
+    'completed': '🎉',
+    'cancelled': '❌'
+  };
+
+  return {
+    title: "📊 Project Status Updated",
+    color: statusColorMap[newStatus] || 0x7C3AED,
+    fields: [
+      {
+        name: "📋 Request ID",
+        value: `\`${requestId.substring(0, 8)}...\``,
+        inline: true
+      },
+      {
+        name: "🎯 Tier",
+        value: songRequest.tier.toUpperCase(),
+        inline: true
+      },
+      {
+        name: "📧 Customer",
+        value: songRequest.user_email,
+        inline: true
+      },
+      {
+        name: "Status Change",
+        value: `${statusEmoji[oldStatus] || '❓'} **${oldStatus}** → ${statusEmoji[newStatus] || '❓'} **${newStatus}**`,
+        inline: false
+      },
+      {
+        name: "🔗 Quick Actions",
+        value: `[View in Admin Dashboard](${APP_URL}/admin)`,
+        inline: false
+      }
+    ],
+    timestamp: new Date().toISOString()
+  };
+}
+
+function createProducerAssignedEmbed(songRequest: any, requestId: string) {
+  return {
+    title: "🎧 Producer Assigned",
+    color: 0x2ECC71,
+    fields: [
+      {
+        name: "📋 Request ID",
+        value: `\`${requestId.substring(0, 8)}...\``,
+        inline: true
+      },
+      {
+        name: "🎯 Tier",
+        value: songRequest.tier.toUpperCase(),
+        inline: true
+      },
+      {
+        name: "📧 Customer",
+        value: songRequest.user_email,
+        inline: true
+      },
+      {
+        name: "🎸 Genre",
+        value: songRequest.genre_category || 'Not specified',
+        inline: true
+      },
+      {
+        name: "🔗 Quick Actions",
+        value: `[View in Admin Dashboard](${APP_URL}/admin)`,
+        inline: false
+      }
+    ],
+    timestamp: new Date().toISOString()
+  };
+}
