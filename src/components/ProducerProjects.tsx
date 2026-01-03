@@ -84,6 +84,9 @@ export const ProducerProjects = () => {
 
   const handleStatusChange = async (projectId: string, newStatus: string) => {
     setUpdatingId(projectId);
+    const project = projects.find(p => p.id === projectId);
+    const oldStatus = project?.status || 'unknown';
+    
     try {
       const { error } = await supabase
         .from("song_requests")
@@ -91,6 +94,21 @@ export const ProducerProjects = () => {
         .eq("id", projectId);
 
       if (error) throw error;
+
+      // Send Discord notification for status change
+      try {
+        await supabase.functions.invoke('send-discord-notification', {
+          body: {
+            requestId: projectId,
+            notificationType: 'status_change',
+            oldStatus,
+            newStatus
+          }
+        });
+      } catch (discordError) {
+        console.error("Discord notification failed:", discordError);
+        // Don't fail the whole operation if Discord fails
+      }
 
       toast({
         title: "Status Updated",
