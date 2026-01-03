@@ -168,10 +168,24 @@ const GenerateSong = () => {
 
           if (error) {
             console.error("AI generation error:", error);
+            // Try to get better error message from response
             throw new Error(error.message || "Failed to generate music");
           }
 
           if (data?.error) {
+            // Handle content filter errors with helpful message
+            if (data.errorType === "CONTENT_FILTER") {
+              toast({
+                title: "Prompt needs adjustment",
+                description: data.error,
+                variant: "destructive",
+                duration: 8000
+              });
+              setAiProgress("");
+              setIsGeneratingAI(false);
+              setIsSubmitting(false);
+              return;
+            }
             throw new Error(data.error);
           }
 
@@ -200,7 +214,7 @@ const GenerateSong = () => {
           setAiProgress("");
           toast({
             title: "AI Generation Failed",
-            description: aiError instanceof Error ? aiError.message : "Please try again or contact support.",
+            description: aiError instanceof Error ? aiError.message : "Please try again with a more abstract description of the music you want.",
             variant: "destructive"
           });
         } finally {

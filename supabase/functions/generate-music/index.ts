@@ -120,6 +120,26 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Lyria API error:", response.status, errorText);
+      
+      // Parse the error to provide better user feedback
+      try {
+        const errorData = JSON.parse(errorText);
+        const errorMessage = errorData.error?.message || errorText;
+        
+        // Check for recitation/content filter blocks
+        if (errorMessage.includes("recitation") || errorMessage.includes("blocked")) {
+          return new Response(JSON.stringify({ 
+            error: "Your prompt triggered content filters. Try being more abstract and creative - describe the mood, tempo, and instruments rather than specific songs or artists.",
+            errorType: "CONTENT_FILTER"
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 400,
+          });
+        }
+      } catch (parseError) {
+        // If parsing fails, use the raw error
+      }
+      
       throw new Error(`Lyria API error: ${response.status} - ${errorText}`);
     }
 
