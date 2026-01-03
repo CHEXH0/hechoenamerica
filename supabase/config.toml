@@ -47,3 +47,6 @@ verify_jwt = true
 
 [functions.generate-music]
 verify_jwt = true
+
+[functions.notify-producer-assignment]
+verify_jwt = true

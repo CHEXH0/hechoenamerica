@@ -110,6 +110,7 @@ export type Database = {
           bio: string
           country: string
           created_at: string
+          email: string | null
           genre: string
           id: string
           image: string
@@ -127,6 +128,7 @@ export type Database = {
           bio: string
           country: string
           created_at?: string
+          email?: string | null
           genre: string
           id?: string
           image: string
@@ -144,6 +146,7 @@ export type Database = {
           bio?: string
           country?: string
           created_at?: string
+          email?: string | null
           genre?: string
           id?: string
           image?: string
