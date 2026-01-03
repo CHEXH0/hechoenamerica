@@ -129,7 +129,7 @@ serve(async (req) => {
         // Check for recitation/content filter blocks OR generic generation failures
         if (errorMessage.includes("recitation") || errorMessage.includes("blocked") || errorMessage.includes("Music generation failed")) {
           return new Response(JSON.stringify({ 
-            error: "Music generation failed. This usually happens when referencing specific songs or artists. Try describing the mood, tempo, and instruments instead (e.g., 'upbeat reggaeton with tropical vibes and synth bass').",
+            error: "⚠️ Cannot reference specific songs or artists. Describe your music using mood, tempo, genre, and instruments instead. Example: 'energetic reggaeton with tropical synths and punchy drums at 95 BPM'",
             errorType: "CONTENT_FILTER"
           }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
