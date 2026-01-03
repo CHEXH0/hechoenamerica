@@ -32,6 +32,9 @@ const tiers = [
   { label: "$250", price: 250, description: "Industry standard - for masterpiece (300sec)", priceId: "price_1SHdNmQchHjxRXODgqWhW9TO" }
 ];
 
+const MAX_FREE_AI_SONGS = 3;
+const RESET_HOURS = 24;
+
 const GenerateSong = () => {
   const [sliderValue, setSliderValue] = useState([0]);
   const [idea, setIdea] = useState("");
@@ -48,11 +51,52 @@ const GenerateSong = () => {
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [aiProgress, setAiProgress] = useState("");
   const [generatedAudioUrl, setGeneratedAudioUrl] = useState<string | null>(null);
+  const [aiGenerationsRemaining, setAiGenerationsRemaining] = useState<number | null>(null);
+  const [nextResetTime, setNextResetTime] = useState<Date | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const currentTier = tiers[sliderValue[0]];
+
+  // Check AI generation limits
+  const checkAIGenerationLimits = async () => {
+    if (!user) {
+      setAiGenerationsRemaining(MAX_FREE_AI_SONGS);
+      return;
+    }
+
+    const twentyFourHoursAgo = new Date();
+    twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - RESET_HOURS);
+
+    const { data, error } = await supabase
+      .from('ai_song_generations')
+      .select('created_at')
+      .eq('user_id', user.id)
+      .gte('created_at', twentyFourHoursAgo.toISOString())
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error("Error checking AI limits:", error);
+      return;
+    }
+
+    const usedCount = data?.length || 0;
+    setAiGenerationsRemaining(Math.max(0, MAX_FREE_AI_SONGS - usedCount));
+
+    // Calculate next reset time based on oldest generation in window
+    if (data && data.length > 0) {
+      const oldestGeneration = new Date(data[0].created_at);
+      const nextReset = new Date(oldestGeneration.getTime() + RESET_HOURS * 60 * 60 * 1000);
+      setNextResetTime(nextReset);
+    } else {
+      setNextResetTime(null);
+    }
+  };
+
+  useEffect(() => {
+    checkAIGenerationLimits();
+  }, [user]);
 
   // Check if returning from auth with pending request
   useEffect(() => {
@@ -74,8 +118,133 @@ const GenerateSong = () => {
       setFiles(prevFiles => [...prevFiles, ...Array.from(e.target.files)]);
     }
   };
+  // Handle AI generation separately from paid tier submission
+  const handleGenerateAI = async () => {
+    if (!idea) {
+      toast({
+        title: "Missing information",
+        description: "Please share your idea",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check if user is authenticated for AI generation
+    if (!user) {
+      localStorage.setItem('pendingSongRequest', JSON.stringify({
+        idea,
+        tier: 0
+      }));
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to generate AI songs.",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    // Check limits
+    if (aiGenerationsRemaining !== null && aiGenerationsRemaining <= 0) {
+      const timeUntilReset = nextResetTime ? 
+        Math.ceil((nextResetTime.getTime() - Date.now()) / (1000 * 60 * 60)) : RESET_HOURS;
+      toast({
+        title: "Daily limit reached",
+        description: `You've used all ${MAX_FREE_AI_SONGS} free AI generations. Try again in ${timeUntilReset} hours or choose a paid tier.`,
+        variant: "destructive",
+        duration: 8000
+      });
+      return;
+    }
+
+    setIsGeneratingAI(true);
+    setAiProgress("Connecting to Google Lyria 2...");
+
+    try {
+      const genreText = selectedGenre ? genreCategories.find(g => g.value === selectedGenre)?.label || selectedGenre : "";
+      const fullPrompt = genreText ? `${genreText} style: ${idea}` : idea;
+      
+      setAiProgress("Generating your AI music... This may take a moment.");
+      
+      const { data, error } = await supabase.functions.invoke('generate-music', {
+        body: { prompt: fullPrompt }
+      });
+
+      if (error) {
+        console.error("AI generation error:", error);
+        throw new Error(error.message || "Failed to generate music");
+      }
+
+      if (data?.error) {
+        if (data.errorType === "CONTENT_FILTER") {
+          toast({
+            title: "Prompt needs adjustment",
+            description: data.error,
+            variant: "destructive",
+            duration: 8000
+          });
+          setAiProgress("");
+          setIsGeneratingAI(false);
+          return;
+        }
+        throw new Error(data.error);
+      }
+
+      if (data?.output) {
+        // Record this generation in the database
+        const { error: insertError } = await supabase
+          .from('ai_song_generations')
+          .insert({
+            user_id: user.id,
+            prompt: idea,
+            genre: selectedGenre || null
+          });
+
+        if (insertError) {
+          console.error("Failed to record AI generation:", insertError);
+        }
+
+        // Refresh the limits
+        await checkAIGenerationLimits();
+
+        // Convert base64 audio to blob URL
+        const audioData = data.output;
+        const binaryString = atob(audioData);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: 'audio/wav' });
+        const audioUrl = URL.createObjectURL(blob);
+        
+        setGeneratedAudioUrl(audioUrl);
+        setAiProgress("");
+        toast({
+          title: "🎵 Music Generated!",
+          description: `Your AI-generated track is ready. ${aiGenerationsRemaining !== null ? `${aiGenerationsRemaining - 1} generations remaining today.` : ''}`,
+        });
+      } else {
+        throw new Error("No audio data received from AI");
+      }
+    } catch (aiError) {
+      console.error("AI generation failed:", aiError);
+      setAiProgress("");
+      toast({
+        title: "AI Generation Failed",
+        description: aiError instanceof Error ? aiError.message : "Please try again with a more abstract description of the music you want.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // For free tier, this button shouldn't do anything - use handleGenerateAI instead
+    if (currentTier.price === 0) {
+      return;
+    }
     
     if (!idea) {
       toast({
@@ -150,157 +319,82 @@ const GenerateSong = () => {
         console.log(`All files uploaded. Total URLs: ${fileUrls.length}`);
       }
 
-      // Create song request record in database
-      if (currentTier.price === 0) {
-        // For free tier, generate AI music with Lyria 2
-        setIsGeneratingAI(true);
-        setAiProgress("Connecting to Google Lyria 2...");
-        
-        try {
-          const genreText = selectedGenre ? genreCategories.find(g => g.value === selectedGenre)?.label || selectedGenre : "";
-          const fullPrompt = genreText ? `${genreText} style: ${idea}` : idea;
-          
-          setAiProgress("Generating your AI music... This may take a moment.");
-          
-          const { data, error } = await supabase.functions.invoke('generate-music', {
-            body: { prompt: fullPrompt }
-          });
+      // For paid tiers only - create song request and redirect to Stripe
+      console.log("Creating paid tier song request...");
+      const { data: requestData, error: insertError } = await supabase
+        .from('song_requests')
+        .insert({
+          user_id: user.id,
+          user_email: user.email || '',
+          song_idea: idea,
+          tier: currentTier.label,
+          price: currentTier.label,
+          status: 'pending_payment',
+          file_urls: fileUrls.length > 0 ? fileUrls : null,
+          number_of_revisions: numberOfRevisions,
+          wants_recorded_stems: wantsRecordedStems,
+          wants_analog: wantsAnalog,
+          wants_mixing: wantsMixing,
+          wants_mastering: wantsMastering,
+          genre_category: selectedGenre || null
+        })
+        .select()
+        .single();
 
-          if (error) {
-            console.error("AI generation error:", error);
-            // Try to get better error message from response
-            throw new Error(error.message || "Failed to generate music");
-          }
+      if (insertError) {
+        console.error("Database insert error:", insertError);
+        throw insertError;
+      }
 
-          if (data?.error) {
-            // Handle content filter errors with helpful message
-            if (data.errorType === "CONTENT_FILTER") {
-              toast({
-                title: "Prompt needs adjustment",
-                description: data.error,
-                variant: "destructive",
-                duration: 8000
-              });
-              setAiProgress("");
-              setIsGeneratingAI(false);
-              setIsSubmitting(false);
-              return;
-            }
-            throw new Error(data.error);
-          }
+      console.log("Song request created:", requestData?.id);
+      
+      // Auto-match producer based on genre
+      try {
+        const { data: matchData } = await supabase.functions.invoke('auto-match-producer', {
+          body: { requestId: requestData?.id }
+        });
+        console.log("Producer matched:", matchData?.producerName);
+      } catch (matchError) {
+        console.error("Failed to auto-match producer:", matchError);
+      }
 
-          if (data?.output) {
-            // Convert base64 audio to blob URL
-            const audioData = data.output;
-            const binaryString = atob(audioData);
-            const bytes = new Uint8Array(binaryString.length);
-            for (let i = 0; i < binaryString.length; i++) {
-              bytes[i] = binaryString.charCodeAt(i);
-            }
-            const blob = new Blob([bytes], { type: 'audio/wav' });
-            const audioUrl = URL.createObjectURL(blob);
-            
-            setGeneratedAudioUrl(audioUrl);
-            setAiProgress("");
-            toast({
-              title: "🎵 Music Generated!",
-              description: "Your AI-generated track is ready to play.",
-            });
-          } else {
-            throw new Error("No audio data received from AI");
-          }
-        } catch (aiError) {
-          console.error("AI generation failed:", aiError);
-          setAiProgress("");
-          toast({
-            title: "AI Generation Failed",
-            description: aiError instanceof Error ? aiError.message : "Please try again with a more abstract description of the music you want.",
-            variant: "destructive"
-          });
-        } finally {
-          setIsGeneratingAI(false);
-          setIsSubmitting(false);
-        }
-        return;
-      } else {
-        // For paid tiers, create song request first, then Stripe checkout
-        console.log("Creating paid tier song request...");
-        const { data: requestData, error: insertError } = await supabase
-          .from('song_requests')
-          .insert({
-            user_id: user.id,
-            user_email: user.email || '',
-            song_idea: idea,
-            tier: currentTier.label,
-            price: currentTier.label,
-            status: 'pending_payment',
-            file_urls: fileUrls.length > 0 ? fileUrls : null,
-            number_of_revisions: numberOfRevisions,
-            wants_recorded_stems: wantsRecordedStems,
-            wants_analog: wantsAnalog,
-            wants_mixing: wantsMixing,
-            wants_mastering: wantsMastering,
-            genre_category: selectedGenre || null
-          })
-          .select()
-          .single();
-
-        if (insertError) {
-          console.error("Database insert error:", insertError);
-          throw insertError;
-        }
-
-        console.log("Song request created:", requestData?.id);
-        
-        // Auto-match producer based on genre
-        try {
-          const { data: matchData } = await supabase.functions.invoke('auto-match-producer', {
-            body: { requestId: requestData?.id }
-          });
-          console.log("Producer matched:", matchData?.producerName);
-        } catch (matchError) {
-          console.error("Failed to auto-match producer:", matchError);
-        }
-
-        // Send Discord notification
-        try {
-          await supabase.functions.invoke('send-discord-notification', {
-            body: {
-              requestId: requestData?.id,
-              requestData: {
-                tier: currentTier.label,
-                idea,
-                fileCount: fileUrls.length
-              }
-            }
-          });
-          console.log("Discord notification sent");
-        } catch (notifError) {
-          console.error("Failed to send Discord notification:", notifError);
-        }
-        
-        console.log("Initiating Stripe checkout...");
-
-        const { data: sessionData, error } = await supabase.functions.invoke('create-song-checkout', {
+      // Send Discord notification
+      try {
+        await supabase.functions.invoke('send-discord-notification', {
           body: {
-            priceId: currentTier.priceId,
-            tier: currentTier.label,
-            idea,
-            fileUrls: fileUrls,
-            requestId: requestData.id
+            requestId: requestData?.id,
+            requestData: {
+              tier: currentTier.label,
+              idea,
+              fileCount: fileUrls.length
+            }
           }
         });
+        console.log("Discord notification sent");
+      } catch (notifError) {
+        console.error("Failed to send Discord notification:", notifError);
+      }
+      
+      console.log("Initiating Stripe checkout...");
 
-        if (error) {
-          console.error("Stripe checkout error:", error);
-          throw error;
+      const { data: sessionData, error } = await supabase.functions.invoke('create-song-checkout', {
+        body: {
+          priceId: currentTier.priceId,
+          tier: currentTier.label,
+          idea,
+          fileUrls: fileUrls,
+          requestId: requestData.id
         }
-        
-        if (sessionData?.url) {
-          console.log("Redirecting to Stripe checkout...");
-          // Redirect to Stripe checkout in the same window
-          window.location.href = sessionData.url;
-        }
+      });
+
+      if (error) {
+        console.error("Stripe checkout error:", error);
+        throw error;
+      }
+      
+      if (sessionData?.url) {
+        console.log("Redirecting to Stripe checkout...");
+        window.location.href = sessionData.url;
       }
     } catch (error) {
       console.error("Submission error:", error);
@@ -642,14 +736,34 @@ const GenerateSong = () => {
             </AnimatePresence>
 
             
-            <Button 
-              type="submit" 
-              disabled={isSubmitting || isGeneratingAI} 
-              className="w-full bg-white/50 text-black hover:bg-white font-bold text-lg py-6" 
-              size="lg"
-            >
-              {isSubmitting ? "Submitting..." : isGeneratingAI ? "Generating..." : currentTier.price === 0 ? "Generate Free AI Song" : "Submit Your Song Idea"}
-            </Button>
+            {/* Separate buttons for AI generation vs paid submission */}
+            {currentTier.price === 0 ? (
+              <div className="space-y-2">
+                <Button 
+                  type="button"
+                  onClick={handleGenerateAI}
+                  disabled={isGeneratingAI || (aiGenerationsRemaining !== null && aiGenerationsRemaining <= 0)} 
+                  className="w-full bg-white/50 text-black hover:bg-white font-bold text-lg py-6" 
+                  size="lg"
+                >
+                  {isGeneratingAI ? "Generating..." : `Generate Free AI Song${aiGenerationsRemaining !== null ? ` (${aiGenerationsRemaining}/${MAX_FREE_AI_SONGS} left)` : ''}`}
+                </Button>
+                {aiGenerationsRemaining !== null && aiGenerationsRemaining <= 0 && nextResetTime && (
+                  <p className="text-white/70 text-xs text-center">
+                    Limit resets in {Math.ceil((nextResetTime.getTime() - Date.now()) / (1000 * 60 * 60))} hours
+                  </p>
+                )}
+              </div>
+            ) : (
+              <Button 
+                type="submit" 
+                disabled={isSubmitting} 
+                className="w-full bg-white/50 text-black hover:bg-white font-bold text-lg py-6" 
+                size="lg"
+              >
+                {isSubmitting ? "Submitting..." : "Submit Your Song Idea"}
+              </Button>
+            )}
           </form>
         </motion.div>
 
