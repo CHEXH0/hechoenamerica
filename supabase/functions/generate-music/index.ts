@@ -126,10 +126,10 @@ serve(async (req) => {
         const errorData = JSON.parse(errorText);
         const errorMessage = errorData.error?.message || errorText;
         
-        // Check for recitation/content filter blocks
-        if (errorMessage.includes("recitation") || errorMessage.includes("blocked")) {
+        // Check for recitation/content filter blocks OR generic generation failures
+        if (errorMessage.includes("recitation") || errorMessage.includes("blocked") || errorMessage.includes("Music generation failed")) {
           return new Response(JSON.stringify({ 
-            error: "Your prompt triggered content filters. Try being more abstract and creative - describe the mood, tempo, and instruments rather than specific songs or artists.",
+            error: "Music generation failed. This usually happens when referencing specific songs or artists. Try describing the mood, tempo, and instruments instead (e.g., 'upbeat reggaeton with tropical vibes and synth bass').",
             errorType: "CONTENT_FILTER"
           }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
