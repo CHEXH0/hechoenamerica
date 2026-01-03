@@ -121,6 +121,34 @@ serve(async (req) => {
       producerName: matchedProducer.name 
     });
 
+    // Send email notification to the assigned producer
+    try {
+      const notifyResponse = await fetch(
+        `${Deno.env.get("SUPABASE_URL")}/functions/v1/notify-producer-assignment`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+          },
+          body: JSON.stringify({
+            requestId,
+            producerId: matchedProducer.id,
+          }),
+        }
+      );
+      
+      if (notifyResponse.ok) {
+        logStep("Producer notification sent successfully");
+      } else {
+        const errorText = await notifyResponse.text();
+        logStep("Producer notification failed", { error: errorText });
+      }
+    } catch (notifyError) {
+      logStep("Failed to send producer notification", { error: String(notifyError) });
+      // Don't fail the whole operation if notification fails
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 
