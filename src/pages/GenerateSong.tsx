@@ -152,12 +152,61 @@ const GenerateSong = () => {
 
       // Create song request record in database
       if (currentTier.price === 0) {
-        // For free tier, show coming soon message
-        setIsSubmitting(false);
-        toast({
-          title: "🚀 Coming Soon!",
-          description: "Free AI music generation is launching soon. Try a paid tier for professional production now!",
-        });
+        // For free tier, generate AI music with Lyria 2
+        setIsGeneratingAI(true);
+        setAiProgress("Connecting to Google Lyria 2...");
+        
+        try {
+          const genreText = selectedGenre ? genreCategories.find(g => g.value === selectedGenre)?.label || selectedGenre : "";
+          const fullPrompt = genreText ? `${genreText} style: ${idea}` : idea;
+          
+          setAiProgress("Generating your AI music... This may take a moment.");
+          
+          const { data, error } = await supabase.functions.invoke('generate-music', {
+            body: { prompt: fullPrompt }
+          });
+
+          if (error) {
+            console.error("AI generation error:", error);
+            throw new Error(error.message || "Failed to generate music");
+          }
+
+          if (data?.error) {
+            throw new Error(data.error);
+          }
+
+          if (data?.output) {
+            // Convert base64 audio to blob URL
+            const audioData = data.output;
+            const binaryString = atob(audioData);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
+            const blob = new Blob([bytes], { type: 'audio/wav' });
+            const audioUrl = URL.createObjectURL(blob);
+            
+            setGeneratedAudioUrl(audioUrl);
+            setAiProgress("");
+            toast({
+              title: "🎵 Music Generated!",
+              description: "Your AI-generated track is ready to play.",
+            });
+          } else {
+            throw new Error("No audio data received from AI");
+          }
+        } catch (aiError) {
+          console.error("AI generation failed:", aiError);
+          setAiProgress("");
+          toast({
+            title: "AI Generation Failed",
+            description: aiError instanceof Error ? aiError.message : "Please try again or contact support.",
+            variant: "destructive"
+          });
+        } finally {
+          setIsGeneratingAI(false);
+          setIsSubmitting(false);
+        }
         return;
       } else {
         // For paid tiers, create song request first, then Stripe checkout
