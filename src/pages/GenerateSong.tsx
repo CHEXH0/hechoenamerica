@@ -152,113 +152,13 @@ const GenerateSong = () => {
 
       // Create song request record in database
       if (currentTier.price === 0) {
-        // For free tier, generate AI music with MusicGen
-        console.log("Starting AI music generation...");
-        setIsGeneratingAI(true);
-        setAiProgress("Starting AI generation...");
-        
-        try {
-          // Build a descriptive prompt combining genre and idea
-          const genreLabel = genreCategories.find(g => g.value === selectedGenre)?.label || "";
-          const musicPrompt = `${genreLabel ? genreLabel + " style. " : ""}${idea}`;
-          
-          // Start the generation
-          setAiProgress("Sending request to AI...");
-          const { data: startData, error: startError } = await supabase.functions.invoke('generate-music', {
-            body: { 
-              prompt: musicPrompt,
-              duration: 15 // 15 seconds for free tier
-            }
-          });
-
-          if (startError) {
-            console.error("AI generation error:", startError);
-            throw new Error(startError.message || "Failed to start AI generation");
-          }
-
-          console.log("Generation response:", startData);
-
-          // If completed immediately
-          if (startData.status === 'succeeded' && startData.output) {
-            setGeneratedAudioUrl(startData.output);
-            setAiProgress("Generation complete!");
-            toast({
-              title: "🎵 AI Song Generated!",
-              description: "Your free AI-generated song is ready to play.",
-            });
-          } else if (startData.predictionId) {
-            // Poll for completion
-            setAiProgress("Generating your music... (this may take 30-60 seconds)");
-            
-            let attempts = 0;
-            const maxAttempts = 60; // 2 minutes max
-            
-            const pollInterval = setInterval(async () => {
-              attempts++;
-              
-              try {
-                const { data: statusData, error: statusError } = await supabase.functions.invoke('generate-music', {
-                  body: { predictionId: startData.predictionId }
-                });
-
-                if (statusError) {
-                  clearInterval(pollInterval);
-                  throw new Error(statusError.message);
-                }
-
-                console.log("Poll status:", statusData.status);
-                setAiProgress(`Generating... (${Math.min(attempts * 2, 95)}%)`);
-
-                if (statusData.status === 'succeeded') {
-                  clearInterval(pollInterval);
-                  setGeneratedAudioUrl(statusData.output);
-                  setAiProgress("Generation complete!");
-                  setIsGeneratingAI(false);
-                  toast({
-                    title: "🎵 AI Song Generated!",
-                    description: "Your free AI-generated song is ready to play.",
-                  });
-                } else if (statusData.status === 'failed') {
-                  clearInterval(pollInterval);
-                  setIsGeneratingAI(false);
-                  setAiProgress("");
-                  toast({
-                    title: "Generation failed",
-                    description: "The AI couldn't generate your song. Please try again.",
-                    variant: "destructive"
-                  });
-                } else if (attempts >= maxAttempts) {
-                  clearInterval(pollInterval);
-                  setIsGeneratingAI(false);
-                  setAiProgress("");
-                  toast({
-                    title: "Generation timeout",
-                    description: "The generation took too long. Please try again.",
-                    variant: "destructive"
-                  });
-                }
-              } catch (pollError) {
-                console.error("Polling error:", pollError);
-                clearInterval(pollInterval);
-                setIsGeneratingAI(false);
-                setAiProgress("");
-              }
-            }, 2000); // Poll every 2 seconds
-          }
-        } catch (aiError) {
-          console.error("AI generation error:", aiError);
-          setIsGeneratingAI(false);
-          setAiProgress("");
-          toast({
-            title: "AI Generation Failed",
-            description: aiError instanceof Error ? aiError.message : "Failed to generate AI music",
-            variant: "destructive"
-          });
-        } finally {
-          setIsSubmitting(false);
-        }
-        
-        return; // Don't navigate away for free tier
+        // For free tier, show coming soon message
+        setIsSubmitting(false);
+        toast({
+          title: "🚀 Coming Soon!",
+          description: "Free AI music generation is launching soon. Try a paid tier for professional production now!",
+        });
+        return;
       } else {
         // For paid tiers, create song request first, then Stripe checkout
         console.log("Creating paid tier song request...");
