@@ -12,6 +12,11 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CREATE-SONG-CHECKOUT] ${step}${detailsStr}`);
 };
 
+// Platform fee percentage (15%)
+const PLATFORM_FEE_PERCENT = 15;
+// Acceptance deadline in hours
+const ACCEPTANCE_DEADLINE_HOURS = 48;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -20,6 +25,12 @@ serve(async (req) => {
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+  );
+
+  const supabaseAdmin = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { persistSession: false } }
   );
 
   try {
@@ -80,6 +91,21 @@ serve(async (req) => {
       description += ` + ${addOnsList.join(", ")}`;
     }
 
+    // Calculate amounts in cents
+    const totalAmountCents = Math.round(totalPrice * 100);
+    const platformFeeCents = Math.round(totalAmountCents * (PLATFORM_FEE_PERCENT / 100));
+    const producerPayoutCents = totalAmountCents - platformFeeCents;
+
+    logStep("Payment calculation", {
+      totalAmountCents,
+      platformFeeCents,
+      producerPayoutCents,
+    });
+
+    // Calculate acceptance deadline (48 hours from now)
+    const acceptanceDeadline = new Date();
+    acceptanceDeadline.setHours(acceptanceDeadline.getHours() + ACCEPTANCE_DEADLINE_HOURS);
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
@@ -91,12 +117,23 @@ serve(async (req) => {
               name: `Song Production - ${tier}`,
               description: description,
             },
-            unit_amount: Math.round(totalPrice * 100), // Convert to cents
+            unit_amount: totalAmountCents,
           },
           quantity: 1,
         },
       ],
       mode: "payment",
+      payment_intent_data: {
+        // Store metadata on the PaymentIntent for later reference
+        metadata: {
+          tier,
+          user_id: user.id,
+          request_id: requestId || "",
+          platform_fee_cents: platformFeeCents.toString(),
+          producer_payout_cents: producerPayoutCents.toString(),
+          acceptance_deadline: acceptanceDeadline.toISOString(),
+        },
+      },
       metadata: {
         tier,
         idea: idea?.substring(0, 500) || "",
@@ -105,14 +142,25 @@ serve(async (req) => {
         total_price: totalPrice.toString(),
         base_price: basePrice?.toString() || "",
         add_ons: JSON.stringify(addOns || {}),
+        platform_fee_cents: platformFeeCents.toString(),
+        producer_payout_cents: producerPayoutCents.toString(),
+        acceptance_deadline: acceptanceDeadline.toISOString(),
       },
       success_url: `${req.headers.get("origin")}/purchase-confirmation?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/generate-song`,
     });
 
-    logStep("Checkout session created", { sessionId: session.id, url: session.url, totalPrice });
+    logStep("Checkout session created", { 
+      sessionId: session.id, 
+      url: session.url, 
+      totalPrice,
+      acceptanceDeadline: acceptanceDeadline.toISOString(),
+    });
 
-    return new Response(JSON.stringify({ url: session.url }), {
+    return new Response(JSON.stringify({ 
+      url: session.url,
+      acceptanceDeadline: acceptanceDeadline.toISOString(),
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });

@@ -60,6 +60,12 @@ serve(async (req) => {
     const customerEmail = session.customer_details?.email || session.customer_email;
     const amountTotal = session.amount_total ? (session.amount_total / 100).toFixed(2) : '0.00';
     const currency = session.currency?.toUpperCase() || 'USD';
+    
+    // Get payment tracking data
+    const platformFeeCents = session.metadata?.platform_fee_cents || "0";
+    const producerPayoutCents = session.metadata?.producer_payout_cents || "0";
+    const acceptanceDeadline = session.metadata?.acceptance_deadline || null;
+    const paymentIntentId = session.payment_intent as string || null;
 
     // Get product name from line items
     const lineItem = session.line_items?.data[0];
@@ -72,7 +78,9 @@ serve(async (req) => {
       fileCount: fileUrls.length,
       basePrice,
       totalPrice,
-      addOns
+      addOns,
+      paymentIntentId,
+      acceptanceDeadline,
     });
 
     // Send confirmation email using Resend
@@ -219,18 +227,28 @@ serve(async (req) => {
     );
 
     if (requestId) {
+      const updateData: Record<string, any> = {
+        status: 'paid',
+        stripe_session_id: session_id,
+        payment_intent_id: paymentIntentId,
+        platform_fee_cents: parseInt(platformFeeCents),
+        producer_payout_cents: parseInt(producerPayoutCents),
+      };
+      
+      // Set acceptance deadline if available
+      if (acceptanceDeadline) {
+        updateData.acceptance_deadline = acceptanceDeadline;
+      }
+      
       const { error: updateError } = await supabaseAdmin
         .from('song_requests')
-        .update({
-          status: 'paid',
-          stripe_session_id: session_id,
-        })
+        .update(updateData)
         .eq('id', requestId);
 
       if (updateError) {
         logStep("Error updating song request", { error: updateError });
       } else {
-        logStep("Song request updated to paid status");
+        logStep("Song request updated to paid status with payment tracking");
         
         // Send Discord notification for paid request
         try {
