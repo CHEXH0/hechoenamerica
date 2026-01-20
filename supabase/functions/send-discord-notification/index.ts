@@ -68,9 +68,9 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
     
-    const { requestId, requestData, notificationType = 'new_request', oldStatus, newStatus } = await req.json();
+    const { requestId, requestData, notificationType = 'new_request', oldStatus, newStatus, driveLink } = await req.json();
     
-    console.log('Processing Discord notification:', { requestId, notificationType, oldStatus, newStatus });
+    console.log('Processing Discord notification:', { requestId, notificationType, oldStatus, newStatus, driveLink });
 
     // Fetch the full request details from the database
     const { data: songRequest, error: fetchError } = await supabase
@@ -87,7 +87,11 @@ serve(async (req) => {
     let embed;
     let content;
 
-    if (notificationType === 'status_change') {
+    if (notificationType === 'file_delivered') {
+      // File delivered to Google Drive notification
+      embed = createFileDeliveredEmbed(songRequest, requestId, driveLink);
+      content = `📦 **Files Delivered!** Project has been completed and files uploaded to Google Drive.`;
+    } else if (notificationType === 'status_change') {
       // Status change notification
       embed = createStatusChangeEmbed(songRequest, oldStatus, newStatus, requestId);
       content = `📊 Project status updated: **${oldStatus}** → **${newStatus}**`;
@@ -360,5 +364,55 @@ function createProducerAssignedEmbed(songRequest: any, requestId: string) {
       }
     ],
     timestamp: new Date().toISOString()
+  };
+}
+
+function createFileDeliveredEmbed(songRequest: any, requestId: string, driveLink: string) {
+  return {
+    title: "📦 Files Delivered to Google Drive",
+    color: 0x2ECC71, // Green
+    fields: [
+      {
+        name: "📋 Request ID",
+        value: `\`${requestId.substring(0, 8)}...\``,
+        inline: true
+      },
+      {
+        name: "🎯 Tier",
+        value: songRequest.tier.toUpperCase(),
+        inline: true
+      },
+      {
+        name: "📧 Customer",
+        value: songRequest.user_email,
+        inline: true
+      },
+      {
+        name: "💰 Price",
+        value: songRequest.price,
+        inline: true
+      },
+      {
+        name: "💡 Song Idea",
+        value: songRequest.song_idea.length > 200 
+          ? songRequest.song_idea.substring(0, 200) + '...' 
+          : songRequest.song_idea,
+        inline: false
+      },
+      {
+        name: "📁 Google Drive Folder",
+        value: `[Open Delivery Folder](${driveLink})`,
+        inline: false
+      },
+      {
+        name: "🔗 Quick Actions",
+        value: `[View in Admin Dashboard](${APP_URL}/admin)`,
+        inline: false
+      }
+    ],
+    timestamp: new Date().toISOString(),
+    footer: {
+      text: "HechoEnAmerica • Delivery Complete ✅"
+    }
   };
 }
