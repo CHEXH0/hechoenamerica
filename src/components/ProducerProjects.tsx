@@ -34,6 +34,7 @@ const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/10 text-yellow-600",
   pending_payment: "bg-orange-500/10 text-orange-600",
   paid: "bg-green-500/10 text-green-600",
+  accepted: "bg-teal-500/10 text-teal-600",
   in_progress: "bg-blue-500/10 text-blue-600",
   review: "bg-purple-500/10 text-purple-600",
   completed: "bg-emerald-500/10 text-emerald-600",
@@ -41,6 +42,7 @@ const statusColors: Record<string, string> = {
 
 const statusOptions = [
   { value: "pending", label: "Pending" },
+  { value: "accepted", label: "Accepted" },
   { value: "in_progress", label: "In Progress" },
   { value: "review", label: "Under Review" },
   { value: "completed", label: "Completed" },
@@ -108,6 +110,34 @@ export const ProducerProjects = () => {
       } catch (discordError) {
         console.error("Discord notification failed:", discordError);
         // Don't fail the whole operation if Discord fails
+      }
+
+      // When producer accepts the project, send them the file download links
+      if (newStatus === 'accepted' && project?.file_urls && project.file_urls.length > 0) {
+        try {
+          // Fetch the producer info based on assigned_producer_id or use current user
+          const { data: userData } = await supabase
+            .from('profiles')
+            .select('display_name')
+            .eq('id', user?.id)
+            .single();
+
+          await supabase.functions.invoke('send-producer-files-email', {
+            body: {
+              requestId: projectId,
+              producerEmail: user?.email,
+              producerName: userData?.display_name || user?.email?.split('@')[0] || 'Producer'
+            }
+          });
+
+          toast({
+            title: "Files Sent",
+            description: "Customer files have been emailed to you!",
+          });
+        } catch (emailError) {
+          console.error("Files email failed:", emailError);
+          // Don't fail the whole operation
+        }
       }
 
       toast({

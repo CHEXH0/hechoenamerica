@@ -26,6 +26,7 @@ const statusColorMap: Record<string, number> = {
   'pending': 0xFFA500,      // Orange
   'pending_payment': 0xFFD700, // Gold
   'paid': 0x3498DB,         // Blue
+  'accepted': 0x14B8A6,     // Teal
   'in_progress': 0x9B59B6,  // Purple
   'review': 0x1ABC9C,       // Teal
   'revision': 0xE67E22,     // Dark Orange
@@ -285,6 +286,7 @@ function createStatusChangeEmbed(songRequest: any, oldStatus: string, newStatus:
     'pending': '⏳',
     'pending_payment': '💳',
     'paid': '✅',
+    'accepted': '🤝',
     'in_progress': '🎹',
     'review': '👀',
     'revision': '🔄',
