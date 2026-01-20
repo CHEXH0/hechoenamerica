@@ -35,17 +35,9 @@ const Hero = () => {
               className="w-full h-full object-contain"
             />
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">
+          <h1 className="text-4xl md:text-6xl font-bold mb-8">
             Hecho En America Studio
           </h1>
-          <p className="text-lg md:text-xl text-gray-300 mb-6 max-w-3xl mx-auto">
-            A secure production portal using Google Drive integration to allow authorized 
-            producers to upload high-resolution media assets directly to their own secure 
-            cloud storage.
-          </p>
-          <p className="text-base md:text-lg text-gray-400 mb-8">
-            {t.hero.subtitle}
-          </p>
           <Waveform />
           
           {/* Privacy Policy Link for Google Verification */}
