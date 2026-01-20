@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Headphones, Mic, Music } from "lucide-react";
 import { useTranslation } from "@/contexts/TranslationContext";
+import abletonLogo from "@/assets/ableton-logo.png";
 
 const Services = () => {
   const { t } = useTranslation();
@@ -34,9 +35,9 @@ const Services = () => {
       tools: ['"Work with anyone, anywhere"'],
     },
     {
-      name: "Cubase",
-      logo: "/laptop-uploads/Cubase.png",
-      tools: ['"Keeps your creativty flowing"'],
+      name: "Ableton",
+      logo: abletonLogo,
+      tools: ['"Creative tools for music makers"'],
     },
     {
       name: "FL Studio",
