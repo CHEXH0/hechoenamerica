@@ -575,7 +575,7 @@ const GenerateSong = () => {
               <Label htmlFor="idea" className="text-white text-lg font-semibold">
                 Song Idea
               </Label>
-              <Textarea id="idea" value={idea} onChange={e => setIdea(e.target.value)} placeholder="Better than AI. Made by human hehe.." className="bg-white/20 border-white/30 text-white placeholder:text-white/50 min-h-[120px]" required 
+              <Textarea id="idea" value={idea} onChange={e => setIdea(e.target.value)} placeholder={currentTier.price > 0 ? "Better than AI. Made by human hehe.." : "Feel free to use AI audios for your liking"} className="bg-white/20 border-white/30 text-white placeholder:text-white/50 min-h-[120px]" required 
               />
               {currentTier.price > 0 ? (
                 <>
