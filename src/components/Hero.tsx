@@ -35,8 +35,8 @@ const Hero = () => {
               className="w-full h-full object-contain"
             />
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold mb-8">
-            Hecho En America Studio
+          <h1 className="text-4xl md:text-6xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white via-white/80 to-white/40 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] tracking-wider" style={{ textShadow: '0 4px 30px rgba(255, 255, 255, 0.1), inset 0 0 20px rgba(255, 255, 255, 0.05)' }}>
+            HECHO EN AMÉRICA
           </h1>
           <Waveform />
           
