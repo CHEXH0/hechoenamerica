@@ -394,6 +394,7 @@ export type Database = {
       }
       song_requests: {
         Row: {
+          acceptance_deadline: string | null
           assigned_producer_id: string | null
           complexity_level: string | null
           created_at: string
@@ -401,7 +402,12 @@ export type Database = {
           genre_category: string | null
           id: string
           number_of_revisions: number | null
+          payment_intent_id: string | null
+          platform_fee_cents: number | null
           price: string
+          producer_paid_at: string | null
+          producer_payout_cents: number | null
+          refunded_at: string | null
           song_idea: string
           status: string
           stripe_session_id: string | null
@@ -415,6 +421,7 @@ export type Database = {
           wants_recorded_stems: boolean | null
         }
         Insert: {
+          acceptance_deadline?: string | null
           assigned_producer_id?: string | null
           complexity_level?: string | null
           created_at?: string
@@ -422,7 +429,12 @@ export type Database = {
           genre_category?: string | null
           id?: string
           number_of_revisions?: number | null
+          payment_intent_id?: string | null
+          platform_fee_cents?: number | null
           price: string
+          producer_paid_at?: string | null
+          producer_payout_cents?: number | null
+          refunded_at?: string | null
           song_idea: string
           status?: string
           stripe_session_id?: string | null
@@ -436,6 +448,7 @@ export type Database = {
           wants_recorded_stems?: boolean | null
         }
         Update: {
+          acceptance_deadline?: string | null
           assigned_producer_id?: string | null
           complexity_level?: string | null
           created_at?: string
@@ -443,7 +456,12 @@ export type Database = {
           genre_category?: string | null
           id?: string
           number_of_revisions?: number | null
+          payment_intent_id?: string | null
+          platform_fee_cents?: number | null
           price?: string
+          producer_paid_at?: string | null
+          producer_payout_cents?: number | null
+          refunded_at?: string | null
           song_idea?: string
           status?: string
           stripe_session_id?: string | null

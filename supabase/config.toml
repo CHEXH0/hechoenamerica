@@ -56,3 +56,9 @@ verify_jwt = true
 
 [functions.notify-customer-status]
 verify_jwt = true
+
+[functions.check-expired-requests]
+verify_jwt = false
+
+[functions.process-producer-payout]
+verify_jwt = true

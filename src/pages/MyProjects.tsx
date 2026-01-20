@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Music, Download, Clock, CheckCircle, Loader2, FileAudio, Calendar, User, Wifi } from "lucide-react";
+import { ArrowLeft, Music, Download, Clock, CheckCircle, Loader2, FileAudio, Calendar, User, Wifi, AlertTriangle, RefreshCcw } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,9 @@ interface SongRequest {
   number_of_revisions: number | null;
   wants_mixing: boolean | null;
   wants_mastering: boolean | null;
+  // Payment tracking
+  acceptance_deadline: string | null;
+  refunded_at: string | null;
 }
 
 interface Purchase {
@@ -50,6 +53,7 @@ const statusLabels: Record<string, string> = {
   in_progress: "In Production",
   review: "Under Review",
   completed: "Completed",
+  refunded: "Refunded",
 };
 
 const statusColors: Record<string, string> = {
@@ -60,6 +64,7 @@ const statusColors: Record<string, string> = {
   in_progress: "bg-blue-500",
   review: "bg-purple-500",
   completed: "bg-emerald-500",
+  refunded: "bg-red-500",
 };
 
 const getStatusProgress = (status: string): number => {
@@ -73,6 +78,26 @@ const getStatusProgress = (status: string): number => {
     completed: 100,
   };
   return progressMap[status] || 0;
+};
+
+const getTimeRemaining = (deadline: string | null): { text: string; isUrgent: boolean } => {
+  if (!deadline) return { text: '', isUrgent: false };
+  
+  const now = new Date();
+  const deadlineDate = new Date(deadline);
+  const diffMs = deadlineDate.getTime() - now.getTime();
+  
+  if (diffMs <= 0) {
+    return { text: 'Expired', isUrgent: true };
+  }
+  
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+  
+  return { 
+    text: `${hours}h ${minutes}m until producer acceptance deadline`, 
+    isUrgent: hours < 12 
+  };
 };
 
 const MyProjects = () => {
@@ -432,28 +457,65 @@ const MyProjects = () => {
                           <Clock className="mr-2 h-5 w-5" />
                           Preparing Download...
                         </Button>
+                      ) : project.status === "refunded" ? (
+                        <div className="flex flex-col items-center justify-center gap-2 py-2">
+                          <div className="flex items-center gap-2 text-destructive">
+                            <RefreshCcw className="h-4 w-4" />
+                            <span className="font-medium">Payment Refunded</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground text-center">
+                            No producer was available within 48 hours. Your payment has been fully refunded.
+                          </p>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => navigate("/generate-song")}
+                            className="mt-2"
+                          >
+                            Try Again
+                          </Button>
+                        </div>
                       ) : (
-                        <div className="flex items-center justify-center gap-2 text-muted-foreground py-2">
-                          {project.status === "in_progress" ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              Your producer is working on your song...
-                            </>
-                          ) : project.status === "review" ? (
-                            <>
-                              <CheckCircle className="h-4 w-4" />
-                              Almost ready! Under final review...
-                            </>
-                          ) : project.status === "accepted" ? (
-                            <>
-                              <CheckCircle className="h-4 w-4 text-cyan-500" />
-                              A producer has accepted your project!
-                            </>
-                          ) : (
-                            <>
-                              <Clock className="h-4 w-4" />
-                              Waiting to be assigned to a producer...
-                            </>
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center justify-center gap-2 text-muted-foreground py-2">
+                            {project.status === "in_progress" ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Your producer is working on your song...
+                              </>
+                            ) : project.status === "review" ? (
+                              <>
+                                <CheckCircle className="h-4 w-4" />
+                                Almost ready! Under final review...
+                              </>
+                            ) : project.status === "accepted" ? (
+                              <>
+                                <CheckCircle className="h-4 w-4 text-cyan-500" />
+                                A producer has accepted your project!
+                              </>
+                            ) : (
+                              <>
+                                <Clock className="h-4 w-4" />
+                                Waiting to be assigned to a producer...
+                              </>
+                            )}
+                          </div>
+                          
+                          {/* Acceptance Deadline Warning */}
+                          {(project.status === "pending" || project.status === "paid") && project.acceptance_deadline && (
+                            (() => {
+                              const { text, isUrgent } = getTimeRemaining(project.acceptance_deadline);
+                              if (!text) return null;
+                              return (
+                                <div className={`flex items-center justify-center gap-2 p-2 rounded text-sm ${
+                                  isUrgent ? 'bg-yellow-500/10 text-yellow-600' : 'bg-muted text-muted-foreground'
+                                }`}>
+                                  {isUrgent && <AlertTriangle className="h-4 w-4" />}
+                                  <Clock className="h-3 w-3" />
+                                  <span>{text}</span>
+                                </div>
+                              );
+                            })()
                           )}
                         </div>
                       )}

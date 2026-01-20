@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Music, Upload, RefreshCw, Eye, Mail } from "lucide-react";
+import { Music, Upload, RefreshCw, Eye, Mail, DollarSign, Clock, AlertTriangle } from "lucide-react";
 import { AudioFilePlayer } from "./AudioFilePlayer";
 
 interface SongRequest {
@@ -29,6 +29,13 @@ interface SongRequest {
   wants_mastering: boolean | null;
   wants_analog: boolean | null;
   wants_recorded_stems: boolean | null;
+  // Payment tracking fields
+  payment_intent_id: string | null;
+  acceptance_deadline: string | null;
+  platform_fee_cents: number | null;
+  producer_payout_cents: number | null;
+  refunded_at: string | null;
+  producer_paid_at: string | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -58,6 +65,55 @@ export const ProducerProjects = () => {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<SongRequest | null>(null);
   const [resendingFilesId, setResendingFilesId] = useState<string | null>(null);
+  const [processingPayoutId, setProcessingPayoutId] = useState<string | null>(null);
+
+  const getTimeRemaining = (deadline: string | null): { text: string; isUrgent: boolean; isExpired: boolean } => {
+    if (!deadline) return { text: 'No deadline', isUrgent: false, isExpired: false };
+    
+    const now = new Date();
+    const deadlineDate = new Date(deadline);
+    const diffMs = deadlineDate.getTime() - now.getTime();
+    
+    if (diffMs <= 0) {
+      return { text: 'Expired', isUrgent: true, isExpired: true };
+    }
+    
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours < 12) {
+      return { text: `${hours}h ${minutes}m remaining`, isUrgent: true, isExpired: false };
+    }
+    
+    return { text: `${hours}h ${minutes}m remaining`, isUrgent: false, isExpired: false };
+  };
+
+  const handleProcessPayout = async (projectId: string) => {
+    setProcessingPayoutId(projectId);
+    try {
+      const { data, error } = await supabase.functions.invoke('process-producer-payout', {
+        body: { requestId: projectId }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Payout Processed",
+        description: `Producer payout of $${(data.payout.producerPayoutCents / 100).toFixed(2)} has been recorded.`,
+      });
+
+      fetchProjects();
+    } catch (error: any) {
+      console.error("Error processing payout:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to process payout",
+        variant: "destructive",
+      });
+    } finally {
+      setProcessingPayoutId(null);
+    }
+  };
 
   useEffect(() => {
     fetchProjects();
@@ -476,6 +532,82 @@ export const ProducerProjects = () => {
                                 </div>
                               </div>
                             )}
+                            
+                            {/* Payment Information */}
+                            <div className="border-t pt-4 mt-4">
+                              <Label className="text-muted-foreground">Payment Information</Label>
+                              <div className="grid grid-cols-2 gap-4 mt-2">
+                                <div className="bg-muted/50 p-3 rounded-lg">
+                                  <p className="text-xs text-muted-foreground">Total Payment</p>
+                                  <p className="font-medium">{project.price}</p>
+                                </div>
+                                {project.producer_payout_cents && (
+                                  <div className="bg-emerald-500/10 p-3 rounded-lg">
+                                    <p className="text-xs text-muted-foreground">Your Payout (85%)</p>
+                                    <p className="font-medium text-emerald-600">
+                                      ${(project.producer_payout_cents / 100).toFixed(2)}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {/* Acceptance Deadline */}
+                              {project.status === 'pending' && project.acceptance_deadline && (
+                                <div className="mt-3">
+                                  {(() => {
+                                    const { text, isUrgent, isExpired } = getTimeRemaining(project.acceptance_deadline);
+                                    return (
+                                      <div className={`flex items-center gap-2 p-2 rounded ${
+                                        isExpired ? 'bg-destructive/10 text-destructive' :
+                                        isUrgent ? 'bg-yellow-500/10 text-yellow-600' : 'bg-muted'
+                                      }`}>
+                                        {isUrgent ? <AlertTriangle className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
+                                        <span className="text-sm font-medium">
+                                          {isExpired ? 'Acceptance deadline expired - Will be refunded' : `Accept within: ${text}`}
+                                        </span>
+                                      </div>
+                                    );
+                                  })()}
+                                </div>
+                              )}
+
+                              {/* Payout Status */}
+                              {project.status === 'completed' && (
+                                <div className="mt-3">
+                                  {project.producer_paid_at ? (
+                                    <div className="flex items-center gap-2 p-2 bg-emerald-500/10 rounded">
+                                      <DollarSign className="h-4 w-4 text-emerald-600" />
+                                      <span className="text-sm text-emerald-600 font-medium">
+                                        Paid on {new Date(project.producer_paid_at).toLocaleDateString()}
+                                      </span>
+                                    </div>
+                                  ) : (
+                                    <Button
+                                      onClick={() => handleProcessPayout(project.id)}
+                                      disabled={processingPayoutId === project.id}
+                                      className="w-full"
+                                    >
+                                      {processingPayoutId === project.id ? (
+                                        <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                                      ) : (
+                                        <DollarSign className="h-4 w-4 mr-2" />
+                                      )}
+                                      Process Producer Payout
+                                    </Button>
+                                  )}
+                                </div>
+                              )}
+                              
+                              {/* Refunded Status */}
+                              {project.refunded_at && (
+                                <div className="mt-3 flex items-center gap-2 p-2 bg-destructive/10 rounded">
+                                  <AlertTriangle className="h-4 w-4 text-destructive" />
+                                  <span className="text-sm text-destructive font-medium">
+                                    Refunded on {new Date(project.refunded_at).toLocaleDateString()}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </DialogContent>
                       </Dialog>
