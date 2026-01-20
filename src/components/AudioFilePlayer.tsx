@@ -1,7 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, Download, Volume2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import WaveSurfer from "wavesurfer.js";
 
 interface AudioFilePlayerProps {
   url: string;
@@ -18,52 +19,12 @@ export const AudioFilePlayer = ({ url, fileName }: AudioFilePlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const [volume, setVolume] = useState(0.8);
+  const [isLoading, setIsLoading] = useState(true);
+  const waveformRef = useRef<HTMLDivElement>(null);
+  const wavesurferRef = useRef<WaveSurfer | null>(null);
 
   const isAudio = isAudioFile(url);
-
-  const togglePlay = () => {
-    if (!audioRef.current) return;
-    
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
-    }
-    setIsPlaying(!isPlaying);
-  };
-
-  const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
-    }
-  };
-
-  const handleLoadedMetadata = () => {
-    if (audioRef.current) {
-      setDuration(audioRef.current.duration);
-    }
-  };
-
-  const handleSeek = (value: number[]) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = value[0];
-      setCurrentTime(value[0]);
-    }
-  };
-
-  const handleVolumeChange = (value: number[]) => {
-    if (audioRef.current) {
-      audioRef.current.volume = value[0];
-      setVolume(value[0]);
-    }
-  };
-
-  const handleEnded = () => {
-    setIsPlaying(false);
-    setCurrentTime(0);
-  };
 
   const formatTime = (time: number) => {
     if (isNaN(time)) return "0:00";
@@ -71,6 +32,81 @@ export const AudioFilePlayer = ({ url, fileName }: AudioFilePlayerProps) => {
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
+
+  // Initialize WaveSurfer
+  useEffect(() => {
+    if (!isAudio || !waveformRef.current) return;
+
+    const wavesurfer = WaveSurfer.create({
+      container: waveformRef.current,
+      waveColor: 'hsl(var(--muted-foreground) / 0.4)',
+      progressColor: 'hsl(var(--primary))',
+      cursorColor: 'hsl(var(--primary))',
+      cursorWidth: 2,
+      barWidth: 2,
+      barGap: 1,
+      barRadius: 2,
+      height: 48,
+      normalize: true,
+      backend: 'WebAudio',
+    });
+
+    wavesurfer.load(url);
+
+    wavesurfer.on('ready', () => {
+      setDuration(wavesurfer.getDuration());
+      setIsLoading(false);
+      wavesurfer.setVolume(volume);
+    });
+
+    wavesurfer.on('audioprocess', () => {
+      setCurrentTime(wavesurfer.getCurrentTime());
+    });
+
+    wavesurfer.on('seeking', () => {
+      setCurrentTime(wavesurfer.getCurrentTime());
+    });
+
+    wavesurfer.on('play', () => {
+      setIsPlaying(true);
+    });
+
+    wavesurfer.on('pause', () => {
+      setIsPlaying(false);
+    });
+
+    wavesurfer.on('finish', () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    });
+
+    wavesurfer.on('error', (error) => {
+      console.error('WaveSurfer error:', error);
+      setIsLoading(false);
+    });
+
+    wavesurferRef.current = wavesurfer;
+
+    return () => {
+      wavesurfer.destroy();
+    };
+  }, [url, isAudio]);
+
+  // Update volume when it changes
+  useEffect(() => {
+    if (wavesurferRef.current) {
+      wavesurferRef.current.setVolume(volume);
+    }
+  }, [volume]);
+
+  const togglePlay = useCallback(() => {
+    if (!wavesurferRef.current) return;
+    wavesurferRef.current.playPause();
+  }, []);
+
+  const handleVolumeChange = useCallback((value: number[]) => {
+    setVolume(value[0]);
+  }, []);
 
   if (!isAudio) {
     // Non-audio file - just show download link
@@ -89,15 +125,6 @@ export const AudioFilePlayer = ({ url, fileName }: AudioFilePlayerProps) => {
 
   return (
     <div className="p-4 bg-muted rounded-lg space-y-3">
-      <audio
-        ref={audioRef}
-        src={url}
-        onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleLoadedMetadata}
-        onEnded={handleEnded}
-        preload="metadata"
-      />
-      
       {/* File name and download */}
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium truncate flex-1">{fileName}</span>
@@ -108,13 +135,35 @@ export const AudioFilePlayer = ({ url, fileName }: AudioFilePlayerProps) => {
         </Button>
       </div>
 
+      {/* Waveform visualization */}
+      <div className="relative">
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted/50 rounded">
+            <div className="flex gap-1">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className="w-1 bg-primary/40 rounded animate-pulse"
+                  style={{
+                    height: `${12 + Math.random() * 24}px`,
+                    animationDelay: `${i * 0.1}s`
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        <div ref={waveformRef} className="w-full cursor-pointer" />
+      </div>
+
       {/* Player controls */}
       <div className="flex items-center gap-3">
         <Button
           variant="outline"
           size="icon"
-          className="h-10 w-10 rounded-full"
+          className="h-10 w-10 rounded-full shrink-0"
           onClick={togglePlay}
+          disabled={isLoading}
         >
           {isPlaying ? (
             <Pause className="h-4 w-4" />
@@ -123,25 +172,15 @@ export const AudioFilePlayer = ({ url, fileName }: AudioFilePlayerProps) => {
           )}
         </Button>
 
-        {/* Progress bar */}
-        <div className="flex-1 space-y-1">
-          <Slider
-            value={[currentTime]}
-            min={0}
-            max={duration || 100}
-            step={0.1}
-            onValueChange={handleSeek}
-            className="cursor-pointer"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatTime(duration)}</span>
-          </div>
+        {/* Time display */}
+        <div className="flex-1 flex items-center justify-between text-sm text-muted-foreground">
+          <span className="tabular-nums">{formatTime(currentTime)}</span>
+          <span className="tabular-nums">{formatTime(duration)}</span>
         </div>
 
         {/* Volume control */}
-        <div className="flex items-center gap-2 w-24">
-          <Volume2 className="h-4 w-4 text-muted-foreground" />
+        <div className="flex items-center gap-2 w-24 shrink-0">
+          <Volume2 className="h-4 w-4 text-muted-foreground shrink-0" />
           <Slider
             value={[volume]}
             min={0}
