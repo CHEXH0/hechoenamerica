@@ -85,11 +85,64 @@ const PurchaseConfirmation = () => {
             Thank you for your purchase. Your order has been confirmed.
           </p>
           {purchaseDetails && (
-            <div className="bg-white/5 rounded-lg p-4 border border-white/10 mt-4 text-left">
-              <h3 className="text-white font-semibold mb-2">Purchase Details:</h3>
-              <p className="text-white/70 text-sm"><strong>Tier:</strong> {purchaseDetails.tier}</p>
-              <p className="text-white/70 text-sm"><strong>Product:</strong> {purchaseDetails.productName}</p>
-              <p className="text-white/70 text-sm"><strong>Amount:</strong> {purchaseDetails.amount}</p>
+            <div className="bg-white/5 rounded-lg p-4 border border-white/10 mt-4 text-left space-y-3">
+              <h3 className="text-white font-semibold">Purchase Details:</h3>
+              <div className="space-y-1">
+                <p className="text-white/70 text-sm"><strong>Tier:</strong> {purchaseDetails.tier}</p>
+                <p className="text-white/70 text-sm"><strong>Product:</strong> {purchaseDetails.productName}</p>
+              </div>
+              
+              {/* Price Breakdown */}
+              <div className="border-t border-white/10 pt-3 space-y-2">
+                <h4 className="text-white/90 text-sm font-medium">Price Breakdown:</h4>
+                
+                {purchaseDetails.basePrice && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/60">Base Price ({purchaseDetails.tier})</span>
+                    <span className="text-white/80">{purchaseDetails.basePrice}</span>
+                  </div>
+                )}
+                
+                {purchaseDetails.addOns?.stems && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/60">+ Recorded Stems</span>
+                    <span className="text-white/80">Included</span>
+                  </div>
+                )}
+                
+                {purchaseDetails.addOns?.analog && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/60">+ Analog Equipment</span>
+                    <span className="text-white/80">Included</span>
+                  </div>
+                )}
+                
+                {purchaseDetails.addOns?.mixing && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/60">+ Mixing Service</span>
+                    <span className="text-white/80">Included</span>
+                  </div>
+                )}
+                
+                {purchaseDetails.addOns?.mastering && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/60">+ Mastering Service</span>
+                    <span className="text-white/80">Included</span>
+                  </div>
+                )}
+                
+                {purchaseDetails.addOns?.revisions > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/60">+ {purchaseDetails.addOns.revisions} Revision(s)</span>
+                    <span className="text-white/80">Included</span>
+                  </div>
+                )}
+                
+                <div className="border-t border-white/20 pt-2 mt-2 flex justify-between">
+                  <span className="text-white font-semibold">Total Paid</span>
+                  <span className="text-white font-bold text-lg">{purchaseDetails.amount}</span>
+                </div>
+              </div>
             </div>
           )}
           {purchaseDetails?.email && (

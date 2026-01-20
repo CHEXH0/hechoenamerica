@@ -53,6 +53,10 @@ serve(async (req) => {
     const fileUrls = fileUrlsStr ? JSON.parse(fileUrlsStr) : [];
     const requestId = session.metadata?.request_id || "";
     const userId = session.metadata?.user_id || "";
+    const totalPrice = session.metadata?.total_price || "";
+    const basePrice = session.metadata?.base_price || "";
+    const addOnsStr = session.metadata?.add_ons || "{}";
+    const addOns = JSON.parse(addOnsStr);
     const customerEmail = session.customer_details?.email || session.customer_email;
     const amountTotal = session.amount_total ? (session.amount_total / 100).toFixed(2) : '0.00';
     const currency = session.currency?.toUpperCase() || 'USD';
@@ -65,7 +69,10 @@ serve(async (req) => {
       tier, 
       customerEmail, 
       amount: `${amountTotal} ${currency}`,
-      fileCount: fileUrls.length 
+      fileCount: fileUrls.length,
+      basePrice,
+      totalPrice,
+      addOns
     });
 
     // Send confirmation email using Resend
@@ -277,7 +284,10 @@ serve(async (req) => {
         productName,
         amount: `${currency} ${amountTotal}`,
         email: customerEmail,
-        filesIncluded: fileUrls.length > 0
+        filesIncluded: fileUrls.length > 0,
+        basePrice: basePrice ? `$${basePrice}` : null,
+        totalPrice: totalPrice ? `$${totalPrice}` : null,
+        addOns: addOns
       }
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
