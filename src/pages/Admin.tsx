@@ -6,6 +6,7 @@ import { GoogleDriveConnect } from "@/components/GoogleDriveConnect";
 import { ProducerProjects } from "@/components/ProducerProjects";
 import { PaymentAnalyticsDashboard } from "@/components/PaymentAnalyticsDashboard";
 import { StripeConnectOnboarding } from "@/components/StripeConnectOnboarding";
+import { StorageManagement } from "@/components/StorageManagement";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -379,6 +380,10 @@ const Admin = () => {
             <>
               {/* Payment Analytics Dashboard */}
               <PaymentAnalyticsDashboard />
+              
+              {/* Storage Management */}
+              <StorageManagement />
+              
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">

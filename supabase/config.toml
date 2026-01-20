@@ -77,3 +77,9 @@ verify_jwt = true
 
 [functions.cleanup-completed-files]
 verify_jwt = false
+
+[functions.get-storage-stats]
+verify_jwt = true
+
+[functions.admin-cleanup-storage]
+verify_jwt = true
