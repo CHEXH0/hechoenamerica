@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -9,8 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Music, Upload, RefreshCw, Eye, Mail, DollarSign, Clock, AlertTriangle, HardDrive, ExternalLink } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Music, Upload, RefreshCw, Eye, Mail, DollarSign, Clock, AlertTriangle, HardDrive, ExternalLink, Trash2 } from "lucide-react";
 import { AudioFilePlayer } from "./AudioFilePlayer";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -59,6 +61,7 @@ const statusOptions = [
 
 export const ProducerProjects = () => {
   const { user } = useAuth();
+  const { data: userRole } = useUserRole();
   const { toast } = useToast();
   const [projects, setProjects] = useState<SongRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,6 +71,9 @@ export const ProducerProjects = () => {
   const [resendingFilesId, setResendingFilesId] = useState<string | null>(null);
   const [processingPayoutId, setProcessingPayoutId] = useState<string | null>(null);
   const [hasDriveConnection, setHasDriveConnection] = useState<boolean | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const isAdmin = userRole?.isAdmin || false;
 
   const getTimeRemaining = (deadline: string | null): { text: string; isUrgent: boolean; isExpired: boolean } => {
     if (!deadline) return { text: 'No deadline', isUrgent: false, isExpired: false };
@@ -354,6 +360,55 @@ export const ProducerProjects = () => {
       });
     } finally {
       setResendingFilesId(null);
+    }
+  };
+
+  const handleDeleteProject = async (projectId: string, fileUrls: string[] | null) => {
+    setDeletingId(projectId);
+    try {
+      // Delete associated files from storage if they exist
+      if (fileUrls && fileUrls.length > 0) {
+        for (const url of fileUrls) {
+          try {
+            // Extract file path from signed URL
+            const urlObj = new URL(url);
+            const pathMatch = urlObj.pathname.match(/\/object\/sign\/product-assets\/(.+)/);
+            if (pathMatch) {
+              const filePath = decodeURIComponent(pathMatch[1]);
+              await supabase.storage
+                .from('product-assets')
+                .remove([filePath]);
+            }
+          } catch (fileError) {
+            console.error("Error deleting file:", fileError);
+            // Continue with other files
+          }
+        }
+      }
+
+      // Delete the song request record
+      const { error } = await supabase
+        .from("song_requests")
+        .delete()
+        .eq("id", projectId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Project Deleted",
+        description: "The project and associated files have been removed.",
+      });
+
+      fetchProjects();
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete project. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -678,6 +733,45 @@ export const ProducerProjects = () => {
                           if (file) handleFileUpload(project.id, file);
                         }}
                       />
+
+                      {/* Admin Delete Button */}
+                      {isAdmin && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              disabled={deletingId === project.id}
+                            >
+                              {deletingId === project.id ? (
+                                <RefreshCw className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Project?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently delete this project and all associated files. This action cannot be undone.
+                                <br /><br />
+                                <strong>Client:</strong> {project.user_email}<br />
+                                <strong>Tier:</strong> {project.tier} ({project.price})
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteProject(project.id, project.file_urls)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Delete Project
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
