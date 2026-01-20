@@ -217,12 +217,12 @@ const GenerateSong = () => {
       }
 
       if (data?.output) {
-        // Record this generation in the database
+        // Record this generation count (no prompt stored for privacy)
         const { error: insertError } = await supabase
           .from('ai_song_generations')
           .insert({
             user_id: user.id,
-            prompt: idea,
+            prompt: 'free_tier_generation', // Placeholder - no actual prompt stored
             genre: selectedGenre || null
           });
 
