@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Music, Upload, RefreshCw, Eye, FileAudio, ExternalLink } from "lucide-react";
+import { Music, Upload, RefreshCw, Eye, FileAudio, ExternalLink, Mail } from "lucide-react";
 
 interface SongRequest {
   id: string;
@@ -56,6 +56,7 @@ export const ProducerProjects = () => {
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<SongRequest | null>(null);
+  const [resendingFilesId, setResendingFilesId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProjects();
@@ -228,6 +229,48 @@ export const ProducerProjects = () => {
     }
   };
 
+  const handleResendFiles = async (project: SongRequest) => {
+    if (!project.file_urls || project.file_urls.length === 0) {
+      toast({
+        title: "No Files",
+        description: "This project has no customer files attached.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setResendingFilesId(project.id);
+    try {
+      const { data: userData } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('id', user?.id)
+        .single();
+
+      await supabase.functions.invoke('send-producer-files-email', {
+        body: {
+          requestId: project.id,
+          producerEmail: user?.email,
+          producerName: userData?.display_name || user?.email?.split('@')[0] || 'Producer'
+        }
+      });
+
+      toast({
+        title: "Files Sent!",
+        description: "Customer files have been emailed to you.",
+      });
+    } catch (error) {
+      console.error("Error resending files:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send files email. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setResendingFilesId(null);
+    }
+  };
+
   const getGenreLabel = (genre: string | null) => {
     const genreMap: Record<string, string> = {
       "hip-hop": "Hip Hop / Trap",
@@ -386,8 +429,23 @@ export const ProducerProjects = () => {
                             </div>
                             {project.file_urls && project.file_urls.length > 0 && (
                               <div>
-                                <Label className="text-muted-foreground">Client Files</Label>
-                                <div className="space-y-2 mt-2">
+                                <div className="flex items-center justify-between mb-2">
+                                  <Label className="text-muted-foreground">Client Files</Label>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleResendFiles(project)}
+                                    disabled={resendingFilesId === project.id}
+                                  >
+                                    {resendingFilesId === project.id ? (
+                                      <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                                    ) : (
+                                      <Mail className="h-4 w-4 mr-2" />
+                                    )}
+                                    Resend Files to Email
+                                  </Button>
+                                </div>
+                                <div className="space-y-2">
                                   {project.file_urls.map((url, index) => (
                                     <a
                                       key={index}
