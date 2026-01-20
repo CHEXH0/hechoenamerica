@@ -13,6 +13,7 @@ interface StatusNotificationRequest {
   requestId: string;
   oldStatus: string;
   newStatus: string;
+  driveLink?: string;
 }
 
 const APP_URL = 'https://hechoenamerica.lovable.app';
@@ -40,7 +41,7 @@ const statusInfo: Record<string, { emoji: string; title: string; description: st
   'completed': {
     emoji: '🎉',
     title: 'Project Completed!',
-    description: 'Your song is ready! Head to your dashboard to download your finished track.',
+    description: 'Your song is ready! Click the button below to download your finished track from Google Drive.',
     color: '#10B981'
   },
   'revision': {
@@ -74,9 +75,9 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { requestId, oldStatus, newStatus }: StatusNotificationRequest = await req.json();
+    const { requestId, oldStatus, newStatus, driveLink }: StatusNotificationRequest = await req.json();
     
-    console.log('Sending customer status notification:', { requestId, oldStatus, newStatus });
+    console.log('Sending customer status notification:', { requestId, oldStatus, newStatus, driveLink });
 
     // Only send notifications for meaningful status changes
     const notifiableStatuses = ['accepted', 'in_progress', 'review', 'completed', 'revision'];
@@ -184,12 +185,25 @@ serve(async (req) => {
 
             <!-- CTA -->
             <div style="padding: 32px; text-align: center;">
-              <a href="${APP_URL}/my-projects" style="display: inline-block; background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%); color: white; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
-                View My Projects →
-              </a>
-              <p style="margin: 16px 0 0 0; color: #999; font-size: 14px;">
-                Track all your projects and download completed songs
-              </p>
+              ${newStatus === 'completed' && driveLink ? `
+                <a href="${driveLink}" style="display: inline-block; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; text-decoration: none; padding: 16px 48px; border-radius: 8px; font-weight: bold; font-size: 18px; margin-bottom: 16px;">
+                  📥 Download Your Song from Google Drive
+                </a>
+                <br><br>
+                <a href="${APP_URL}/my-projects" style="display: inline-block; background: transparent; color: #7C3AED; text-decoration: underline; padding: 10px 24px; font-size: 14px;">
+                  View All My Projects →
+                </a>
+                <p style="margin: 16px 0 0 0; color: #999; font-size: 14px;">
+                  Your completed song is hosted on Google Drive for easy access
+                </p>
+              ` : `
+                <a href="${APP_URL}/my-projects" style="display: inline-block; background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%); color: white; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                  View My Projects →
+                </a>
+                <p style="margin: 16px 0 0 0; color: #999; font-size: 14px;">
+                  Track all your projects and download completed songs
+                </p>
+              `}
             </div>
 
           </div>
