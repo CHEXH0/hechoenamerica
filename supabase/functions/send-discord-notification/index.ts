@@ -35,6 +35,22 @@ const statusColorMap: Record<string, number> = {
 
 const APP_URL = 'https://eapbuoqkhckqaswfjexv.lovableproject.com';
 
+// Add-on pricing per tier (matches frontend: tier index 1=$25, 2=$125, 3=$250)
+const addOnPricing: Record<string, number[]> = {
+  stems: [0, 10, 25, 40],
+  analog: [0, 15, 35, 50],
+  mixing: [0, 20, 50, 75],
+  mastering: [0, 15, 40, 60],
+  revision: [0, 5, 15, 25],
+};
+
+const tierIndexMap: Record<string, number> = {
+  '$0': 0,
+  '$25': 1,
+  '$125': 2,
+  '$250': 3,
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -136,12 +152,46 @@ serve(async (req) => {
 
 function createNewRequestEmbed(songRequest: any, requestId: string) {
   const complexityMap: Record<string, string> = {
-    'free': '🟢 Basic',
-    'basic': '🟡 Standard',
-    'premium': '🟠 Premium',
-    'custom': '🔴 Custom'
+    '$0': '🟢 Free AI',
+    '$25': '🟡 Demo',
+    '$125': '🟠 Artist',
+    '$250': '🔴 Industry'
   };
-  const complexityLevel = complexityMap[songRequest.tier.toLowerCase()] || '🟡 Standard';
+  const complexityLevel = complexityMap[songRequest.tier] || '🟡 Standard';
+  const tierIndex = tierIndexMap[songRequest.tier] || 1;
+
+  // Calculate price breakdown
+  const basePrice = parseInt(songRequest.tier.replace('$', '')) || 0;
+  let addOnTotal = 0;
+  const addOnBreakdown: string[] = [];
+
+  if (songRequest.wants_recorded_stems) {
+    const cost = addOnPricing.stems[tierIndex];
+    addOnTotal += cost;
+    addOnBreakdown.push(`🎹 Stems: +$${cost}`);
+  }
+  if (songRequest.wants_analog) {
+    const cost = addOnPricing.analog[tierIndex];
+    addOnTotal += cost;
+    addOnBreakdown.push(`📻 Analog: +$${cost}`);
+  }
+  if (songRequest.wants_mixing) {
+    const cost = addOnPricing.mixing[tierIndex];
+    addOnTotal += cost;
+    addOnBreakdown.push(`🎚️ Mixing: +$${cost}`);
+  }
+  if (songRequest.wants_mastering) {
+    const cost = addOnPricing.mastering[tierIndex];
+    addOnTotal += cost;
+    addOnBreakdown.push(`🔊 Mastering: +$${cost}`);
+  }
+  if (songRequest.number_of_revisions > 0) {
+    const cost = addOnPricing.revision[tierIndex] * songRequest.number_of_revisions;
+    addOnTotal += cost;
+    addOnBreakdown.push(`🔄 ${songRequest.number_of_revisions}x Revisions: +$${cost}`);
+  }
+
+  const totalPrice = basePrice + addOnTotal;
 
   const embed = {
     title: "🎵 New Song Request",
@@ -154,17 +204,7 @@ function createNewRequestEmbed(songRequest: any, requestId: string) {
       },
       {
         name: "🎯 Tier",
-        value: songRequest.tier.toUpperCase(),
-        inline: true
-      },
-      {
-        name: "💰 Price",
-        value: songRequest.price,
-        inline: true
-      },
-      {
-        name: "⚡ Complexity",
-        value: complexityLevel,
+        value: `${songRequest.tier} (${complexityLevel})`,
         inline: true
       },
       {
@@ -178,38 +218,54 @@ function createNewRequestEmbed(songRequest: any, requestId: string) {
         inline: true
       },
       {
+        name: "📅 Submitted",
+        value: new Date(songRequest.created_at).toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric', 
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        inline: true
+      },
+      {
+        name: "📊 Status",
+        value: songRequest.status.replace('_', ' ').toUpperCase(),
+        inline: true
+      },
+      {
         name: "💡 Song Idea",
-        value: songRequest.song_idea.substring(0, 500) + (songRequest.song_idea.length > 500 ? '...' : '')
+        value: songRequest.song_idea.length > 400 
+          ? songRequest.song_idea.substring(0, 400) + '...' 
+          : songRequest.song_idea
       }
     ],
     timestamp: new Date().toISOString(),
     footer: {
-      text: "Click the link below to manage this project"
+      text: "HechoEnAmerica • LA MUSIC ES MEDICINA"
     }
   };
 
-  // Add additional options
-  const additionalOptions = [];
-  if (songRequest.wants_recorded_stems) additionalOptions.push("🎹 Recorded Stems");
-  if (songRequest.wants_analog) additionalOptions.push("📻 Analog");
-  if (songRequest.wants_mixing) additionalOptions.push("🎚️ Mixing");
-  if (songRequest.wants_mastering) additionalOptions.push("🔊 Mastering");
-  if (songRequest.number_of_revisions > 0) {
-    additionalOptions.push(`🔄 ${songRequest.number_of_revisions} Revisions`);
+  // Add price breakdown section
+  let priceBreakdownText = `**Base:** $${basePrice}`;
+  if (addOnBreakdown.length > 0) {
+    priceBreakdownText += '\n' + addOnBreakdown.join('\n');
+    priceBreakdownText += `\n──────────\n**TOTAL: $${totalPrice}**`;
+  } else {
+    priceBreakdownText += `\n**TOTAL: $${totalPrice}**`;
   }
 
-  if (additionalOptions.length > 0) {
-    embed.fields.push({
-      name: "✨ Add-ons",
-      value: additionalOptions.join(" • "),
-      inline: false
-    });
-  }
+  embed.fields.push({
+    name: "💰 Price Breakdown",
+    value: priceBreakdownText,
+    inline: false
+  });
 
+  // Files section
   if (songRequest.file_urls && songRequest.file_urls.length > 0) {
     embed.fields.push({
-      name: "📎 Files",
-      value: `${songRequest.file_urls.length} file(s) attached`,
+      name: "📎 Attached Files",
+      value: `${songRequest.file_urls.length} file(s) uploaded`,
       inline: true
     });
   }

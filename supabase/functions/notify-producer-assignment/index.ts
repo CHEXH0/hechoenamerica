@@ -16,6 +16,26 @@ interface AssignmentNotificationRequest {
 
 const APP_URL = 'https://eapbuoqkhckqaswfjexv.lovableproject.com';
 
+// Genre display names
+const genreDisplayNames: Record<string, string> = {
+  'hip-hop': 'Hip Hop / Trap / Rap',
+  'rnb': 'R&B / Soul',
+  'reggae': 'Reggae / Dancehall',
+  'latin': 'Latin / Reggaeton',
+  'electronic': 'Electronic / EDM',
+  'pop': 'Pop / Alternative',
+  'rock': 'Rock / Indie',
+  'world': 'World / Indigenous / Medicina',
+  'other': 'Other / Mixed'
+};
+
+// Tier descriptions
+const tierDescriptions: Record<string, string> = {
+  '$25': 'Demo Project - 30 seconds',
+  '$125': 'Artist-grade quality - 180 seconds',
+  '$250': 'Industry standard - 300 seconds'
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -68,17 +88,26 @@ serve(async (req) => {
 
     // Build add-ons list
     const addOns = [];
-    if (songRequest.wants_mixing) addOns.push('Mixing');
-    if (songRequest.wants_mastering) addOns.push('Mastering');
-    if (songRequest.wants_analog) addOns.push('Analog Processing');
+    if (songRequest.wants_mixing) addOns.push('Mixing Service');
+    if (songRequest.wants_mastering) addOns.push('Mastering Service');
+    if (songRequest.wants_analog) addOns.push('Analog Equipment');
     if (songRequest.wants_recorded_stems) addOns.push('Recorded Stems');
-    if (songRequest.number_of_revisions > 0) addOns.push(`${songRequest.number_of_revisions} Revisions`);
+    if (songRequest.number_of_revisions > 0) addOns.push(`${songRequest.number_of_revisions} Revision(s)`);
 
-    // Send email notification
+    const genreDisplay = genreDisplayNames[songRequest.genre_category] || songRequest.genre_category || 'Not specified';
+    const tierDescription = tierDescriptions[songRequest.tier] || songRequest.tier;
+    const formattedDate = new Date(songRequest.created_at).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    // Send email notification - Basic, clean format for producer
     const emailResponse = await resend.emails.send({
       from: "HEA Music <onboarding@resend.dev>",
       to: [producer.email],
-      subject: `🎵 New Project Assigned: ${songRequest.tier.toUpperCase()} Song Request`,
+      subject: `🎵 New Project: ${songRequest.tier} - ${genreDisplay}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -86,64 +115,76 @@ serve(async (req) => {
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
         </head>
-        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background: #f8f9fa;">
           
-          <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #7C3AED; margin: 0;">🎵 New Project Assigned!</h1>
-            <p style="color: #666; margin-top: 10px;">Hey ${producer.name}, you've been assigned a new song production project.</p>
-          </div>
-
-          <div style="background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%); border-radius: 12px; padding: 24px; margin-bottom: 24px; color: white;">
-            <h2 style="margin: 0 0 16px 0; font-size: 24px;">${songRequest.tier.toUpperCase()} Tier</h2>
-            <p style="margin: 0; font-size: 18px; opacity: 0.9;">💰 ${songRequest.price}</p>
-          </div>
-
-          <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-            <h3 style="color: #7C3AED; margin: 0 0 16px 0;">📋 Project Details</h3>
+          <div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
             
-            <div style="margin-bottom: 16px;">
-              <strong style="color: #666;">Genre:</strong>
-              <span style="margin-left: 8px;">${songRequest.genre_category || 'Not specified'}</span>
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%); padding: 32px; text-align: center; color: white;">
+              <h1 style="margin: 0 0 8px 0; font-size: 28px;">New Project Assigned!</h1>
+              <p style="margin: 0; opacity: 0.9; font-size: 16px;">Hey ${producer.name}, you have a new song to produce 🎧</p>
             </div>
-            
-            <div style="margin-bottom: 16px;">
-              <strong style="color: #666;">Customer Email:</strong>
-              <span style="margin-left: 8px;">${songRequest.user_email}</span>
+
+            <!-- Quick Summary -->
+            <div style="padding: 24px; border-bottom: 1px solid #eee;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #666; width: 120px;">Tier:</td>
+                  <td style="padding: 8px 0; font-weight: 600;">${songRequest.tier} — ${tierDescription}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Genre:</td>
+                  <td style="padding: 8px 0; font-weight: 600;">${genreDisplay}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Submitted:</td>
+                  <td style="padding: 8px 0;">${formattedDate}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Customer:</td>
+                  <td style="padding: 8px 0;">${songRequest.user_email}</td>
+                </tr>
+              </table>
             </div>
-            
-            <div style="margin-bottom: 16px;">
-              <strong style="color: #666;">Song Idea:</strong>
-              <p style="background: white; padding: 16px; border-radius: 8px; margin: 8px 0 0 0; border-left: 4px solid #7C3AED;">
-                ${songRequest.song_idea}
-              </p>
+
+            <!-- Song Idea -->
+            <div style="padding: 24px; border-bottom: 1px solid #eee;">
+              <h3 style="margin: 0 0 12px 0; color: #7C3AED; font-size: 16px;">💡 Song Idea</h3>
+              <div style="background: #f8f4ff; padding: 16px; border-radius: 8px; border-left: 4px solid #7C3AED;">
+                <p style="margin: 0; white-space: pre-wrap;">${songRequest.song_idea}</p>
+              </div>
             </div>
 
             ${addOns.length > 0 ? `
-            <div style="margin-bottom: 16px;">
-              <strong style="color: #666;">Add-ons:</strong>
-              <div style="margin-top: 8px;">
-                ${addOns.map(addon => `<span style="display: inline-block; background: #7C3AED; color: white; padding: 4px 12px; border-radius: 20px; margin: 4px 4px 4px 0; font-size: 14px;">✓ ${addon}</span>`).join('')}
+            <!-- Add-ons -->
+            <div style="padding: 24px; border-bottom: 1px solid #eee;">
+              <h3 style="margin: 0 0 12px 0; color: #7C3AED; font-size: 16px;">✨ Included Add-ons</h3>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                ${addOns.map(addon => `<span style="background: #7C3AED; color: white; padding: 6px 14px; border-radius: 20px; font-size: 14px;">✓ ${addon}</span>`).join('')}
               </div>
             </div>
             ` : ''}
 
             ${songRequest.file_urls && songRequest.file_urls.length > 0 ? `
-            <div>
-              <strong style="color: #666;">📎 Attached Files:</strong>
-              <span style="margin-left: 8px;">${songRequest.file_urls.length} file(s)</span>
+            <!-- Files -->
+            <div style="padding: 24px; border-bottom: 1px solid #eee;">
+              <h3 style="margin: 0 0 12px 0; color: #7C3AED; font-size: 16px;">📎 Customer Files</h3>
+              <p style="margin: 0; color: #666;">${songRequest.file_urls.length} file(s) attached — view in dashboard</p>
             </div>
             ` : ''}
+
+            <!-- CTA -->
+            <div style="padding: 32px; text-align: center;">
+              <a href="${APP_URL}/admin" style="display: inline-block; background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%); color: white; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                Open Project Dashboard →
+              </a>
+            </div>
+
           </div>
 
-          <div style="text-align: center; margin: 32px 0;">
-            <a href="${APP_URL}/admin" style="display: inline-block; background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: bold; font-size: 16px;">
-              View Project Details →
-            </a>
-          </div>
-
-          <div style="border-top: 1px solid #eee; padding-top: 24px; text-align: center; color: #999; font-size: 14px;">
-            <p style="margin: 0;">This is an automated notification from HEA Music.</p>
-            <p style="margin: 8px 0 0 0;">Log in to your producer dashboard to manage this project.</p>
+          <!-- Footer -->
+          <div style="text-align: center; padding: 24px; color: #999; font-size: 13px;">
+            <p style="margin: 0;">HechoEnAmerica • LA MUSIC ES MEDICINA</p>
           </div>
 
         </body>
