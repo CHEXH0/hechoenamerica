@@ -715,26 +715,21 @@ const GenerateSong = () => {
                         +${numberOfRevisions * addOnPricing.revision[tierIndex]} (${addOnPricing.revision[tierIndex]}/each)
                       </span>
                     </div>
-                    <div className="flex items-center justify-center gap-4">
-                      <button
-                        type="button"
-                        onClick={() => setNumberOfRevisions(Math.max(0, numberOfRevisions - 1))}
-                        disabled={numberOfRevisions <= 0}
-                        className="w-10 h-10 rounded-full border border-white/30 bg-white/5 hover:bg-white/15 text-white text-xl font-light transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                      >
-                        −
-                      </button>
-                      <div className="min-w-[80px] h-12 rounded-full border border-white/30 bg-white/5 backdrop-blur-sm flex items-center justify-center">
-                        <span className="text-white text-2xl font-light">{numberOfRevisions}</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setNumberOfRevisions(Math.min(5, numberOfRevisions + 1))}
-                        disabled={numberOfRevisions >= 5}
-                        className="w-10 h-10 rounded-full border border-white/30 bg-white/5 hover:bg-white/15 text-white text-xl font-light transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                      >
-                        +
-                      </button>
+                    <Slider
+                      id="revisions"
+                      value={[numberOfRevisions]}
+                      onValueChange={(value) => setNumberOfRevisions(value[0])}
+                      max={5}
+                      step={1}
+                      className="[&_[role=slider]]:border-white/40 [&_[role=slider]]:bg-white/10 [&_[role=slider]]:backdrop-blur-sm [&>span:first-child]:bg-white/20 [&>span:first-child>span]:bg-white/40"
+                    />
+                    <div className="flex justify-between text-white/50 text-xs">
+                      <span>0</span>
+                      <span>1</span>
+                      <span>2</span>
+                      <span>3</span>
+                      <span>4</span>
+                      <span>5</span>
                     </div>
                   </div>
                 </div>
