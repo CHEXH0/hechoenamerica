@@ -17,12 +17,25 @@ const FeaturedProducers = () => {
   };
 
   const scroll = (direction: 'left' | 'right') => {
-    if (scrollRef.current) {
-      const scrollAmount = scrollRef.current.offsetWidth;
-      scrollRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
+    if (scrollRef.current && producers.length > 0) {
+      const container = scrollRef.current;
+      const scrollAmount = container.offsetWidth;
+      
+      if (direction === 'right') {
+        // If near the end, loop back to start
+        if (container.scrollLeft + container.offsetWidth >= container.scrollWidth - 10) {
+          container.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        }
+      } else {
+        // If at the start, loop to end
+        if (container.scrollLeft <= 10) {
+          container.scrollTo({ left: container.scrollWidth, behavior: 'smooth' });
+        } else {
+          container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        }
+      }
     }
   };
 
