@@ -32,6 +32,15 @@ const tiers = [
   { label: "$250", price: 250, description: "Industry standard - for masterpiece (300sec)", priceId: "price_1SHdNmQchHjxRXODgqWhW9TO" }
 ];
 
+// Add-on pricing per tier (tier index: 0=free, 1=$25, 2=$125, 3=$250)
+const addOnPricing = {
+  stems: [0, 10, 25, 40],        // Recorded stems
+  analog: [0, 15, 35, 50],       // Analog equipment
+  mixing: [0, 20, 50, 75],       // Mixing service
+  mastering: [0, 15, 40, 60],    // Mastering service
+  revision: [0, 5, 15, 25],      // Per revision
+};
+
 const MAX_FREE_AI_SONGS = 3;
 const RESET_HOURS = 24;
 
@@ -58,6 +67,24 @@ const GenerateSong = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const currentTier = tiers[sliderValue[0]];
+  const tierIndex = sliderValue[0];
+
+  // Calculate total price with add-ons
+  const calculateTotalPrice = () => {
+    if (tierIndex === 0) return 0;
+    
+    let total = currentTier.price;
+    
+    if (wantsRecordedStems) total += addOnPricing.stems[tierIndex];
+    if (wantsAnalog) total += addOnPricing.analog[tierIndex];
+    if (wantsMixing) total += addOnPricing.mixing[tierIndex];
+    if (wantsMastering) total += addOnPricing.mastering[tierIndex];
+    total += numberOfRevisions * addOnPricing.revision[tierIndex];
+    
+    return total;
+  };
+
+  const totalPrice = calculateTotalPrice();
 
   // Check AI generation limits
   const checkAIGenerationLimits = async () => {
@@ -591,70 +618,95 @@ const GenerateSong = () => {
               
               <CollapsibleContent className="space-y-2">
                 <div className="space-y-4 bg-white/10 p-4 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <Checkbox 
-                      id="stems" 
-                      checked={wantsRecordedStems}
-                      onCheckedChange={(checked) => setWantsRecordedStems(checked as boolean)}
-                      className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
-                    />
-                    <label
-                      htmlFor="stems"
-                      className="text-white text-sm font-medium leading-none cursor-pointer"
-                    >
-                      Provide recorded stems
-                    </label>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Checkbox 
+                        id="stems" 
+                        checked={wantsRecordedStems}
+                        onCheckedChange={(checked) => setWantsRecordedStems(checked as boolean)}
+                        className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
+                      />
+                      <label
+                        htmlFor="stems"
+                        className="text-white text-sm font-medium leading-none cursor-pointer"
+                      >
+                        Provide recorded stems
+                      </label>
+                    </div>
+                    <span className="text-white/80 text-sm font-medium">
+                      +${addOnPricing.stems[tierIndex]}
+                    </span>
                   </div>
 
-                  <div className="flex items-center space-x-3">
-                    <Checkbox 
-                      id="analog" 
-                      checked={wantsAnalog}
-                      onCheckedChange={(checked) => setWantsAnalog(checked as boolean)}
-                      className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
-                    />
-                    <label
-                      htmlFor="analog"
-                      className="text-white text-sm font-medium leading-none cursor-pointer"
-                    >
-                      Use analog equipment
-                    </label>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Checkbox 
+                        id="analog" 
+                        checked={wantsAnalog}
+                        onCheckedChange={(checked) => setWantsAnalog(checked as boolean)}
+                        className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
+                      />
+                      <label
+                        htmlFor="analog"
+                        className="text-white text-sm font-medium leading-none cursor-pointer"
+                      >
+                        Use analog equipment
+                      </label>
+                    </div>
+                    <span className="text-white/80 text-sm font-medium">
+                      +${addOnPricing.analog[tierIndex]}
+                    </span>
                   </div>
 
-                  <div className="flex items-center space-x-3">
-                    <Checkbox 
-                      id="mixing" 
-                      checked={wantsMixing}
-                      onCheckedChange={(checked) => setWantsMixing(checked as boolean)}
-                      className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
-                    />
-                    <label
-                      htmlFor="mixing"
-                      className="text-white text-sm font-medium leading-none cursor-pointer"
-                    >
-                      Include mixing service
-                    </label>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Checkbox 
+                        id="mixing" 
+                        checked={wantsMixing}
+                        onCheckedChange={(checked) => setWantsMixing(checked as boolean)}
+                        className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
+                      />
+                      <label
+                        htmlFor="mixing"
+                        className="text-white text-sm font-medium leading-none cursor-pointer"
+                      >
+                        Include mixing service
+                      </label>
+                    </div>
+                    <span className="text-white/80 text-sm font-medium">
+                      +${addOnPricing.mixing[tierIndex]}
+                    </span>
                   </div>
 
-                  <div className="flex items-center space-x-3">
-                    <Checkbox 
-                      id="mastering" 
-                      checked={wantsMastering}
-                      onCheckedChange={(checked) => setWantsMastering(checked as boolean)}
-                      className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
-                    />
-                    <label
-                      htmlFor="mastering"
-                      className="text-white text-sm font-medium leading-none cursor-pointer"
-                    >
-                      Include mastering service
-                    </label>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Checkbox 
+                        id="mastering" 
+                        checked={wantsMastering}
+                        onCheckedChange={(checked) => setWantsMastering(checked as boolean)}
+                        className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
+                      />
+                      <label
+                        htmlFor="mastering"
+                        className="text-white text-sm font-medium leading-none cursor-pointer"
+                      >
+                        Include mastering service
+                      </label>
+                    </div>
+                    <span className="text-white/80 text-sm font-medium">
+                      +${addOnPricing.mastering[tierIndex]}
+                    </span>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="revisions" className="text-white text-sm font-medium">
-                      Number of revisions: {numberOfRevisions}
-                    </Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="revisions" className="text-white text-sm font-medium">
+                        Number of revisions: {numberOfRevisions}
+                      </Label>
+                      <span className="text-white/80 text-sm font-medium">
+                        +${numberOfRevisions * addOnPricing.revision[tierIndex]} (${addOnPricing.revision[tierIndex]}/each)
+                      </span>
+                    </div>
                     <Slider
                       id="revisions"
                       value={[numberOfRevisions]}
@@ -677,7 +729,38 @@ const GenerateSong = () => {
               </Collapsible>
             )}
 
-            {/* AI Generation Progress */}
+            {/* Real-time Total Price Display */}
+            {currentTier.price > 0 && (
+              <motion.div
+                key={totalPrice}
+                initial={{ scale: 1.05 }}
+                animate={{ scale: 1 }}
+                className="bg-white/20 backdrop-blur-sm rounded-xl p-4 border border-white/30"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="text-white">
+                    <p className="text-sm font-medium opacity-80">Total Price</p>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl font-bold">${totalPrice}</span>
+                      {totalPrice > currentTier.price && (
+                        <span className="text-sm opacity-70">
+                          (Base ${currentTier.price} + ${totalPrice - currentTier.price} add-ons)
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {(wantsRecordedStems || wantsAnalog || wantsMixing || wantsMastering || numberOfRevisions > 0) && (
+                    <div className="text-right text-white/70 text-xs space-y-0.5">
+                      {wantsRecordedStems && <p>Stems +${addOnPricing.stems[tierIndex]}</p>}
+                      {wantsAnalog && <p>Analog +${addOnPricing.analog[tierIndex]}</p>}
+                      {wantsMixing && <p>Mixing +${addOnPricing.mixing[tierIndex]}</p>}
+                      {wantsMastering && <p>Mastering +${addOnPricing.mastering[tierIndex]}</p>}
+                      {numberOfRevisions > 0 && <p>{numberOfRevisions}x Revisions +${numberOfRevisions * addOnPricing.revision[tierIndex]}</p>}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
             <AnimatePresence>
               {(isGeneratingAI || generatedAudioUrl) && (
                 <motion.div
