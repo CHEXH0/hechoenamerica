@@ -116,14 +116,42 @@ serve(async (req) => {
       platformFeePercent: PLATFORM_FEE_PERCENT,
     });
 
-    // For now, we'll record the payout amounts in the database
-    // In a full Stripe Connect implementation, you would create a transfer here:
-    // await stripe.transfers.create({
-    //   amount: producerPayoutCents,
-    //   currency: 'usd',
-    //   destination: producerStripeAccountId,
-    //   transfer_group: request.id,
-    // });
+// Check if producer has Stripe Connect account for automatic payout
+    const { data: producerData } = await supabaseAdmin
+      .from("producers")
+      .select("stripe_connect_account_id, stripe_connect_onboarded_at")
+      .eq("id", request.assigned_producer_id)
+      .single();
+
+    let transferId = null;
+    let payoutMethod = "manual";
+
+    if (producerData?.stripe_connect_account_id && producerData?.stripe_connect_onboarded_at) {
+      // Create actual Stripe transfer to producer's Connect account
+      try {
+        const transfer = await stripe.transfers.create({
+          amount: producerPayoutCents,
+          currency: "usd",
+          destination: producerData.stripe_connect_account_id,
+          transfer_group: request.id,
+          metadata: {
+            request_id: request.id,
+            tier: request.tier,
+            producer_id: request.assigned_producer_id,
+          },
+        });
+        transferId = transfer.id;
+        payoutMethod = "stripe_connect";
+        logStep("Stripe transfer created", { transferId, amount: producerPayoutCents });
+      } catch (transferError) {
+        logStep("Transfer failed, falling back to manual", { 
+          error: transferError instanceof Error ? transferError.message : String(transferError) 
+        });
+        // Fall back to manual payout tracking
+      }
+    } else {
+      logStep("Producer not onboarded to Stripe Connect, recording manual payout");
+    }
 
     // Update the song request with payout information
     const { error: updateError } = await supabaseAdmin

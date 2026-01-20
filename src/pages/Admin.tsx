@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload, Users, User, Database, TrendingUp, DollarSign, FileText, HardDrive } from "lucide-react";
 import { GoogleDriveConnect } from "@/components/GoogleDriveConnect";
 import { ProducerProjects } from "@/components/ProducerProjects";
+import { PaymentAnalyticsDashboard } from "@/components/PaymentAnalyticsDashboard";
+import { StripeConnectOnboarding } from "@/components/StripeConnectOnboarding";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -31,6 +33,7 @@ const Admin = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
   const [assigningRole, setAssigningRole] = useState<string | null>(null);
+  const [linkedProducerId, setLinkedProducerId] = useState<string | null>(null);
   const [systemStats, setSystemStats] = useState({
     totalUsers: 0,
     totalPurchases: 0,
@@ -46,12 +49,28 @@ const Admin = () => {
       navigate('/auth');
     } else if (userRole?.hasAccess) {
       fetchPendingPurchases();
+      fetchLinkedProducer();
       if (userRole?.isAdmin) {
         fetchUsers();
         fetchSystemStats();
       }
     }
   }, [user, navigate, userRole]);
+
+  const fetchLinkedProducer = async () => {
+    if (!user?.email) return;
+    
+    // Try to find a producer linked to this user's email
+    const { data: producer } = await supabase
+      .from("producers")
+      .select("id")
+      .eq("email", user.email)
+      .single();
+    
+    if (producer) {
+      setLinkedProducerId(producer.id);
+    }
+  };
 
   const fetchPendingPurchases = async () => {
     try {
@@ -345,6 +364,11 @@ const Admin = () => {
           transition={{ delay: 0.1 }}
           className="space-y-6"
         >
+          {/* Producer-specific sections */}
+          {userRole?.isProducer && linkedProducerId && (
+            <StripeConnectOnboarding producerId={linkedProducerId} />
+          )}
+
           {/* Producer Projects - shows assigned song requests */}
           <ProducerProjects />
 
@@ -353,6 +377,8 @@ const Admin = () => {
 
           {isAdmin && (
             <>
+              {/* Payment Analytics Dashboard */}
+              <PaymentAnalyticsDashboard />
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
