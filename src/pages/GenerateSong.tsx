@@ -355,7 +355,7 @@ const GenerateSong = () => {
           user_email: user.email || '',
           song_idea: idea,
           tier: currentTier.label,
-          price: currentTier.label,
+          price: `$${totalPrice}`,
           status: 'pending_payment',
           file_urls: fileUrls.length > 0 ? fileUrls : null,
           number_of_revisions: numberOfRevisions,
