@@ -406,11 +406,19 @@ const GenerateSong = () => {
 
       const { data: sessionData, error } = await supabase.functions.invoke('create-song-checkout', {
         body: {
-          priceId: currentTier.priceId,
           tier: currentTier.label,
           idea,
           fileUrls: fileUrls,
-          requestId: requestData.id
+          requestId: requestData.id,
+          totalPrice: totalPrice,
+          basePrice: currentTier.price,
+          addOns: {
+            stems: wantsRecordedStems,
+            analog: wantsAnalog,
+            mixing: wantsMixing,
+            mastering: wantsMastering,
+            revisions: numberOfRevisions,
+          }
         }
       });
 

@@ -32,11 +32,28 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { priceId, tier, idea, fileUrls, requestId } = await req.json();
-    logStep("Request body received", { priceId, tier, idea: idea?.substring(0, 50), fileCount: fileUrls?.length || 0, requestId });
+    const { 
+      tier, 
+      idea, 
+      fileUrls, 
+      requestId,
+      totalPrice,
+      basePrice,
+      addOns 
+    } = await req.json();
+    
+    logStep("Request body received", { 
+      tier, 
+      idea: idea?.substring(0, 50), 
+      fileCount: fileUrls?.length || 0, 
+      requestId,
+      totalPrice,
+      basePrice,
+      addOns
+    });
 
-    if (!priceId || !tier) {
-      throw new Error("Missing required fields: priceId and tier");
+    if (!tier || totalPrice === undefined) {
+      throw new Error("Missing required fields: tier and totalPrice");
     }
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -50,12 +67,32 @@ serve(async (req) => {
       logStep("Existing customer found", { customerId });
     }
 
+    // Build description with add-ons
+    let description = `Song Production - ${tier} Tier`;
+    const addOnsList: string[] = [];
+    if (addOns?.stems) addOnsList.push("Recorded Stems");
+    if (addOns?.analog) addOnsList.push("Analog Equipment");
+    if (addOns?.mixing) addOnsList.push("Mixing Service");
+    if (addOns?.mastering) addOnsList.push("Mastering Service");
+    if (addOns?.revisions > 0) addOnsList.push(`${addOns.revisions} Revision(s)`);
+    
+    if (addOnsList.length > 0) {
+      description += ` + ${addOnsList.join(", ")}`;
+    }
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [
         {
-          price: priceId,
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: `Song Production - ${tier}`,
+              description: description,
+            },
+            unit_amount: Math.round(totalPrice * 100), // Convert to cents
+          },
           quantity: 1,
         },
       ],
@@ -65,12 +102,15 @@ serve(async (req) => {
         idea: idea?.substring(0, 500) || "",
         user_id: user.id,
         request_id: requestId || "",
+        total_price: totalPrice.toString(),
+        base_price: basePrice?.toString() || "",
+        add_ons: JSON.stringify(addOns || {}),
       },
       success_url: `${req.headers.get("origin")}/purchase-confirmation?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/generate-song`,
     });
 
-    logStep("Checkout session created", { sessionId: session.id, url: session.url });
+    logStep("Checkout session created", { sessionId: session.id, url: session.url, totalPrice });
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -84,4 +124,5 @@ serve(async (req) => {
       status: 500,
     });
   }
+});
 });
