@@ -74,3 +74,6 @@ verify_jwt = true
 
 [functions.upload-deliverable-to-drive]
 verify_jwt = true
+
+[functions.cleanup-completed-files]
+verify_jwt = false
