@@ -41,11 +41,12 @@ interface Producer {
   image: string;
 }
 
-const statusSteps = ["pending", "in_progress", "review", "completed"];
+const statusSteps = ["pending", "accepted", "in_progress", "review", "completed"];
 const statusLabels: Record<string, string> = {
   pending: "Pending",
   pending_payment: "Awaiting Payment",
   paid: "Paid",
+  accepted: "Accepted",
   in_progress: "In Production",
   review: "Under Review",
   completed: "Completed",
@@ -55,6 +56,7 @@ const statusColors: Record<string, string> = {
   pending: "bg-yellow-500",
   pending_payment: "bg-orange-500",
   paid: "bg-green-500",
+  accepted: "bg-cyan-500",
   in_progress: "bg-blue-500",
   review: "bg-purple-500",
   completed: "bg-emerald-500",
@@ -64,7 +66,8 @@ const getStatusProgress = (status: string): number => {
   const progressMap: Record<string, number> = {
     pending: 10,
     pending_payment: 15,
-    paid: 25,
+    paid: 20,
+    accepted: 30,
     in_progress: 50,
     review: 75,
     completed: 100,
@@ -440,6 +443,11 @@ const MyProjects = () => {
                             <>
                               <CheckCircle className="h-4 w-4" />
                               Almost ready! Under final review...
+                            </>
+                          ) : project.status === "accepted" ? (
+                            <>
+                              <CheckCircle className="h-4 w-4 text-cyan-500" />
+                              A producer has accepted your project!
                             </>
                           ) : (
                             <>
