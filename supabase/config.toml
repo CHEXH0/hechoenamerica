@@ -53,3 +53,6 @@ verify_jwt = true
 
 [functions.send-producer-files-email]
 verify_jwt = true
+
+[functions.notify-customer-status]
+verify_jwt = true
