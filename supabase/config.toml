@@ -71,3 +71,6 @@ verify_jwt = false
 
 [functions.get-payment-analytics]
 verify_jwt = true
+
+[functions.upload-deliverable-to-drive]
+verify_jwt = true

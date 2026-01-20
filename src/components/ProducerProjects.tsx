@@ -10,8 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Music, Upload, RefreshCw, Eye, Mail, DollarSign, Clock, AlertTriangle } from "lucide-react";
+import { Music, Upload, RefreshCw, Eye, Mail, DollarSign, Clock, AlertTriangle, HardDrive, ExternalLink } from "lucide-react";
 import { AudioFilePlayer } from "./AudioFilePlayer";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface SongRequest {
   id: string;
@@ -66,6 +67,7 @@ export const ProducerProjects = () => {
   const [selectedProject, setSelectedProject] = useState<SongRequest | null>(null);
   const [resendingFilesId, setResendingFilesId] = useState<string | null>(null);
   const [processingPayoutId, setProcessingPayoutId] = useState<string | null>(null);
+  const [hasDriveConnection, setHasDriveConnection] = useState<boolean | null>(null);
 
   const getTimeRemaining = (deadline: string | null): { text: string; isUrgent: boolean; isExpired: boolean } => {
     if (!deadline) return { text: 'No deadline', isUrgent: false, isExpired: false };
@@ -117,7 +119,23 @@ export const ProducerProjects = () => {
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+    checkDriveConnection();
+  }, [user]);
+
+  const checkDriveConnection = async () => {
+    if (!user) {
+      setHasDriveConnection(false);
+      return;
+    }
+    
+    const { data, error } = await supabase
+      .from('producer_google_tokens')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    
+    setHasDriveConnection(!error && !!data);
+  };
 
   const fetchProjects = async () => {
     try {
@@ -232,68 +250,64 @@ export const ProducerProjects = () => {
   };
 
   const handleFileUpload = async (projectId: string, file: File) => {
+    // Check if Google Drive is connected
+    if (!hasDriveConnection) {
+      toast({
+        title: "Google Drive Not Connected",
+        description: "Please connect your Google Drive first to upload deliverables.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setUploadingId(projectId);
     try {
-      const timestamp = Date.now();
-      const fileName = `deliverables/${projectId}/${timestamp}_${file.name}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("product-assets")
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      // Get signed URL
-      const { data: signedData, error: signError } = await supabase.storage
-        .from("product-assets")
-        .createSignedUrl(fileName, 315360000); // 10 years
-
-      if (signError || !signedData) throw signError;
-
-      // Update project to completed with download URL
-      // First create a purchase record for tracking
       const project = projects.find(p => p.id === projectId);
-      if (project) {
-        const { error: purchaseError } = await supabase
-          .from("purchases")
-          .upsert({
-            user_id: project.user_id,
-            product_id: projectId,
-            product_name: `Song Generation - ${project.tier}`,
-            product_type: "song_generation",
-            product_category: project.tier,
-            price: project.price,
-            status: "ready",
-            download_url: signedData.signedUrl,
-            song_idea: project.song_idea,
-          }, {
-            onConflict: 'product_id'
-          });
+      
+      // Create form data for the upload
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('requestId', projectId);
+      formData.append('customerEmail', project?.user_email || '');
 
-        if (purchaseError) {
-          console.error("Purchase upsert error:", purchaseError);
-        }
+      // Get auth token
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('Not authenticated');
       }
 
-      // Update song request status
-      const { error: updateError } = await supabase
-        .from("song_requests")
-        .update({ status: "completed" })
-        .eq("id", projectId);
+      // Upload to Google Drive via edge function
+      const { data, error } = await supabase.functions.invoke('upload-deliverable-to-drive', {
+        body: formData,
+      });
 
-      if (updateError) throw updateError;
+      if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "File uploaded and project marked as completed!",
+        title: "Success! 🎉",
+        description: (
+          <div className="flex flex-col gap-2">
+            <span>File uploaded to Google Drive and project completed!</span>
+            {data.driveLink && (
+              <a 
+                href={data.driveLink} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary underline flex items-center gap-1"
+              >
+                Open Drive Folder <ExternalLink className="h-3 w-3" />
+              </a>
+            )}
+          </div>
+        ),
       });
 
       fetchProjects();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error uploading file:", error);
       toast({
         title: "Error",
-        description: "Failed to upload file",
+        description: error.message || "Failed to upload file to Google Drive",
         variant: "destructive",
       });
     } finally {
@@ -379,8 +393,17 @@ export const ProducerProjects = () => {
               <Music className="h-5 w-5" />
               My Assigned Projects
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="flex items-center gap-2">
               Manage your song production projects
+              {hasDriveConnection !== null && (
+                <Badge 
+                  variant={hasDriveConnection ? "default" : "destructive"}
+                  className="text-xs"
+                >
+                  <HardDrive className="h-3 w-3 mr-1" />
+                  {hasDriveConnection ? "Drive Connected" : "Drive Not Connected"}
+                </Badge>
+              )}
             </CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={fetchProjects}>
@@ -612,28 +635,44 @@ export const ProducerProjects = () => {
                         </DialogContent>
                       </Dialog>
 
-                      {/* Upload Deliverable */}
-                      <Label htmlFor={`upload-${project.id}`} className="cursor-pointer">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={uploadingId === project.id}
-                          asChild
-                        >
-                          <span>
-                            {uploadingId === project.id ? (
-                              <RefreshCw className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Upload className="h-4 w-4" />
-                            )}
-                          </span>
-                        </Button>
-                      </Label>
+                      {/* Upload Deliverable to Google Drive */}
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Label htmlFor={`upload-${project.id}`} className={!hasDriveConnection ? "cursor-not-allowed" : "cursor-pointer"}>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={uploadingId === project.id || !hasDriveConnection}
+                                asChild
+                              >
+                                <span className="flex items-center gap-1">
+                                  {uploadingId === project.id ? (
+                                    <RefreshCw className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <>
+                                      <HardDrive className="h-3 w-3" />
+                                      <Upload className="h-4 w-4" />
+                                    </>
+                                  )}
+                                </span>
+                              </Button>
+                            </Label>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {hasDriveConnection 
+                              ? "Upload deliverable to Google Drive" 
+                              : "Connect Google Drive first to upload files"
+                            }
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       <Input
                         id={`upload-${project.id}`}
                         type="file"
                         accept=".mp3,.wav,.m4a,.flac,.zip"
                         className="hidden"
+                        disabled={!hasDriveConnection}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) handleFileUpload(project.id, file);
