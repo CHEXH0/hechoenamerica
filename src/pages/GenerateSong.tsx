@@ -577,7 +577,7 @@ const GenerateSong = () => {
               </Label>
               <Textarea id="idea" value={idea} onChange={e => setIdea(e.target.value)} placeholder={currentTier.price > 0 ? "Better than AI. Made by human hehe.." : "Feel free to use AI audios for your liking"} className="bg-white/20 border-white/30 text-white placeholder:text-white/50 min-h-[120px]" required 
               />
-              {currentTier.price > 0 ? (
+              {currentTier.price > 0 && (
                 <>
                   <div onClick={() => fileInputRef.current?.click()} className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors">
                     <Plus className="w-3 h-3 text-white" />
@@ -603,10 +603,6 @@ const GenerateSong = () => {
                     )}
                   </div>
                 </>
-              ) : (
-                <p className="text-white/60 text-xs italic">
-                  Feel free to use AI audios for your liking
-                </p>
               )}
             </div>
 
