@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Music, Upload, RefreshCw, Eye, FileAudio, ExternalLink, Mail } from "lucide-react";
+import { Music, Upload, RefreshCw, Eye, Mail } from "lucide-react";
+import { AudioFilePlayer } from "./AudioFilePlayer";
 
 interface SongRequest {
   id: string;
@@ -139,6 +140,21 @@ export const ProducerProjects = () => {
           console.error("Files email failed:", emailError);
           // Don't fail the whole operation
         }
+      }
+
+      // Send customer notification email for status change
+      try {
+        await supabase.functions.invoke('notify-customer-status', {
+          body: {
+            requestId: projectId,
+            oldStatus,
+            newStatus
+          }
+        });
+        console.log("Customer notification sent for status change");
+      } catch (customerEmailError) {
+        console.error("Customer notification failed:", customerEmailError);
+        // Don't fail the whole operation
       }
 
       toast({
@@ -445,20 +461,18 @@ export const ProducerProjects = () => {
                                     Resend Files to Email
                                   </Button>
                                 </div>
-                                <div className="space-y-2">
-                                  {project.file_urls.map((url, index) => (
-                                    <a
-                                      key={index}
-                                      href={url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="flex items-center gap-2 text-primary hover:underline"
-                                    >
-                                      <FileAudio className="h-4 w-4" />
-                                      File {index + 1}
-                                      <ExternalLink className="h-3 w-3" />
-                                    </a>
-                                  ))}
+                                <div className="space-y-3 max-h-80 overflow-y-auto">
+                                  {project.file_urls.map((url, index) => {
+                                    const urlParts = url.split('/');
+                                    const fileName = decodeURIComponent(urlParts[urlParts.length - 1].split('?')[0]) || `File ${index + 1}`;
+                                    return (
+                                      <AudioFilePlayer
+                                        key={index}
+                                        url={url}
+                                        fileName={fileName}
+                                      />
+                                    );
+                                  })}
                                 </div>
                               </div>
                             )}
