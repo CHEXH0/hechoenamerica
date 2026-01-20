@@ -142,6 +142,8 @@ export type Database = {
           name: string
           slug: string
           spotify_url: string | null
+          stripe_connect_account_id: string | null
+          stripe_connect_onboarded_at: string | null
           updated_at: string
           website_url: string | null
           youtube_channel_url: string | null
@@ -160,6 +162,8 @@ export type Database = {
           name: string
           slug: string
           spotify_url?: string | null
+          stripe_connect_account_id?: string | null
+          stripe_connect_onboarded_at?: string | null
           updated_at?: string
           website_url?: string | null
           youtube_channel_url?: string | null
@@ -178,6 +182,8 @@ export type Database = {
           name?: string
           slug?: string
           spotify_url?: string | null
+          stripe_connect_account_id?: string | null
+          stripe_connect_onboarded_at?: string | null
           updated_at?: string
           website_url?: string | null
           youtube_channel_url?: string | null
