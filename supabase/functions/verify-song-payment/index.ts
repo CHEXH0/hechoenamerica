@@ -83,6 +83,29 @@ serve(async (req) => {
       acceptanceDeadline,
     });
 
+    // Format add-ons for email display
+    const addOnsList = [];
+    if (addOns.wants_mixing) addOnsList.push('Professional Mixing');
+    if (addOns.wants_mastering) addOnsList.push('Mastering');
+    if (addOns.wants_recorded_stems) addOnsList.push('Recorded Stems');
+    if (addOns.wants_analog) addOnsList.push('Analog Processing');
+    if (addOns.number_of_revisions > 0) addOnsList.push(`${addOns.number_of_revisions} Revision${addOns.number_of_revisions > 1 ? 's' : ''}`);
+    
+    // Format genre for display
+    const genreCategory = session.metadata?.genre_category || '';
+    const genreDisplayNames: Record<string, string> = {
+      'hip-hop': 'Hip Hop / Trap / Rap',
+      'rnb': 'R&B / Soul',
+      'reggae': 'Reggae / Dancehall',
+      'latin': 'Latin / Reggaeton',
+      'electronic': 'Electronic / EDM',
+      'pop': 'Pop / Alternative',
+      'rock': 'Rock / Indie',
+      'world': 'World / Indigenous / Medicina',
+      'other': 'Other / Mixed'
+    };
+    const genreDisplay = genreDisplayNames[genreCategory] || genreCategory || 'Not specified';
+
     // Send confirmation email using Resend
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -93,56 +116,150 @@ serve(async (req) => {
       body: JSON.stringify({
         from: 'HechoEnAmerica <onboarding@resend.dev>',
         to: [customerEmail],
-        subject: `Song Generation Purchase Confirmed - ${tier}`,
+        subject: `🎵 Project Confirmed - ${tier} | HechoEnAmerica`,
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #8b5cf6;">🎶 Purchase Confirmed! 🎶</h1>
-            <p>Thank you for your purchase! We've received your song generation request.</p>
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background: #f8f9fa;">
             
-            <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h2 style="margin-top: 0; color: #374151;">Purchase Details</h2>
-              <table style="width: 100%; border-collapse: collapse;">
-                <tr>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #d1d5db;"><strong>Tier:</strong></td>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #d1d5db;">${tier}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #d1d5db;"><strong>Product:</strong></td>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #d1d5db;">${productName}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #d1d5db;"><strong>Amount Paid:</strong></td>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #d1d5db;">${currency} ${amountTotal}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0;"><strong>Payment Status:</strong></td>
-                  <td style="padding: 8px 0;"><span style="color: #10b981; font-weight: bold;">✓ PAID</span></td>
-                </tr>
-              </table>
-            </div>
-
-            <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="margin-top: 0; color: #92400e;">Your Song Idea:</h3>
-              <p style="color: #78350f; white-space: pre-wrap;">${idea}</p>
-            </div>
-
-            ${fileUrls.length > 0 ? `
-              <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                <h3 style="margin-top: 0; color: #075985;">Your Uploaded Files:</h3>
-                ${fileUrls.map((url: string, index: number) => {
-                  const fileName = url.split('/').pop() || `File ${index + 1}`;
-                  return `<p style="margin: 8px 0;"><a href="${url}" style="color: #0284c7; text-decoration: none;" target="_blank">${index + 1}. ${decodeURIComponent(fileName)}</a></p>`;
-                }).join('')}
+            <div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              
+              <!-- Header -->
+              <div style="background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); padding: 40px 32px; text-align: center; color: white;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🎶</div>
+                <h1 style="margin: 0 0 8px 0; font-size: 28px;">Project Confirmed!</h1>
+                <p style="margin: 0; opacity: 0.9; font-size: 16px;">Your song request has been received and paid</p>
               </div>
-            ` : ''}
 
-            <p>We'll start working on your song right away. You'll receive updates at this email address.</p>
-            
-            <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
-              <strong>LA MUSIC ES MEDICINA</strong><br>
-              HechoEnAmerica
-            </p>
-          </div>
+              <!-- 48 Hour Notice -->
+              <div style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); padding: 20px 24px; border-bottom: 1px solid #FCD34D;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="font-size: 32px;">⏰</div>
+                  <div>
+                    <h3 style="margin: 0 0 4px 0; color: #92400E; font-size: 16px;">What Happens Next?</h3>
+                    <p style="margin: 0; color: #78350F; font-size: 14px;">
+                      A producer will review and accept your project within <strong>48 hours</strong>. 
+                      We'll notify you immediately when your project is matched with a producer!
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Project Summary -->
+              <div style="padding: 24px; border-bottom: 1px solid #eee;">
+                <h3 style="margin: 0 0 16px 0; color: #666; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">📋 Project Details</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 10px 0; color: #666; width: 120px; vertical-align: top;">Tier:</td>
+                    <td style="padding: 10px 0; font-weight: 600;">${tier}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px 0; color: #666; vertical-align: top;">Genre:</td>
+                    <td style="padding: 10px 0; font-weight: 600;">${genreDisplay}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px 0; color: #666; vertical-align: top;">Amount Paid:</td>
+                    <td style="padding: 10px 0; font-weight: 600; color: #10B981;">${currency} ${amountTotal}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px 0; color: #666; vertical-align: top;">Status:</td>
+                    <td style="padding: 10px 0;">
+                      <span style="background: #DCFCE7; color: #166534; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">✓ PAID - Awaiting Producer</span>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- Add-ons Section (if any) -->
+              ${addOnsList.length > 0 ? `
+              <div style="padding: 24px; border-bottom: 1px solid #eee;">
+                <h3 style="margin: 0 0 16px 0; color: #666; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">✨ Selected Add-ons</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                  ${addOnsList.map(addon => `
+                    <span style="background: #EDE9FE; color: #7C3AED; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;">${addon}</span>
+                  `).join('')}
+                </div>
+              </div>
+              ` : ''}
+
+              <!-- Song Idea -->
+              <div style="padding: 24px; border-bottom: 1px solid #eee;">
+                <h3 style="margin: 0 0 12px 0; color: #666; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">💡 Your Song Idea</h3>
+                <div style="background: #F8F4FF; padding: 16px; border-radius: 8px; border-left: 4px solid #8B5CF6;">
+                  <p style="margin: 0; color: #555; white-space: pre-wrap;">${idea}</p>
+                </div>
+              </div>
+
+              <!-- Uploaded Files -->
+              ${fileUrls.length > 0 ? `
+              <div style="padding: 24px; border-bottom: 1px solid #eee;">
+                <h3 style="margin: 0 0 12px 0; color: #666; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">📁 Your Uploaded Files (${fileUrls.length})</h3>
+                <div style="background: #EFF6FF; padding: 16px; border-radius: 8px;">
+                  ${fileUrls.map((url: string, index: number) => {
+                    const fileName = url.split('/').pop() || `File ${index + 1}`;
+                    return `<p style="margin: 8px 0;"><a href="${url}" style="color: #2563EB; text-decoration: none; font-weight: 500;" target="_blank">📎 ${decodeURIComponent(fileName)}</a></p>`;
+                  }).join('')}
+                </div>
+              </div>
+              ` : ''}
+
+              <!-- Timeline -->
+              <div style="padding: 24px; border-bottom: 1px solid #eee;">
+                <h3 style="margin: 0 0 16px 0; color: #666; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">📆 Project Timeline</h3>
+                <div style="position: relative; padding-left: 24px;">
+                  <div style="position: absolute; left: 8px; top: 8px; bottom: 8px; width: 2px; background: #E5E7EB;"></div>
+                  
+                  <div style="position: relative; margin-bottom: 16px;">
+                    <div style="position: absolute; left: -20px; width: 12px; height: 12px; background: #10B981; border-radius: 50%;"></div>
+                    <p style="margin: 0; font-weight: 600; color: #10B981;">✓ Order Confirmed</p>
+                    <p style="margin: 4px 0 0 0; font-size: 13px; color: #666;">Payment received successfully</p>
+                  </div>
+                  
+                  <div style="position: relative; margin-bottom: 16px;">
+                    <div style="position: absolute; left: -20px; width: 12px; height: 12px; background: #F59E0B; border-radius: 50%; animation: pulse 2s infinite;"></div>
+                    <p style="margin: 0; font-weight: 600; color: #F59E0B;">⏳ Awaiting Producer (48h)</p>
+                    <p style="margin: 4px 0 0 0; font-size: 13px; color: #666;">A producer will accept your project</p>
+                  </div>
+                  
+                  <div style="position: relative; margin-bottom: 16px;">
+                    <div style="position: absolute; left: -20px; width: 12px; height: 12px; background: #E5E7EB; border-radius: 50%;"></div>
+                    <p style="margin: 0; color: #9CA3AF;">Production Begins</p>
+                    <p style="margin: 4px 0 0 0; font-size: 13px; color: #9CA3AF;">Your song is being created</p>
+                  </div>
+                  
+                  <div style="position: relative;">
+                    <div style="position: absolute; left: -20px; width: 12px; height: 12px; background: #E5E7EB; border-radius: 50%;"></div>
+                    <p style="margin: 0; color: #9CA3AF;">Delivery</p>
+                    <p style="margin: 4px 0 0 0; font-size: 13px; color: #9CA3AF;">Download your finished track</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CTA -->
+              <div style="padding: 32px; text-align: center;">
+                <a href="https://hechoenamerica.lovable.app/my-projects" style="display: inline-block; background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); color: white; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                  Track Your Project →
+                </a>
+                <p style="margin: 16px 0 0 0; color: #999; font-size: 14px;">
+                  View your project status and updates anytime
+                </p>
+              </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div style="text-align: center; padding: 24px; color: #999; font-size: 13px;">
+              <p style="margin: 0 0 8px 0;">Questions? Reply to this email or contact us.</p>
+              <p style="margin: 0;"><strong>LA MUSIC ES MEDICINA</strong></p>
+              <p style="margin: 4px 0 0 0;">HechoEnAmerica</p>
+            </div>
+
+          </body>
+          </html>
         `,
       }),
     });
