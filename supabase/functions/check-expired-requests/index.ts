@@ -30,12 +30,13 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
-    // Find all pending requests that have passed their acceptance deadline
+    // Find all requests that have passed their acceptance deadline
+    // Include both 'pending' and 'paid' statuses (paid but not yet accepted by producer)
     const now = new Date().toISOString();
     const { data: expiredRequests, error: fetchError } = await supabaseAdmin
       .from("song_requests")
-      .select("id, payment_intent_id, user_email, tier, price, song_idea")
-      .eq("status", "pending")
+      .select("id, payment_intent_id, user_email, tier, price, song_idea, status, assigned_producer_id")
+      .in("status", ["pending", "paid"])
       .is("refunded_at", null)
       .not("payment_intent_id", "is", null)
       .lt("acceptance_deadline", now);
@@ -114,17 +115,32 @@ serve(async (req) => {
           try {
             await supabaseAdmin.functions.invoke("notify-customer-status", {
               body: {
-                projectId: request.id,
-                customerEmail: request.user_email,
-                projectTitle: `${request.tier} Song`,
+                requestId: request.id,
                 newStatus: "refunded",
-                message: "No producer was available to accept your project within 48 hours. Your payment has been fully refunded. Please try again or contact support for assistance.",
+                oldStatus: request.status,
               },
             });
             logStep("Customer notified of refund", { email: request.user_email });
           } catch (emailError) {
             logStep("Failed to send refund notification email", { 
               error: emailError instanceof Error ? emailError.message : String(emailError) 
+            });
+          }
+
+          // Send Discord notification about expired/refunded request
+          try {
+            await supabaseAdmin.functions.invoke("send-discord-notification", {
+              body: {
+                requestId: request.id,
+                notificationType: "status_change",
+                oldStatus: request.status,
+                newStatus: "refunded",
+              },
+            });
+            logStep("Discord notified of expired request", { requestId: request.id });
+          } catch (discordError) {
+            logStep("Failed to send Discord notification", { 
+              error: discordError instanceof Error ? discordError.message : String(discordError) 
             });
           }
 
