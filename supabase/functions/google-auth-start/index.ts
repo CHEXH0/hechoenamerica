@@ -22,8 +22,8 @@ serve(async (req) => {
       throw new Error('redirectUri is required');
     }
 
-    // Build Google OAuth URL
-    const scope = encodeURIComponent('https://www.googleapis.com/auth/drive.file');
+    // Build Google OAuth URL - don't pre-encode scope, searchParams handles encoding
+    const scope = 'https://www.googleapis.com/auth/drive.file';
     const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
     authUrl.searchParams.set('client_id', clientId);
     authUrl.searchParams.set('redirect_uri', redirectUri);
