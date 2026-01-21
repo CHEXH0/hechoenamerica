@@ -109,19 +109,51 @@ serve(async (req) => {
       content = `🚨 **@${roleMention}** - New ${songRequest.tier.toUpperCase()} song request needs a producer!`;
     }
 
+    // Build message payload
+    const messagePayload: any = {
+      content,
+      embeds: [embed],
+      thread_name: notificationType === 'new_request' 
+        ? `🎵 ${songRequest.tier.toUpperCase()} - ${requestId.substring(0, 8)}`
+        : undefined
+    };
+
+    // Add Accept/Decline buttons for new requests and producer assignments
+    if (notificationType === 'new_request' || notificationType === 'producer_assigned') {
+      messagePayload.components = [
+        {
+          type: 1, // Action Row
+          components: [
+            {
+              type: 2, // Button
+              style: 3, // Success (green)
+              label: '✅ Accept Project',
+              custom_id: `accept_${requestId}`
+            },
+            {
+              type: 2, // Button
+              style: 4, // Danger (red)
+              label: '❌ Decline',
+              custom_id: `decline_${requestId}`
+            },
+            {
+              type: 2, // Button
+              style: 5, // Link
+              label: '📋 View Details',
+              url: `${APP_URL}/admin`
+            }
+          ]
+        }
+      ];
+    }
+
     // Send to Discord
     const discordResponse = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        content,
-        embeds: [embed],
-        thread_name: notificationType === 'new_request' 
-          ? `🎵 ${songRequest.tier.toUpperCase()} - ${requestId.substring(0, 8)}`
-          : undefined
-      })
+      body: JSON.stringify(messagePayload)
     });
 
     if (!discordResponse.ok) {
