@@ -80,24 +80,123 @@ const getStatusProgress = (status: string): number => {
   return progressMap[status] || 0;
 };
 
-const getTimeRemaining = (deadline: string | null): { text: string; isUrgent: boolean } => {
-  if (!deadline) return { text: '', isUrgent: false };
+const getTimeRemaining = (deadline: string | null): { text: string; hours: number; minutes: number; seconds: number; isUrgent: boolean; isExpired: boolean; percentage: number } => {
+  if (!deadline) return { text: '', hours: 0, minutes: 0, seconds: 0, isUrgent: false, isExpired: false, percentage: 0 };
   
   const now = new Date();
   const deadlineDate = new Date(deadline);
   const diffMs = deadlineDate.getTime() - now.getTime();
   
+  // Calculate percentage of 48 hours remaining
+  const totalMs = 48 * 60 * 60 * 1000;
+  const percentage = Math.max(0, Math.min(100, (diffMs / totalMs) * 100));
+  
   if (diffMs <= 0) {
-    return { text: 'Expired', isUrgent: true };
+    return { text: 'Expired', hours: 0, minutes: 0, seconds: 0, isUrgent: true, isExpired: true, percentage: 0 };
   }
   
   const hours = Math.floor(diffMs / (1000 * 60 * 60));
   const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
   
   return { 
-    text: `${hours}h ${minutes}m until producer acceptance deadline`, 
-    isUrgent: hours < 12 
+    text: `${hours}h ${minutes}m ${seconds}s`, 
+    hours,
+    minutes,
+    seconds,
+    isUrgent: hours < 12,
+    isExpired: false,
+    percentage
   };
+};
+
+// Countdown Timer Component
+const CountdownTimer = ({ deadline }: { deadline: string }) => {
+  const [timeRemaining, setTimeRemaining] = useState(getTimeRemaining(deadline));
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeRemaining(getTimeRemaining(deadline));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [deadline]);
+
+  if (!deadline) return null;
+
+  const { hours, minutes, seconds, isUrgent, isExpired, percentage } = timeRemaining;
+
+  if (isExpired) {
+    return (
+      <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+        <div className="flex items-center gap-2 text-red-500 mb-2">
+          <AlertTriangle className="h-5 w-5" />
+          <span className="font-semibold">Deadline Expired</span>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Processing refund if no producer accepted...
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`rounded-lg p-4 border ${
+      isUrgent 
+        ? 'bg-amber-500/10 border-amber-500/30' 
+        : 'bg-primary/5 border-primary/20'
+    }`}>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Clock className={`h-4 w-4 ${isUrgent ? 'text-amber-500' : 'text-primary'}`} />
+          <span className={`text-sm font-medium ${isUrgent ? 'text-amber-600' : 'text-foreground'}`}>
+            Producer Acceptance Window
+          </span>
+        </div>
+        {isUrgent && (
+          <span className="text-xs bg-amber-500 text-white px-2 py-0.5 rounded-full animate-pulse">
+            Urgent
+          </span>
+        )}
+      </div>
+      
+      {/* Countdown Display */}
+      <div className="flex justify-center gap-2 mb-3">
+        <div className="bg-background rounded-lg px-3 py-2 min-w-[60px] text-center shadow-sm">
+          <div className={`text-2xl font-bold tabular-nums ${isUrgent ? 'text-amber-500' : 'text-primary'}`}>
+            {String(hours).padStart(2, '0')}
+          </div>
+          <div className="text-[10px] uppercase text-muted-foreground tracking-wider">Hours</div>
+        </div>
+        <div className="flex items-center text-muted-foreground font-bold">:</div>
+        <div className="bg-background rounded-lg px-3 py-2 min-w-[60px] text-center shadow-sm">
+          <div className={`text-2xl font-bold tabular-nums ${isUrgent ? 'text-amber-500' : 'text-primary'}`}>
+            {String(minutes).padStart(2, '0')}
+          </div>
+          <div className="text-[10px] uppercase text-muted-foreground tracking-wider">Mins</div>
+        </div>
+        <div className="flex items-center text-muted-foreground font-bold">:</div>
+        <div className="bg-background rounded-lg px-3 py-2 min-w-[60px] text-center shadow-sm">
+          <div className={`text-2xl font-bold tabular-nums ${isUrgent ? 'text-amber-500' : 'text-primary'}`}>
+            {String(seconds).padStart(2, '0')}
+          </div>
+          <div className="text-[10px] uppercase text-muted-foreground tracking-wider">Secs</div>
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+        <div 
+          className={`h-full transition-all duration-1000 ${isUrgent ? 'bg-amber-500' : 'bg-primary'}`}
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+      
+      <p className="text-xs text-muted-foreground mt-2 text-center">
+        A producer will accept your project within this window
+      </p>
+    </div>
+  );
 };
 
 const MyProjects = () => {
@@ -501,21 +600,9 @@ const MyProjects = () => {
                             )}
                           </div>
                           
-                          {/* Acceptance Deadline Warning */}
+                          {/* Live Countdown Timer */}
                           {(project.status === "pending" || project.status === "paid") && project.acceptance_deadline && (
-                            (() => {
-                              const { text, isUrgent } = getTimeRemaining(project.acceptance_deadline);
-                              if (!text) return null;
-                              return (
-                                <div className={`flex items-center justify-center gap-2 p-2 rounded text-sm ${
-                                  isUrgent ? 'bg-yellow-500/10 text-yellow-600' : 'bg-muted text-muted-foreground'
-                                }`}>
-                                  {isUrgent && <AlertTriangle className="h-4 w-4" />}
-                                  <Clock className="h-3 w-3" />
-                                  <span>{text}</span>
-                                </div>
-                              );
-                            })()
+                            <CountdownTimer deadline={project.acceptance_deadline} />
                           )}
                         </div>
                       )}
