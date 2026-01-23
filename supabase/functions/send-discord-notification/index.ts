@@ -149,9 +149,10 @@ serve(async (req) => {
     }
 
     let discordResponse;
+    let usedFallback = false;
     
     if (botToken && channelId) {
-      // Use Discord Bot API for interactive buttons
+      // Try Discord Bot API for interactive buttons
       console.log('Sending message via Discord Bot API to channel:', channelId);
       discordResponse = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
         method: 'POST',
@@ -161,9 +162,26 @@ serve(async (req) => {
         },
         body: JSON.stringify(messagePayload)
       });
+      
+      // If bot API fails with 403, fall back to webhook
+      if (!discordResponse.ok && discordResponse.status === 403 && webhookUrl) {
+        console.warn('Bot API returned 403, falling back to webhook (no interactive buttons)');
+        usedFallback = true;
+        // Remove components for webhook (not supported)
+        delete messagePayload.components;
+        discordResponse = await fetch(webhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(messagePayload)
+        });
+      }
     } else if (webhookUrl) {
-      // Fallback to webhook (no interactive buttons)
+      // Use webhook directly (no interactive buttons)
       console.log('Sending message via webhook (no interactive buttons)');
+      // Remove components for webhook
+      delete messagePayload.components;
       discordResponse = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
@@ -180,7 +198,7 @@ serve(async (req) => {
     }
 
     const responseData = await discordResponse.json();
-    console.log('Discord notification sent successfully, message ID:', responseData.id);
+    console.log('Discord notification sent successfully, message ID:', responseData.id, usedFallback ? '(via webhook fallback)' : '');
 
     return new Response(
       JSON.stringify({ success: true, message: 'Discord notification sent', messageId: responseData.id }),
