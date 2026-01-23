@@ -31,7 +31,8 @@ const statusColorMap: Record<string, number> = {
   'review': 0x1ABC9C,       // Teal
   'revision': 0xE67E22,     // Dark Orange
   'completed': 0x2ECC71,    // Green
-  'cancelled': 0xE74C3C     // Red
+  'cancelled': 0xE74C3C,    // Red
+  'refunded': 0xE74C3C      // Red
 };
 
 const APP_URL = 'https://eapbuoqkhckqaswfjexv.lovableproject.com';
@@ -60,17 +61,25 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const webhookUrl = Deno.env.get('DISCORD_WEBHOOK_URL')!;
+    const botToken = Deno.env.get('DISCORD_BOT_TOKEN')!;
+    const channelId = Deno.env.get('DISCORD_CHANNEL_ID')!;
+    
+    // Fallback to webhook if bot token not configured
+    const webhookUrl = Deno.env.get('DISCORD_WEBHOOK_URL');
 
-    if (!webhookUrl) {
-      throw new Error('DISCORD_WEBHOOK_URL is not configured');
+    if (!botToken && !webhookUrl) {
+      throw new Error('Neither DISCORD_BOT_TOKEN nor DISCORD_WEBHOOK_URL is configured');
+    }
+    
+    if (!channelId && botToken) {
+      throw new Error('DISCORD_CHANNEL_ID is required when using bot token');
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
     
     const { requestId, requestData, notificationType = 'new_request', oldStatus, newStatus, driveLink } = await req.json();
     
-    console.log('Processing Discord notification:', { requestId, notificationType, oldStatus, newStatus, driveLink });
+    console.log('Processing Discord notification:', { requestId, notificationType, oldStatus, newStatus, driveLink, useBotApi: !!botToken });
 
     // Fetch the full request details from the database
     const { data: songRequest, error: fetchError } = await supabase
@@ -88,22 +97,16 @@ serve(async (req) => {
     let content;
 
     if (notificationType === 'file_delivered') {
-      // File delivered to Google Drive notification
       embed = createFileDeliveredEmbed(songRequest, requestId, driveLink);
       content = `📦 **Files Delivered!** Project has been completed and files uploaded to Google Drive.`;
     } else if (notificationType === 'status_change') {
-      // Status change notification
       embed = createStatusChangeEmbed(songRequest, oldStatus, newStatus, requestId);
       content = `📊 Project status updated: **${oldStatus}** → **${newStatus}**`;
     } else if (notificationType === 'producer_assigned') {
-      // Producer assigned notification
       embed = createProducerAssignedEmbed(songRequest, requestId);
       content = `🎧 Producer has been assigned to a project!`;
     } else {
-      // New request notification (default)
       embed = createNewRequestEmbed(songRequest, requestId);
-      
-      // Add genre-based role mention
       const genreKey = songRequest.genre_category?.toLowerCase() || 'other';
       const roleMention = genreRoleMap[genreKey] || genreRoleMap['other'];
       content = `🚨 **@${roleMention}** - New ${songRequest.tier.toUpperCase()} song request needs a producer!`;
@@ -113,13 +116,11 @@ serve(async (req) => {
     const messagePayload: any = {
       content,
       embeds: [embed],
-      thread_name: notificationType === 'new_request' 
-        ? `🎵 ${songRequest.tier.toUpperCase()} - ${requestId.substring(0, 8)}`
-        : undefined
     };
 
     // Add Accept/Decline buttons for new requests and producer assignments
-    if (notificationType === 'new_request' || notificationType === 'producer_assigned') {
+    // Note: Interactive components only work with Bot API, not webhooks
+    if (botToken && (notificationType === 'new_request' || notificationType === 'producer_assigned')) {
       messagePayload.components = [
         {
           type: 1, // Action Row
@@ -147,25 +148,42 @@ serve(async (req) => {
       ];
     }
 
-    // Send to Discord
-    const discordResponse = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(messagePayload)
-    });
-
-    if (!discordResponse.ok) {
-      const errorText = await discordResponse.text();
-      console.error('Discord webhook error:', errorText);
-      throw new Error(`Discord webhook failed: ${discordResponse.status}`);
+    let discordResponse;
+    
+    if (botToken && channelId) {
+      // Use Discord Bot API for interactive buttons
+      console.log('Sending message via Discord Bot API to channel:', channelId);
+      discordResponse = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bot ${botToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(messagePayload)
+      });
+    } else if (webhookUrl) {
+      // Fallback to webhook (no interactive buttons)
+      console.log('Sending message via webhook (no interactive buttons)');
+      discordResponse = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(messagePayload)
+      });
     }
 
-    console.log('Discord notification sent successfully');
+    if (!discordResponse || !discordResponse.ok) {
+      const errorText = discordResponse ? await discordResponse.text() : 'No response';
+      console.error('Discord API error:', errorText);
+      throw new Error(`Discord API failed: ${discordResponse?.status} - ${errorText}`);
+    }
+
+    const responseData = await discordResponse.json();
+    console.log('Discord notification sent successfully, message ID:', responseData.id);
 
     return new Response(
-      JSON.stringify({ success: true, message: 'Discord notification sent' }),
+      JSON.stringify({ success: true, message: 'Discord notification sent', messageId: responseData.id }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200 
@@ -327,7 +345,8 @@ function createStatusChangeEmbed(songRequest: any, oldStatus: string, newStatus:
     'review': '👀',
     'revision': '🔄',
     'completed': '🎉',
-    'cancelled': '❌'
+    'cancelled': '❌',
+    'refunded': '💸'
   };
 
   return {
