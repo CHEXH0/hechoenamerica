@@ -226,20 +226,3 @@ serve(async (req: Request) => {
     });
   }
 });
-    if (userError) {
-      console.error("User confirmation email failed:", userError);
-      // Don't fail the request if user email fails
-    }
-
-    return new Response(JSON.stringify({ ok: true, sentToUser: !userError }), {
-      status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
-  } catch (err: any) {
-    console.error("send-contact-email error:", err);
-    return new Response(JSON.stringify({ error: err?.message || "Unknown error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
-  }
-});
