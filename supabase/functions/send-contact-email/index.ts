@@ -104,10 +104,10 @@ serve(async (req: Request) => {
 
       // Send to business email
       const { error: businessError } = await resend.emails.send({
-        from: "Hecho En America <onboarding@resend.dev>",
-        to: [toAddress],
-        reply_to: email,
-        subject: `🎵 New Producer Application: ${name}`,
+      from: "Hecho En America <team@hechoenamerica.com>",
+      to: [toAddress],
+      reply_to: email,
+      subject: `🎵 New Producer Application: ${name}`,
         html: businessHtml,
       });
 
@@ -125,7 +125,7 @@ serve(async (req: Request) => {
       );
 
       const { error: confirmError } = await resend.emails.send({
-        from: "Hecho En America <onboarding@resend.dev>",
+        from: "Hecho En America <team@hechoenamerica.com>",
         to: [email],
         subject: "🎉 Application Received - Hecho En América",
         html: confirmationHtml,
@@ -174,7 +174,7 @@ serve(async (req: Request) => {
 
     // Send to business email
     const { error: businessError } = await resend.emails.send({
-      from: "Hecho En America <onboarding@resend.dev>",
+      from: "Hecho En America <team@hechoenamerica.com>",
       to: [toAddress],
       reply_to: email,
       subject: subject || `New contact form message from ${name}`,
@@ -204,7 +204,7 @@ serve(async (req: Request) => {
     );
 
     const { error: userError } = await resend.emails.send({
-      from: "Hecho En America <onboarding@resend.dev>",
+      from: "Hecho En America <team@hechoenamerica.com>",
       to: [email],
       subject: "Your Request Has Been Received",
       html: userHtml,
