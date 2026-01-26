@@ -11,8 +11,9 @@ const corsHeaders = {
 
 interface SendFilesEmailRequest {
   requestId: string;
-  producerEmail: string;
-  producerName: string;
+  producerId?: string;
+  producerEmail?: string;
+  producerName?: string;
 }
 
 const APP_URL = 'https://eapbuoqkhckqaswfjexv.lovableproject.com';
@@ -41,14 +42,33 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { requestId, producerEmail, producerName }: SendFilesEmailRequest = await req.json();
+    const body: SendFilesEmailRequest = await req.json();
+    const { requestId, producerId } = body;
+    let { producerEmail, producerName } = body;
     
-    console.log('Sending producer files email:', { requestId, producerEmail, producerName });
+    console.log('Sending producer files email:', { requestId, producerId, producerEmail, producerName });
+
+    // If producerId is provided but not email/name, look up the producer
+    if (producerId && (!producerEmail || !producerName)) {
+      const { data: producer, error: producerError } = await supabase
+        .from('producers')
+        .select('email, name')
+        .eq('id', producerId)
+        .single();
+
+      if (producerError) {
+        console.error('Error fetching producer:', producerError);
+      } else if (producer) {
+        producerEmail = producer.email || producerEmail;
+        producerName = producer.name || producerName;
+        console.log('Looked up producer:', { producerEmail, producerName });
+      }
+    }
 
     if (!producerEmail) {
-      console.log('Producer has no email, skipping');
+      console.log('Producer has no email configured, skipping');
       return new Response(
-        JSON.stringify({ success: false, message: 'Producer email not provided' }),
+        JSON.stringify({ success: false, message: 'Producer email not configured' }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
