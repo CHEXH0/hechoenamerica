@@ -134,6 +134,7 @@ export type Database = {
           bio: string
           country: string
           created_at: string
+          discord_user_id: string | null
           email: string | null
           genre: string
           id: string
@@ -154,6 +155,7 @@ export type Database = {
           bio: string
           country: string
           created_at?: string
+          discord_user_id?: string | null
           email?: string | null
           genre: string
           id?: string
@@ -174,6 +176,7 @@ export type Database = {
           bio?: string
           country?: string
           created_at?: string
+          discord_user_id?: string | null
           email?: string | null
           genre?: string
           id?: string

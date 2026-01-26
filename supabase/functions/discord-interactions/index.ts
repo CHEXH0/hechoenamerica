@@ -129,6 +129,24 @@ serve(async (req) => {
 
       console.log(`User ${discordUsername} (${discordUserId}) is ${action}ing request ${requestId}`);
 
+      // Look up the producer by their Discord user ID
+      const { data: clickingProducer, error: producerLookupError } = await supabase
+        .from('producers')
+        .select('id, name, email')
+        .eq('discord_user_id', discordUserId)
+        .maybeSingle();
+
+      if (producerLookupError) {
+        console.error('Error looking up producer by Discord ID:', producerLookupError);
+      }
+
+      // Log whether we found a matching producer
+      if (clickingProducer) {
+        console.log(`Discord user ${discordUsername} is linked to producer: ${clickingProducer.name} (${clickingProducer.id})`);
+      } else {
+        console.log(`Discord user ${discordUsername} is not linked to any producer in the database`);
+      }
+
       // Fetch the song request
       const { data: songRequest, error: fetchError } = await supabase
         .from('song_requests')
@@ -186,15 +204,17 @@ serve(async (req) => {
           console.error('Failed to notify customer:', notifyError);
         }
 
-        // Send producer files email
-        if (songRequest.assigned_producer_id) {
+        // Send producer files email - use the clicking producer if linked, otherwise use assigned producer
+        const emailProducerId = clickingProducer?.id || songRequest.assigned_producer_id;
+        if (emailProducerId) {
           try {
             await supabase.functions.invoke('send-producer-files-email', {
               body: { 
                 requestId,
-                producerId: songRequest.assigned_producer_id
+                producerId: emailProducerId
               }
             });
+            console.log(`Producer files email sent to producer ${emailProducerId}`);
           } catch (emailError) {
             console.error('Failed to send producer files:', emailError);
           }
