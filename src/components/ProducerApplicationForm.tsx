@@ -138,8 +138,7 @@ const ProducerApplicationForm = () => {
         .from('product-images')
         .getPublicUrl(filePath);
 
-      // Submit the application to contact_submissions for now
-      // This will be reviewed by admins
+      // Submit the application to contact_submissions for record keeping
       const applicationData = {
         name: data.name,
         email: data.email,
@@ -166,10 +165,33 @@ const ProducerApplicationForm = () => {
         throw submitError;
       }
 
+      // Send email notification via edge function
+      const { error: emailError } = await supabase.functions.invoke('send-contact-email', {
+        body: {
+          isProducerApplication: true,
+          name: data.name,
+          email: data.email,
+          country: data.country,
+          genres: data.genres,
+          bio: data.bio,
+          imageUrl: publicUrlData.publicUrl,
+          spotifyUrl: data.spotify_url || undefined,
+          youtubeUrl: data.youtube_url || undefined,
+          appleMusicUrl: data.apple_music_url || undefined,
+          instagramUrl: data.instagram_url || undefined,
+          websiteUrl: data.website_url || undefined,
+        },
+      });
+
+      if (emailError) {
+        console.error("Email notification failed:", emailError);
+        // Don't fail the submission if email fails, the data is already saved
+      }
+
       setIsSubmitted(true);
       toast({
         title: "Application Submitted! 🎉",
-        description: "We'll review your application and get back to you soon.",
+        description: "Check your email for confirmation. We'll be in touch soon!",
       });
     } catch (error) {
       console.error("Error submitting application:", error);
@@ -203,9 +225,17 @@ const ProducerApplicationForm = () => {
               <CheckCircle className="h-20 w-20 text-green-400 mx-auto" />
             </motion.div>
             <h3 className="text-3xl font-bold text-white mb-4">Application Received!</h3>
-            <p className="text-gray-300 text-lg max-w-md mx-auto">
-              Thank you for your interest in joining our producer network. We'll review your application and reach out soon.
+            <p className="text-gray-300 text-lg max-w-md mx-auto mb-6">
+              Thank you for your interest in joining our producer network! Check your email for a confirmation with next steps.
             </p>
+            <div className="bg-indigo-900/30 border border-indigo-500/40 rounded-lg p-4 max-w-md mx-auto">
+              <p className="text-indigo-300 text-sm flex items-center justify-center gap-2">
+                <span className="text-xl">💬</span>
+                <span>
+                  <strong>Note:</strong> If approved, you'll use Discord to receive and accept projects from artists.
+                </span>
+              </p>
+            </div>
           </CardContent>
         </Card>
       </motion.div>
