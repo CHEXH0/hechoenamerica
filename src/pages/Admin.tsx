@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload, Users, User, Database, TrendingUp, DollarSign, FileText, HardDrive } from "lucide-react";
+import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload, Users, User, Database, TrendingUp, DollarSign, FileText, HardDrive, UserPlus } from "lucide-react";
 import { GoogleDriveConnect } from "@/components/GoogleDriveConnect";
 import { ProducerProjects } from "@/components/ProducerProjects";
 import { PaymentAnalyticsDashboard } from "@/components/PaymentAnalyticsDashboard";
@@ -10,6 +10,7 @@ import { StorageManagement } from "@/components/StorageManagement";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useHiringStatus, useUpdateHiringStatus } from "@/hooks/useHiringStatus";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import type { Purchase } from "@/hooks/usePurchases";
 
 const Admin = () => {
@@ -314,6 +316,69 @@ const Admin = () => {
       setIsSyncing(false);
     }
   };
+
+  // Hiring Status Control Component
+  const HiringStatusControl = () => {
+    const { data: hiringStatus, isLoading: hiringLoading } = useHiringStatus();
+    const updateHiring = useUpdateHiringStatus();
+    const isHiring = hiringStatus?.enabled ?? false;
+
+    const handleToggle = async (checked: boolean) => {
+      try {
+        await updateHiring.mutateAsync(checked);
+        toast({
+          title: checked ? "Hiring Enabled" : "Hiring Disabled",
+          description: checked 
+            ? "Producer applications are now open." 
+            : "Producer applications are now closed.",
+        });
+      } catch (error) {
+        console.error("Error updating hiring status:", error);
+        toast({
+          title: "Error",
+          description: "Failed to update hiring status.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UserPlus className="h-5 w-5" />
+            Producer Recruitment
+          </CardTitle>
+          <CardDescription>
+            Control whether new producer applications are accepted
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label className="text-base">Accept New Applications</Label>
+              <p className="text-sm text-muted-foreground">
+                {isHiring 
+                  ? "Applications are currently open. New producers can apply."
+                  : "Applications are closed. The apply page shows a 'not hiring' message."}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Badge variant={isHiring ? "default" : "secondary"} className={isHiring ? "bg-green-500" : ""}>
+                {isHiring ? "Hiring" : "Not Hiring"}
+              </Badge>
+              <Switch
+                checked={isHiring}
+                onCheckedChange={handleToggle}
+                disabled={hiringLoading || updateHiring.isPending}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20">
       {/* Background Effects */}
@@ -378,6 +443,9 @@ const Admin = () => {
 
           {isAdmin && (
             <>
+              {/* Hiring Status Control */}
+              <HiringStatusControl />
+              
               {/* Payment Analytics Dashboard */}
               <PaymentAnalyticsDashboard />
               
