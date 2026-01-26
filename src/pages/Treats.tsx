@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, FileAudio, Disc3, Candy, Play, Download, ShoppingCart, Bell, BellRing, RefreshCw, Plus, Phone, Mail } from "lucide-react";
+import { ArrowLeft, FileAudio, Disc3, Candy, Play, Download, ShoppingCart, Bell, BellRing, RefreshCw, Plus } from "lucide-react";
+import ProducerApplicationForm from "@/components/ProducerApplicationForm";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1004,98 +1005,8 @@ const Treats = () => {
           </Tabs>
         </motion.div>
         
-        <motion.div 
-          initial={{
-            opacity: 0,
-            scale: 0.95
-          }} 
-          animate={{
-            opacity: 1,
-            scale: 1
-          }} 
-          transition={{
-            duration: 0.6,
-            delay: 0.8
-          }} 
-          className="mt-20 text-center"
-        >
-          <Card className="bg-gradient-to-br from-purple-900/50 via-pink-900/30 to-red-900/50 border-purple-500/40 backdrop-blur-md max-w-4xl mx-auto">
-            <CardHeader>
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text mb-4">
-                Need Something Custom?
-              </CardTitle>
-              <CardDescription className="text-gray-800 text-lg leading-relaxed">
-                Looking for bespoke audio production, custom VST development, or something else? 
-                We specialize in creating unique experiences tailored to your creative vision.
-              </CardDescription>
-            </CardHeader>
-            <CardFooter className="justify-center">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button 
-                      size="lg" 
-                      className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white border-0 px-8"
-                    >
-                      Get In Touch
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md bg-gradient-to-br from-background/95 via-background to-muted/20 backdrop-blur-xl border border-primary/20">
-                    <DialogHeader>
-                      <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent text-center">
-                        Contact Information
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-6 py-4">
-                      <motion.div 
-                        className="flex items-center gap-4 p-4 rounded-lg bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.1 }}
-                      >
-                        <div className="w-12 h-12 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center">
-                          <Phone className="h-6 w-6 text-purple-400" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-foreground">Phone</p>
-                          <a 
-                            href="tel:+1234567890" 
-                            className="text-muted-foreground hover:text-primary transition-colors"
-                          >
-                            +1 (909) 384-2193
-                          </a>
-                        </div>
-                      </motion.div>
-                      
-                      <motion.div 
-                        className="flex items-center gap-4 p-4 rounded-lg bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-500/20"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 }}
-                      >
-                        <div className="w-12 h-12 bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-full flex items-center justify-center">
-                          <Mail className="h-6 w-6 text-pink-400" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-foreground">Email</p>
-                          <a 
-                            href="mailto:contact@hechoenamarica.com" 
-                            className="text-muted-foreground hover:text-primary transition-colors"
-                          >
-                            hechoenamerica369@gmail.com
-                          </a>
-                        </div>
-                      </motion.div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </motion.div>
-            </CardFooter>
-          </Card>
-        </motion.div>
+        {/* Producer Application Form */}
+        <ProducerApplicationForm />
       </motion.div>
 
       {/* Cart Component */}
