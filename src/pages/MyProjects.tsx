@@ -506,8 +506,8 @@ const MyProjects = () => {
                         <p className="text-foreground">{project.song_idea}</p>
                       </div>
 
-                      {/* Producer Info */}
-                      {producer && (
+                      {/* Producer Info - Only show when actually assigned */}
+                      {project.assigned_producer_id && producer && (
                         <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg">
                           <img
                             src={producer.image}
@@ -592,10 +592,20 @@ const MyProjects = () => {
                                 <CheckCircle className="h-4 w-4 text-cyan-500" />
                                 A producer has accepted your project!
                               </>
+                            ) : project.status === "paid" ? (
+                              <>
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                Payment confirmed! Awaiting producer assignment...
+                              </>
+                            ) : project.status === "pending" ? (
+                              <>
+                                <Clock className="h-4 w-4" />
+                                Project submitted. Awaiting producer assignment...
+                              </>
                             ) : (
                               <>
                                 <Clock className="h-4 w-4" />
-                                Waiting to be assigned to a producer...
+                                Processing your request...
                               </>
                             )}
                           </div>
