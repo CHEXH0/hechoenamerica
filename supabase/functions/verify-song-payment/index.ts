@@ -114,9 +114,9 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'HechoEnAmerica <onboarding@resend.dev>',
+        from: 'Hecho En America <team@hechoenamericastudio.com>',
         to: [customerEmail],
-        subject: `🎵 Project Confirmed - ${tier} | HechoEnAmerica`,
+        subject: `🎵 Project Confirmed - ${tier} | Hecho En América`,
         html: `
           <!DOCTYPE html>
           <html>
@@ -144,6 +144,19 @@ serve(async (req) => {
                     <p style="margin: 0; color: #78350F; font-size: 14px;">
                       A producer will review and accept your project within <strong>48 hours</strong>. 
                       We'll notify you immediately when your project is matched with a producer!
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Track Your Project CTA -->
+              <div style="background: linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%); padding: 20px 24px; border-bottom: 1px solid #C4B5FD;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="font-size: 32px;">📱</div>
+                  <div>
+                    <h3 style="margin: 0 0 4px 0; color: #5B21B6; font-size: 16px;">Track Your Project Anytime</h3>
+                    <p style="margin: 0; color: #6D28D9; font-size: 14px;">
+                      Visit <strong>"My Projects"</strong> in your account settings to see real-time updates, countdown timers, and download your completed song when ready.
                     </p>
                   </div>
                 </div>
@@ -242,11 +255,22 @@ serve(async (req) => {
               <!-- CTA -->
               <div style="padding: 32px; text-align: center;">
                 <a href="https://hechoenamerica.lovable.app/my-projects" style="display: inline-block; background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); color: white; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
-                  Track Your Project →
+                  View My Projects →
                 </a>
                 <p style="margin: 16px 0 0 0; color: #999; font-size: 14px;">
-                  View your project status and updates anytime
+                  Track your project status and get real-time updates
                 </p>
+              </div>
+
+              <!-- Next Steps -->
+              <div style="background: #F9FAFB; padding: 24px; border-top: 1px solid #eee;">
+                <h3 style="margin: 0 0 12px 0; color: #374151; font-size: 14px; font-weight: 600;">📝 How to Access Your Project</h3>
+                <ol style="margin: 0; padding-left: 20px; color: #6B7280; font-size: 14px;">
+                  <li style="margin-bottom: 8px;">Click the profile icon in the top right corner of our website</li>
+                  <li style="margin-bottom: 8px;">Select <strong>"My Projects"</strong> from the dropdown menu</li>
+                  <li style="margin-bottom: 8px;">View your project's real-time status, countdown timer, and producer info</li>
+                  <li>Download your completed song when it's ready!</li>
+                </ol>
               </div>
 
             </div>
@@ -254,8 +278,8 @@ serve(async (req) => {
             <!-- Footer -->
             <div style="text-align: center; padding: 24px; color: #999; font-size: 13px;">
               <p style="margin: 0 0 8px 0;">Questions? Reply to this email or contact us.</p>
-              <p style="margin: 0;"><strong>LA MUSIC ES MEDICINA</strong></p>
-              <p style="margin: 4px 0 0 0;">HechoEnAmerica</p>
+              <p style="margin: 0;"><strong>LA MÚSICA ES MEDICINA</strong></p>
+              <p style="margin: 4px 0 0 0;">Hecho En América</p>
             </div>
 
           </body>
@@ -280,7 +304,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'HechoEnAmerica <onboarding@resend.dev>',
+        from: 'Hecho En America <team@hechoenamericastudio.com>',
         to: ['hechoenamerica369@gmail.com'],
         subject: `New Song Purchase - ${tier}`,
         html: `
