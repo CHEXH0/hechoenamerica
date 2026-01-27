@@ -375,15 +375,8 @@ const GenerateSong = () => {
 
       console.log("Song request created:", requestData?.id);
       
-      // Auto-match producer based on genre
-      try {
-        const { data: matchData } = await supabase.functions.invoke('auto-match-producer', {
-          body: { requestId: requestData?.id }
-        });
-        console.log("Producer matched:", matchData?.producerName);
-      } catch (matchError) {
-        console.error("Failed to auto-match producer:", matchError);
-      }
+      // Note: Producer assignment happens when a producer accepts via Discord
+      // We no longer auto-match here - the Discord notification is sent to all producers
 
       // Send Discord notification
       try {

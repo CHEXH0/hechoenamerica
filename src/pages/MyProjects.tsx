@@ -506,8 +506,9 @@ const MyProjects = () => {
                         <p className="text-foreground">{project.song_idea}</p>
                       </div>
 
-                      {/* Producer Info - Only show when actually assigned */}
-                      {project.assigned_producer_id && producer && (
+                      {/* Producer Info - Only show when producer has accepted (status is accepted or beyond) */}
+                      {project.assigned_producer_id && producer && 
+                       ['accepted', 'in_progress', 'review', 'completed'].includes(project.status) && (
                         <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg">
                           <img
                             src={producer.image}
@@ -516,7 +517,7 @@ const MyProjects = () => {
                           />
                           <div>
                             <p className="text-sm text-muted-foreground">
-                              Assigned Producer
+                              Your Producer
                             </p>
                             <p className="font-medium">{producer.name}</p>
                           </div>
