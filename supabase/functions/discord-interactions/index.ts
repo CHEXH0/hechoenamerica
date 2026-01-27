@@ -174,11 +174,23 @@ serve(async (req) => {
       }
 
       if (action === 'accept') {
-        // Update status to accepted
+        // Check if the clicking user is a registered producer
+        if (!clickingProducer) {
+          return new Response(JSON.stringify({
+            type: 4,
+            data: { 
+              content: `❌ You are not registered as a producer. Please contact an admin to link your Discord account.`,
+              flags: 64 
+            }
+          }), { headers: { 'Content-Type': 'application/json' } });
+        }
+
+        // Update status to accepted AND assign the producer who clicked
         const { error: updateError } = await supabase
           .from('song_requests')
           .update({ 
             status: 'accepted',
+            assigned_producer_id: clickingProducer.id, // Assign the producer who accepted
             updated_at: new Date().toISOString()
           })
           .eq('id', requestId);
@@ -190,6 +202,8 @@ serve(async (req) => {
             data: { content: '❌ Failed to accept project. Please try again.', flags: 64 }
           }), { headers: { 'Content-Type': 'application/json' } });
         }
+        
+        console.log(`Producer ${clickingProducer.name} (${clickingProducer.id}) assigned to request ${requestId}`);
 
         // Notify customer
         try {
