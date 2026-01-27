@@ -376,24 +376,7 @@ const GenerateSong = () => {
       console.log("Song request created:", requestData?.id);
       
       // Note: Producer assignment happens when a producer accepts via Discord
-      // We no longer auto-match here - the Discord notification is sent to all producers
-
-      // Send Discord notification
-      try {
-        await supabase.functions.invoke('send-discord-notification', {
-          body: {
-            requestId: requestData?.id,
-            requestData: {
-              tier: currentTier.label,
-              idea,
-              fileCount: fileUrls.length
-            }
-          }
-        });
-        console.log("Discord notification sent");
-      } catch (notifError) {
-        console.error("Failed to send Discord notification:", notifError);
-      }
+      // Discord notification is sent AFTER payment verification in verify-song-payment
       
       console.log("Initiating Stripe checkout...");
 
