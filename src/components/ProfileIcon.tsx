@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, LogIn, Settings, Music, ShoppingBag } from 'lucide-react';
+import { User, LogIn, Settings, Music, ShoppingBag, Mic2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -9,10 +9,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 import { Link, useNavigate } from 'react-router-dom';
 
 const ProfileIcon = () => {
   const { user, signOut, loading } = useAuth();
+  const { data: roleData } = useUserRole();
   const navigate = useNavigate();
 
   if (loading) {
@@ -75,7 +77,16 @@ const ProfileIcon = () => {
           <ShoppingBag className="h-4 w-4 mr-2" />
           My Purchases
         </DropdownMenuItem>
-        {user.email === 'hechoenamerica369@gmail.com' && (
+        {roleData?.isProducer && (
+          <DropdownMenuItem 
+            onClick={() => navigate('/producer-profile')}
+            className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
+          >
+            <Mic2 className="h-4 w-4 mr-2" />
+            Producer Profile
+          </DropdownMenuItem>
+        )}
+        {roleData?.isAdmin && (
           <DropdownMenuItem 
             onClick={() => navigate('/admin')}
             className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
