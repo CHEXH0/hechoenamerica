@@ -1008,20 +1008,20 @@ const Treats = () => {
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }} 
           animate={{ opacity: 1, scale: 1 }} 
-          transition={{ duration: 0.6, delay: 0.8 }} 
+          transition={{ duration: 0.3, delay: 0.6 }} 
           className="mt-20 text-center"
         >
           <Card className="bg-gradient-to-br from-purple-900/50 via-pink-900/30 to-red-900/50 border-purple-500/40 backdrop-blur-md max-w-4xl mx-auto">
             <CardHeader>
               <div className="flex justify-center mb-4">
                 <div className="w-16 h-16 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-full flex items-center justify-center border border-pink-500/30">
-                  <Users className="h-8 w-8 text-pink-400" />
+                  <Users className="h-8 w-8 text-pink-600" />
                 </div>
               </div>
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent mb-4">
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-800 to-purple-500 bg-clip-text text-transparent mb-4">
                 Are You a Producer?
               </CardTitle>
-              <CardDescription className="text-gray-300 text-lg leading-relaxed">
+              <CardDescription className="text-gray-800 text-lg leading-relaxed">
                 Join our network of talented music producers. Work with artists from around the world 
                 and be part of the Hecho En América family.
               </CardDescription>
@@ -1031,7 +1031,7 @@ const Treats = () => {
                 <Link to="/producer-application">
                   <Button 
                     size="lg" 
-                    className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white border-0 px-8"
+                    className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white border-0 px-8"
                   >
                     Apply to Join
                   </Button>

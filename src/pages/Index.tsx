@@ -31,21 +31,6 @@ const Index = () => {
         </div>
       </section>
       
-      {/* Google Drive Integration Section */}
-      <section className="py-16 bg-black">
-        <div className="container mx-auto px-4 text-center max-w-3xl">
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">
-            Secure Google Drive Integration
-          </h2>
-          <p className="text-gray-300 text-lg leading-relaxed">
-            Hecho En America Studio (HEA) is a secure production portal. We use Google Drive 
-            integration to allow authorized producers to upload high-resolution media assets 
-            directly to their own secure cloud storage. This ensures that large files are 
-            organized and accessible only to the content creator.
-          </p>
-        </div>
-      </section>
-      
       <Footer />
     </div>
   );

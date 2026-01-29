@@ -8,20 +8,8 @@ import ProducerApplicationForm from "@/components/ProducerApplicationForm";
 import { useHiringStatus } from "@/hooks/useHiringStatus";
 
 const ProducerApplication = () => {
-  const { data: hiringStatus, isLoading } = useHiringStatus();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-pink-950 flex items-center justify-center">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-4 border-pink-500/30 border-t-pink-400 rounded-full"
-        />
-      </div>
-    );
-  }
-
+  const { data: hiringStatus} = useHiringStatus();
+  
   const isHiring = hiringStatus?.enabled ?? false;
 
   return (
@@ -49,7 +37,7 @@ const ProducerApplication = () => {
           transition={{ delay: 0.1 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-pink-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
             Join Our Producer Network
           </h1>
           <p className="text-gray-300 text-lg max-w-2xl mx-auto">

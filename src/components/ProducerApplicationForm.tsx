@@ -251,10 +251,10 @@ const ProducerApplicationForm = () => {
     >
       <Card className="bg-gradient-to-br from-purple-900/50 via-pink-900/30 to-red-900/50 border-purple-500/40 backdrop-blur-md max-w-4xl mx-auto">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent mb-4">
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent mb-4">
             Become a Producer
           </CardTitle>
-          <CardDescription className="text-gray-300 text-lg leading-relaxed max-w-2xl mx-auto">
+          <CardDescription className="text-gray-800 text-lg leading-relaxed max-w-2xl mx-auto">
             Join our network of talented producers. Fill out the application below and we'll review your submission.
           </CardDescription>
         </CardHeader>
@@ -273,7 +273,7 @@ const ProducerApplicationForm = () => {
                       <FormControl>
                         <Input
                           placeholder="Your stage name or brand"
-                          className="bg-black/30 border-purple-500/30 text-white placeholder:text-gray-500"
+                          className="bg-black/50 border-purple-500/80 text-white placeholder:text-gray-400"
                           {...field}
                         />
                       </FormControl>
@@ -292,7 +292,7 @@ const ProducerApplicationForm = () => {
                         <Input
                           type="email"
                           placeholder="your@email.com"
-                          className="bg-black/30 border-purple-500/30 text-white placeholder:text-gray-500"
+                          className="bg-black/50 border-purple-500/80 text-white placeholder:text-gray-400"
                           {...field}
                         />
                       </FormControl>
@@ -311,11 +311,11 @@ const ProducerApplicationForm = () => {
                     <FormControl>
                       <Input
                         placeholder="City, Country (e.g., Los Angeles, USA)"
-                        className="bg-black/30 border-purple-500/30 text-white placeholder:text-gray-500"
+                        className="bg-black/50 border-purple-500/80 text-white placeholder:text-gray-400"
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription className="text-gray-400">
+                    <FormDescription className="text-gray-700">
                       Where you're primarily based
                     </FormDescription>
                     <FormMessage />
@@ -355,12 +355,12 @@ const ProducerApplicationForm = () => {
                                         : field.value?.filter((value) => value !== genre);
                                       field.onChange(newValue);
                                     }}
-                                    className="border-purple-500/50 data-[state=checked]:bg-pink-500 data-[state=checked]:border-pink-500"
+                                    className="border-purple-500/100 data-[state=checked]:bg-pink-500 data-[state=checked]:border-pink-500"
                                   />
                                 </FormControl>
                                 <Label
                                   className={`text-sm cursor-pointer ${
-                                    isDisabled ? "text-gray-500" : "text-gray-300"
+                                    isDisabled ? "text-gray-700" : "text-gray-600"
                                   }`}
                                 >
                                   {genre}
@@ -386,11 +386,11 @@ const ProducerApplicationForm = () => {
                     <FormControl>
                       <Textarea
                         placeholder="Tell us about yourself, your experience, style, and what makes you unique as a producer..."
-                        className="bg-black/30 border-purple-500/30 text-white placeholder:text-gray-500 min-h-[120px]"
+                        className="bg-black/50 border-purple-500/80 text-white placeholder:text-gray-400 min-h-[120px]"
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription className="text-gray-400">
+                    <FormDescription className="text-gray-700">
                       {field.value?.length || 0}/1000 characters (minimum 50)
                     </FormDescription>
                     <FormMessage />
@@ -404,10 +404,10 @@ const ProducerApplicationForm = () => {
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="flex-1">
                     <div
-                      className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                      className={`bg-black/50 relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
                         imageError
                           ? "border-red-500/50 bg-red-900/10"
-                          : "border-purple-500/30 bg-black/20 hover:border-pink-400/50"
+                          : "border-purple-500/80 bg-black/20 hover:border-pink-400/100"
                       }`}
                     >
                       <input
@@ -418,7 +418,7 @@ const ProducerApplicationForm = () => {
                       />
                       <Upload className="h-10 w-10 text-gray-400 mx-auto mb-3" />
                       <p className="text-gray-300 mb-1">Click or drag to upload</p>
-                      <p className="text-gray-500 text-sm">PNG, JPG up to 5MB</p>
+                      <p className="text-gray-400 text-sm">PNG, JPG up to 5MB</p>
                     </div>
                     {imageError && (
                       <p className="text-red-400 text-sm mt-2">{imageError}</p>
@@ -439,7 +439,7 @@ const ProducerApplicationForm = () => {
                     </motion.div>
                   )}
                 </div>
-                <p className="text-gray-400 text-sm">
+                <p className="text-gray-700 text-sm">
                   Upload a logo, photo, or image that represents your brand
                 </p>
               </div>
@@ -448,7 +448,7 @@ const ProducerApplicationForm = () => {
               <div className="space-y-4">
                 <div>
                   <Label className="text-white text-lg">Platform Links *</Label>
-                  <p className="text-gray-400 text-sm mt-1">
+                  <p className="text-gray-700 text-sm mt-1">
                     Provide at least one link to your music or social profile
                   </p>
                 </div>
@@ -459,14 +459,14 @@ const ProducerApplicationForm = () => {
                     name="spotify_url"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-300 flex items-center gap-2">
+                        <FormLabel className="text-gray-600 flex items-center gap-2">
                           <Music className="h-4 w-4 text-green-400" />
                           Spotify
                         </FormLabel>
                         <FormControl>
                           <Input
                             placeholder="https://open.spotify.com/artist/..."
-                            className="bg-black/30 border-purple-500/30 text-white placeholder:text-gray-500"
+                            className="bg-black/50 border-purple-500/80 text-white placeholder:text-gray-400"
                             {...field}
                           />
                         </FormControl>
@@ -480,14 +480,14 @@ const ProducerApplicationForm = () => {
                     name="youtube_url"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-300 flex items-center gap-2">
+                        <FormLabel className="text-gray-600 flex items-center gap-2">
                           <Youtube className="h-4 w-4 text-red-400" />
                           YouTube
                         </FormLabel>
                         <FormControl>
                           <Input
                             placeholder="https://youtube.com/c/..."
-                            className="bg-black/30 border-purple-500/30 text-white placeholder:text-gray-500"
+                            className="bg-black/50 border-purple-500/80 text-white placeholder:text-gray-400"
                             {...field}
                           />
                         </FormControl>
@@ -501,14 +501,14 @@ const ProducerApplicationForm = () => {
                     name="apple_music_url"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-300 flex items-center gap-2">
+                        <FormLabel className="text-gray-600 flex items-center gap-2">
                           <Music className="h-4 w-4 text-pink-400" />
                           Apple Music
                         </FormLabel>
                         <FormControl>
                           <Input
                             placeholder="https://music.apple.com/..."
-                            className="bg-black/30 border-purple-500/30 text-white placeholder:text-gray-500"
+                            className="bg-black/50 border-purple-500/80 text-white placeholder:text-gray-400"
                             {...field}
                           />
                         </FormControl>
@@ -522,14 +522,14 @@ const ProducerApplicationForm = () => {
                     name="instagram_url"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-300 flex items-center gap-2">
+                        <FormLabel className="text-gray-600 flex items-center gap-2">
                           <Instagram className="h-4 w-4 text-purple-400" />
                           Instagram
                         </FormLabel>
                         <FormControl>
                           <Input
                             placeholder="https://instagram.com/..."
-                            className="bg-black/30 border-purple-500/30 text-white placeholder:text-gray-500"
+                            className="bg-black/50 border-purple-500/80 text-white placeholder:text-gray-400"
                             {...field}
                           />
                         </FormControl>
@@ -543,14 +543,14 @@ const ProducerApplicationForm = () => {
                     name="website_url"
                     render={({ field }) => (
                       <FormItem className="md:col-span-2">
-                        <FormLabel className="text-gray-300 flex items-center gap-2">
+                        <FormLabel className="text-gray-600 flex items-center gap-2">
                           <Globe className="h-4 w-4 text-blue-400" />
                           Website
                         </FormLabel>
                         <FormControl>
                           <Input
                             placeholder="https://yourwebsite.com"
-                            className="bg-black/30 border-purple-500/30 text-white placeholder:text-gray-500"
+                            className="bg-black/50 border-purple-500/80 text-white placeholder:text-gray-400"
                             {...field}
                           />
                         </FormControl>
@@ -571,7 +571,7 @@ const ProducerApplicationForm = () => {
                     type="submit"
                     size="lg"
                     disabled={isSubmitting}
-                    className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white border-0 py-6 text-lg"
+                    className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white border-0 py-6 text-lg"
                   >
                     {isSubmitting ? (
                       <>

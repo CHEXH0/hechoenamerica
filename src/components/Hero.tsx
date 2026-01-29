@@ -39,17 +39,6 @@ const Hero = () => {
             HECHO EN AMÉRICA
           </h1>
           <Waveform />
-          
-          {/* Privacy Policy Link for Google Verification */}
-          <div className="mt-8 text-sm text-gray-500">
-            <Link to="/privacy-policy" className="hover:text-white transition-colors underline">
-              Privacy Policy
-            </Link>
-            <span className="mx-2">•</span>
-            <Link to="/terms-of-service" className="hover:text-white transition-colors underline">
-              Terms of Service
-            </Link>
-          </div>
         </motion.div>
       </div>
     </section>
