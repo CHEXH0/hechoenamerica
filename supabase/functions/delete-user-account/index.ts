@@ -26,26 +26,42 @@ Deno.serve(async (req) => {
 
     // Get the user from the authorization header
     const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
       return new Response(
         JSON.stringify({ error: 'Missing authorization header' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Verify the user's JWT token
-    const token = authHeader.replace('Bearer ', '')
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
+    // Create a user client to validate the JWT using getClaims
+    const supabaseUser = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    )
 
-    if (authError || !user) {
+    // Verify the user's JWT token using getClaims (validates signature without session check)
+    const token = authHeader.replace('Bearer ', '')
+    const { data: claimsData, error: claimsError } = await supabaseUser.auth.getClaims(token)
+
+    if (claimsError || !claimsData?.claims) {
+      console.error('JWT validation error:', claimsError)
       return new Response(
         JSON.stringify({ error: 'Invalid or expired token' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Delete the user account
-    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id)
+    const userId = claimsData.claims.sub
+    if (!userId) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid token - no user ID' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Delete the user account using the userId from claims
+    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
 
     if (deleteError) {
       console.error('Error deleting user:', deleteError)
