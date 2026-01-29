@@ -3,31 +3,30 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, User, Mail, Lock, Trash2, Save } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import { useProfile, useUpdateProfile, useChangePassword, useUpdateEmail, useDeleteAccount } from "@/hooks/useProfile";
+import { useProfile, useUpdateProfile, useUpdateEmail, useDeleteAccount } from "@/hooks/useProfile";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
   const { data: profile, isLoading } = useProfile(user?.id);
   const updateProfile = useUpdateProfile();
-  const changePassword = useChangePassword();
   const updateEmail = useUpdateEmail();
   const deleteAccount = useDeleteAccount();
 
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [newEmail, setNewEmail] = useState("");
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [sendingResetEmail, setSendingResetEmail] = useState(false);
 
   // Update form when profile loads
   useEffect(() => {
@@ -64,20 +63,32 @@ const Profile = () => {
     });
   };
 
-  const handleChangePassword = () => {
-    if (newPassword.length < 6) {
-      return;
+  const handleSendPasswordResetEmail = async () => {
+    if (!user?.email) return;
+    
+    setSendingResetEmail(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Password reset email sent!",
+        description: "Check your email for a link to reset your password.",
+        duration: 8000,
+      });
+    } catch (error) {
+      console.error('Password reset error:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to send password reset email.",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingResetEmail(false);
     }
-    if (newPassword !== confirmPassword) {
-      return;
-    }
-    changePassword.mutate(newPassword, {
-      onSuccess: () => {
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-      }
-    });
   };
 
   const handleUpdateEmail = () => {
@@ -218,33 +229,17 @@ const Profile = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="newPassword">New Password</Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Enter new password"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm new password"
-                  />
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  For security reasons, password changes require email verification. 
+                  Click below to receive a password reset link.
+                </p>
                 <Button 
-                  onClick={handleChangePassword}
-                  disabled={changePassword.isPending || !newPassword || newPassword !== confirmPassword}
+                  onClick={handleSendPasswordResetEmail}
+                  disabled={sendingResetEmail}
                   className="w-full"
                 >
-                  <Lock className="mr-2 h-4 w-4" />
-                  {changePassword.isPending ? "Changing..." : "Change Password"}
+                  <Mail className="mr-2 h-4 w-4" />
+                  {sendingResetEmail ? "Sending..." : "Send Password Reset Email"}
                 </Button>
               </CardContent>
             </Card>
