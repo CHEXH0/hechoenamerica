@@ -25,6 +25,8 @@ const Profile = () => {
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [sendingResetEmail, setSendingResetEmail] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // Update form when profile loads
   useEffect(() => {
@@ -84,7 +86,17 @@ const Profile = () => {
   };
 
   const handleDeleteAccount = () => {
+    if (deleteConfirmation !== "DELETE") {
+      toast({
+        title: "Confirmation required",
+        description: "Please type DELETE to confirm account deletion.",
+        variant: "destructive",
+      });
+      return;
+    }
     deleteAccount.mutate();
+    setDeleteDialogOpen(false);
+    setDeleteConfirmation("");
   };
 
   return (
@@ -229,7 +241,10 @@ const Profile = () => {
                       Permanently delete your account and all associated data. This action cannot be undone.
                     </p>
                   </div>
-                  <AlertDialog>
+                  <AlertDialog open={deleteDialogOpen} onOpenChange={(open) => {
+                    setDeleteDialogOpen(open);
+                    if (!open) setDeleteConfirmation("");
+                  }}>
                     <AlertDialogTrigger asChild>
                       <Button variant="destructive">
                         <Trash2 className="mr-2 h-4 w-4" />
@@ -239,19 +254,41 @@ const Profile = () => {
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone. This will permanently delete your account
-                          and remove your data from our servers.
+                        <AlertDialogDescription className="space-y-4">
+                          <p>
+                            This action cannot be undone. This will permanently delete your account
+                            and remove all your data from our servers, including:
+                          </p>
+                          <ul className="list-disc pl-5 text-sm space-y-1">
+                            <li>Your profile information</li>
+                            <li>All purchases and order history</li>
+                            <li>Song requests and project files</li>
+                            <li>Any uploaded files in storage</li>
+                          </ul>
+                          <div className="pt-4">
+                            <Label htmlFor="deleteConfirm" className="text-foreground font-medium">
+                              Type <span className="font-bold text-red-600">DELETE</span> to confirm:
+                            </Label>
+                            <Input
+                              id="deleteConfirm"
+                              value={deleteConfirmation}
+                              onChange={(e) => setDeleteConfirmation(e.target.value)}
+                              placeholder="Type DELETE here"
+                              className="mt-2"
+                              autoComplete="off"
+                            />
+                          </div>
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
+                        <Button
                           onClick={handleDeleteAccount}
-                          className="bg-red-600 hover:bg-red-700"
+                          disabled={deleteConfirmation !== "DELETE" || deleteAccount.isPending}
+                          variant="destructive"
                         >
-                          Delete Account
-                        </AlertDialogAction>
+                          {deleteAccount.isPending ? "Deleting..." : "Delete Account"}
+                        </Button>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
