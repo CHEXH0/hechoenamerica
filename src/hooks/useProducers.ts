@@ -9,6 +9,8 @@ export interface Producer {
   country: string;
   genre: string;
   bio: string;
+  email?: string;
+  discord_user_id?: string;
   spotify_url?: string;
   youtube_url?: string;
   apple_music_url?: string;
