@@ -96,9 +96,12 @@ const Auth = () => {
         }
       } else {
         toast({
-          title: "Check your email!",
-          description: "We've sent you a confirmation link to complete your registration.",
+          title: "Verify your email!",
+          description: "We've sent a verification link to your email. Please click it to activate your account before signing in.",
+          duration: 10000,
         });
+        setEmail('');
+        setPassword('');
       }
     } catch (error) {
       toast({
