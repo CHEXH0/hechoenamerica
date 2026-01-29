@@ -25,7 +25,7 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.delete-user-account]
-verify_jwt = true
+verify_jwt = false
 
 [functions.get-all-users]
 verify_jwt = true
