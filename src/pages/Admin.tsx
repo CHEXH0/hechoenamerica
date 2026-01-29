@@ -7,6 +7,7 @@ import { ProducerProjects } from "@/components/ProducerProjects";
 import { PaymentAnalyticsDashboard } from "@/components/PaymentAnalyticsDashboard";
 import { StripeConnectOnboarding } from "@/components/StripeConnectOnboarding";
 import { StorageManagement } from "@/components/StorageManagement";
+import { ProducerApplicationsAdmin } from "@/components/ProducerApplicationsAdmin";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -445,6 +446,9 @@ const Admin = () => {
             <>
               {/* Hiring Status Control */}
               <HiringStatusControl />
+
+              {/* Producer Applications Management */}
+              <ProducerApplicationsAdmin />
               
               {/* Payment Analytics Dashboard */}
               <PaymentAnalyticsDashboard />

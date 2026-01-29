@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Upload, Music, Globe, Instagram, Youtube, ExternalLink, Send, Loader2, CheckCircle } from "lucide-react";
+import { Upload, Music, Globe, Instagram, Youtube, ExternalLink, Send, Loader2, CheckCircle, LogIn } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Form,
   FormControl,
@@ -59,6 +61,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 const ProducerApplicationForm = () => {
+  const { user, loading: authLoading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -138,12 +141,13 @@ const ProducerApplicationForm = () => {
         .from('product-images')
         .getPublicUrl(filePath);
 
-      // Submit the application to contact_submissions for record keeping
+      // Submit the application to contact_submissions with user_id for record keeping
       const applicationData = {
         name: data.name,
         email: data.email,
         subject: "Producer Application",
         country: data.country,
+        user_id: user?.id, // Link application to authenticated user
         message: JSON.stringify({
           type: "producer_application",
           genres: data.genres,
@@ -236,6 +240,50 @@ const ProducerApplicationForm = () => {
                 </span>
               </p>
             </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
+
+  // Show login prompt if user is not authenticated
+  if (!authLoading && !user) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="mt-20"
+      >
+        <Card className="bg-gradient-to-br from-purple-900/50 via-pink-900/30 to-red-900/50 border-purple-500/40 backdrop-blur-md max-w-4xl mx-auto">
+          <CardContent className="py-16 text-center">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, damping: 10 }}
+              className="mb-6"
+            >
+              <div className="w-24 h-24 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center mx-auto border border-purple-500/30">
+                <LogIn className="h-12 w-12 text-purple-400" />
+              </div>
+            </motion.div>
+            
+            <h2 className="text-3xl font-bold text-white mb-4">
+              Sign In Required
+            </h2>
+            <p className="text-gray-300 text-lg max-w-md mx-auto mb-8">
+              You need to be signed in to submit a producer application. This helps us link your application to your account.
+            </p>
+            
+            <Link to="/auth?redirect=/producer-application">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white"
+              >
+                <LogIn className="h-5 w-5 mr-2" />
+                Sign In to Apply
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       </motion.div>

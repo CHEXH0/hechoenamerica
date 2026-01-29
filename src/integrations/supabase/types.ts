@@ -64,6 +64,7 @@ export type Database = {
       }
       contact_submissions: {
         Row: {
+          application_status: string | null
           country: string | null
           created_at: string
           email: string
@@ -71,8 +72,10 @@ export type Database = {
           message: string
           name: string
           subject: string
+          user_id: string | null
         }
         Insert: {
+          application_status?: string | null
           country?: string | null
           created_at?: string
           email: string
@@ -80,8 +83,10 @@ export type Database = {
           message: string
           name: string
           subject: string
+          user_id?: string | null
         }
         Update: {
+          application_status?: string | null
           country?: string | null
           created_at?: string
           email?: string
@@ -89,6 +94,7 @@ export type Database = {
           message?: string
           name?: string
           subject?: string
+          user_id?: string | null
         }
         Relationships: []
       }
