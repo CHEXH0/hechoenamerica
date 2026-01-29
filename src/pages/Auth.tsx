@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [sendingReset, setSendingReset] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { user } = useAuth();
@@ -111,6 +112,41 @@ const Auth = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address to reset your password.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSendingReset(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Check your email!",
+        description: "We've sent you a password reset link. Click it to set a new password.",
+        duration: 10000,
+      });
+    } catch (error) {
+      console.error('Password reset error:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to send reset email.",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingReset(false);
     }
   };
 
@@ -248,6 +284,16 @@ const Auth = () => {
                     >
                       {loading ? "Signing in..." : "Sign In"}
                     </Button>
+                    <div className="text-center">
+                      <button
+                        type="button"
+                        onClick={handleForgotPassword}
+                        disabled={sendingReset}
+                        className="text-sm text-pink-400 hover:text-pink-300 transition-colors underline underline-offset-2"
+                      >
+                        {sendingReset ? "Sending..." : "Forgot your password?"}
+                      </button>
+                    </div>
                   </form>
                 </TabsContent>
 
