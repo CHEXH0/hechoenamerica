@@ -36,10 +36,14 @@ export const useUpdateProfile = () => {
 
   return useMutation({
     mutationFn: async ({ userId, updates }: { userId: string; updates: Partial<Profile> }) => {
+      // Use upsert to handle old users who don't have a profile yet
       const { data, error } = await supabase
         .from('profiles')
-        .update(updates)
-        .eq('id', userId)
+        .upsert({
+          id: userId,
+          ...updates,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'id' })
         .select()
         .single();
       
