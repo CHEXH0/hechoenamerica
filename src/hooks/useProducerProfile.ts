@@ -26,15 +26,18 @@ export const useProducerProfile = () => {
 };
 
 export type ProducerProfileUpdate = {
+  name?: string;
+  country?: string;
+  genre?: string;
   bio?: string;
   image?: string;
-  discord_user_id?: string;
-  spotify_url?: string;
-  youtube_url?: string;
-  apple_music_url?: string;
-  youtube_channel_url?: string;
-  instagram_url?: string;
-  website_url?: string;
+  discord_user_id?: string | null;
+  spotify_url?: string | null;
+  youtube_url?: string | null;
+  apple_music_url?: string | null;
+  youtube_channel_url?: string | null;
+  instagram_url?: string | null;
+  website_url?: string | null;
 };
 
 export const useUpdateProducerProfile = () => {

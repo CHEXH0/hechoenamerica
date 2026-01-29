@@ -39,6 +39,9 @@ const ProducerProfile = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form state
+  const [name, setName] = useState("");
+  const [country, setCountry] = useState("");
+  const [genre, setGenre] = useState("");
   const [bio, setBio] = useState("");
   const [image, setImage] = useState("");
   const [discordUserId, setDiscordUserId] = useState("");
@@ -52,6 +55,9 @@ const ProducerProfile = () => {
   // Populate form when profile loads
   useEffect(() => {
     if (producerProfile) {
+      setName(producerProfile.name || "");
+      setCountry(producerProfile.country || "");
+      setGenre(producerProfile.genre || "");
       setBio(producerProfile.bio || "");
       setImage(producerProfile.image || "");
       setDiscordUserId(producerProfile.discord_user_id || "");
@@ -133,6 +139,9 @@ const ProducerProfile = () => {
 
   const handleSave = () => {
     updateProfile.mutate({
+      name,
+      country,
+      genre,
       bio,
       image,
       discord_user_id: discordUserId || null,
@@ -226,35 +235,35 @@ const ProducerProfile = () => {
                   </div>
                 </div>
 
-                {/* Read-only fields */}
+                {/* Editable fields */}
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <Label>Name</Label>
+                    <Label htmlFor="name">Name</Label>
                     <Input
-                      value={producerProfile.name}
-                      disabled
-                      className="bg-muted/50 cursor-not-allowed"
+                      id="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Your producer name"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Contact admin to change name
-                    </p>
                   </div>
                   <div>
-                    <Label>Country</Label>
+                    <Label htmlFor="country">Country</Label>
                     <Input
-                      value={producerProfile.country}
-                      disabled
-                      className="bg-muted/50 cursor-not-allowed"
+                      id="country"
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      placeholder="Your country"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label>Genre</Label>
+                  <Label htmlFor="genre">Genre</Label>
                   <Input
-                    value={producerProfile.genre}
-                    disabled
-                    className="bg-muted/50 cursor-not-allowed"
+                    id="genre"
+                    value={genre}
+                    onChange={(e) => setGenre(e.target.value)}
+                    placeholder="Your music genre(s)"
                   />
                 </div>
 
