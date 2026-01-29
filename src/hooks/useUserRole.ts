@@ -24,12 +24,14 @@ export const useUserRole = () => {
 
       // Return all roles as an array
       const roles = data?.map(r => r.role as UserRole) || [];
+      const isAdmin = roles.includes('admin');
       
       return {
         roles,
-        isAdmin: roles.includes('admin'),
-        isProducer: roles.includes('producer'),
-        hasAccess: roles.includes('admin') || roles.includes('producer'),
+        isAdmin,
+        // Admins automatically have producer permissions
+        isProducer: isAdmin || roles.includes('producer'),
+        hasAccess: isAdmin || roles.includes('producer'),
       };
     },
     enabled: !!user,
