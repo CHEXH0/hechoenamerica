@@ -22,6 +22,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import ProducerApplication from "./pages/ProducerApplication";
 import ResetPassword from "./pages/ResetPassword";
+import ProducerProfile from "./pages/ProducerProfile";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const App = () => (
               <Route path="/terms-of-service" element={<TermsOfService />} />
               <Route path="/producer-application" element={<ProducerApplication />} />
               <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/producer-profile" element={<ProducerProfile />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
