@@ -60,7 +60,89 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Delete the user account using the userId from claims
+    console.log(`Starting account deletion for user: ${userId}`)
+
+    // Get user email for producer cleanup
+    const { data: { user: targetUser } } = await supabaseAdmin.auth.admin.getUserById(userId)
+    const userEmail = targetUser?.email
+
+    // Delete user's purchases
+    const { error: purchasesError } = await supabaseAdmin
+      .from('purchases')
+      .delete()
+      .eq('user_id', userId)
+    if (purchasesError) console.error('Error deleting purchases:', purchasesError)
+    else console.log('Deleted user purchases')
+
+    // Delete user's song requests
+    const { error: songRequestsError } = await supabaseAdmin
+      .from('song_requests')
+      .delete()
+      .eq('user_id', userId)
+    if (songRequestsError) console.error('Error deleting song requests:', songRequestsError)
+    else console.log('Deleted user song requests')
+
+    // Delete user's AI song generations
+    const { error: aiGenError } = await supabaseAdmin
+      .from('ai_song_generations')
+      .delete()
+      .eq('user_id', userId)
+    if (aiGenError) console.error('Error deleting AI generations:', aiGenError)
+    else console.log('Deleted AI song generations')
+
+    // Delete user's profile
+    const { error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .delete()
+      .eq('id', userId)
+    if (profileError) console.error('Error deleting profile:', profileError)
+    else console.log('Deleted user profile')
+
+    // Delete user's roles
+    const { error: rolesError } = await supabaseAdmin
+      .from('user_roles')
+      .delete()
+      .eq('user_id', userId)
+    if (rolesError) console.error('Error deleting user roles:', rolesError)
+    else console.log('Deleted user roles')
+
+    // Delete producer Google tokens if they exist
+    const { error: tokensError } = await supabaseAdmin
+      .from('producer_google_tokens')
+      .delete()
+      .eq('user_id', userId)
+    if (tokensError) console.error('Error deleting Google tokens:', tokensError)
+    else console.log('Deleted Google tokens')
+
+    // Delete producer profile if email matches
+    if (userEmail) {
+      const { error: producerError } = await supabaseAdmin
+        .from('producers')
+        .delete()
+        .eq('email', userEmail)
+      if (producerError) console.error('Error deleting producer profile:', producerError)
+      else console.log('Deleted producer profile')
+    }
+
+    // Delete user's files from storage buckets
+    // Delete from product-assets (song files)
+    try {
+      const { data: songFiles } = await supabaseAdmin.storage
+        .from('product-assets')
+        .list(`songs/${userId}`)
+      
+      if (songFiles && songFiles.length > 0) {
+        const filePaths = songFiles.map(file => `songs/${userId}/${file.name}`)
+        await supabaseAdmin.storage
+          .from('product-assets')
+          .remove(filePaths)
+        console.log(`Deleted ${filePaths.length} files from product-assets`)
+      }
+    } catch (storageError) {
+      console.error('Error deleting storage files:', storageError)
+    }
+
+    // Finally, delete the user account from auth
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
 
     if (deleteError) {
@@ -70,6 +152,8 @@ Deno.serve(async (req) => {
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    console.log(`Successfully deleted account for user: ${userId}`)
 
     return new Response(
       JSON.stringify({ success: true, message: 'Account deleted successfully' }),
