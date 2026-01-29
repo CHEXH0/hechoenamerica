@@ -57,6 +57,49 @@ serve(async (req) => {
       if (error && !error.message.includes('duplicate')) {
         throw error;
       }
+
+      // If adding producer role, ensure they have a producer profile with their email
+      if (role === 'producer') {
+        // Get user email from auth
+        const { data: { user: targetUser } } = await supabaseClient.auth.admin.getUserById(userId);
+        
+        if (targetUser?.email) {
+          // Check if producer with this email already exists
+          const { data: existingProducer } = await supabaseClient
+            .from('producers')
+            .select('id')
+            .eq('email', targetUser.email)
+            .maybeSingle();
+
+          if (!existingProducer) {
+            // Create a new producer profile with basic info
+            const displayName = targetUser.user_metadata?.display_name 
+              || targetUser.email.split('@')[0];
+            const slug = displayName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            
+            const { error: createError } = await supabaseClient
+              .from('producers')
+              .insert({
+                email: targetUser.email,
+                name: displayName,
+                slug: `${slug}-${Date.now()}`,
+                country: 'Not specified',
+                genre: 'Not specified',
+                bio: 'New producer',
+                image: '/placeholder.svg',
+              });
+
+            if (createError) {
+              console.error('Error creating producer profile:', createError);
+              // Don't throw - role was assigned successfully, producer profile creation is secondary
+            } else {
+              console.log(`Created producer profile for ${targetUser.email}`);
+            }
+          } else {
+            console.log(`Producer profile already exists for ${targetUser.email}`);
+          }
+        }
+      }
     } else {
       const { error } = await supabaseClient
         .from('user_roles')
