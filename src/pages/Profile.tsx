@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, User, Mail, Lock, Trash2, Save } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import { useProfile, useUpdateProfile, useUpdateEmail, useDeleteAccount } from "@/hooks/useProfile";
+import { useProfile, useUpdateProfile, useDeleteAccount } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,12 +20,10 @@ const Profile = () => {
   const { user, loading: authLoading } = useAuth();
   const { data: profile, isLoading } = useProfile(user?.id);
   const updateProfile = useUpdateProfile();
-  const updateEmail = useUpdateEmail();
   const deleteAccount = useDeleteAccount();
 
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
-  const [newEmail, setNewEmail] = useState("");
   const [sendingResetEmail, setSendingResetEmail] = useState(false);
 
   // Update form when profile loads
@@ -35,12 +33,6 @@ const Profile = () => {
       setBio(profile.bio || "");
     }
   }, [profile]);
-
-  useEffect(() => {
-    if (user) {
-      setNewEmail(user.email || "");
-    }
-  }, [user]);
 
   if (authLoading || isLoading) {
     return (
@@ -88,12 +80,6 @@ const Profile = () => {
       });
     } finally {
       setSendingResetEmail(false);
-    }
-  };
-
-  const handleUpdateEmail = () => {
-    if (newEmail && newEmail !== user.email) {
-      updateEmail.mutate(newEmail);
     }
   };
 
@@ -149,6 +135,19 @@ const Profile = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={user?.email || ""}
+                    disabled
+                    className="bg-muted/50 cursor-not-allowed"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Email address cannot be changed after account activation.
+                  </p>
+                </div>
+                <div>
                   <Label htmlFor="displayName">Display Name</Label>
                   <Input
                     id="displayName"
@@ -179,47 +178,11 @@ const Profile = () => {
             </Card>
           </motion.div>
 
-          {/* Email Settings */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Mail className="h-5 w-5" />
-                  Email Settings
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={newEmail}
-                    onChange={(e) => setNewEmail(e.target.value)}
-                    placeholder="Enter your email"
-                  />
-                </div>
-                <Button 
-                  onClick={handleUpdateEmail}
-                  disabled={updateEmail.isPending || newEmail === user.email}
-                  className="w-full"
-                >
-                  <Mail className="mr-2 h-4 w-4" />
-                  {updateEmail.isPending ? "Updating..." : "Update Email"}
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
-
           {/* Password Settings */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.2 }}
           >
             <Card>
               <CardHeader>
@@ -249,7 +212,7 @@ const Profile = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.3 }}
           >
             <Card className="border-red-200 dark:border-red-800">
               <CardHeader>
