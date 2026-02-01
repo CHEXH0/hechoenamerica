@@ -553,6 +553,11 @@ const GenerateSong = () => {
               </Label>
               <Textarea id="idea" value={idea} onChange={e => setIdea(e.target.value)} placeholder={currentTier.price > 0 ? "Better than AI. Made by human hehe.." : "Feel free to use AI audios for your liking"} className="bg-white/20 border-white/30 text-white placeholder:text-white/50 min-h-[120px]" required 
               />
+              {currentTier.price === 0 && (
+                <p className="text-white/70 text-xs leading-relaxed">
+                  💡 <span className="font-medium">Tip:</span> Be descriptive! Instead of "reggae music", try "upbeat reggae with offbeat guitar skanks, deep dub bass, one-drop drums, and melodica at 90 BPM". Include mood, instruments, and tempo for best results.
+                </p>
+              )}
               {currentTier.price > 0 && (
                 <>
                   <div onClick={() => fileInputRef.current?.click()} className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors">
