@@ -113,7 +113,7 @@ async function setFolderPermissions(accessToken: string, folderId: string): Prom
   }
 }
 
-// Initiate resumable upload session
+// Initiate resumable upload session and return the upload URI
 async function initiateResumableUpload(
   accessToken: string,
   fileName: string,
@@ -153,115 +153,6 @@ async function initiateResumableUpload(
   return uploadUri;
 }
 
-// Stream file from Supabase Storage to Google Drive in chunks
-async function streamFileToDrive(
-  supabase: any,
-  storagePath: string,
-  uploadUri: string,
-  fileSize: number,
-  mimeType: string
-): Promise<{ id: string }> {
-  const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks (must be multiple of 256KB)
-  let uploadedBytes = 0;
-
-  while (uploadedBytes < fileSize) {
-    const endByte = Math.min(uploadedBytes + CHUNK_SIZE, fileSize);
-    const chunkSize = endByte - uploadedBytes;
-    
-    console.log(`Downloading chunk: bytes ${uploadedBytes}-${endByte - 1}/${fileSize} from storage`);
-
-    // Download chunk from Supabase Storage using range header
-    const { data: chunkData, error: downloadError } = await supabase.storage
-      .from('product-assets')
-      .download(storagePath, {
-        transform: {
-          quality: 100
-        }
-      });
-
-    if (downloadError) {
-      throw new Error(`Failed to download chunk from storage: ${downloadError.message}`);
-    }
-
-    // For the first implementation, we'll download the full file once and upload in chunks
-    // This is still memory-efficient as we process chunks sequentially
-    const arrayBuffer = await chunkData.arrayBuffer();
-    const fullData = new Uint8Array(arrayBuffer);
-    const chunk = fullData.slice(uploadedBytes, endByte);
-
-    console.log(`Uploading chunk: bytes ${uploadedBytes}-${endByte - 1}/${fileSize} to Drive`);
-
-    const response = await fetch(uploadUri, {
-      method: 'PUT',
-      headers: {
-        'Content-Length': chunk.length.toString(),
-        'Content-Range': `bytes ${uploadedBytes}-${endByte - 1}/${fileSize}`,
-        'Content-Type': mimeType,
-      },
-      body: chunk,
-    });
-
-    if (response.status === 200 || response.status === 201) {
-      const result = await response.json();
-      console.log('Upload complete:', result.id);
-      return { id: result.id };
-    } else if (response.status === 308) {
-      const range = response.headers.get('Range');
-      if (range) {
-        const match = range.match(/bytes=0-(\d+)/);
-        if (match) {
-          uploadedBytes = parseInt(match[1]) + 1;
-        }
-      } else {
-        uploadedBytes = endByte;
-      }
-    } else {
-      const error = await response.text();
-      throw new Error(`Chunk upload failed with status ${response.status}: ${error}`);
-    }
-
-    // Break after first iteration - we download full file once due to Storage API limitations
-    // But we upload in chunks to Drive
-    break;
-  }
-
-  // For files that need single upload (due to Storage API not supporting range downloads)
-  // Download full file once, then upload to Drive in one go
-  console.log('Downloading full file from storage for single upload...');
-  
-  const { data: fileData, error: downloadError } = await supabase.storage
-    .from('product-assets')
-    .download(storagePath);
-
-  if (downloadError) {
-    throw new Error(`Failed to download file from storage: ${downloadError.message}`);
-  }
-
-  const arrayBuffer = await fileData.arrayBuffer();
-  const fullData = new Uint8Array(arrayBuffer);
-
-  console.log(`Uploading full file (${fileSize} bytes) to Drive...`);
-
-  const response = await fetch(uploadUri, {
-    method: 'PUT',
-    headers: {
-      'Content-Length': fileSize.toString(),
-      'Content-Range': `bytes 0-${fileSize - 1}/${fileSize}`,
-      'Content-Type': mimeType,
-    },
-    body: fullData,
-  });
-
-  if (response.status === 200 || response.status === 201) {
-    const result = await response.json();
-    console.log('Upload complete:', result.id);
-    return { id: result.id };
-  } else {
-    const error = await response.text();
-    throw new Error(`Upload failed with status ${response.status}: ${error}`);
-  }
-}
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -285,143 +176,145 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    console.log('Processing upload for user:', user.id);
-
-    // Parse JSON body (now expects storagePath instead of file)
     const body = await req.json();
-    const { storagePath, fileName, fileSize, mimeType, requestId, customerEmail } = body;
+    const { action } = body;
 
-    if (!storagePath || !requestId || !fileName || !fileSize) {
-      throw new Error('Missing required fields: storagePath, fileName, fileSize, or requestId');
+    // Action: init - Initialize upload session and return upload URI for direct client upload
+    if (action === 'init') {
+      const { fileName, fileSize, mimeType, requestId, customerEmail } = body;
+
+      if (!requestId || !fileName || !fileSize) {
+        throw new Error('Missing required fields: fileName, fileSize, or requestId');
+      }
+
+      console.log(`Initializing upload for: ${fileName}, size: ${(fileSize / (1024 * 1024)).toFixed(2)}MB`);
+
+      // Get valid access token
+      const accessToken = await getValidAccessToken(supabase, user.id);
+
+      // Create folder for this delivery
+      const folderName = `HEA_Delivery_${requestId.substring(0, 8)}_${customerEmail?.split('@')[0] || 'customer'}`;
+      const folderId = await createDriveFolder(accessToken, folderName);
+      console.log('Created folder:', folderId);
+
+      // Set folder to be viewable by anyone with link
+      await setFolderPermissions(accessToken, folderId);
+
+      // Initiate resumable upload - client will upload directly to this URI
+      const uploadUri = await initiateResumableUpload(
+        accessToken,
+        fileName,
+        mimeType || 'application/octet-stream',
+        fileSize,
+        folderId
+      );
+      console.log('Resumable upload session created');
+
+      const folderLink = `https://drive.google.com/drive/folders/${folderId}`;
+
+      return new Response(
+        JSON.stringify({ 
+          success: true,
+          uploadUri,
+          folderId,
+          folderLink,
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    console.log(`Processing file: ${fileName}, size: ${(fileSize / (1024 * 1024)).toFixed(2)}MB from storage path: ${storagePath}`);
+    // Action: complete - Finalize upload after client has uploaded directly to Drive
+    if (action === 'complete') {
+      const { requestId, folderId, folderLink } = body;
 
-    // Get valid access token
-    const accessToken = await getValidAccessToken(supabase, user.id);
+      if (!requestId || !folderId) {
+        throw new Error('Missing required fields: requestId or folderId');
+      }
 
-    // Create folder for this delivery
-    const folderName = `HEA_Delivery_${requestId.substring(0, 8)}_${customerEmail?.split('@')[0] || 'customer'}`;
-    const folderId = await createDriveFolder(accessToken, folderName);
-    console.log('Created folder:', folderId);
+      console.log(`Completing upload for request: ${requestId}`);
 
-    // Set folder to be viewable by anyone with link
-    await setFolderPermissions(accessToken, folderId);
+      // Fetch the song request to get current data
+      const { data: songRequest, error: fetchError } = await supabase
+        .from('song_requests')
+        .select('*')
+        .eq('id', requestId)
+        .single();
 
-    // Initiate resumable upload
-    const uploadUri = await initiateResumableUpload(
-      accessToken,
-      fileName,
-      mimeType || 'application/octet-stream',
-      fileSize,
-      folderId
-    );
-    console.log('Resumable upload initiated');
+      if (fetchError) throw fetchError;
 
-    // Stream file from Storage to Drive
-    const result = await streamFileToDrive(
-      supabase,
-      storagePath,
-      uploadUri,
-      fileSize,
-      mimeType || 'application/octet-stream'
-    );
+      // Update song_request to completed
+      const { error: updateError } = await supabase
+        .from('song_requests')
+        .update({ 
+          status: 'completed',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', requestId);
 
-    console.log('File uploaded to Drive:', result);
+      if (updateError) throw updateError;
+      console.log('Song request marked as completed');
 
-    // Clean up: delete file from Supabase Storage
-    const { error: deleteError } = await supabase.storage
-      .from('product-assets')
-      .remove([storagePath]);
-    
-    if (deleteError) {
-      console.error('Failed to delete temp file from storage:', deleteError);
-    } else {
-      console.log('Cleaned up temp file from storage');
-    }
+      // Create/update purchase record with Drive link
+      const { error: purchaseError } = await supabase
+        .from('purchases')
+        .upsert({
+          user_id: songRequest.user_id,
+          product_id: requestId,
+          product_name: `Song Generation - ${songRequest.tier}`,
+          product_type: 'song_generation',
+          product_category: songRequest.tier,
+          price: songRequest.price,
+          status: 'ready',
+          download_url: folderLink,
+          song_idea: songRequest.song_idea,
+        }, {
+          onConflict: 'product_id'
+        });
 
-    // Get folder web link
-    const folderLink = `https://drive.google.com/drive/folders/${folderId}`;
+      if (purchaseError) {
+        console.error('Purchase upsert error:', purchaseError);
+      }
 
-    // Fetch the song request to get current data
-    const { data: songRequest, error: fetchError } = await supabase
-      .from('song_requests')
-      .select('*')
-      .eq('id', requestId)
-      .single();
+      // Send Discord notification
+      try {
+        await supabase.functions.invoke('send-discord-notification', {
+          body: {
+            requestId,
+            notificationType: 'file_delivered',
+            driveLink: folderLink,
+          }
+        });
+      } catch (discordError) {
+        console.error('Discord notification failed:', discordError);
+      }
 
-    if (fetchError) throw fetchError;
+      // Notify customer
+      try {
+        await supabase.functions.invoke('notify-customer-status', {
+          body: {
+            requestId,
+            oldStatus: songRequest.status,
+            newStatus: 'completed',
+            driveLink: folderLink,
+          }
+        });
+      } catch (emailError) {
+        console.error('Customer email failed:', emailError);
+      }
 
-    // Update song_request with Google Drive link and mark as completed
-    const { error: updateError } = await supabase
-      .from('song_requests')
-      .update({ 
-        status: 'completed',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', requestId);
-
-    if (updateError) throw updateError;
-
-    // Create/update purchase record with Drive link
-    const { error: purchaseError } = await supabase
-      .from('purchases')
-      .upsert({
-        user_id: songRequest.user_id,
-        product_id: requestId,
-        product_name: `Song Generation - ${songRequest.tier}`,
-        product_type: 'song_generation',
-        product_category: songRequest.tier,
-        price: songRequest.price,
-        status: 'ready',
-        download_url: folderLink,
-        song_idea: songRequest.song_idea,
-      }, {
-        onConflict: 'product_id'
-      });
-
-    if (purchaseError) {
-      console.error('Purchase upsert error:', purchaseError);
-    }
-
-    // Send Discord notification with Drive link
-    try {
-      await supabase.functions.invoke('send-discord-notification', {
-        body: {
-          requestId,
-          notificationType: 'file_delivered',
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
           driveLink: folderLink,
-        }
-      });
-    } catch (discordError) {
-      console.error('Discord notification failed:', discordError);
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Notify customer
-    try {
-      await supabase.functions.invoke('notify-customer-status', {
-        body: {
-          requestId,
-          oldStatus: songRequest.status,
-          newStatus: 'completed',
-          driveLink: folderLink,
-        }
-      });
-    } catch (emailError) {
-      console.error('Customer email failed:', emailError);
-    }
-
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        driveLink: folderLink,
-        fileId: result.id,
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    throw new Error('Invalid action. Use "init" or "complete".');
 
   } catch (error) {
-    console.error('Error uploading to Drive:', error);
+    console.error('Error:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
