@@ -264,11 +264,31 @@ const MyProjects = () => {
     setHasDriveConnection(!error && !!data);
   };
 
+  // Max file size: 50MB (edge function memory limit is ~256MB, need headroom for processing)
+  const MAX_FILE_SIZE_MB = 50;
+  const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
   const handleFileUpload = async (projectId: string, file: File) => {
     if (!hasDriveConnection) {
       toast({
         title: "Google Drive Not Connected",
         description: "Please connect your Google Drive in your Profile settings first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // File size validation
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      toast({
+        title: "File Too Large",
+        description: `Maximum file size is ${MAX_FILE_SIZE_MB}MB. Your file is ${formatFileSize(file.size)}. Please compress or split the file.`,
         variant: "destructive",
       });
       return;
