@@ -35,7 +35,7 @@ const statusColorMap: Record<string, number> = {
   'refunded': 0xE74C3C      // Red
 };
 
-const APP_URL = 'https://eapbuoqkhckqaswfjexv.lovableproject.com';
+const APP_URL = 'https://hechoenamericastudio.com';
 
 // Add-on pricing per tier (matches frontend: tier index 1=$25, 2=$125, 3=$250)
 const addOnPricing: Record<string, number[]> = {
@@ -135,7 +135,7 @@ serve(async (req) => {
               type: 2, // Button
               style: 5, // Link
               label: '📋 View Details',
-              url: `${APP_URL}/admin`
+              url: `${APP_URL}/my-projects`
             }
           ]
         }
