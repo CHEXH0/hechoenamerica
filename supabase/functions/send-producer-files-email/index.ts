@@ -16,7 +16,7 @@ interface SendFilesEmailRequest {
   producerName?: string;
 }
 
-const APP_URL = 'https://eapbuoqkhckqaswfjexv.lovableproject.com';
+const APP_URL = 'https://hechoenamericastudio.com';
 
 // Genre display names
 const genreDisplayNames: Record<string, string> = {
