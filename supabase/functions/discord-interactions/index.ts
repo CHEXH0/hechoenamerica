@@ -42,7 +42,7 @@ async function verifyDiscordSignature(
   }
 }
 
-const APP_URL = 'https://eapbuoqkhckqaswfjexv.lovableproject.com';
+const APP_URL = 'https://hechoenamericastudio.com';
 
 // Helper to follow up on deferred interaction
 async function followUpInteraction(
