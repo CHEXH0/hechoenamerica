@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 // Parse service account credentials and get access token
@@ -12,7 +12,17 @@ async function getAccessToken(): Promise<string> {
     throw new Error('GOOGLE_CLOUD_CREDENTIALS is not configured');
   }
 
-  const credentials = JSON.parse(credentialsJson);
+  let credentials;
+  try {
+    credentials = JSON.parse(credentialsJson);
+  } catch (e) {
+    console.error("Failed to parse GOOGLE_CLOUD_CREDENTIALS JSON:", e);
+    throw new Error('GOOGLE_CLOUD_CREDENTIALS contains invalid JSON');
+  }
+
+  if (!credentials.client_email || !credentials.private_key) {
+    throw new Error('GOOGLE_CLOUD_CREDENTIALS is missing required fields (client_email or private_key)');
+  }
   
   // Create JWT for service account authentication
   const header = { alg: "RS256", typ: "JWT" };
@@ -103,7 +113,25 @@ serve(async (req) => {
 
     console.log("Generating music with Lyria 2, prompt:", body.prompt);
     
-    const endpoint = `https://us-central1-aiplatform.googleapis.com/v1/projects/${projectId}/locations/us-central1/publishers/google/models/lyria-002:predict`;
+    // Use the correct Vertex AI endpoint format for Lyria 2
+    const location = "us-central1";
+    const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/lyria-002:predict`;
+
+    console.log("Calling endpoint:", endpoint);
+
+    const requestBody = {
+      instances: [{ 
+        prompt: body.prompt,
+        // Optional: add negative_prompt to filter out unwanted elements
+        // negative_prompt: "vocals, distortion, noise"
+      }],
+      parameters: {
+        // Generate one sample by default
+        sample_count: 1
+      }
+    };
+
+    console.log("Request payload:", JSON.stringify(requestBody));
 
     const response = await fetch(endpoint, {
       method: "POST",
@@ -111,11 +139,10 @@ serve(async (req) => {
         "Authorization": `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        instances: [{ prompt: body.prompt }],
-        parameters: {}
-      })
+      body: JSON.stringify(requestBody)
     });
+
+    console.log("Response status:", response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -126,7 +153,7 @@ serve(async (req) => {
         const errorData = JSON.parse(errorText);
         const errorMessage = errorData.error?.message || errorText;
         
-        // Check for recitation/content filter blocks OR generic generation failures
+        // Check for common error types
         if (errorMessage.includes("recitation") || errorMessage.includes("blocked") || errorMessage.includes("Music generation failed")) {
           return new Response(JSON.stringify({ 
             error: "⚠️ Cannot reference specific songs or artists. Describe your music using mood, tempo, genre, and instruments instead. Example: 'energetic reggaeton with tropical synths and punchy drums at 95 BPM'",
@@ -136,8 +163,42 @@ serve(async (req) => {
             status: 400,
           });
         }
+
+        // Check for quota/permission errors
+        if (errorMessage.includes("quota") || errorMessage.includes("QUOTA_EXCEEDED")) {
+          return new Response(JSON.stringify({ 
+            error: "API quota exceeded. Please try again later.",
+            errorType: "QUOTA_EXCEEDED"
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 429,
+          });
+        }
+
+        if (errorMessage.includes("permission") || errorMessage.includes("PERMISSION_DENIED") || response.status === 403) {
+          console.error("Permission denied - check if Lyria API is enabled and service account has access");
+          return new Response(JSON.stringify({ 
+            error: "API access denied. Please contact support.",
+            errorType: "PERMISSION_DENIED"
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 403,
+          });
+        }
+
+        if (response.status === 404) {
+          console.error("API endpoint not found - Lyria API may not be enabled for this project");
+          return new Response(JSON.stringify({ 
+            error: "Music generation service is currently unavailable.",
+            errorType: "SERVICE_UNAVAILABLE"
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 503,
+          });
+        }
       } catch (parseError) {
         // If parsing fails, use the raw error
+        console.error("Error parsing API response:", parseError);
       }
       
       throw new Error(`Lyria API error: ${response.status} - ${errorText}`);
@@ -151,8 +212,17 @@ serve(async (req) => {
       const prediction = data.predictions[0];
       
       // The response format may vary - handle different possible structures
-      let audioData = prediction.bytesBase64Encoded || prediction.audio || prediction;
+      let audioData = prediction.bytesBase64Encoded || prediction.audio || prediction.audioContent || prediction;
       
+      // If audioData is an object, try to extract the audio
+      if (typeof audioData === 'object') {
+        audioData = audioData.bytesBase64Encoded || audioData.audio || audioData.audioContent || JSON.stringify(audioData);
+        console.log("Extracted audio from object structure");
+      }
+      
+      console.log("Audio data type:", typeof audioData);
+      console.log("Audio data length:", typeof audioData === 'string' ? audioData.length : 'N/A');
+
       return new Response(JSON.stringify({ 
         output: audioData,
         status: 'succeeded',
@@ -163,11 +233,15 @@ serve(async (req) => {
       });
     }
 
+    console.error("No predictions in response:", JSON.stringify(data));
     throw new Error("No audio generated from Lyria API");
 
   } catch (error) {
     console.error("Error in generate-music function:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ 
+      error: error.message || "An unexpected error occurred",
+      errorType: "INTERNAL_ERROR"
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     })
