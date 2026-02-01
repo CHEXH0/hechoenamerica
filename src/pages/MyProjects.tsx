@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Music, Download, Clock, CheckCircle, Loader2, FileAudio, Calendar, User, Wifi, AlertTriangle, RefreshCcw, Headphones, Users } from "lucide-react";
+import { ArrowLeft, Music, Download, Clock, CheckCircle, Loader2, FileAudio, Calendar, User, Wifi, AlertTriangle, RefreshCcw, Headphones, Users, Upload, HardDrive, ExternalLink, Mail } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useUserRole } from "@/hooks/useUserRole";
+import { Input } from "@/components/ui/input";
 
 interface SongRequest {
   id: string;
@@ -29,6 +30,7 @@ interface SongRequest {
   user_email: string;
   acceptance_deadline: string | null;
   refunded_at: string | null;
+  file_urls: string[] | null;
 }
 
 interface Purchase {
@@ -223,6 +225,10 @@ const MyProjects = () => {
   const [loading, setLoading] = useState(true);
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
   const [activeTab, setActiveTab] = useState("my-requests");
+  const [hasDriveConnection, setHasDriveConnection] = useState<boolean | null>(null);
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [resendingFilesId, setResendingFilesId] = useState<string | null>(null);
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const { toast } = useToast();
 
   const isProducer = userRole?.isProducer || false;
@@ -236,8 +242,163 @@ const MyProjects = () => {
   useEffect(() => {
     if (user) {
       fetchProjects();
+      if (isProducer) {
+        checkDriveConnection();
+      }
     }
   }, [user, isProducer]);
+
+  const checkDriveConnection = async () => {
+    if (!user) {
+      setHasDriveConnection(false);
+      return;
+    }
+    
+    const { data, error } = await supabase
+      .from('producer_google_tokens')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    
+    setHasDriveConnection(!error && !!data);
+  };
+
+  const handleFileUpload = async (projectId: string, file: File) => {
+    if (!hasDriveConnection) {
+      toast({
+        title: "Google Drive Not Connected",
+        description: "Please connect your Google Drive in your Profile settings first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploadingId(projectId);
+    try {
+      const project = producerProjects.find(p => p.id === projectId);
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('requestId', projectId);
+      formData.append('customerEmail', project?.user_email || '');
+
+      const { data, error } = await supabase.functions.invoke('upload-deliverable-to-drive', {
+        body: formData,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success! 🎉",
+        description: (
+          <div className="flex flex-col gap-2">
+            <span>File uploaded to Google Drive and project completed!</span>
+            {data.driveLink && (
+              <a 
+                href={data.driveLink} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary underline flex items-center gap-1"
+              >
+                Open Drive Folder <ExternalLink className="h-3 w-3" />
+              </a>
+            )}
+          </div>
+        ),
+      });
+
+      fetchProjects();
+    } catch (error: any) {
+      console.error("Error uploading file:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to upload file to Google Drive",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingId(null);
+    }
+  };
+
+  const handleResendFiles = async (project: SongRequest) => {
+    if (!project.file_urls || project.file_urls.length === 0) {
+      toast({
+        title: "No Files",
+        description: "This project has no customer files attached.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setResendingFilesId(project.id);
+    try {
+      const { data: userData } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('id', user?.id)
+        .single();
+
+      await supabase.functions.invoke('send-producer-files-email', {
+        body: {
+          requestId: project.id,
+          producerEmail: user?.email,
+          producerName: userData?.display_name || user?.email?.split('@')[0] || 'Producer'
+        }
+      });
+
+      toast({
+        title: "Files Sent!",
+        description: "Customer files have been emailed to you.",
+      });
+    } catch (error) {
+      console.error("Error resending files:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send files email. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setResendingFilesId(null);
+    }
+  };
+
+  const handleStartWorking = async (projectId: string) => {
+    try {
+      const { error } = await supabase
+        .from("song_requests")
+        .update({ status: "in_progress" })
+        .eq("id", projectId);
+
+      if (error) throw error;
+
+      // Send customer notification
+      try {
+        await supabase.functions.invoke('notify-customer-status', {
+          body: {
+            requestId: projectId,
+            oldStatus: 'accepted',
+            newStatus: 'in_progress'
+          }
+        });
+      } catch (notifyError) {
+        console.error("Customer notification failed:", notifyError);
+      }
+
+      toast({
+        title: "Project Started",
+        description: "Status updated to In Progress. Time to make some music! 🎵",
+      });
+
+      fetchProjects();
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update project status",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Real-time subscription
   useEffect(() => {
@@ -505,25 +666,93 @@ const MyProjects = () => {
 
           {/* Producer View Actions */}
           {isProducerView && (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
+              {/* Google Drive Status */}
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Google Drive:</span>
+                <Badge 
+                  variant={hasDriveConnection ? "default" : "destructive"}
+                  className="text-xs"
+                >
+                  <HardDrive className="h-3 w-3 mr-1" />
+                  {hasDriveConnection ? "Connected" : "Not Connected"}
+                </Badge>
+              </div>
+
+              {/* Get Customer Files Button */}
+              {project.file_urls && project.file_urls.length > 0 && (
+                <Button 
+                  variant="outline"
+                  className="w-full" 
+                  onClick={() => handleResendFiles(project)}
+                  disabled={resendingFilesId === project.id}
+                >
+                  {resendingFilesId === project.id ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Mail className="mr-2 h-4 w-4" />
+                  )}
+                  Email Me Customer Files
+                </Button>
+              )}
+
               {project.status === "accepted" && (
                 <Button 
                   className="w-full" 
-                  onClick={() => navigate("/admin")}
+                  onClick={() => handleStartWorking(project.id)}
                 >
-                  <Loader2 className="mr-2 h-4 w-4" />
+                  <Headphones className="mr-2 h-4 w-4" />
                   Start Working on Project
                 </Button>
               )}
+              
               {project.status === "in_progress" && (
-                <Button 
-                  className="w-full" 
-                  onClick={() => navigate("/admin")}
-                >
-                  <FileAudio className="mr-2 h-4 w-4" />
-                  Upload Deliverables
-                </Button>
+                <>
+                  <input
+                    type="file"
+                    ref={(el) => { fileInputRefs.current[project.id] = el; }}
+                    className="hidden"
+                    accept="audio/*,.zip,.rar"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileUpload(project.id, file);
+                    }}
+                  />
+                  <Button 
+                    className="w-full" 
+                    onClick={() => {
+                      if (!hasDriveConnection) {
+                        toast({
+                          title: "Connect Google Drive First",
+                          description: "Go to your Profile page to connect Google Drive before uploading.",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      fileInputRefs.current[project.id]?.click();
+                    }}
+                    disabled={uploadingId === project.id}
+                  >
+                    {uploadingId === project.id ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Uploading to Drive...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="mr-2 h-4 w-4" />
+                        Upload Deliverables to Drive
+                      </>
+                    )}
+                  </Button>
+                  {!hasDriveConnection && (
+                    <p className="text-xs text-amber-600 text-center">
+                      ⚠️ Connect Google Drive in your Profile to upload
+                    </p>
+                  )}
+                </>
               )}
+              
               {project.status === "completed" && (
                 <div className="flex items-center justify-center gap-2 text-emerald-500 py-2">
                   <CheckCircle className="h-5 w-5" />
