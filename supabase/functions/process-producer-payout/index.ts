@@ -177,7 +177,7 @@ serve(async (req) => {
         const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
         await resend.emails.send({
-          from: "Hecho En America <noreply@hechoenamerica.lovable.app>",
+          from: "Hecho En America <team@hechoenamericastudio.com>",
           to: [request.producers.email],
           subject: `Payment Processed - ${request.tier} Song Project`,
           html: `

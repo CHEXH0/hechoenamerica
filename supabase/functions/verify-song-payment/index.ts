@@ -254,7 +254,7 @@ serve(async (req) => {
 
               <!-- CTA -->
               <div style="padding: 32px; text-align: center;">
-                <a href="https://hechoenamerica.lovable.app/my-projects" style="display: inline-block; background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); color: white; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                <a href="https://hechoenamericastudio.com/my-projects" style="display: inline-block; background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); color: white; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
                   View My Projects →
                 </a>
                 <p style="margin: 16px 0 0 0; color: #999; font-size: 14px;">

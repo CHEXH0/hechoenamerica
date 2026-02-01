@@ -16,7 +16,7 @@ interface StatusNotificationRequest {
   driveLink?: string;
 }
 
-const APP_URL = 'https://hechoenamerica.lovable.app';
+const APP_URL = 'https://hechoenamericastudio.com';
 
 // Status display info
 const statusInfo: Record<string, { emoji: string; title: string; description: string; color: string }> = {

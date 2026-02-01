@@ -243,7 +243,7 @@ serve(async (req) => {
               </div>
               
               <div style="text-align: center; margin: 30px 0;">
-                <a href="https://hechoenamerica.lovable.app/producer-profile" 
+                <a href="https://hechoenamericastudio.com/producer-profile" 
                    style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
                   Go to Your Dashboard →
                 </a>
