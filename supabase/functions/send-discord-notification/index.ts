@@ -133,12 +133,6 @@ serve(async (req) => {
             },
             {
               type: 2, // Button
-              style: 4, // Danger (red)
-              label: '❌ Decline',
-              custom_id: `decline_${requestId}`
-            },
-            {
-              type: 2, // Button
               style: 5, // Link
               label: '📋 View Details',
               url: `${APP_URL}/admin`
