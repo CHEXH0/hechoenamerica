@@ -214,7 +214,7 @@ const Auth = () => {
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
                 Welcome
               </CardTitle>
-              <CardDescription className="text-gray-000">
+              <CardDescription className="text-gray-300">
                 Sign in to your account or create a new one
               </CardDescription>
             </CardHeader>
@@ -239,7 +239,7 @@ const Auth = () => {
                 <TabsContent value="signin">
                   <form onSubmit={handleSignIn} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signin-email" className="text-gray-000">Email</Label>
+                      <Label htmlFor="signin-email" className="text-gray-200">Email</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
@@ -254,7 +254,7 @@ const Auth = () => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signin-password" className="text-gray-000">Password</Label>
+                      <Label htmlFor="signin-password" className="text-gray-200">Password</Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
@@ -300,7 +300,7 @@ const Auth = () => {
                 <TabsContent value="signup">
                   <form onSubmit={handleSignUp} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signup-email" className="text-gray-000">Email</Label>
+                      <Label htmlFor="signup-email" className="text-gray-200">Email</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
@@ -315,7 +315,7 @@ const Auth = () => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signup-password" className="text-gray-000">Password</Label>
+                      <Label htmlFor="signup-password" className="text-gray-200">Password</Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
@@ -338,7 +338,7 @@ const Auth = () => {
                           {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </Button>
                       </div>
-                      <p className="text-xs text-gray-000">Password must be at least 6 characters</p>
+                      <p className="text-xs text-gray-400">Password must be at least 6 characters</p>
                     </div>
                     <Button
                       type="submit"

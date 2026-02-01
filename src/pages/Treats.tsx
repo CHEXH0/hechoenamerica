@@ -1021,7 +1021,7 @@ const Treats = () => {
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-800 to-purple-500 bg-clip-text text-transparent mb-4">
                 Are You a Producer?
               </CardTitle>
-              <CardDescription className="text-gray-800 text-lg leading-relaxed">
+              <CardDescription className="text-gray-300 text-lg leading-relaxed">
                 Join our network of talented music producers. Work with artists from around the world 
                 and be part of the Hecho En América family.
               </CardDescription>

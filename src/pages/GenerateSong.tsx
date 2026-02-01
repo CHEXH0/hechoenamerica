@@ -787,7 +787,7 @@ const GenerateSong = () => {
                               setGeneratedAudioUrl(null);
                               setAiProgress("");
                             }}
-                            className="text-white border-white/50 hover:bg-white/20"
+                            className="bg-white/20 text-white border-white/50 hover:bg-white/30 font-medium"
                           >
                             Generate New
                           </Button>
