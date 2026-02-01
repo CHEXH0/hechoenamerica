@@ -264,8 +264,8 @@ const MyProjects = () => {
     setHasDriveConnection(!error && !!data);
   };
 
-  // Max file size: 50MB (edge function memory limit is ~256MB, need headroom for processing)
-  const MAX_FILE_SIZE_MB = 50;
+  // Max file size: 200MB (using resumable upload with streaming chunks)
+  const MAX_FILE_SIZE_MB = 200;
   const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
   const formatFileSize = (bytes: number): string => {

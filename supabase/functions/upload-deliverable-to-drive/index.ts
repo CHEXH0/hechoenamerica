@@ -111,55 +111,122 @@ async function setFolderPermissions(accessToken: string, folderId: string): Prom
 
   if (!response.ok) {
     console.error('Failed to set folder permissions:', await response.text());
-    // Don't throw - the upload should still succeed
   }
 }
 
-// Upload file to Google Drive folder
-async function uploadFileToDrive(
-  accessToken: string, 
-  fileName: string, 
-  fileContent: Uint8Array, 
+// Initiate resumable upload session
+async function initiateResumableUpload(
+  accessToken: string,
+  fileName: string,
   mimeType: string,
+  fileSize: number,
   folderId: string
-): Promise<{ id: string; webViewLink: string }> {
-  const boundary = '-------314159265358979323846';
-  
+): Promise<string> {
   const metadata = JSON.stringify({
     name: fileName,
     parents: [folderId],
   });
 
-  const multipartBody = new Uint8Array([
-    ...new TextEncoder().encode(
-      `--${boundary}\r\n` +
-      `Content-Type: application/json; charset=UTF-8\r\n\r\n` +
-      `${metadata}\r\n` +
-      `--${boundary}\r\n` +
-      `Content-Type: ${mimeType}\r\n\r\n`
-    ),
-    ...fileContent,
-    ...new TextEncoder().encode(`\r\n--${boundary}--`),
-  ]);
-
   const response = await fetch(
-    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',
+    'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable',
     {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': `multipart/related; boundary=${boundary}`,
+        'Content-Type': 'application/json; charset=UTF-8',
+        'X-Upload-Content-Type': mimeType,
+        'X-Upload-Content-Length': fileSize.toString(),
       },
-      body: multipartBody,
+      body: metadata,
     }
   );
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`Failed to upload file: ${error}`);
+    throw new Error(`Failed to initiate resumable upload: ${error}`);
   }
 
-  return await response.json();
+  const uploadUri = response.headers.get('Location');
+  if (!uploadUri) {
+    throw new Error('No upload URI returned from Google Drive');
+  }
+
+  return uploadUri;
+}
+
+// Upload file in chunks using resumable upload
+async function uploadFileInChunks(
+  uploadUri: string,
+  fileStream: ReadableStream<Uint8Array>,
+  fileSize: number,
+  mimeType: string
+): Promise<{ id: string; webViewLink: string }> {
+  const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks (must be multiple of 256KB)
+  const reader = fileStream.getReader();
+  let uploadedBytes = 0;
+  let buffer = new Uint8Array(0);
+
+  while (true) {
+    // Read more data if buffer is less than chunk size
+    while (buffer.length < CHUNK_SIZE) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      // Append to buffer
+      const newBuffer = new Uint8Array(buffer.length + value.length);
+      newBuffer.set(buffer);
+      newBuffer.set(value, buffer.length);
+      buffer = newBuffer;
+    }
+
+    if (buffer.length === 0) break;
+
+    // Determine chunk size (last chunk may be smaller)
+    const chunkSize = Math.min(CHUNK_SIZE, buffer.length);
+    const isLastChunk = buffer.length <= CHUNK_SIZE;
+    const chunk = buffer.slice(0, chunkSize);
+    
+    // Update buffer to remaining data
+    buffer = buffer.slice(chunkSize);
+
+    const startByte = uploadedBytes;
+    const endByte = uploadedBytes + chunk.length - 1;
+
+    console.log(`Uploading chunk: bytes ${startByte}-${endByte}/${fileSize}`);
+
+    const response = await fetch(uploadUri, {
+      method: 'PUT',
+      headers: {
+        'Content-Length': chunk.length.toString(),
+        'Content-Range': `bytes ${startByte}-${endByte}/${fileSize}`,
+        'Content-Type': mimeType,
+      },
+      body: chunk,
+    });
+
+    if (response.status === 200 || response.status === 201) {
+      // Upload complete
+      const result = await response.json();
+      console.log('Upload complete:', result.id);
+      return { id: result.id, webViewLink: result.webViewLink || '' };
+    } else if (response.status === 308) {
+      // Resume incomplete - chunk uploaded successfully, continue
+      const range = response.headers.get('Range');
+      if (range) {
+        const match = range.match(/bytes=0-(\d+)/);
+        if (match) {
+          uploadedBytes = parseInt(match[1]) + 1;
+        }
+      } else {
+        uploadedBytes += chunk.length;
+      }
+    } else {
+      const error = await response.text();
+      throw new Error(`Chunk upload failed with status ${response.status}: ${error}`);
+    }
+  }
+
+  throw new Error('Upload did not complete successfully');
 }
 
 serve(async (req) => {
@@ -197,7 +264,10 @@ serve(async (req) => {
       throw new Error('Missing file or requestId');
     }
 
-    console.log('Uploading file:', file.name, 'for request:', requestId);
+    const fileSize = file.size;
+    const mimeType = file.type || 'application/octet-stream';
+    
+    console.log(`Uploading file: ${file.name}, size: ${(fileSize / (1024 * 1024)).toFixed(2)}MB, type: ${mimeType}`);
 
     // Get valid access token
     const accessToken = await getValidAccessToken(supabase, user.id);
@@ -210,14 +280,22 @@ serve(async (req) => {
     // Set folder to be viewable by anyone with link
     await setFolderPermissions(accessToken, folderId);
 
-    // Upload file to the folder
-    const fileContent = new Uint8Array(await file.arrayBuffer());
-    const result = await uploadFileToDrive(
-      accessToken, 
-      file.name, 
-      fileContent, 
-      file.type || 'application/octet-stream',
+    // Initiate resumable upload
+    const uploadUri = await initiateResumableUpload(
+      accessToken,
+      file.name,
+      mimeType,
+      fileSize,
       folderId
+    );
+    console.log('Resumable upload initiated');
+
+    // Upload file using streaming chunks
+    const result = await uploadFileInChunks(
+      uploadUri,
+      file.stream(),
+      fileSize,
+      mimeType
     );
 
     console.log('File uploaded to Drive:', result);
