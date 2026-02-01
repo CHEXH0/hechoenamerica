@@ -230,6 +230,7 @@ const MyProjects = () => {
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [resendingFilesId, setResendingFilesId] = useState<string | null>(null);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const uploadXhrRef = useRef<XMLHttpRequest | null>(null);
   const { toast } = useToast();
 
   const isProducer = userRole?.isProducer || false;
@@ -311,9 +312,10 @@ const MyProjects = () => {
         throw new Error('Not authenticated');
       }
 
-      // Use XMLHttpRequest for progress tracking
+      // Use XMLHttpRequest for progress tracking and cancel support
       const result = await new Promise<{ driveLink?: string }>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
+        uploadXhrRef.current = xhr;
         
         xhr.upload.addEventListener('progress', (event) => {
           if (event.lengthComputable) {
@@ -323,6 +325,7 @@ const MyProjects = () => {
         });
 
         xhr.addEventListener('load', () => {
+          uploadXhrRef.current = null;
           if (xhr.status >= 200 && xhr.status < 300) {
             try {
               const response = JSON.parse(xhr.responseText);
@@ -341,10 +344,12 @@ const MyProjects = () => {
         });
 
         xhr.addEventListener('error', () => {
+          uploadXhrRef.current = null;
           reject(new Error('Network error during upload'));
         });
 
         xhr.addEventListener('abort', () => {
+          uploadXhrRef.current = null;
           reject(new Error('Upload cancelled'));
         });
 
@@ -795,6 +800,23 @@ const MyProjects = () => {
                         <span className="font-medium text-primary">{uploadProgress}%</span>
                       </div>
                       <Progress value={uploadProgress} className="h-2" />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-destructive hover:text-destructive"
+                        onClick={() => {
+                          if (uploadXhrRef.current) {
+                            uploadXhrRef.current.abort();
+                            toast({
+                              title: "Upload Cancelled",
+                              description: "The file upload was cancelled.",
+                            });
+                          }
+                        }}
+                      >
+                        <AlertTriangle className="mr-2 h-4 w-4" />
+                        Cancel Upload
+                      </Button>
                     </div>
                   ) : (
                     <Button 
