@@ -85,6 +85,55 @@ async function getAccessToken(): Promise<string> {
   return tokenData.access_token;
 }
 
+// Transform genre-style prompts into more descriptive, instrument-focused prompts
+// This helps avoid Lyria's recitation filter which blocks generic genre references
+function enhancePrompt(originalPrompt: string): string {
+  // Genre-to-instruments mapping for more descriptive prompts
+  const genreEnhancements: Record<string, string> = {
+    "hip hop": "punchy 808 bass, crisp snares, hi-hats, and atmospheric pads",
+    "trap": "heavy 808 bass, rolling hi-hats, dark synths, and hard-hitting kicks",
+    "rap": "boom-bap drums, vinyl samples, deep bass, and rhythmic percussion",
+    "r&b": "smooth electric piano, warm bass, soft drums, and silky pads",
+    "soul": "organ, warm bass guitar, live drums, and brass section",
+    "reggae": "offbeat guitar skanks, deep dub bass, one-drop drums, and melodica",
+    "dancehall": "digital riddim, punchy kicks, syncopated hi-hats, and brass stabs",
+    "latin": "congas, timbales, piano montuno, and upright bass",
+    "reggaeton": "dembow rhythm, perreo drums, tropical synths, and punchy 808s at 95 BPM",
+    "electronic": "synthesizers, drum machines, arpeggiated sequences, and atmospheric textures",
+    "edm": "big room synths, four-on-the-floor kick, risers, and drops",
+    "pop": "acoustic guitar, piano, polished drums, and catchy melodic hooks",
+    "alternative": "distorted guitars, indie drums, bass guitar, and ethereal vocals",
+    "rock": "electric guitars, driving drums, bass guitar, and powerful energy",
+    "indie": "jangly guitars, soft drums, bass, and dreamy reverb",
+    "world": "ethnic percussion, traditional instruments, organic textures, and cultural melodies",
+    "indigenous": "traditional drums, nature sounds, wooden flutes, and organic rhythms",
+    "medicina": "healing frequencies, shamanic drums, nature sounds, and meditative textures"
+  };
+
+  let enhanced = originalPrompt.toLowerCase();
+  
+  // Remove common trigger patterns like "X style:" prefix
+  enhanced = enhanced.replace(/^[\w\s\/]+style:\s*/i, '');
+  
+  // Add instrumental context for recognized genres
+  for (const [genre, instruments] of Object.entries(genreEnhancements)) {
+    if (originalPrompt.toLowerCase().includes(genre)) {
+      // If the prompt mentions a genre, add instrumental context
+      if (!enhanced.includes("instrument") && !enhanced.includes("drum") && !enhanced.includes("bass") && !enhanced.includes("guitar")) {
+        enhanced = `${enhanced} featuring ${instruments}`;
+        break;
+      }
+    }
+  }
+  
+  // Add quality descriptors to make the prompt more specific
+  if (!enhanced.includes("bpm") && !enhanced.includes("tempo")) {
+    enhanced = `${enhanced}, high quality instrumental track`;
+  }
+  
+  return enhanced.trim();
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -107,11 +156,16 @@ serve(async (req) => {
       );
     }
 
+    // Enhance the prompt to avoid recitation filter
+    const enhancedPrompt = enhancePrompt(body.prompt);
+    console.log("Original prompt:", body.prompt);
+    console.log("Enhanced prompt:", enhancedPrompt);
+
     console.log("Getting access token...");
     const accessToken = await getAccessToken();
     console.log("Access token obtained successfully");
 
-    console.log("Generating music with Lyria 2, prompt:", body.prompt);
+    console.log("Generating music with Lyria 2...");
     
     // Use the correct Vertex AI endpoint format for Lyria 2
     const location = "us-central1";
@@ -121,12 +175,9 @@ serve(async (req) => {
 
     const requestBody = {
       instances: [{ 
-        prompt: body.prompt,
-        // Optional: add negative_prompt to filter out unwanted elements
-        // negative_prompt: "vocals, distortion, noise"
+        prompt: enhancedPrompt,
       }],
       parameters: {
-        // Generate one sample by default
         sample_count: 1
       }
     };
