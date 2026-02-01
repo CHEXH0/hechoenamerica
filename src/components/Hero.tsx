@@ -34,24 +34,12 @@ const Hero = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <motion.img
+            <img
               src="/lovable-uploads/d5eed490-6d34-4af5-8428-15981ab0f9c3.png"
               alt="HechoEnAmerica Logo"
-              className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+              className="w-full h-full object-contain"
               loading="eager"
               fetchPriority="high"
-              animate={{ 
-                filter: [
-                  "drop-shadow(0 0 10px rgba(255,255,255,0.2))",
-                  "drop-shadow(0 0 20px rgba(255,255,255,0.4))",
-                  "drop-shadow(0 0 10px rgba(255,255,255,0.2))"
-                ]
-              }}
-              transition={{ 
-                duration: 3, 
-                repeat: Infinity, 
-                ease: "easeInOut" 
-              }}
             />
           </motion.div>
           <h1 className="text-4xl md:text-6xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white via-white/80 to-white/40 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] tracking-wider" style={{ textShadow: '0 4px 30px rgba(255, 255, 255, 0.1), inset 0 0 20px rgba(255, 255, 255, 0.05)' }}>
