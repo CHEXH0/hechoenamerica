@@ -329,8 +329,14 @@ serve(async (req) => {
         }
       };
 
-      // Start processing but don't await - return deferred response immediately
-      processInteraction().catch(err => console.error('Background processing error:', err));
+      // Use EdgeRuntime.waitUntil for proper background task handling
+      // @ts-ignore - EdgeRuntime is available in Supabase Edge Functions
+      if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
+        EdgeRuntime.waitUntil(processInteraction());
+      } else {
+        // Fallback for environments without EdgeRuntime
+        processInteraction().catch(err => console.error('Background processing error:', err));
+      }
       
       return deferredResponse;
     }
