@@ -105,7 +105,7 @@ serve(async (req) => {
     }
 
     // Create an account link for onboarding
-    const origin = req.headers.get("origin") || "https://hechoenamerica.lovable.app";
+    const origin = req.headers.get("origin") || "https://hechoenamericastudio.com";
     const accountLink = await stripe.accountLinks.create({
       account: accountId,
       refresh_url: `${origin}/admin?connect_refresh=true`,

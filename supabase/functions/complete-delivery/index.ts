@@ -9,7 +9,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const APP_URL = 'https://hechoenamerica.lovable.app';
+const APP_URL = 'https://hechoenamericastudio.com';
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
