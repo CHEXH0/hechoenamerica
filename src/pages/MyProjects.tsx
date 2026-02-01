@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Music, Clock, CheckCircle, Loader2, FileAudio, Calendar, User, Wifi, AlertTriangle, RefreshCcw, Headphones, Users, Upload, Mail } from "lucide-react";
+import { ArrowLeft, Music, Clock, CheckCircle, Loader2, Calendar, User, Wifi, AlertTriangle, RefreshCcw, Headphones, Users, Mail } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Input } from "@/components/ui/input";
+import { DeliveryForm } from "@/components/DeliveryForm";
 
 interface SongRequest {
   id: string;
@@ -225,10 +225,7 @@ const MyProjects = () => {
   const [loading, setLoading] = useState(true);
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
   const [activeTab, setActiveTab] = useState("my-requests");
-  const [uploadingId, setUploadingId] = useState<string | null>(null);
-  const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [resendingFilesId, setResendingFilesId] = useState<string | null>(null);
-  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const { toast } = useToast();
 
   const isProducer = userRole?.isProducer || false;
@@ -244,81 +241,6 @@ const MyProjects = () => {
       fetchProjects();
     }
   }, [user, isProducer]);
-
-  // Max file size: 100MB for Supabase Storage
-  const MAX_FILE_SIZE_MB = 100;
-  const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
-
-  const handleFileUpload = async (projectId: string, file: File) => {
-    // File size validation
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      toast({
-        title: "File Too Large",
-        description: `Maximum file size is ${MAX_FILE_SIZE_MB}MB. Your file is ${formatFileSize(file.size)}. Please compress or split the file.`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setUploadingId(projectId);
-    setUploadProgress(0);
-    
-    try {
-      const project = producerProjects.find(p => p.id === projectId);
-      
-      // Step 1: Upload file to Supabase Storage
-      setUploadProgress(10);
-      const storagePath = `deliverables/${projectId}/${file.name}`;
-      
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('product-assets')
-        .upload(storagePath, file, {
-          cacheControl: '3600',
-          upsert: true,
-        });
-
-      if (uploadError) throw uploadError;
-      setUploadProgress(70);
-
-      // Step 2: Complete delivery - update DB and send email to customer
-      const { data: completeData, error: completeError } = await supabase.functions.invoke('complete-delivery', {
-        body: {
-          requestId: projectId,
-          storagePath,
-          fileName: file.name,
-        }
-      });
-
-      if (completeError) throw completeError;
-      if (completeData?.error) throw new Error(completeData.error);
-
-      setUploadProgress(100);
-
-      toast({
-        title: "Delivery Complete! 🎉",
-        description: "Customer has been emailed with the download link.",
-      });
-
-      fetchProjects();
-    } catch (error: any) {
-      console.error("Error uploading file:", error);
-      
-      toast({
-        title: "Upload Failed",
-        description: error.message || "Failed to upload file",
-        variant: "destructive",
-      });
-    } finally {
-      setUploadingId(null);
-      setUploadProgress(0);
-    }
-  };
 
   const handleResendFiles = async (project: SongRequest) => {
     if (!project.file_urls || project.file_urls.length === 0) {
@@ -695,38 +617,11 @@ const MyProjects = () => {
               )}
               
               {project.status === "in_progress" && (
-                <>
-                  <input
-                    type="file"
-                    ref={(el) => { fileInputRefs.current[project.id] = el; }}
-                    className="hidden"
-                    accept="audio/*,.zip,.rar"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleFileUpload(project.id, file);
-                    }}
-                  />
-                  {uploadingId === project.id ? (
-                    <div className="w-full space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="flex items-center gap-2">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Uploading & sending to customer...
-                        </span>
-                        <span className="font-medium text-primary">{uploadProgress}%</span>
-                      </div>
-                      <Progress value={uploadProgress} className="h-2" />
-                    </div>
-                  ) : (
-                    <Button 
-                      className="w-full" 
-                      onClick={() => fileInputRefs.current[project.id]?.click()}
-                    >
-                      <Upload className="mr-2 h-4 w-4" />
-                      Upload & Deliver to Customer
-                    </Button>
-                  )}
-                </>
+                <DeliveryForm
+                  projectId={project.id}
+                  customerEmail={project.user_email}
+                  onDeliveryComplete={fetchProjects}
+                />
               )}
               
               {project.status === "completed" && (
