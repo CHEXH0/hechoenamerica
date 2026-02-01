@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Music, Download, Clock, CheckCircle, Loader2, FileAudio, Calendar, User, Wifi, AlertTriangle, RefreshCcw, Headphones, Users, Upload, HardDrive, ExternalLink, Mail } from "lucide-react";
+import { ArrowLeft, Music, Clock, CheckCircle, Loader2, FileAudio, Calendar, User, Wifi, AlertTriangle, RefreshCcw, Headphones, Users, Upload, Mail } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -225,12 +225,10 @@ const MyProjects = () => {
   const [loading, setLoading] = useState(true);
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
   const [activeTab, setActiveTab] = useState("my-requests");
-  const [hasDriveConnection, setHasDriveConnection] = useState<boolean | null>(null);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [resendingFilesId, setResendingFilesId] = useState<string | null>(null);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
-  const uploadXhrRef = useRef<XMLHttpRequest | null>(null);
   const { toast } = useToast();
 
   const isProducer = userRole?.isProducer || false;
@@ -244,29 +242,11 @@ const MyProjects = () => {
   useEffect(() => {
     if (user) {
       fetchProjects();
-      if (isProducer) {
-        checkDriveConnection();
-      }
     }
   }, [user, isProducer]);
 
-  const checkDriveConnection = async () => {
-    if (!user) {
-      setHasDriveConnection(false);
-      return;
-    }
-    
-    const { data, error } = await supabase
-      .from('producer_google_tokens')
-      .select('id')
-      .eq('user_id', user.id)
-      .maybeSingle();
-    
-    setHasDriveConnection(!error && !!data);
-  };
-
-  // Max file size: 200MB (using resumable upload with streaming chunks)
-  const MAX_FILE_SIZE_MB = 200;
+  // Max file size: 100MB for Supabase Storage
+  const MAX_FILE_SIZE_MB = 100;
   const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
   const formatFileSize = (bytes: number): string => {
@@ -276,15 +256,6 @@ const MyProjects = () => {
   };
 
   const handleFileUpload = async (projectId: string, file: File) => {
-    if (!hasDriveConnection) {
-      toast({
-        title: "Google Drive Not Connected",
-        description: "Please connect your Google Drive in your Profile settings first.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     // File size validation
     if (file.size > MAX_FILE_SIZE_BYTES) {
       toast({
@@ -301,77 +272,26 @@ const MyProjects = () => {
     try {
       const project = producerProjects.find(p => p.id === projectId);
       
-      // Step 1: Initialize upload session - get direct upload URI from Google Drive
-      setUploadProgress(5);
-      const { data: initData, error: initError } = await supabase.functions.invoke('upload-deliverable-to-drive', {
-        body: {
-          action: 'init',
-          fileName: file.name,
-          fileSize: file.size,
-          mimeType: file.type || 'application/octet-stream',
-          requestId: projectId,
-          customerEmail: project?.user_email || '',
-        }
-      });
-
-      if (initError) throw initError;
-      if (initData?.error) throw new Error(initData.error);
-      if (!initData?.uploadUri) throw new Error('Failed to get upload URI');
-
-      const { uploadUri, folderId, folderLink } = initData;
+      // Step 1: Upload file to Supabase Storage
       setUploadProgress(10);
-
-      // Step 2: Upload directly to Google Drive using resumable upload
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        uploadXhrRef.current = xhr;
-        
-        xhr.upload.addEventListener('progress', (event) => {
-          if (event.lengthComputable) {
-            // Progress from 10% to 90% during file upload
-            const percentComplete = 10 + Math.round((event.loaded / event.total) * 80);
-            setUploadProgress(percentComplete);
-          }
+      const storagePath = `deliverables/${projectId}/${file.name}`;
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('product-assets')
+        .upload(storagePath, file, {
+          cacheControl: '3600',
+          upsert: true,
         });
 
-        xhr.addEventListener('load', () => {
-          if (xhr.status === 200 || xhr.status === 201) {
-            resolve();
-          } else {
-            try {
-              const errorResponse = JSON.parse(xhr.responseText);
-              reject(new Error(errorResponse.error?.message || 'Drive upload failed'));
-            } catch {
-              reject(new Error(`Drive upload failed with status ${xhr.status}`));
-            }
-          }
-        });
+      if (uploadError) throw uploadError;
+      setUploadProgress(70);
 
-        xhr.addEventListener('error', () => {
-          reject(new Error('Network error during Drive upload'));
-        });
-
-        xhr.addEventListener('abort', () => {
-          reject(new Error('Upload cancelled'));
-        });
-
-        // Upload directly to Google Drive resumable upload URI
-        xhr.open('PUT', uploadUri);
-        xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
-        xhr.setRequestHeader('Content-Length', file.size.toString());
-        xhr.send(file);
-      });
-
-      uploadXhrRef.current = null;
-      setUploadProgress(95);
-
-      // Step 3: Complete the upload - update database and send notifications
-      const { data: completeData, error: completeError } = await supabase.functions.invoke('upload-deliverable-to-drive', {
+      // Step 2: Complete delivery - update DB and send email to customer
+      const { data: completeData, error: completeError } = await supabase.functions.invoke('complete-delivery', {
         body: {
-          action: 'complete',
           requestId: projectId,
-          folderId,
-          folderLink,
+          storagePath,
+          fileName: file.name,
         }
       });
 
@@ -381,22 +301,8 @@ const MyProjects = () => {
       setUploadProgress(100);
 
       toast({
-        title: "Success! 🎉",
-        description: (
-          <div className="flex flex-col gap-2">
-            <span>File uploaded to Google Drive and project completed!</span>
-            {folderLink && (
-              <a 
-                href={folderLink} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-primary underline flex items-center gap-1"
-              >
-                Open Drive Folder <ExternalLink className="h-3 w-3" />
-              </a>
-            )}
-          </div>
-        ),
+        title: "Delivery Complete! 🎉",
+        description: "Customer has been emailed with the download link.",
       });
 
       fetchProjects();
@@ -405,13 +311,12 @@ const MyProjects = () => {
       
       toast({
         title: "Upload Failed",
-        description: error.message || "Failed to upload file to Google Drive",
+        description: error.message || "Failed to upload file",
         variant: "destructive",
       });
     } finally {
       setUploadingId(null);
       setUploadProgress(0);
-      uploadXhrRef.current = null;
     }
   };
 
@@ -762,18 +667,6 @@ const MyProjects = () => {
           {/* Producer View Actions */}
           {isProducerView && (
             <div className="flex flex-col gap-3">
-              {/* Google Drive Status */}
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Google Drive:</span>
-                <Badge 
-                  variant={hasDriveConnection ? "default" : "destructive"}
-                  className="text-xs"
-                >
-                  <HardDrive className="h-3 w-3 mr-1" />
-                  {hasDriveConnection ? "Connected" : "Not Connected"}
-                </Badge>
-              </div>
-
               {/* Get Customer Files Button */}
               {project.file_urls && project.file_urls.length > 0 && (
                 <Button 
@@ -818,60 +711,33 @@ const MyProjects = () => {
                       <div className="flex items-center justify-between text-sm">
                         <span className="flex items-center gap-2">
                           <Loader2 className="h-4 w-4 animate-spin" />
-                          Uploading to Drive...
+                          Uploading & sending to customer...
                         </span>
                         <span className="font-medium text-primary">{uploadProgress}%</span>
                       </div>
                       <Progress value={uploadProgress} className="h-2" />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-destructive hover:text-destructive"
-                        onClick={() => {
-                          if (uploadXhrRef.current) {
-                            uploadXhrRef.current.abort();
-                            toast({
-                              title: "Upload Cancelled",
-                              description: "The file upload was cancelled.",
-                            });
-                          }
-                        }}
-                      >
-                        <AlertTriangle className="mr-2 h-4 w-4" />
-                        Cancel Upload
-                      </Button>
                     </div>
                   ) : (
                     <Button 
                       className="w-full" 
-                      onClick={() => {
-                        if (!hasDriveConnection) {
-                          toast({
-                            title: "Connect Google Drive First",
-                            description: "Go to your Profile page to connect Google Drive before uploading.",
-                            variant: "destructive",
-                          });
-                          return;
-                        }
-                        fileInputRefs.current[project.id]?.click();
-                      }}
+                      onClick={() => fileInputRefs.current[project.id]?.click()}
                     >
                       <Upload className="mr-2 h-4 w-4" />
-                      Upload Deliverables to Drive
+                      Upload & Deliver to Customer
                     </Button>
-                  )}
-                  {!hasDriveConnection && (
-                    <p className="text-xs text-amber-600 text-center">
-                      ⚠️ Connect Google Drive in your Profile to upload
-                    </p>
                   )}
                 </>
               )}
               
               {project.status === "completed" && (
-                <div className="flex items-center justify-center gap-2 text-emerald-500 py-2">
-                  <CheckCircle className="h-5 w-5" />
-                  <span className="font-medium">Project Completed!</span>
+                <div className="flex flex-col items-center gap-2 py-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg">
+                  <div className="flex items-center gap-2 text-emerald-600">
+                    <CheckCircle className="h-5 w-5" />
+                    <span className="font-medium">Delivered!</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground text-center">
+                    Customer has been emailed the download link
+                  </p>
                 </div>
               )}
             </div>
@@ -880,23 +746,19 @@ const MyProjects = () => {
           {/* Customer View Actions */}
           {!isProducerView && (
             <>
-              {project.status === "completed" && downloadUrl ? (
-                <a
-                  href={downloadUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block"
-                >
-                  <Button className="w-full" size="lg">
-                    <Download className="mr-2 h-5 w-5" />
-                    Download Your Song
-                  </Button>
-                </a>
-              ) : project.status === "completed" ? (
-                <Button className="w-full" size="lg" disabled>
-                  <Clock className="mr-2 h-5 w-5" />
-                  Preparing Download...
-                </Button>
+              {project.status === "completed" ? (
+                <div className="flex flex-col items-center gap-3 py-4 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg">
+                  <div className="flex items-center gap-2 text-emerald-600">
+                    <Mail className="h-6 w-6" />
+                    <span className="font-semibold text-lg">Check Your Email!</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground text-center px-4">
+                    We've sent you an email with your download link. Check your inbox (and spam folder).
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Download link expires in 7 days
+                  </p>
+                </div>
               ) : project.status === "refunded" ? (
                 <div className="flex flex-col items-center justify-center gap-2 py-2">
                   <div className="flex items-center gap-2 text-destructive">
