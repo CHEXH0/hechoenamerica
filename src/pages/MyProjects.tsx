@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Music, Download, Clock, CheckCircle, Loader2, FileAudio, Calendar, User, Wifi, AlertTriangle, RefreshCcw } from "lucide-react";
+import { ArrowLeft, Music, Download, Clock, CheckCircle, Loader2, FileAudio, Calendar, User, Wifi, AlertTriangle, RefreshCcw, Headphones, Users } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface SongRequest {
   id: string;
@@ -24,7 +26,7 @@ interface SongRequest {
   number_of_revisions: number | null;
   wants_mixing: boolean | null;
   wants_mastering: boolean | null;
-  // Payment tracking
+  user_email: string;
   acceptance_deadline: string | null;
   refunded_at: string | null;
 }
@@ -44,7 +46,6 @@ interface Producer {
   image: string;
 }
 
-const statusSteps = ["pending", "accepted", "in_progress", "review", "completed"];
 const statusLabels: Record<string, string> = {
   pending: "Pending",
   pending_payment: "Awaiting Payment",
@@ -87,7 +88,6 @@ const getTimeRemaining = (deadline: string | null): { text: string; hours: numbe
   const deadlineDate = new Date(deadline);
   const diffMs = deadlineDate.getTime() - now.getTime();
   
-  // Calculate percentage of 48 hours remaining
   const totalMs = 48 * 60 * 60 * 1000;
   const percentage = Math.max(0, Math.min(100, (diffMs / totalMs) * 100));
   
@@ -160,7 +160,6 @@ const CountdownTimer = ({ deadline }: { deadline: string }) => {
         )}
       </div>
       
-      {/* Countdown Display */}
       <div className="flex justify-center gap-2 mb-3">
         <div className="bg-background rounded-lg px-3 py-2 min-w-[60px] text-center shadow-sm">
           <div className={`text-2xl font-bold tabular-nums ${isUrgent ? 'text-amber-500' : 'text-primary'}`}>
@@ -184,7 +183,6 @@ const CountdownTimer = ({ deadline }: { deadline: string }) => {
         </div>
       </div>
 
-      {/* Progress bar */}
       <div className="h-1.5 bg-muted rounded-full overflow-hidden">
         <div 
           className={`h-full transition-all duration-1000 ${isUrgent ? 'bg-amber-500' : 'bg-primary'}`}
@@ -199,15 +197,35 @@ const CountdownTimer = ({ deadline }: { deadline: string }) => {
   );
 };
 
+const getGenreLabel = (genre: string | null): string => {
+  const genreMap: Record<string, string> = {
+    "hip-hop": "Hip Hop / Trap",
+    rnb: "R&B / Soul",
+    reggae: "Reggae",
+    latin: "Latin",
+    electronic: "Electronic",
+    pop: "Pop",
+    rock: "Rock",
+    world: "World / Indigenous",
+    other: "Other",
+  };
+  return genre ? genreMap[genre] || genre : "Not specified";
+};
+
 const MyProjects = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const [projects, setProjects] = useState<SongRequest[]>([]);
+  const { data: userRole } = useUserRole();
+  const [myRequests, setMyRequests] = useState<SongRequest[]>([]);
+  const [producerProjects, setProducerProjects] = useState<SongRequest[]>([]);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [producers, setProducers] = useState<Record<string, Producer>>({});
   const [loading, setLoading] = useState(true);
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
+  const [activeTab, setActiveTab] = useState("my-requests");
   const { toast } = useToast();
+
+  const isProducer = userRole?.isProducer || false;
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -219,9 +237,9 @@ const MyProjects = () => {
     if (user) {
       fetchProjects();
     }
-  }, [user]);
+  }, [user, isProducer]);
 
-  // Real-time subscription for song_requests updates
+  // Real-time subscription
   useEffect(() => {
     if (!user) return;
 
@@ -239,19 +257,17 @@ const MyProjects = () => {
           console.log('Real-time update received:', payload);
           const updatedProject = payload.new as SongRequest;
           
-          setProjects((prev) =>
+          setMyRequests((prev) =>
             prev.map((p) =>
               p.id === updatedProject.id ? { ...p, ...updatedProject } : p
             )
           );
 
-          // Show toast for status changes
           toast({
             title: "Project Updated",
             description: `Your project status changed to: ${statusLabels[updatedProject.status] || updatedProject.status}`,
           });
 
-          // If a producer was assigned, fetch their info
           if (updatedProject.assigned_producer_id && !producers[updatedProject.assigned_producer_id]) {
             supabase
               .from("producers")
@@ -306,7 +322,7 @@ const MyProjects = () => {
     try {
       setLoading(true);
 
-      // Fetch song requests
+      // Fetch my song requests (as a customer)
       const { data: requestsData, error: requestsError } = await supabase
         .from("song_requests")
         .select("*")
@@ -314,7 +330,28 @@ const MyProjects = () => {
         .order("created_at", { ascending: false });
 
       if (requestsError) throw requestsError;
-      setProjects(requestsData || []);
+      setMyRequests(requestsData || []);
+
+      // If user is a producer, fetch their assigned projects
+      if (isProducer) {
+        // First get the producer record for this user
+        const { data: producerData } = await supabase
+          .from("producers")
+          .select("id")
+          .eq("email", user?.email)
+          .single();
+
+        if (producerData) {
+          const { data: producerProjectsData, error: producerError } = await supabase
+            .from("song_requests")
+            .select("*")
+            .eq("assigned_producer_id", producerData.id)
+            .order("created_at", { ascending: false });
+
+          if (producerError) throw producerError;
+          setProducerProjects(producerProjectsData || []);
+        }
+      }
 
       // Fetch purchases for download URLs
       const { data: purchasesData, error: purchasesError } = await supabase
@@ -327,8 +364,9 @@ const MyProjects = () => {
       setPurchases(purchasesData || []);
 
       // Fetch producers for assigned projects
-      const producerIds = requestsData
-        ?.filter((r) => r.assigned_producer_id)
+      const allProjects = [...(requestsData || [])];
+      const producerIds = allProjects
+        .filter((r) => r.assigned_producer_id)
         .map((r) => r.assigned_producer_id) || [];
 
       if (producerIds.length > 0) {
@@ -355,21 +393,6 @@ const MyProjects = () => {
     return purchase?.download_url || null;
   };
 
-  const getGenreLabel = (genre: string | null): string => {
-    const genreMap: Record<string, string> = {
-      "hip-hop": "Hip Hop / Trap",
-      rnb: "R&B / Soul",
-      reggae: "Reggae",
-      latin: "Latin",
-      electronic: "Electronic",
-      pop: "Pop",
-      rock: "Rock",
-      world: "World / Indigenous",
-      other: "Other",
-    };
-    return genre ? genreMap[genre] || genre : "Not specified";
-  };
-
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20 p-4">
@@ -385,6 +408,216 @@ const MyProjects = () => {
   }
 
   if (!user) return null;
+
+  // Project Card Component
+  const ProjectCard = ({ project, isProducerView = false }: { project: SongRequest; isProducerView?: boolean }) => {
+    const downloadUrl = getDownloadUrl(project.id);
+    const producer = project.assigned_producer_id
+      ? producers[project.assigned_producer_id]
+      : null;
+
+    return (
+      <Card className="overflow-hidden">
+        <CardHeader className="pb-2">
+          <div className="flex items-start justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Music className="h-5 w-5 text-primary" />
+                {project.tier} Song
+              </CardTitle>
+              <CardDescription className="flex items-center gap-4 mt-1">
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  {new Date(project.created_at).toLocaleDateString()}
+                </span>
+                <Badge variant="outline">
+                  {getGenreLabel(project.genre_category)}
+                </Badge>
+              </CardDescription>
+            </div>
+            <Badge
+              className={`${statusColors[project.status]} text-white`}
+            >
+              {statusLabels[project.status] || project.status}
+            </Badge>
+          </div>
+        </CardHeader>
+
+        <CardContent className="space-y-4">
+          {/* Progress Bar */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm text-muted-foreground">
+              <span>Progress</span>
+              <span>{getStatusProgress(project.status)}%</span>
+            </div>
+            <Progress value={getStatusProgress(project.status)} className="h-2" />
+          </div>
+
+          {/* Song Idea */}
+          <div className="bg-muted/50 p-4 rounded-lg">
+            <p className="text-sm text-muted-foreground mb-1">
+              {isProducerView ? "Client's Idea:" : "Your Idea:"}
+            </p>
+            <p className="text-foreground">{project.song_idea}</p>
+          </div>
+
+          {/* Client Info (for producer view) */}
+          {isProducerView && (
+            <div className="flex items-center gap-3 p-3 bg-secondary/10 rounded-lg">
+              <User className="h-8 w-8 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Client</p>
+                <p className="font-medium">{project.user_email}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Producer Info (for customer view) */}
+          {!isProducerView && project.assigned_producer_id && producer && 
+           ['accepted', 'in_progress', 'review', 'completed'].includes(project.status) && (
+            <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg">
+              <img
+                src={producer.image}
+                alt={producer.name}
+                className="w-10 h-10 rounded-full object-cover"
+              />
+              <div>
+                <p className="text-sm text-muted-foreground">Your Producer</p>
+                <p className="font-medium">{producer.name}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Options */}
+          <div className="flex flex-wrap gap-2">
+            {project.wants_mixing && (
+              <Badge variant="secondary">Mixing</Badge>
+            )}
+            {project.wants_mastering && (
+              <Badge variant="secondary">Mastering</Badge>
+            )}
+            {project.number_of_revisions && project.number_of_revisions > 0 && (
+              <Badge variant="secondary">
+                {project.number_of_revisions} Revisions
+              </Badge>
+            )}
+          </div>
+
+          {/* Producer View Actions */}
+          {isProducerView && (
+            <div className="flex flex-col gap-2">
+              {project.status === "accepted" && (
+                <Button 
+                  className="w-full" 
+                  onClick={() => navigate("/admin")}
+                >
+                  <Loader2 className="mr-2 h-4 w-4" />
+                  Start Working on Project
+                </Button>
+              )}
+              {project.status === "in_progress" && (
+                <Button 
+                  className="w-full" 
+                  onClick={() => navigate("/admin")}
+                >
+                  <FileAudio className="mr-2 h-4 w-4" />
+                  Upload Deliverables
+                </Button>
+              )}
+              {project.status === "completed" && (
+                <div className="flex items-center justify-center gap-2 text-emerald-500 py-2">
+                  <CheckCircle className="h-5 w-5" />
+                  <span className="font-medium">Project Completed!</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Customer View Actions */}
+          {!isProducerView && (
+            <>
+              {project.status === "completed" && downloadUrl ? (
+                <a
+                  href={downloadUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block"
+                >
+                  <Button className="w-full" size="lg">
+                    <Download className="mr-2 h-5 w-5" />
+                    Download Your Song
+                  </Button>
+                </a>
+              ) : project.status === "completed" ? (
+                <Button className="w-full" size="lg" disabled>
+                  <Clock className="mr-2 h-5 w-5" />
+                  Preparing Download...
+                </Button>
+              ) : project.status === "refunded" ? (
+                <div className="flex flex-col items-center justify-center gap-2 py-2">
+                  <div className="flex items-center gap-2 text-destructive">
+                    <RefreshCcw className="h-4 w-4" />
+                    <span className="font-medium">Payment Refunded</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground text-center">
+                    No producer was available within 48 hours. Your payment has been fully refunded.
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate("/generate-song")}
+                    className="mt-2"
+                  >
+                    Try Again
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-center gap-2 text-muted-foreground py-2">
+                    {project.status === "in_progress" ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Your producer is working on your song...
+                      </>
+                    ) : project.status === "review" ? (
+                      <>
+                        <CheckCircle className="h-4 w-4" />
+                        Almost ready! Under final review...
+                      </>
+                    ) : project.status === "accepted" ? (
+                      <>
+                        <CheckCircle className="h-4 w-4 text-cyan-500" />
+                        A producer has accepted your project!
+                      </>
+                    ) : project.status === "paid" ? (
+                      <>
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        Payment confirmed! Awaiting producer assignment...
+                      </>
+                    ) : project.status === "pending" ? (
+                      <>
+                        <Clock className="h-4 w-4" />
+                        Project submitted. Awaiting producer assignment...
+                      </>
+                    ) : (
+                      <>
+                        <Clock className="h-4 w-4" />
+                        Processing your request...
+                      </>
+                    )}
+                  </div>
+                  
+                  {(project.status === "pending" || project.status === "paid") && project.acceptance_deadline && (
+                    <CountdownTimer deadline={project.acceptance_deadline} />
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20">
@@ -416,10 +649,9 @@ const MyProjects = () => {
                 My Projects
               </h1>
               <p className="text-muted-foreground">
-                Track the progress of your song requests
+                {isProducer ? "Manage your requests and producer assignments" : "Track the progress of your song requests"}
               </p>
             </div>
-            {/* Real-time connection indicator */}
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${isRealtimeConnected ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
               <span className="text-xs text-muted-foreground">
@@ -430,200 +662,123 @@ const MyProjects = () => {
           </div>
         </motion.div>
 
-        {/* Projects List */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="space-y-6"
-        >
-          {projects.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Projects Yet</h3>
-                <p className="text-muted-foreground mb-4">
-                  You haven't submitted any song requests yet.
-                </p>
-                <Button onClick={() => navigate("/generate-song")}>
-                  Create Your First Song
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            projects.map((project, index) => {
-              const downloadUrl = getDownloadUrl(project.id);
-              const producer = project.assigned_producer_id
-                ? producers[project.assigned_producer_id]
-                : null;
+        {/* Tabs for Producer vs Customer Projects */}
+        {isProducer ? (
+          <Tabs defaultValue="my-requests" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="my-requests" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                My Requests ({myRequests.length})
+              </TabsTrigger>
+              <TabsTrigger value="producer-projects" className="flex items-center gap-2">
+                <Headphones className="h-4 w-4" />
+                Producer Projects ({producerProjects.length})
+              </TabsTrigger>
+            </TabsList>
 
-              return (
+            <TabsContent value="my-requests">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6"
+              >
+                {myRequests.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-12 text-center">
+                      <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No Requests Yet</h3>
+                      <p className="text-muted-foreground mb-4">
+                        You haven't submitted any song requests as a customer.
+                      </p>
+                      <Button onClick={() => navigate("/generate-song")}>
+                        Create Your First Song
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  myRequests.map((project, index) => (
+                    <motion.div
+                      key={project.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <ProjectCard project={project} isProducerView={false} />
+                    </motion.div>
+                  ))
+                )}
+              </motion.div>
+            </TabsContent>
+
+            <TabsContent value="producer-projects">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6"
+              >
+                {producerProjects.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-12 text-center">
+                      <Headphones className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No Producer Projects Yet</h3>
+                      <p className="text-muted-foreground mb-4">
+                        You haven't accepted any projects as a producer yet.
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Check Discord for new project notifications to accept!
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  producerProjects.map((project, index) => (
+                    <motion.div
+                      key={project.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <ProjectCard project={project} isProducerView={true} />
+                    </motion.div>
+                  ))
+                )}
+              </motion.div>
+            </TabsContent>
+          </Tabs>
+        ) : (
+          // Regular user view (no tabs)
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="space-y-6"
+          >
+            {myRequests.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No Projects Yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    You haven't submitted any song requests yet.
+                  </p>
+                  <Button onClick={() => navigate("/generate-song")}>
+                    Create Your First Song
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              myRequests.map((project, index) => (
                 <motion.div
                   key={project.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="overflow-hidden">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <CardTitle className="flex items-center gap-2">
-                            <Music className="h-5 w-5 text-primary" />
-                            {project.tier} Song
-                          </CardTitle>
-                          <CardDescription className="flex items-center gap-4 mt-1">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              {new Date(project.created_at).toLocaleDateString()}
-                            </span>
-                            <Badge variant="outline">
-                              {getGenreLabel(project.genre_category)}
-                            </Badge>
-                          </CardDescription>
-                        </div>
-                        <Badge
-                          className={`${statusColors[project.status]} text-white`}
-                        >
-                          {statusLabels[project.status] || project.status}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-
-                    <CardContent className="space-y-4">
-                      {/* Progress Bar */}
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm text-muted-foreground">
-                          <span>Progress</span>
-                          <span>{getStatusProgress(project.status)}%</span>
-                        </div>
-                        <Progress value={getStatusProgress(project.status)} className="h-2" />
-                      </div>
-
-                      {/* Song Idea */}
-                      <div className="bg-muted/50 p-4 rounded-lg">
-                        <p className="text-sm text-muted-foreground mb-1">Your Idea:</p>
-                        <p className="text-foreground">{project.song_idea}</p>
-                      </div>
-
-                      {/* Producer Info - Only show when producer has accepted (status is accepted or beyond) */}
-                      {project.assigned_producer_id && producer && 
-                       ['accepted', 'in_progress', 'review', 'completed'].includes(project.status) && (
-                        <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg">
-                          <img
-                            src={producer.image}
-                            alt={producer.name}
-                            className="w-10 h-10 rounded-full object-cover"
-                          />
-                          <div>
-                            <p className="text-sm text-muted-foreground">
-                              Your Producer
-                            </p>
-                            <p className="font-medium">{producer.name}</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Options */}
-                      <div className="flex flex-wrap gap-2">
-                        {project.wants_mixing && (
-                          <Badge variant="secondary">Mixing</Badge>
-                        )}
-                        {project.wants_mastering && (
-                          <Badge variant="secondary">Mastering</Badge>
-                        )}
-                        {project.number_of_revisions && project.number_of_revisions > 0 && (
-                          <Badge variant="secondary">
-                            {project.number_of_revisions} Revisions
-                          </Badge>
-                        )}
-                      </div>
-
-                      {/* Download Button */}
-                      {project.status === "completed" && downloadUrl ? (
-                        <a
-                          href={downloadUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block"
-                        >
-                          <Button className="w-full" size="lg">
-                            <Download className="mr-2 h-5 w-5" />
-                            Download Your Song
-                          </Button>
-                        </a>
-                      ) : project.status === "completed" ? (
-                        <Button className="w-full" size="lg" disabled>
-                          <Clock className="mr-2 h-5 w-5" />
-                          Preparing Download...
-                        </Button>
-                      ) : project.status === "refunded" ? (
-                        <div className="flex flex-col items-center justify-center gap-2 py-2">
-                          <div className="flex items-center gap-2 text-destructive">
-                            <RefreshCcw className="h-4 w-4" />
-                            <span className="font-medium">Payment Refunded</span>
-                          </div>
-                          <p className="text-sm text-muted-foreground text-center">
-                            No producer was available within 48 hours. Your payment has been fully refunded.
-                          </p>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => navigate("/generate-song")}
-                            className="mt-2"
-                          >
-                            Try Again
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col gap-2">
-                          <div className="flex items-center justify-center gap-2 text-muted-foreground py-2">
-                            {project.status === "in_progress" ? (
-                              <>
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                Your producer is working on your song...
-                              </>
-                            ) : project.status === "review" ? (
-                              <>
-                                <CheckCircle className="h-4 w-4" />
-                                Almost ready! Under final review...
-                              </>
-                            ) : project.status === "accepted" ? (
-                              <>
-                                <CheckCircle className="h-4 w-4 text-cyan-500" />
-                                A producer has accepted your project!
-                              </>
-                            ) : project.status === "paid" ? (
-                              <>
-                                <CheckCircle className="h-4 w-4 text-green-500" />
-                                Payment confirmed! Awaiting producer assignment...
-                              </>
-                            ) : project.status === "pending" ? (
-                              <>
-                                <Clock className="h-4 w-4" />
-                                Project submitted. Awaiting producer assignment...
-                              </>
-                            ) : (
-                              <>
-                                <Clock className="h-4 w-4" />
-                                Processing your request...
-                              </>
-                            )}
-                          </div>
-                          
-                          {/* Live Countdown Timer */}
-                          {(project.status === "pending" || project.status === "paid") && project.acceptance_deadline && (
-                            <CountdownTimer deadline={project.acceptance_deadline} />
-                          )}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
+                  <ProjectCard project={project} isProducerView={false} />
                 </motion.div>
-              );
-            })
-          )}
-        </motion.div>
+              ))
+            )}
+          </motion.div>
+        )}
       </div>
     </div>
   );
