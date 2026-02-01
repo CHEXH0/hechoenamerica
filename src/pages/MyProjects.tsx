@@ -227,6 +227,7 @@ const MyProjects = () => {
   const [activeTab, setActiveTab] = useState("my-requests");
   const [hasDriveConnection, setHasDriveConnection] = useState<boolean | null>(null);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [resendingFilesId, setResendingFilesId] = useState<string | null>(null);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const { toast } = useToast();
@@ -274,6 +275,8 @@ const MyProjects = () => {
     }
 
     setUploadingId(projectId);
+    setUploadProgress(0);
+    
     try {
       const project = producerProjects.find(p => p.id === projectId);
       
@@ -282,20 +285,63 @@ const MyProjects = () => {
       formData.append('requestId', projectId);
       formData.append('customerEmail', project?.user_email || '');
 
-      const { data, error } = await supabase.functions.invoke('upload-deliverable-to-drive', {
-        body: formData,
-      });
+      // Get auth token
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('Not authenticated');
+      }
 
-      if (error) throw error;
+      // Use XMLHttpRequest for progress tracking
+      const result = await new Promise<{ driveLink?: string }>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        
+        xhr.upload.addEventListener('progress', (event) => {
+          if (event.lengthComputable) {
+            const percentComplete = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(percentComplete);
+          }
+        });
+
+        xhr.addEventListener('load', () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const response = JSON.parse(xhr.responseText);
+              resolve(response);
+            } catch {
+              reject(new Error('Invalid response from server'));
+            }
+          } else {
+            try {
+              const errorResponse = JSON.parse(xhr.responseText);
+              reject(new Error(errorResponse.error || 'Upload failed'));
+            } catch {
+              reject(new Error(`Upload failed with status ${xhr.status}`));
+            }
+          }
+        });
+
+        xhr.addEventListener('error', () => {
+          reject(new Error('Network error during upload'));
+        });
+
+        xhr.addEventListener('abort', () => {
+          reject(new Error('Upload cancelled'));
+        });
+
+        const supabaseUrl = 'https://eapbuoqkhckqaswfjexv.supabase.co';
+        xhr.open('POST', `${supabaseUrl}/functions/v1/upload-deliverable-to-drive`);
+        xhr.setRequestHeader('Authorization', `Bearer ${session.access_token}`);
+        xhr.send(formData);
+      });
 
       toast({
         title: "Success! 🎉",
         description: (
           <div className="flex flex-col gap-2">
             <span>File uploaded to Google Drive and project completed!</span>
-            {data.driveLink && (
+            {result.driveLink && (
               <a 
-                href={data.driveLink} 
+                href={result.driveLink} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-primary underline flex items-center gap-1"
@@ -317,6 +363,7 @@ const MyProjects = () => {
       });
     } finally {
       setUploadingId(null);
+      setUploadProgress(0);
     }
   };
 
@@ -718,33 +765,36 @@ const MyProjects = () => {
                       if (file) handleFileUpload(project.id, file);
                     }}
                   />
-                  <Button 
-                    className="w-full" 
-                    onClick={() => {
-                      if (!hasDriveConnection) {
-                        toast({
-                          title: "Connect Google Drive First",
-                          description: "Go to your Profile page to connect Google Drive before uploading.",
-                          variant: "destructive",
-                        });
-                        return;
-                      }
-                      fileInputRefs.current[project.id]?.click();
-                    }}
-                    disabled={uploadingId === project.id}
-                  >
-                    {uploadingId === project.id ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Uploading to Drive...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="mr-2 h-4 w-4" />
-                        Upload Deliverables to Drive
-                      </>
-                    )}
-                  </Button>
+                  {uploadingId === project.id ? (
+                    <div className="w-full space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Uploading to Drive...
+                        </span>
+                        <span className="font-medium text-primary">{uploadProgress}%</span>
+                      </div>
+                      <Progress value={uploadProgress} className="h-2" />
+                    </div>
+                  ) : (
+                    <Button 
+                      className="w-full" 
+                      onClick={() => {
+                        if (!hasDriveConnection) {
+                          toast({
+                            title: "Connect Google Drive First",
+                            description: "Go to your Profile page to connect Google Drive before uploading.",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+                        fileInputRefs.current[project.id]?.click();
+                      }}
+                    >
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload Deliverables to Drive
+                    </Button>
+                  )}
                   {!hasDriveConnection && (
                     <p className="text-xs text-amber-600 text-center">
                       ⚠️ Connect Google Drive in your Profile to upload
