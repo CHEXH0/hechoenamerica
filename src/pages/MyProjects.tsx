@@ -301,64 +301,11 @@ const MyProjects = () => {
     try {
       const project = producerProjects.find(p => p.id === projectId);
       
-      // Get auth token
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        throw new Error('Not authenticated');
-      }
-
-      // Step 1: Upload to Supabase Storage first (handles large files)
-      const storagePath = `deliverables/${projectId}/${Date.now()}_${file.name}`;
-      
-      // Use XMLHttpRequest for progress tracking during storage upload
-      const storageUploadResult = await new Promise<{ path: string }>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        uploadXhrRef.current = xhr;
-        
-        xhr.upload.addEventListener('progress', (event) => {
-          if (event.lengthComputable) {
-            // First 80% is storage upload
-            const percentComplete = Math.round((event.loaded / event.total) * 80);
-            setUploadProgress(percentComplete);
-          }
-        });
-
-        xhr.addEventListener('load', () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve({ path: storagePath });
-          } else {
-            try {
-              const errorResponse = JSON.parse(xhr.responseText);
-              reject(new Error(errorResponse.error || errorResponse.message || 'Storage upload failed'));
-            } catch {
-              reject(new Error(`Storage upload failed with status ${xhr.status}`));
-            }
-          }
-        });
-
-        xhr.addEventListener('error', () => {
-          reject(new Error('Network error during storage upload'));
-        });
-
-        xhr.addEventListener('abort', () => {
-          reject(new Error('Upload cancelled'));
-        });
-
-        // Upload to Supabase Storage
-        const supabaseUrl = 'https://eapbuoqkhckqaswfjexv.supabase.co';
-        xhr.open('POST', `${supabaseUrl}/storage/v1/object/product-assets/${storagePath}`);
-        xhr.setRequestHeader('Authorization', `Bearer ${session.access_token}`);
-        xhr.setRequestHeader('x-upsert', 'true');
-        xhr.send(file);
-      });
-
-      setUploadProgress(85);
-      uploadXhrRef.current = null;
-
-      // Step 2: Call edge function to transfer from Storage to Google Drive
-      const { data, error } = await supabase.functions.invoke('upload-deliverable-to-drive', {
+      // Step 1: Initialize upload session - get direct upload URI from Google Drive
+      setUploadProgress(5);
+      const { data: initData, error: initError } = await supabase.functions.invoke('upload-deliverable-to-drive', {
         body: {
-          storagePath: storageUploadResult.path,
+          action: 'init',
           fileName: file.name,
           fileSize: file.size,
           mimeType: file.type || 'application/octet-stream',
@@ -367,8 +314,69 @@ const MyProjects = () => {
         }
       });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (initError) throw initError;
+      if (initData?.error) throw new Error(initData.error);
+      if (!initData?.uploadUri) throw new Error('Failed to get upload URI');
+
+      const { uploadUri, folderId, folderLink } = initData;
+      setUploadProgress(10);
+
+      // Step 2: Upload directly to Google Drive using resumable upload
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        uploadXhrRef.current = xhr;
+        
+        xhr.upload.addEventListener('progress', (event) => {
+          if (event.lengthComputable) {
+            // Progress from 10% to 90% during file upload
+            const percentComplete = 10 + Math.round((event.loaded / event.total) * 80);
+            setUploadProgress(percentComplete);
+          }
+        });
+
+        xhr.addEventListener('load', () => {
+          if (xhr.status === 200 || xhr.status === 201) {
+            resolve();
+          } else {
+            try {
+              const errorResponse = JSON.parse(xhr.responseText);
+              reject(new Error(errorResponse.error?.message || 'Drive upload failed'));
+            } catch {
+              reject(new Error(`Drive upload failed with status ${xhr.status}`));
+            }
+          }
+        });
+
+        xhr.addEventListener('error', () => {
+          reject(new Error('Network error during Drive upload'));
+        });
+
+        xhr.addEventListener('abort', () => {
+          reject(new Error('Upload cancelled'));
+        });
+
+        // Upload directly to Google Drive resumable upload URI
+        xhr.open('PUT', uploadUri);
+        xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+        xhr.setRequestHeader('Content-Length', file.size.toString());
+        xhr.send(file);
+      });
+
+      uploadXhrRef.current = null;
+      setUploadProgress(95);
+
+      // Step 3: Complete the upload - update database and send notifications
+      const { data: completeData, error: completeError } = await supabase.functions.invoke('upload-deliverable-to-drive', {
+        body: {
+          action: 'complete',
+          requestId: projectId,
+          folderId,
+          folderLink,
+        }
+      });
+
+      if (completeError) throw completeError;
+      if (completeData?.error) throw new Error(completeData.error);
 
       setUploadProgress(100);
 
@@ -377,9 +385,9 @@ const MyProjects = () => {
         description: (
           <div className="flex flex-col gap-2">
             <span>File uploaded to Google Drive and project completed!</span>
-            {data?.driveLink && (
+            {folderLink && (
               <a 
-                href={data.driveLink} 
+                href={folderLink} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-primary underline flex items-center gap-1"
@@ -395,16 +403,8 @@ const MyProjects = () => {
     } catch (error: any) {
       console.error("Error uploading file:", error);
       
-      // Clean up partial upload from storage if it exists
-      try {
-        const storagePath = `deliverables/${projectId}`;
-        await supabase.storage.from('product-assets').remove([storagePath]);
-      } catch {
-        // Ignore cleanup errors
-      }
-      
       toast({
-        title: "Error",
+        title: "Upload Failed",
         description: error.message || "Failed to upload file to Google Drive",
         variant: "destructive",
       });
