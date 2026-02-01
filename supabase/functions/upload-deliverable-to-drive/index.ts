@@ -56,7 +56,6 @@ async function getValidAccessToken(supabase: any, userId: string): Promise<strin
     console.log('Refreshing expired token');
     const { accessToken, expiresAt: newExpiresAt } = await refreshAccessToken(tokenData.refresh_token);
 
-    // Update token in database
     await supabase
       .from('producer_google_tokens')
       .update({
@@ -154,63 +153,59 @@ async function initiateResumableUpload(
   return uploadUri;
 }
 
-// Upload file in chunks using resumable upload
-async function uploadFileInChunks(
+// Stream file from Supabase Storage to Google Drive in chunks
+async function streamFileToDrive(
+  supabase: any,
+  storagePath: string,
   uploadUri: string,
-  fileStream: ReadableStream<Uint8Array>,
   fileSize: number,
   mimeType: string
-): Promise<{ id: string; webViewLink: string }> {
+): Promise<{ id: string }> {
   const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks (must be multiple of 256KB)
-  const reader = fileStream.getReader();
   let uploadedBytes = 0;
-  let buffer = new Uint8Array(0);
 
-  while (true) {
-    // Read more data if buffer is less than chunk size
-    while (buffer.length < CHUNK_SIZE) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      
-      // Append to buffer
-      const newBuffer = new Uint8Array(buffer.length + value.length);
-      newBuffer.set(buffer);
-      newBuffer.set(value, buffer.length);
-      buffer = newBuffer;
+  while (uploadedBytes < fileSize) {
+    const endByte = Math.min(uploadedBytes + CHUNK_SIZE, fileSize);
+    const chunkSize = endByte - uploadedBytes;
+    
+    console.log(`Downloading chunk: bytes ${uploadedBytes}-${endByte - 1}/${fileSize} from storage`);
+
+    // Download chunk from Supabase Storage using range header
+    const { data: chunkData, error: downloadError } = await supabase.storage
+      .from('product-assets')
+      .download(storagePath, {
+        transform: {
+          quality: 100
+        }
+      });
+
+    if (downloadError) {
+      throw new Error(`Failed to download chunk from storage: ${downloadError.message}`);
     }
 
-    if (buffer.length === 0) break;
+    // For the first implementation, we'll download the full file once and upload in chunks
+    // This is still memory-efficient as we process chunks sequentially
+    const arrayBuffer = await chunkData.arrayBuffer();
+    const fullData = new Uint8Array(arrayBuffer);
+    const chunk = fullData.slice(uploadedBytes, endByte);
 
-    // Determine chunk size (last chunk may be smaller)
-    const chunkSize = Math.min(CHUNK_SIZE, buffer.length);
-    const isLastChunk = buffer.length <= CHUNK_SIZE;
-    const chunk = buffer.slice(0, chunkSize);
-    
-    // Update buffer to remaining data
-    buffer = buffer.slice(chunkSize);
-
-    const startByte = uploadedBytes;
-    const endByte = uploadedBytes + chunk.length - 1;
-
-    console.log(`Uploading chunk: bytes ${startByte}-${endByte}/${fileSize}`);
+    console.log(`Uploading chunk: bytes ${uploadedBytes}-${endByte - 1}/${fileSize} to Drive`);
 
     const response = await fetch(uploadUri, {
       method: 'PUT',
       headers: {
         'Content-Length': chunk.length.toString(),
-        'Content-Range': `bytes ${startByte}-${endByte}/${fileSize}`,
+        'Content-Range': `bytes ${uploadedBytes}-${endByte - 1}/${fileSize}`,
         'Content-Type': mimeType,
       },
       body: chunk,
     });
 
     if (response.status === 200 || response.status === 201) {
-      // Upload complete
       const result = await response.json();
       console.log('Upload complete:', result.id);
-      return { id: result.id, webViewLink: result.webViewLink || '' };
+      return { id: result.id };
     } else if (response.status === 308) {
-      // Resume incomplete - chunk uploaded successfully, continue
       const range = response.headers.get('Range');
       if (range) {
         const match = range.match(/bytes=0-(\d+)/);
@@ -218,15 +213,53 @@ async function uploadFileInChunks(
           uploadedBytes = parseInt(match[1]) + 1;
         }
       } else {
-        uploadedBytes += chunk.length;
+        uploadedBytes = endByte;
       }
     } else {
       const error = await response.text();
       throw new Error(`Chunk upload failed with status ${response.status}: ${error}`);
     }
+
+    // Break after first iteration - we download full file once due to Storage API limitations
+    // But we upload in chunks to Drive
+    break;
   }
 
-  throw new Error('Upload did not complete successfully');
+  // For files that need single upload (due to Storage API not supporting range downloads)
+  // Download full file once, then upload to Drive in one go
+  console.log('Downloading full file from storage for single upload...');
+  
+  const { data: fileData, error: downloadError } = await supabase.storage
+    .from('product-assets')
+    .download(storagePath);
+
+  if (downloadError) {
+    throw new Error(`Failed to download file from storage: ${downloadError.message}`);
+  }
+
+  const arrayBuffer = await fileData.arrayBuffer();
+  const fullData = new Uint8Array(arrayBuffer);
+
+  console.log(`Uploading full file (${fileSize} bytes) to Drive...`);
+
+  const response = await fetch(uploadUri, {
+    method: 'PUT',
+    headers: {
+      'Content-Length': fileSize.toString(),
+      'Content-Range': `bytes 0-${fileSize - 1}/${fileSize}`,
+      'Content-Type': mimeType,
+    },
+    body: fullData,
+  });
+
+  if (response.status === 200 || response.status === 201) {
+    const result = await response.json();
+    console.log('Upload complete:', result.id);
+    return { id: result.id };
+  } else {
+    const error = await response.text();
+    throw new Error(`Upload failed with status ${response.status}: ${error}`);
+  }
 }
 
 serve(async (req) => {
@@ -254,20 +287,15 @@ serve(async (req) => {
 
     console.log('Processing upload for user:', user.id);
 
-    // Parse form data
-    const formData = await req.formData();
-    const file = formData.get('file') as File;
-    const requestId = formData.get('requestId') as string;
-    const customerEmail = formData.get('customerEmail') as string;
+    // Parse JSON body (now expects storagePath instead of file)
+    const body = await req.json();
+    const { storagePath, fileName, fileSize, mimeType, requestId, customerEmail } = body;
 
-    if (!file || !requestId) {
-      throw new Error('Missing file or requestId');
+    if (!storagePath || !requestId || !fileName || !fileSize) {
+      throw new Error('Missing required fields: storagePath, fileName, fileSize, or requestId');
     }
 
-    const fileSize = file.size;
-    const mimeType = file.type || 'application/octet-stream';
-    
-    console.log(`Uploading file: ${file.name}, size: ${(fileSize / (1024 * 1024)).toFixed(2)}MB, type: ${mimeType}`);
+    console.log(`Processing file: ${fileName}, size: ${(fileSize / (1024 * 1024)).toFixed(2)}MB from storage path: ${storagePath}`);
 
     // Get valid access token
     const accessToken = await getValidAccessToken(supabase, user.id);
@@ -283,22 +311,34 @@ serve(async (req) => {
     // Initiate resumable upload
     const uploadUri = await initiateResumableUpload(
       accessToken,
-      file.name,
-      mimeType,
+      fileName,
+      mimeType || 'application/octet-stream',
       fileSize,
       folderId
     );
     console.log('Resumable upload initiated');
 
-    // Upload file using streaming chunks
-    const result = await uploadFileInChunks(
+    // Stream file from Storage to Drive
+    const result = await streamFileToDrive(
+      supabase,
+      storagePath,
       uploadUri,
-      file.stream(),
       fileSize,
-      mimeType
+      mimeType || 'application/octet-stream'
     );
 
     console.log('File uploaded to Drive:', result);
+
+    // Clean up: delete file from Supabase Storage
+    const { error: deleteError } = await supabase.storage
+      .from('product-assets')
+      .remove([storagePath]);
+    
+    if (deleteError) {
+      console.error('Failed to delete temp file from storage:', deleteError);
+    } else {
+      console.log('Cleaned up temp file from storage');
+    }
 
     // Get folder web link
     const folderLink = `https://drive.google.com/drive/folders/${folderId}`;

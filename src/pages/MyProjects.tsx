@@ -301,72 +301,85 @@ const MyProjects = () => {
     try {
       const project = producerProjects.find(p => p.id === projectId);
       
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('requestId', projectId);
-      formData.append('customerEmail', project?.user_email || '');
-
       // Get auth token
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
         throw new Error('Not authenticated');
       }
 
-      // Use XMLHttpRequest for progress tracking and cancel support
-      const result = await new Promise<{ driveLink?: string }>((resolve, reject) => {
+      // Step 1: Upload to Supabase Storage first (handles large files)
+      const storagePath = `deliverables/${projectId}/${Date.now()}_${file.name}`;
+      
+      // Use XMLHttpRequest for progress tracking during storage upload
+      const storageUploadResult = await new Promise<{ path: string }>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         uploadXhrRef.current = xhr;
         
         xhr.upload.addEventListener('progress', (event) => {
           if (event.lengthComputable) {
-            const percentComplete = Math.round((event.loaded / event.total) * 100);
+            // First 80% is storage upload
+            const percentComplete = Math.round((event.loaded / event.total) * 80);
             setUploadProgress(percentComplete);
           }
         });
 
         xhr.addEventListener('load', () => {
-          uploadXhrRef.current = null;
           if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              const response = JSON.parse(xhr.responseText);
-              resolve(response);
-            } catch {
-              reject(new Error('Invalid response from server'));
-            }
+            resolve({ path: storagePath });
           } else {
             try {
               const errorResponse = JSON.parse(xhr.responseText);
-              reject(new Error(errorResponse.error || 'Upload failed'));
+              reject(new Error(errorResponse.error || errorResponse.message || 'Storage upload failed'));
             } catch {
-              reject(new Error(`Upload failed with status ${xhr.status}`));
+              reject(new Error(`Storage upload failed with status ${xhr.status}`));
             }
           }
         });
 
         xhr.addEventListener('error', () => {
-          uploadXhrRef.current = null;
-          reject(new Error('Network error during upload'));
+          reject(new Error('Network error during storage upload'));
         });
 
         xhr.addEventListener('abort', () => {
-          uploadXhrRef.current = null;
           reject(new Error('Upload cancelled'));
         });
 
+        // Upload to Supabase Storage
         const supabaseUrl = 'https://eapbuoqkhckqaswfjexv.supabase.co';
-        xhr.open('POST', `${supabaseUrl}/functions/v1/upload-deliverable-to-drive`);
+        xhr.open('POST', `${supabaseUrl}/storage/v1/object/product-assets/${storagePath}`);
         xhr.setRequestHeader('Authorization', `Bearer ${session.access_token}`);
-        xhr.send(formData);
+        xhr.setRequestHeader('x-upsert', 'true');
+        xhr.send(file);
       });
+
+      setUploadProgress(85);
+      uploadXhrRef.current = null;
+
+      // Step 2: Call edge function to transfer from Storage to Google Drive
+      const { data, error } = await supabase.functions.invoke('upload-deliverable-to-drive', {
+        body: {
+          storagePath: storageUploadResult.path,
+          fileName: file.name,
+          fileSize: file.size,
+          mimeType: file.type || 'application/octet-stream',
+          requestId: projectId,
+          customerEmail: project?.user_email || '',
+        }
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setUploadProgress(100);
 
       toast({
         title: "Success! 🎉",
         description: (
           <div className="flex flex-col gap-2">
             <span>File uploaded to Google Drive and project completed!</span>
-            {result.driveLink && (
+            {data?.driveLink && (
               <a 
-                href={result.driveLink} 
+                href={data.driveLink} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-primary underline flex items-center gap-1"
@@ -381,6 +394,15 @@ const MyProjects = () => {
       fetchProjects();
     } catch (error: any) {
       console.error("Error uploading file:", error);
+      
+      // Clean up partial upload from storage if it exists
+      try {
+        const storagePath = `deliverables/${projectId}`;
+        await supabase.storage.from('product-assets').remove([storagePath]);
+      } catch {
+        // Ignore cleanup errors
+      }
+      
       toast({
         title: "Error",
         description: error.message || "Failed to upload file to Google Drive",
@@ -389,6 +411,7 @@ const MyProjects = () => {
     } finally {
       setUploadingId(null);
       setUploadProgress(0);
+      uploadXhrRef.current = null;
     }
   };
 
