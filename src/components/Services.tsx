@@ -30,24 +30,52 @@ const Services = () => {
 
   const platforms = [
     {
-      name: "ProTools",
+      name: "Pro Tools",
       logo: "/laptop-uploads/ProTools.png",
-      tools: ['"Work with anyone, anywhere"'],
+      tagline: "Work with anyone, anywhere",
     },
     {
-      name: "Ableton",
+      name: "Ableton Live",
       logo: abletonLogo,
-      tools: ['"Creative tools for music makers"'],
+      tagline: "Creative tools for music makers",
     },
     {
       name: "FL Studio",
       logo: "/laptop-uploads/FLoops.png",
-      tools: ['"Create your best music"'],
+      tagline: "Create your best music",
+    },
+    {
+      name: "Cubase",
+      logo: "/laptop-uploads/Cubase.png",
+      tagline: "Professional music production",
+    },
+    {
+      name: "Logic Pro",
+      logo: "/lovable-uploads/b0915421-1e88-4e72-af78-b3f03acea982.png",
+      tagline: "Powerful. Creative. Intuitive.",
+    },
+    {
+      name: "Studio One",
+      logo: "/lovable-uploads/d5eed490-6d34-4af5-8428-15981ab0f9c3.png",
+      tagline: "The future of recording",
+    },
+    {
+      name: "Reason",
+      logo: "/laptop-uploads/Synth.png",
+      tagline: "Make music your way",
+    },
+    {
+      name: "Reaper",
+      logo: "/laptop-uploads/mixing-mastering.jpg",
+      tagline: "Digital audio workstation",
     },
   ];
 
+  // Duplicate platforms for seamless infinite scroll
+  const duplicatedPlatforms = [...platforms, ...platforms];
+
   return (
-    <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-800/80 via-purple-900/60 to-black">
+    <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-800/80 via-purple-900/60 to-black overflow-hidden">
       <div className="container mx-auto px-4">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -89,38 +117,54 @@ const Services = () => {
           ))}
         </div>
 
-        {/* Platforms Section */}
+        {/* DAW Platforms Scrolling Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
           className="mt-16"
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {platforms.map((platform, index) => (
-              <motion.div
-                key={platform.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="bg-black/40 backdrop-blur-md border border-purple-400/20 rounded-xl p-6 text-center hover:border-purple-400/40 transition-all duration-300"
-              >
-                <div className="w-16 h-16 mx-auto mb-4 bg-white/10 rounded-lg flex items-center justify-center">
-                  <img src={platform.logo} alt={`${platform.name} logo`} className="w-12 h-12 object-contain" />
+          <h3 className="text-xl md:text-2xl font-semibold text-center text-white/80 mb-8">
+            We work with industry-standard DAWs
+          </h3>
+          
+          {/* Scrolling container */}
+          <div className="relative w-full overflow-hidden">
+            {/* Gradient masks for smooth fade effect */}
+            <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-purple-900/60 to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-purple-900/60 to-transparent z-10 pointer-events-none" />
+            
+            {/* Infinite scrolling track */}
+            <motion.div
+              className="flex gap-8"
+              animate={{
+                x: [0, -50 * platforms.length * 4],
+              }}
+              transition={{
+                x: {
+                  duration: 30,
+                  repeat: Infinity,
+                  ease: "linear",
+                },
+              }}
+            >
+              {duplicatedPlatforms.map((platform, index) => (
+                <div
+                  key={`${platform.name}-${index}`}
+                  className="flex-shrink-0 w-48 bg-black/40 backdrop-blur-md border border-purple-400/20 rounded-xl p-6 text-center hover:border-purple-400/40 hover:bg-black/60 transition-all duration-300 group"
+                >
+                  <div className="w-16 h-16 mx-auto mb-4 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                    <img 
+                      src={platform.logo} 
+                      alt={`${platform.name} logo`} 
+                      className="w-12 h-12 object-contain"
+                    />
+                  </div>
+                  <h4 className="text-base font-semibold text-white mb-2">{platform.name}</h4>
+                  <p className="text-purple-300 text-xs italic">"{platform.tagline}"</p>
                 </div>
-                <h4 className="text-lg font-semibold text-white mb-3">{platform.name}</h4>
-                <div className="space-y-1 pb-4">
-                  {platform.tools.map((tool) => (
-                    <span
-                      key={tool}
-                      className="inline-block px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full border border-purple-400/30 mr-1 mb-1"
-                    >
-                      {tool}
-                    </span>
-                  ))}
-                </div>
-              </motion.div>
-            ))}
+              ))}
+            </motion.div>
           </div>
         </motion.div>
       </div>
