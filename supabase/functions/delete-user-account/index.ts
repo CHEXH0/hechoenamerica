@@ -124,6 +124,14 @@ Deno.serve(async (req) => {
       else console.log('Deleted producer profile')
     }
 
+    // Delete contact submissions (including producer applications) for this user
+    const { error: contactError } = await supabaseAdmin
+      .from('contact_submissions')
+      .delete()
+      .eq('user_id', userId)
+    if (contactError) console.error('Error deleting contact submissions:', contactError)
+    else console.log('Deleted contact submissions')
+
     // Delete user's files from storage buckets
     // Delete from product-assets (song files)
     try {
