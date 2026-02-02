@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft, UserX } from "lucide-react";
@@ -8,6 +8,9 @@ import ProducerApplicationForm from "@/components/ProducerApplicationForm";
 import { useHiringStatus } from "@/hooks/useHiringStatus";
 
 const ProducerApplication = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const { data: hiringStatus} = useHiringStatus();
   
   const isHiring = hiringStatus?.enabled ?? false;
