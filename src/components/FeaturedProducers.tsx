@@ -13,11 +13,11 @@ const FeaturedProducers = () => {
   const [scrollDirection, setScrollDirection] = useState<'left' | 'right' | 'none'>('none');
   const containerRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
-  const baseSpeed = 0.8; // pixels per frame
+  const baseSpeed = 1.5; // faster pixels per frame
   
-  // Calculate the reset point based on producer card width
-  const itemWidth = 400 + 24; // approximate card width + gap
-  const resetPoint = producers.length * itemWidth;
+  // Calculate the max scroll distance
+  const itemWidth = 400 + 24; // card width + gap
+  const maxScroll = producers.length > 0 ? (producers.length - 2) * itemWidth : 0;
 
   useAnimationFrame(() => {
     if (scrollDirection === 'none' || producers.length === 0) return;
@@ -26,11 +26,11 @@ const FeaturedProducers = () => {
     const speed = scrollDirection === 'left' ? -baseSpeed : baseSpeed;
     let newX = currentX + speed;
     
-    // Seamless loop: reset position when we've scrolled one full set
-    if (newX <= -resetPoint) {
+    // Clamp to boundaries - stop at ends
+    if (newX > 0) {
       newX = 0;
-    } else if (newX >= 0 && scrollDirection === 'right') {
-      newX = -resetPoint + baseSpeed;
+    } else if (newX < -maxScroll) {
+      newX = -maxScroll;
     }
     
     x.set(newX);
@@ -60,8 +60,8 @@ const FeaturedProducers = () => {
     navigate(`/producer/${producerSlug}`);
   };
 
-  // Duplicate producers for seamless infinite scroll
-  const duplicatedProducers = [...producers, ...producers, ...producers];
+  // No duplication needed - using the original producers list
+  const displayProducers = producers;
 
   if (isLoading) {
     return (
@@ -116,7 +116,7 @@ const FeaturedProducers = () => {
           className="flex gap-6 px-6"
           style={{ x }}
         >
-          {duplicatedProducers.map((producer, index) => (
+          {displayProducers.map((producer, index) => (
             <motion.div
               key={`${producer.name}-${index}`}
               initial={{ opacity: 0, y: 20 }}
