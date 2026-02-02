@@ -347,7 +347,7 @@ const ProducerProfile = () => {
                   Link your Discord account to receive project notifications
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="discordUserId">Discord User ID</Label>
                   <Input
@@ -360,6 +360,23 @@ const ProducerProfile = () => {
                     Enable Developer Mode in Discord, right-click your profile, and copy your ID.
                   </p>
                 </div>
+                
+                {producerProfile.discord_user_id && (
+                  <div className="p-4 rounded-lg bg-[#5865F2]/10 border border-[#5865F2]/20">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      ✓ Your Discord is linked! Join our producer channel to receive project notifications:
+                    </p>
+                    <a
+                      href="https://discord.gg/hechoenamerica"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-sm font-medium text-[#5865F2] hover:underline"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      Join HEA Producer Discord
+                    </a>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </motion.div>
