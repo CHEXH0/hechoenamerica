@@ -28,6 +28,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const GENRE_OPTIONS = [
+  { value: "hip-hop", label: "Hip-Hop / Trap / Rap" },
+  { value: "rnb", label: "R&B / Soul" },
+  { value: "latin", label: "Latin / Reggaeton" },
+] as const;
 
 const ProducerProfile = () => {
   const navigate = useNavigate();
@@ -259,12 +272,18 @@ const ProducerProfile = () => {
 
                 <div>
                   <Label htmlFor="genre">Genre</Label>
-                  <Input
-                    id="genre"
-                    value={genre}
-                    onChange={(e) => setGenre(e.target.value)}
-                    placeholder="Your music genre(s)"
-                  />
+                  <Select value={genre} onValueChange={setGenre}>
+                    <SelectTrigger id="genre">
+                      <SelectValue placeholder="Select your primary genre" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {GENRE_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Editable Bio */}
