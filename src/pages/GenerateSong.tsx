@@ -16,8 +16,8 @@ import { Progress } from "@/components/ui/progress";
 import FileDeleter from "@/components/FileDeleter";
 
 // File size limits
-const MAX_FILE_SIZE_MB = 500; // 500MB per file
-const MAX_TOTAL_SIZE_MB = 2000; // 2GB total
+const MAX_FILE_SIZE_MB = 50; // 50MB per file
+const MAX_TOTAL_SIZE_MB = 200; // 200MB total
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 const MAX_TOTAL_SIZE_BYTES = MAX_TOTAL_SIZE_MB * 1024 * 1024;
 
