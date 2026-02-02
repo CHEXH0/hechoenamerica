@@ -28,19 +28,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const GENRE_OPTIONS = [
-  { value: "hip-hop", label: "Hip-Hop / Trap / Rap" },
-  { value: "rnb", label: "R&B / Soul" },
-  { value: "latin", label: "Latin / Reggaeton" },
-] as const;
+  "Hip-Hop/Rap",
+  "R&B/Soul",
+  "Pop",
+  "Electronic/EDM",
+  "Latin/Reggaeton",
+  "Rock/Alternative",
+  "Country",
+  "Jazz/Blues",
+  "Classical/Orchestral",
+  "Afrobeats",
+  "Dancehall/Caribbean",
+  "Gospel/Christian",
+];
 
 const ProducerProfile = () => {
   const navigate = useNavigate();
@@ -54,7 +57,7 @@ const ProducerProfile = () => {
   // Form state
   const [name, setName] = useState("");
   const [country, setCountry] = useState("");
-  const [genre, setGenre] = useState("");
+  const [genres, setGenres] = useState<string[]>([]);
   const [bio, setBio] = useState("");
   const [image, setImage] = useState("");
   const [discordUserId, setDiscordUserId] = useState("");
@@ -70,7 +73,10 @@ const ProducerProfile = () => {
     if (producerProfile) {
       setName(producerProfile.name || "");
       setCountry(producerProfile.country || "");
-      setGenre(producerProfile.genre || "");
+      // Parse genre - could be comma-separated string or already an array format
+      const genreStr = producerProfile.genre || "";
+      const parsedGenres = genreStr.split(",").map(g => g.trim()).filter(Boolean);
+      setGenres(parsedGenres);
       setBio(producerProfile.bio || "");
       setImage(producerProfile.image || "");
       setDiscordUserId(producerProfile.discord_user_id || "");
@@ -150,11 +156,21 @@ const ProducerProfile = () => {
     setImage(imageUrl);
   };
 
+  const handleGenreToggle = (genre: string, checked: boolean) => {
+    if (checked) {
+      if (genres.length < 3) {
+        setGenres([...genres, genre]);
+      }
+    } else {
+      setGenres(genres.filter(g => g !== genre));
+    }
+  };
+
   const handleSave = () => {
     updateProfile.mutate({
       name,
       country,
-      genre,
+      genre: genres.join(", "), // Store as comma-separated string
       bio,
       image,
       discord_user_id: discordUserId || null,
@@ -271,19 +287,33 @@ const ProducerProfile = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="genre">Genre</Label>
-                  <Select value={genre} onValueChange={setGenre}>
-                    <SelectTrigger id="genre">
-                      <SelectValue placeholder="Select your primary genre" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {GENRE_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label>Genres (Select up to 3)</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+                    {GENRE_OPTIONS.map((genreOption) => {
+                      const isSelected = genres.includes(genreOption);
+                      const isDisabled = genres.length >= 3 && !isSelected;
+                      
+                      return (
+                        <div key={genreOption} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`genre-${genreOption}`}
+                            checked={isSelected}
+                            disabled={isDisabled}
+                            onCheckedChange={(checked) => handleGenreToggle(genreOption, checked === true)}
+                          />
+                          <Label
+                            htmlFor={`genre-${genreOption}`}
+                            className={`text-sm cursor-pointer ${isDisabled ? "text-muted-foreground" : ""}`}
+                          >
+                            {genreOption}
+                          </Label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {genres.length}/3 genres selected
+                  </p>
                 </div>
 
                 {/* Editable Bio */}
