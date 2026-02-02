@@ -62,6 +62,7 @@ const GenerateSong = () => {
   const [generatedAudioUrl, setGeneratedAudioUrl] = useState<string | null>(null);
   const [aiGenerationsRemaining, setAiGenerationsRemaining] = useState<number | null>(null);
   const [nextResetTime, setNextResetTime] = useState<Date | null>(null);
+  const [countdownDisplay, setCountdownDisplay] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -124,6 +125,41 @@ const GenerateSong = () => {
   useEffect(() => {
     checkAIGenerationLimits();
   }, [user]);
+
+  // Live countdown timer for generation reset
+  useEffect(() => {
+    if (!nextResetTime) {
+      setCountdownDisplay("");
+      return;
+    }
+
+    const updateCountdown = () => {
+      const now = Date.now();
+      const diff = nextResetTime.getTime() - now;
+      
+      if (diff <= 0) {
+        setCountdownDisplay("");
+        checkAIGenerationLimits(); // Refresh limits when timer expires
+        return;
+      }
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      if (hours > 0) {
+        setCountdownDisplay(`${hours}h ${minutes}m ${seconds}s`);
+      } else if (minutes > 0) {
+        setCountdownDisplay(`${minutes}m ${seconds}s`);
+      } else {
+        setCountdownDisplay(`${seconds}s`);
+      }
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [nextResetTime]);
 
   // Check if returning from auth with pending request
   useEffect(() => {
@@ -806,6 +842,27 @@ const GenerateSong = () => {
             {/* Separate buttons for AI generation vs paid submission */}
             {currentTier.price === 0 ? (
               <div className="space-y-2">
+                {/* Generation counter and reset timer */}
+                {aiGenerationsRemaining !== null && countdownDisplay && (
+                  <div className="bg-white/15 backdrop-blur-sm rounded-lg p-3 text-center">
+                    <div className="flex items-center justify-center gap-2 text-white/90">
+                      <span className="text-sm">
+                        {aiGenerationsRemaining > 0 
+                          ? `🎵 ${aiGenerationsRemaining}/${MAX_FREE_AI_SONGS} generations left`
+                          : `⏳ Next generation available in:`
+                        }
+                      </span>
+                    </div>
+                    <div className="text-white font-mono font-bold text-lg mt-1">
+                      {countdownDisplay}
+                    </div>
+                    {aiGenerationsRemaining > 0 && (
+                      <p className="text-white/60 text-xs mt-1">
+                        +1 generation renews in {countdownDisplay}
+                      </p>
+                    )}
+                  </div>
+                )}
                 <Button 
                   type="button"
                   onClick={handleGenerateAI}
@@ -815,11 +872,6 @@ const GenerateSong = () => {
                 >
                   {isGeneratingAI ? "Generating..." : `Generate Free AI Song${aiGenerationsRemaining !== null ? ` (${aiGenerationsRemaining}/${MAX_FREE_AI_SONGS} left)` : ''}`}
                 </Button>
-                {aiGenerationsRemaining !== null && aiGenerationsRemaining <= 0 && nextResetTime && (
-                  <p className="text-white/70 text-xs text-center">
-                    Limit resets in {Math.ceil((nextResetTime.getTime() - Date.now()) / (1000 * 60 * 60))} hours
-                  </p>
-                )}
               </div>
             ) : (
               <Button 
