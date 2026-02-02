@@ -61,6 +61,7 @@ const ProducerProfile = () => {
   const [bio, setBio] = useState("");
   const [image, setImage] = useState("");
   const [discordUserId, setDiscordUserId] = useState("");
+  const [discordError, setDiscordError] = useState("");
   const [spotifyUrl, setSpotifyUrl] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [appleMusicUrl, setAppleMusicUrl] = useState("");
@@ -166,7 +167,29 @@ const ProducerProfile = () => {
     }
   };
 
+  // Validate Discord User ID (must be 17-19 digits)
+  const validateDiscordUserId = (id: string): boolean => {
+    if (!id) return true; // Empty is valid (optional field)
+    const discordIdRegex = /^\d{17,19}$/;
+    return discordIdRegex.test(id);
+  };
+
+  const handleDiscordUserIdChange = (value: string) => {
+    setDiscordUserId(value);
+    if (value && !validateDiscordUserId(value)) {
+      setDiscordError("Discord User ID must be a 17-19 digit number");
+    } else {
+      setDiscordError("");
+    }
+  };
+
   const handleSave = () => {
+    // Validate Discord ID before saving
+    if (discordUserId && !validateDiscordUserId(discordUserId)) {
+      setDiscordError("Discord User ID must be a 17-19 digit number");
+      return;
+    }
+
     updateProfile.mutate({
       name,
       country,
@@ -353,12 +376,17 @@ const ProducerProfile = () => {
                   <Input
                     id="discordUserId"
                     value={discordUserId}
-                    onChange={(e) => setDiscordUserId(e.target.value)}
+                    onChange={(e) => handleDiscordUserIdChange(e.target.value)}
                     placeholder="e.g., 1234567890123456789"
+                    className={discordError ? "border-destructive" : ""}
                   />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Enable Developer Mode in Discord, right-click your profile, and copy your ID.
-                  </p>
+                  {discordError ? (
+                    <p className="text-xs text-destructive mt-1">{discordError}</p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Enable Developer Mode in Discord, right-click your profile, and copy your ID.
+                    </p>
+                  )}
                 </div>
                 
                 {producerProfile.discord_user_id && (
