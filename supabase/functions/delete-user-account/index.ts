@@ -45,6 +45,16 @@ Deno.serve(async (req) => {
     const { data: claimsData, error: claimsError } = await supabaseUser.auth.getClaims(token)
 
     if (claimsError || !claimsData?.claims) {
+      // Check if the error is because the user was already deleted
+      // This can happen if the client retries after a successful deletion
+      if (claimsError?.code === 'user_not_found') {
+        console.log('User already deleted, returning success')
+        return new Response(
+          JSON.stringify({ success: true, message: 'Account already deleted' }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      
       console.error('JWT validation error:', claimsError)
       return new Response(
         JSON.stringify({ error: 'Invalid or expired token' }),
