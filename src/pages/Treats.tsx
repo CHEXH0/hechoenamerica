@@ -735,7 +735,7 @@ const Treats = () => {
             <Button
               onClick={() => setCartOpen(true)}
               variant="outline"
-              className="border-pink-400/50 text-pink-400 hover:bg-pink-500/20 hover:border-pink-400 relative"
+              className="border-pink-400/50 text-pink-700 hover:bg-pink-500/50 hover:border-pink-20 hover:text-gray-200 relative"
             >
               <ShoppingCart className="h-4 w-4 mr-2" />
               Cart
@@ -753,7 +753,7 @@ const Treats = () => {
             className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-red-400 bg-clip-text text-transparent mb-6"
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
           >
             TREATS
           </motion.h1>
@@ -1021,7 +1021,7 @@ const Treats = () => {
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-800 to-purple-500 bg-clip-text text-transparent mb-4">
                 Are You a Producer?
               </CardTitle>
-              <CardDescription className="text-gray-300 text-lg leading-relaxed">
+              <CardDescription className="text-gray-900 text-lg leading-relaxed">
                 Join our network of talented music producers. Work with artists from around the world 
                 and be part of the Hecho En América family.
               </CardDescription>

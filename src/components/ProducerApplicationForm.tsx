@@ -263,15 +263,15 @@ const ProducerApplicationForm = () => {
               transition={{ type: "spring", stiffness: 200, damping: 10 }}
               className="mb-6"
             >
-              <div className="w-24 h-24 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center mx-auto border border-purple-500/30">
-                <LogIn className="h-12 w-12 text-purple-400" />
+              <div className="w-24 h-24 bg-gradient-to-br from-purple-500/80 to-pink-500/80 rounded-full flex items-center justify-center mx-auto border border-purple-500/80">
+                <LogIn className="h-12 w-12 text-purple-600" />
               </div>
             </motion.div>
             
-            <h2 className="text-3xl font-bold text-white mb-4">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">
               Sign In Required
             </h2>
-            <p className="text-gray-300 text-lg max-w-md mx-auto mb-8">
+            <p className="text-gray-900 text-lg max-w-md mx-auto mb-8">
               You need to be signed in to submit a producer application. This helps us link your application to your account.
             </p>
             
@@ -317,7 +317,7 @@ const ProducerApplicationForm = () => {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white">Producer/Artist Name *</FormLabel>
+                      <FormLabel className="text-gray-1000">Producer/Artist Name *</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Your stage name or brand"
@@ -335,7 +335,7 @@ const ProducerApplicationForm = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white">Email *</FormLabel>
+                      <FormLabel className="text-gray-1000">Email *</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
@@ -355,7 +355,7 @@ const ProducerApplicationForm = () => {
                 name="country"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-white">Location *</FormLabel>
+                    <FormLabel className="text-gray-1000">Location *</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="City, Country (e.g., Los Angeles, USA)"
@@ -363,7 +363,7 @@ const ProducerApplicationForm = () => {
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription className="text-gray-700">
+                    <FormDescription className="text-gray-800">
                       Where you're primarily based
                     </FormDescription>
                     <FormMessage />
@@ -377,7 +377,7 @@ const ProducerApplicationForm = () => {
                 name="genres"
                 render={() => (
                   <FormItem>
-                    <FormLabel className="text-white">Main Genres * (Select up to 3)</FormLabel>
+                    <FormLabel className="text-gray-1000">Main Genres * (Select up to 3)</FormLabel>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-2">
                       {GENRE_OPTIONS.map((genre) => (
                         <FormField
@@ -408,7 +408,7 @@ const ProducerApplicationForm = () => {
                                 </FormControl>
                                 <Label
                                   className={`text-sm cursor-pointer ${
-                                    isDisabled ? "text-gray-700" : "text-gray-600"
+                                    isDisabled ? "text-gray-500" : "text-gray-800"
                                   }`}
                                 >
                                   {genre}
@@ -430,7 +430,7 @@ const ProducerApplicationForm = () => {
                 name="bio"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-white">Bio *</FormLabel>
+                    <FormLabel className="text-gray-1000">Bio *</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Tell us about yourself, your experience, style, and what makes you unique as a producer..."
@@ -438,7 +438,7 @@ const ProducerApplicationForm = () => {
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription className="text-gray-700">
+                    <FormDescription className="text-gray-800">
                       {field.value?.length || 0}/1000 characters (minimum 50)
                     </FormDescription>
                     <FormMessage />
@@ -448,7 +448,7 @@ const ProducerApplicationForm = () => {
 
               {/* Image Upload Section */}
               <div className="space-y-2">
-                <Label className="text-white">Brand Image *</Label>
+                <Label className="text-gray-1000">Brand Image *</Label>
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="flex-1">
                     <div
@@ -487,7 +487,7 @@ const ProducerApplicationForm = () => {
                     </motion.div>
                   )}
                 </div>
-                <p className="text-gray-700 text-sm">
+                <p className="text-gray-800 text-sm">
                   Upload a logo, photo, or image that represents your brand
                 </p>
               </div>
@@ -495,8 +495,8 @@ const ProducerApplicationForm = () => {
               {/* Social Links Section */}
               <div className="space-y-4">
                 <div>
-                  <Label className="text-white text-lg">Platform Links *</Label>
-                  <p className="text-gray-700 text-sm mt-1">
+                  <Label className="text-gray-1000 text-lg">Platform Links *</Label>
+                  <p className="text-gray-800 text-sm mt-1">
                     Provide at least one link to your music or social profile
                   </p>
                 </div>
@@ -507,7 +507,7 @@ const ProducerApplicationForm = () => {
                     name="spotify_url"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-600 flex items-center gap-2">
+                        <FormLabel className="text-gray-800 flex items-center gap-2">
                           <Music className="h-4 w-4 text-green-400" />
                           Spotify
                         </FormLabel>
@@ -528,7 +528,7 @@ const ProducerApplicationForm = () => {
                     name="youtube_url"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-600 flex items-center gap-2">
+                        <FormLabel className="text-gray-800 flex items-center gap-2">
                           <Youtube className="h-4 w-4 text-red-400" />
                           YouTube
                         </FormLabel>
@@ -549,7 +549,7 @@ const ProducerApplicationForm = () => {
                     name="apple_music_url"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-600 flex items-center gap-2">
+                        <FormLabel className="text-gray-800 flex items-center gap-2">
                           <Music className="h-4 w-4 text-pink-400" />
                           Apple Music
                         </FormLabel>
@@ -570,7 +570,7 @@ const ProducerApplicationForm = () => {
                     name="instagram_url"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-600 flex items-center gap-2">
+                        <FormLabel className="text-gray-800 flex items-center gap-2">
                           <Instagram className="h-4 w-4 text-purple-400" />
                           Instagram
                         </FormLabel>
@@ -591,7 +591,7 @@ const ProducerApplicationForm = () => {
                     name="website_url"
                     render={({ field }) => (
                       <FormItem className="md:col-span-2">
-                        <FormLabel className="text-gray-600 flex items-center gap-2">
+                        <FormLabel className="text-gray-800 flex items-center gap-2">
                           <Globe className="h-4 w-4 text-blue-400" />
                           Website
                         </FormLabel>
