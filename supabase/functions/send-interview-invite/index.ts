@@ -38,11 +38,10 @@ serve(async (req: Request): Promise<Response> => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
     
-    if (claimsError || !claimsData?.claims) {
-      console.error('Claims error:', claimsError);
+    if (userError || !user) {
+      console.error('Auth error:', userError);
       return new Response(
         JSON.stringify({ success: false, error: 'Invalid or expired token' }),
         { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
@@ -50,7 +49,7 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     // Check if user is admin
-    const userId = claimsData.claims.sub as string;
+    const userId = user.id;
     const { data: roleData } = await supabase
       .from('user_roles')
       .select('role')
