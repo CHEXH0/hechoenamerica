@@ -74,10 +74,10 @@ const Services = () => {
   // Duplicate platforms for seamless infinite scroll
   const duplicatedPlatforms = [...platforms, ...platforms, ...platforms];
   
-  const [scrollDirection, setScrollDirection] = useState<'left' | 'right' | 'none'>('left');
+  const [scrollDirection, setScrollDirection] = useState<'left' | 'right' | 'none'>('none');
   const containerRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
-  const baseSpeed = 2; // pixels per frame
+  const baseSpeed = 0.8; // slower pixels per frame
   
   // Calculate the reset point (one full set of platforms)
   const itemWidth = 176 + 24; // w-44 (176px) + gap-6 (24px)
@@ -117,7 +117,7 @@ const Services = () => {
   };
 
   const handleMouseLeave = () => {
-    setScrollDirection('left'); // Resume default scroll when mouse leaves
+    setScrollDirection('none'); // Stop scrolling when mouse leaves
   };
 
   return (
