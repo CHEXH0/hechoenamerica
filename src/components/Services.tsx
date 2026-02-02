@@ -1,5 +1,5 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useRef, useState, useEffect } from "react";
+import { motion, useMotionValue, useAnimationFrame } from "framer-motion";
 import { Headphones, Mic, Music } from "lucide-react";
 import { useTranslation } from "@/contexts/TranslationContext";
 import abletonLogo from "@/assets/ableton-logo.png";
@@ -74,20 +74,43 @@ const Services = () => {
   // Duplicate platforms for seamless infinite scroll
   const duplicatedPlatforms = [...platforms, ...platforms, ...platforms];
   
-  const [scrollDirection, setScrollDirection] = React.useState<'left' | 'right' | 'none'>('left');
-  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [scrollDirection, setScrollDirection] = useState<'left' | 'right' | 'none'>('left');
+  const containerRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const baseSpeed = 2; // pixels per frame
+  
+  // Calculate the reset point (one full set of platforms)
+  const itemWidth = 176 + 24; // w-44 (176px) + gap-6 (24px)
+  const resetPoint = platforms.length * itemWidth;
+
+  useAnimationFrame(() => {
+    if (scrollDirection === 'none') return;
+    
+    const currentX = x.get();
+    const speed = scrollDirection === 'left' ? -baseSpeed : baseSpeed;
+    let newX = currentX + speed;
+    
+    // Seamless loop: reset position when we've scrolled one full set
+    if (newX <= -resetPoint) {
+      newX = 0;
+    } else if (newX >= 0 && scrollDirection === 'right') {
+      newX = -resetPoint + baseSpeed;
+    }
+    
+    x.set(newX);
+  });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const containerWidth = rect.width;
-    const centerZone = containerWidth * 0.3; // 30% center zone = no scroll
+    const centerZone = containerWidth * 0.1; // 10% center zone = more responsive
     
     if (mouseX < (containerWidth - centerZone) / 2) {
-      setScrollDirection('right'); // Mouse on left = scroll right (reveal left items)
+      setScrollDirection('left'); // Mouse on left = scroll left
     } else if (mouseX > (containerWidth + centerZone) / 2) {
-      setScrollDirection('left'); // Mouse on right = scroll left (reveal right items)
+      setScrollDirection('right'); // Mouse on right = scroll right
     } else {
       setScrollDirection('none'); // Center = pause
     }
@@ -167,20 +190,7 @@ const Services = () => {
         {/* Infinite scrolling track */}
         <motion.div
           className="flex gap-6"
-          animate={{
-            x: scrollDirection === 'none' 
-              ? undefined 
-              : scrollDirection === 'left' 
-                ? [0, -50 * platforms.length * 4] 
-                : [-50 * platforms.length * 4, 0],
-          }}
-          transition={{
-            x: {
-              duration: scrollDirection === 'none' ? 0 : 12,
-              repeat: Infinity,
-              ease: [0.25, 0.1, 0.25, 1],
-            },
-          }}
+          style={{ x }}
         >
           {duplicatedPlatforms.map((platform, index) => (
             <div
