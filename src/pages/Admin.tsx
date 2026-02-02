@@ -448,7 +448,7 @@ const Admin = () => {
               <HiringStatusControl />
 
               {/* Producer Applications Management */}
-              <ProducerApplicationsAdmin />
+              <ProducerApplicationsAdmin onApprovalSuccess={fetchUsers} />
               
               {/* Payment Analytics Dashboard */}
               <PaymentAnalyticsDashboard />
