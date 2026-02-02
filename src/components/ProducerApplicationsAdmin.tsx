@@ -36,7 +36,11 @@ interface ProducerApplication {
   parsedData?: ApplicationData;
 }
 
-export const ProducerApplicationsAdmin = () => {
+interface ProducerApplicationsAdminProps {
+  onApprovalSuccess?: () => void;
+}
+
+export const ProducerApplicationsAdmin = ({ onApprovalSuccess }: ProducerApplicationsAdminProps) => {
   const { toast } = useToast();
   const [applications, setApplications] = useState<ProducerApplication[]>([]);
   const [loading, setLoading] = useState(true);
@@ -105,6 +109,11 @@ export const ProducerApplicationsAdmin = () => {
       });
 
       fetchApplications();
+      
+      // Notify parent to refresh users list when approved
+      if (action === 'approve' && onApprovalSuccess) {
+        onApprovalSuccess();
+      }
     } catch (error: any) {
       console.error('Error processing application:', error);
       toast({
