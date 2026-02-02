@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { Check, X, User, Music, Globe, ExternalLink, Loader2, AlertCircle } from "lucide-react";
+import { Check, X, User, Music, Globe, ExternalLink, Loader2, AlertCircle, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +40,7 @@ export const ProducerApplicationsAdmin = () => {
   const [applications, setApplications] = useState<ProducerApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
+  const [sendingInvite, setSendingInvite] = useState<string | null>(null);
   const [selectedApp, setSelectedApp] = useState<ProducerApplication | null>(null);
   const [confirmAction, setConfirmAction] = useState<{ app: ProducerApplication; action: 'approve' | 'reject' } | null>(null);
 
@@ -112,6 +113,39 @@ export const ProducerApplicationsAdmin = () => {
       });
     } finally {
       setProcessing(null);
+    }
+  };
+
+  const handleScheduleInterview = async (app: ProducerApplication) => {
+    setSendingInvite(app.id);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('send-interview-invite', {
+        body: {
+          applicantName: app.name,
+          applicantEmail: app.email,
+        }
+      });
+
+      if (error) throw error;
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to send invite');
+      }
+
+      toast({
+        title: "Interview Invite Sent! 📅",
+        description: `Booking link sent to ${app.email}`,
+      });
+    } catch (error: any) {
+      console.error('Error sending interview invite:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send interview invite",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingInvite(null);
     }
   };
 
@@ -215,6 +249,19 @@ export const ProducerApplicationsAdmin = () => {
                         </Button>
                         {app.application_status === 'pending' && (
                           <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={sendingInvite === app.id}
+                              onClick={() => handleScheduleInterview(app)}
+                              title="Send interview booking link"
+                            >
+                              {sendingInvite === app.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Calendar className="h-4 w-4" />
+                              )}
+                            </Button>
                             <Button
                               variant="default"
                               size="sm"
@@ -368,6 +415,18 @@ export const ProducerApplicationsAdmin = () => {
           <DialogFooter>
             {selectedApp?.application_status === 'pending' && (
               <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  disabled={sendingInvite === selectedApp.id}
+                  onClick={() => handleScheduleInterview(selectedApp)}
+                >
+                  {sendingInvite === selectedApp.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Calendar className="h-4 w-4 mr-2" />
+                  )}
+                  Schedule Interview
+                </Button>
                 <Button
                   variant="destructive"
                   onClick={() => {
