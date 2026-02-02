@@ -42,7 +42,7 @@ const addOnPricing = {
 };
 
 const MAX_FREE_AI_SONGS = 3;
-const RESET_HOURS = 24;
+const RESET_HOURS = 5;
 
 const GenerateSong = () => {
   const [sliderValue, setSliderValue] = useState([0]);
