@@ -44,9 +44,9 @@ const FeaturedProducers = () => {
     const centerZone = containerWidth * 0.1; // 10% center zone
     
     if (mouseX < (containerWidth - centerZone) / 2) {
-      setScrollDirection('left');
+      setScrollDirection('right'); // Mouse on left = scroll right
     } else if (mouseX > (containerWidth + centerZone) / 2) {
-      setScrollDirection('right');
+      setScrollDirection('left'); // Mouse on right = scroll left
     } else {
       setScrollDirection('none');
     }
