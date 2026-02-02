@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Upload, Plus, ChevronDown, HardDrive, Link, X, FileAudio, FileImage, FileArchive, File } from "lucide-react";
+import { Upload, Plus, ChevronDown, HardDrive, Link, X, FileAudio, FileImage, FileArchive, File, Loader2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import FileDeleter from "@/components/FileDeleter";
 
 // File size limits
@@ -64,6 +65,8 @@ const GenerateSong = () => {
   const [showDriveLinkInput, setShowDriveLinkInput] = useState(false);
   const [newDriveLink, setNewDriveLink] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [currentUploadFile, setCurrentUploadFile] = useState<string>("");
   const [showTooltip, setShowTooltip] = useState(true);
   const [numberOfRevisions, setNumberOfRevisions] = useState(0);
   const [wantsRecordedStems, setWantsRecordedStems] = useState(false);
@@ -449,36 +452,71 @@ const GenerateSong = () => {
     }
 
     setIsSubmitting(true);
+    setUploadProgress(0);
+    setCurrentUploadFile("");
     
     try {
       // Upload files to storage if any
       let fileUrls: string[] = [];
       if (files && files.length > 0) {
         console.log(`Starting upload of ${files.length} files...`);
-        toast({
-          title: "Uploading files...",
-          description: `Uploading ${files.length} file(s) to Supabase storage`,
-        });
+        
+        const totalFiles = files.length;
+        let completedFiles = 0;
+        let totalBytes = files.reduce((sum, f) => sum + f.size, 0);
+        let uploadedBytes = 0;
 
         for (const file of files) {
           const timestamp = Date.now();
           const fileName = `${user.id}/${timestamp}_${file.name}`;
           
+          setCurrentUploadFile(file.name);
           console.log(`Uploading file: ${file.name} (${file.size} bytes)`);
           
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('product-assets')
-            .upload(fileName, file, {
-              cacheControl: '3600',
-              upsert: false
+          // Use XMLHttpRequest for progress tracking
+          const { data: { session } } = await supabase.auth.getSession();
+          const accessToken = session?.access_token;
+          
+          await new Promise<void>((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            const supabaseUrl = "https://eapbuoqkhckqaswfjexv.supabase.co";
+            const uploadUrl = `${supabaseUrl}/storage/v1/object/product-assets/${encodeURIComponent(fileName)}`;
+            
+            xhr.upload.addEventListener('progress', (event) => {
+              if (event.lengthComputable) {
+                const fileProgress = event.loaded;
+                const currentTotalProgress = uploadedBytes + fileProgress;
+                const overallProgress = Math.round((currentTotalProgress / totalBytes) * 100);
+                setUploadProgress(Math.min(overallProgress, 99));
+              }
             });
-
-          if (uploadError) {
-            console.error("Upload error:", uploadError);
-            throw new Error(`Failed to upload ${file.name}: ${uploadError.message}`);
-          }
-
-          console.log(`File uploaded successfully: ${fileName}`);
+            
+            xhr.addEventListener('load', () => {
+              if (xhr.status >= 200 && xhr.status < 300) {
+                uploadedBytes += file.size;
+                completedFiles++;
+                console.log(`File uploaded successfully: ${fileName}`);
+                resolve();
+              } else {
+                try {
+                  const errorResponse = JSON.parse(xhr.responseText);
+                  reject(new Error(errorResponse.message || `Upload failed with status ${xhr.status}`));
+                } catch {
+                  reject(new Error(`Upload failed with status ${xhr.status}`));
+                }
+              }
+            });
+            
+            xhr.addEventListener('error', () => {
+              reject(new Error(`Network error while uploading ${file.name}`));
+            });
+            
+            xhr.open('POST', uploadUrl, true);
+            xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+            xhr.setRequestHeader('apikey', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhcGJ1b3FraGNrcWFzd2ZqZXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU4NzM0NjMsImV4cCI6MjA3MTQ0OTQ2M30.oybb51fqUbvPklFND2ah5ko3PVUDRUIulSIojuPfoWE');
+            xhr.setRequestHeader('x-upsert', 'false');
+            xhr.send(file);
+          });
 
           // Get signed URL (valid for 1 year)
           const { data: signedData, error: signError } = await supabase.storage
@@ -494,6 +532,7 @@ const GenerateSong = () => {
           fileUrls.push(signedData.signedUrl);
         }
         
+        setUploadProgress(100);
         console.log(`All files uploaded. Total URLs: ${fileUrls.length}`);
       }
 
@@ -1142,14 +1181,64 @@ const GenerateSong = () => {
                 </Button>
               </div>
             ) : (
-              <Button 
-                type="submit" 
-                disabled={isSubmitting} 
-                className="w-full bg-white/50 text-black hover:bg-white font-bold text-lg py-6" 
-                size="lg"
-              >
-                {isSubmitting ? "Submitting..." : "Submit Your Song Idea"}
-              </Button>
+              <div className="space-y-3">
+                {/* Upload Progress Bar */}
+                <AnimatePresence>
+                  {isSubmitting && files.length > 0 && uploadProgress < 100 && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="bg-white/20 backdrop-blur-sm rounded-xl p-4 border border-white/30 space-y-3"
+                    >
+                      <div className="flex items-center justify-between text-white">
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span className="text-sm font-medium">
+                            Uploading{currentUploadFile ? `: ${currentUploadFile}` : '...'}
+                          </span>
+                        </div>
+                        <span className="text-sm font-bold">{uploadProgress}%</span>
+                      </div>
+                      <Progress 
+                        value={uploadProgress} 
+                        className="h-3 bg-white/20 [&>div]:bg-gradient-to-r [&>div]:from-green-400 [&>div]:via-emerald-500 [&>div]:to-teal-500 [&>div]:shadow-[0_0_15px_rgba(52,211,153,0.5)]"
+                      />
+                      <p className="text-white/60 text-xs text-center">
+                        Please don't close this page while uploading
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                
+                {isSubmitting && uploadProgress === 100 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="bg-green-500/20 backdrop-blur-sm rounded-xl p-4 border border-green-500/30 text-center"
+                  >
+                    <div className="flex items-center justify-center gap-2 text-green-300">
+                      <span className="text-sm font-medium">✓ Files uploaded! Redirecting to payment...</span>
+                    </div>
+                  </motion.div>
+                )}
+                
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting} 
+                  className="w-full bg-white/50 text-black hover:bg-white font-bold text-lg py-6" 
+                  size="lg"
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      {files.length > 0 && uploadProgress < 100 
+                        ? `Uploading... ${uploadProgress}%` 
+                        : "Processing..."}
+                    </span>
+                  ) : "Submit Your Song Idea"}
+                </Button>
+              </div>
             )}
           </form>
         </motion.div>
