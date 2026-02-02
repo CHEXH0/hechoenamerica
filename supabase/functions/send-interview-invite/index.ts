@@ -14,6 +14,7 @@ const BOOKING_URL = "https://calendar.app.google/TGGjqWJpCC64SsV59";
 interface InterviewInviteRequest {
   applicantName: string;
   applicantEmail: string;
+  applicationId: string;
 }
 
 serve(async (req: Request): Promise<Response> => {
@@ -32,11 +33,14 @@ serve(async (req: Request): Promise<Response> => {
       );
     }
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+
+    // Use anon key for user auth check
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
 
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
@@ -64,9 +68,9 @@ serve(async (req: Request): Promise<Response> => {
       );
     }
 
-    const { applicantName, applicantEmail }: InterviewInviteRequest = await req.json();
+    const { applicantName, applicantEmail, applicationId }: InterviewInviteRequest = await req.json();
 
-    console.log(`Sending interview invite to ${applicantEmail} for ${applicantName}`);
+    console.log(`Sending interview invite to ${applicantEmail} for ${applicantName} (application: ${applicationId})`);
 
     if (!applicantName || !applicantEmail) {
       throw new Error('Missing required fields: applicantName and applicantEmail');
@@ -136,6 +140,22 @@ serve(async (req: Request): Promise<Response> => {
     });
 
     console.log('Interview invite email sent successfully:', emailResponse);
+
+    // Update the application record to track that invite was sent
+    if (applicationId) {
+      const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+      
+      const { error: updateError } = await supabaseAdmin
+        .from('contact_submissions')
+        .update({ interview_invite_sent_at: new Date().toISOString() })
+        .eq('id', applicationId);
+
+      if (updateError) {
+        console.error('Failed to update interview_invite_sent_at:', updateError);
+      } else {
+        console.log('Updated interview_invite_sent_at for application:', applicationId);
+      }
+    }
 
     return new Response(
       JSON.stringify({ success: true, message: 'Interview invite sent successfully' }),
