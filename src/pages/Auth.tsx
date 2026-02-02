@@ -338,7 +338,7 @@ const Auth = () => {
                           {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </Button>
                       </div>
-                      <p className="text-xs text-gray-900">Password must be at least 6 characters</p>
+                      <p className="text-xs text-gray-900">Password must be at least 6 characters and not found in known data breaches</p>
                     </div>
                     <Button
                       type="submit"
