@@ -73,9 +73,11 @@ const Services = () => {
 
   // Duplicate platforms for seamless infinite scroll
   const duplicatedPlatforms = [...platforms, ...platforms];
+  
+  const [isPaused, setIsPaused] = React.useState(false);
 
   return (
-    <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-800/80 via-purple-900/60 to-black overflow-hidden">
+    <section className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-purple-800/80 via-purple-900/60 to-black overflow-hidden relative">
       <div className="container mx-auto px-4">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -127,45 +129,50 @@ const Services = () => {
           <h3 className="text-xl md:text-2xl font-semibold text-center text-white/80 mb-8">
             We work with industry-standard DAWs
           </h3>
-          
-          {/* Scrolling container */}
-          <div className="relative w-full overflow-hidden">
-            {/* Gradient masks for smooth fade effect */}
-            <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-purple-900/60 to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-purple-900/60 to-transparent z-10 pointer-events-none" />
-            
-            {/* Infinite scrolling track */}
-            <motion.div
-              className="flex gap-8"
-              animate={{
-                x: [0, -50 * platforms.length * 4],
-              }}
-              transition={{
-                x: {
-                  duration: 30,
-                  repeat: Infinity,
-                  ease: "linear",
-                },
-              }}
+        </motion.div>
+      </div>
+      
+      {/* Full-width scrolling container - outside the container */}
+      <div 
+        className="w-full overflow-hidden mt-8"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
+        {/* Gradient masks for smooth fade effect */}
+        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+        
+        {/* Infinite scrolling track */}
+        <motion.div
+          className="flex gap-6"
+          animate={{
+            x: isPaused ? undefined : [0, -50 * platforms.length * 4],
+          }}
+          transition={{
+            x: {
+              duration: 30,
+              repeat: Infinity,
+              ease: "linear",
+            },
+          }}
+          style={isPaused ? { x: undefined } : undefined}
+        >
+          {duplicatedPlatforms.map((platform, index) => (
+            <div
+              key={`${platform.name}-${index}`}
+              className="flex-shrink-0 w-44 bg-black/40 backdrop-blur-md border border-purple-400/20 rounded-xl p-5 text-center hover:border-purple-400/40 hover:bg-black/60 transition-all duration-300 group"
             >
-              {duplicatedPlatforms.map((platform, index) => (
-                <div
-                  key={`${platform.name}-${index}`}
-                  className="flex-shrink-0 w-48 bg-black/40 backdrop-blur-md border border-purple-400/20 rounded-xl p-6 text-center hover:border-purple-400/40 hover:bg-black/60 transition-all duration-300 group"
-                >
-                  <div className="w-16 h-16 mx-auto mb-4 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-colors">
-                    <img 
-                      src={platform.logo} 
-                      alt={`${platform.name} logo`} 
-                      className="w-12 h-12 object-contain"
-                    />
-                  </div>
-                  <h4 className="text-base font-semibold text-white mb-2">{platform.name}</h4>
-                  <p className="text-purple-300 text-xs italic">"{platform.tagline}"</p>
-                </div>
-              ))}
-            </motion.div>
-          </div>
+              <div className="w-14 h-14 mx-auto mb-3 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                <img 
+                  src={platform.logo} 
+                  alt={`${platform.name} logo`} 
+                  className="w-10 h-10 object-contain"
+                />
+              </div>
+              <h4 className="text-sm font-semibold text-white mb-1">{platform.name}</h4>
+              <p className="text-purple-300 text-xs italic">"{platform.tagline}"</p>
+            </div>
+          ))}
         </motion.div>
       </div>
     </section>
