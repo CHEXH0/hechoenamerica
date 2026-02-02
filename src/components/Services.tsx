@@ -176,9 +176,9 @@ const Services = () => {
           }}
           transition={{
             x: {
-              duration: scrollDirection === 'none' ? 0 : 25,
+              duration: scrollDirection === 'none' ? 0 : 12,
               repeat: Infinity,
-              ease: "linear",
+              ease: [0.25, 0.1, 0.25, 1],
             },
           }}
         >
