@@ -69,6 +69,7 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          interview_invite_sent_at: string | null
           message: string
           name: string
           subject: string
@@ -80,6 +81,7 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
+          interview_invite_sent_at?: string | null
           message: string
           name: string
           subject: string
@@ -91,6 +93,7 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          interview_invite_sent_at?: string | null
           message?: string
           name?: string
           subject?: string

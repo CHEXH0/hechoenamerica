@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { Check, X, User, Music, Globe, ExternalLink, Loader2, AlertCircle, Calendar } from "lucide-react";
+import { Check, X, User, Music, Globe, ExternalLink, Loader2, AlertCircle, Calendar, CheckCircle2, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +32,7 @@ interface ProducerApplication {
   user_id: string | null;
   application_status: string;
   created_at: string;
+  interview_invite_sent_at: string | null;
   parsedData?: ApplicationData;
 }
 
@@ -124,6 +125,7 @@ export const ProducerApplicationsAdmin = () => {
         body: {
           applicantName: app.name,
           applicantEmail: app.email,
+          applicationId: app.id,
         }
       });
 
@@ -134,9 +136,12 @@ export const ProducerApplicationsAdmin = () => {
       }
 
       toast({
-        title: "Interview Invite Sent! 📅",
+        title: app.interview_invite_sent_at ? "Interview Invite Resent! 📅" : "Interview Invite Sent! 📅",
         description: `Booking link sent to ${app.email}`,
       });
+
+      // Refresh applications to show updated status
+      fetchApplications();
     } catch (error: any) {
       console.error('Error sending interview invite:', error);
       toast({
@@ -192,9 +197,10 @@ export const ProducerApplicationsAdmin = () => {
                   <TableHead>Applicant</TableHead>
                   <TableHead>Location</TableHead>
                   <TableHead>Genres</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Interview</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -237,6 +243,16 @@ export const ProducerApplicationsAdmin = () => {
                     <TableCell className="text-sm text-muted-foreground">
                       {format(new Date(app.created_at), 'MMM d, yyyy')}
                     </TableCell>
+                    <TableCell>
+                      {app.interview_invite_sent_at ? (
+                        <div className="flex items-center gap-1 text-green-600" title={`Sent: ${format(new Date(app.interview_invite_sent_at), 'MMM d, yyyy HH:mm')}`}>
+                          <CheckCircle2 className="h-4 w-4" />
+                          <span className="text-xs">Sent</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Not sent</span>
+                      )}
+                    </TableCell>
                     <TableCell>{getStatusBadge(app.application_status)}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
@@ -254,10 +270,13 @@ export const ProducerApplicationsAdmin = () => {
                               size="sm"
                               disabled={sendingInvite === app.id}
                               onClick={() => handleScheduleInterview(app)}
-                              title="Send interview booking link"
+                              title={app.interview_invite_sent_at ? "Resend interview booking link" : "Send interview booking link"}
+                              className={app.interview_invite_sent_at ? "border-green-500/50" : ""}
                             >
                               {sendingInvite === app.id ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : app.interview_invite_sent_at ? (
+                                <RefreshCw className="h-4 w-4 text-green-600" />
                               ) : (
                                 <Calendar className="h-4 w-4" />
                               )}
@@ -419,13 +438,21 @@ export const ProducerApplicationsAdmin = () => {
                   variant="outline"
                   disabled={sendingInvite === selectedApp.id}
                   onClick={() => handleScheduleInterview(selectedApp)}
+                  className={selectedApp.interview_invite_sent_at ? "border-green-500/50" : ""}
                 >
                   {sendingInvite === selectedApp.id ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : selectedApp.interview_invite_sent_at ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 text-green-600" />
+                      Resend Invite
+                    </>
                   ) : (
-                    <Calendar className="h-4 w-4 mr-2" />
+                    <>
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Schedule Interview
+                    </>
                   )}
-                  Schedule Interview
                 </Button>
                 <Button
                   variant="destructive"
