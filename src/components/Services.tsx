@@ -72,12 +72,33 @@ const Services = () => {
   ];
 
   // Duplicate platforms for seamless infinite scroll
-  const duplicatedPlatforms = [...platforms, ...platforms];
+  const duplicatedPlatforms = [...platforms, ...platforms, ...platforms];
   
-  const [isPaused, setIsPaused] = React.useState(false);
+  const [scrollDirection, setScrollDirection] = React.useState<'left' | 'right' | 'none'>('left');
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const containerWidth = rect.width;
+    const centerZone = containerWidth * 0.3; // 30% center zone = no scroll
+    
+    if (mouseX < (containerWidth - centerZone) / 2) {
+      setScrollDirection('right'); // Mouse on left = scroll right (reveal left items)
+    } else if (mouseX > (containerWidth + centerZone) / 2) {
+      setScrollDirection('left'); // Mouse on right = scroll left (reveal right items)
+    } else {
+      setScrollDirection('none'); // Center = pause
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setScrollDirection('left'); // Resume default scroll when mouse leaves
+  };
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-purple-800/80 via-purple-900/60 to-black overflow-hidden relative">
+    <section className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-purple-800/80 via-purple-900/60 to-black overflow-hidden">
       <div className="container mx-auto px-4">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -134,28 +155,32 @@ const Services = () => {
       
       {/* Full-width scrolling container - outside the container */}
       <div 
-        className="w-full overflow-hidden mt-8"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
+        ref={containerRef}
+        className="w-full overflow-hidden mt-8 relative"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
       >
-        {/* Gradient masks for smooth fade effect */}
-        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+        {/* Gradient masks for smooth fade effect - contained within this div */}
+        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
         
         {/* Infinite scrolling track */}
         <motion.div
           className="flex gap-6"
           animate={{
-            x: isPaused ? undefined : [0, -50 * platforms.length * 4],
+            x: scrollDirection === 'none' 
+              ? undefined 
+              : scrollDirection === 'left' 
+                ? [0, -50 * platforms.length * 4] 
+                : [-50 * platforms.length * 4, 0],
           }}
           transition={{
             x: {
-              duration: 30,
+              duration: scrollDirection === 'none' ? 0 : 25,
               repeat: Infinity,
               ease: "linear",
             },
           }}
-          style={isPaused ? { x: undefined } : undefined}
         >
           {duplicatedPlatforms.map((platform, index) => (
             <div
