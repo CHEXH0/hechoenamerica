@@ -11,8 +11,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Upload, Plus, ChevronDown } from "lucide-react";
+import { Upload, Plus, ChevronDown, HardDrive, Link, X, FileAudio, FileImage, FileArchive, File } from "lucide-react";
 import FileDeleter from "@/components/FileDeleter";
+
+// File size limits
+const MAX_FILE_SIZE_MB = 500; // 500MB per file
+const MAX_TOTAL_SIZE_MB = 2000; // 2GB total
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+const MAX_TOTAL_SIZE_BYTES = MAX_TOTAL_SIZE_MB * 1024 * 1024;
+
+// Google Drive link type
+interface DriveLink {
+  url: string;
+  name: string;
+}
 
 const genreCategories = [
   { value: "hip-hop", label: "Hip Hop / Trap / Rap" },
@@ -48,6 +60,9 @@ const GenerateSong = () => {
   const [sliderValue, setSliderValue] = useState([0]);
   const [idea, setIdea] = useState("");
   const [files, setFiles] = useState<File[]>([]);
+  const [driveLinks, setDriveLinks] = useState<DriveLink[]>([]);
+  const [showDriveLinkInput, setShowDriveLinkInput] = useState(false);
+  const [newDriveLink, setNewDriveLink] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showTooltip, setShowTooltip] = useState(true);
   const [numberOfRevisions, setNumberOfRevisions] = useState(0);
@@ -69,6 +84,32 @@ const GenerateSong = () => {
   const { toast } = useToast();
   const currentTier = tiers[sliderValue[0]];
   const tierIndex = sliderValue[0];
+
+  // Calculate total file size
+  const getTotalFileSize = () => {
+    return files.reduce((total, file) => total + file.size, 0);
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+  };
+
+  const getFileIcon = (fileName: string) => {
+    const ext = fileName.toLowerCase().split('.').pop();
+    if (['mp3', 'wav', 'm4a', 'flac', 'aac', 'ogg', 'wma'].includes(ext || '')) {
+      return <FileAudio className="w-4 h-4 text-purple-300" />;
+    }
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'svg', 'heic', 'heif'].includes(ext || '')) {
+      return <FileImage className="w-4 h-4 text-blue-300" />;
+    }
+    if (['zip', 'rar', '7z'].includes(ext || '')) {
+      return <FileArchive className="w-4 h-4 text-yellow-300" />;
+    }
+    return <File className="w-4 h-4 text-white/70" />;
+  };
 
   // Calculate total price with add-ons
   const calculateTotalPrice = () => {
@@ -178,8 +219,82 @@ const GenerateSong = () => {
   }, [user, toast]);
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setFiles(prevFiles => [...prevFiles, ...Array.from(e.target.files)]);
+      const newFiles = Array.from(e.target.files);
+      
+      // Check individual file sizes
+      const oversizedFiles = newFiles.filter(file => file.size > MAX_FILE_SIZE_BYTES);
+      if (oversizedFiles.length > 0) {
+        toast({
+          title: "File too large",
+          description: `Files must be under ${MAX_FILE_SIZE_MB}MB. Use Google Drive for larger files.`,
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Check total size
+      const currentTotal = getTotalFileSize();
+      const newTotal = currentTotal + newFiles.reduce((sum, f) => sum + f.size, 0);
+      if (newTotal > MAX_TOTAL_SIZE_BYTES) {
+        toast({
+          title: "Total size exceeded",
+          description: `Total upload limit is ${MAX_TOTAL_SIZE_MB / 1000}GB. Use Google Drive for additional files.`,
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      setFiles(prevFiles => [...prevFiles, ...newFiles]);
     }
+  };
+
+  // Handle adding Google Drive links
+  const handleAddDriveLink = () => {
+    if (!newDriveLink.trim()) {
+      toast({
+        title: "No link provided",
+        description: "Please enter a Google Drive, Dropbox, or other file sharing link",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Basic URL validation
+    try {
+      new URL(newDriveLink);
+    } catch {
+      toast({
+        title: "Invalid URL",
+        description: "Please enter a valid URL",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Extract name from URL or use generic
+    let name = "Shared file";
+    if (newDriveLink.includes("drive.google.com")) {
+      name = "Google Drive file";
+    } else if (newDriveLink.includes("dropbox.com")) {
+      name = "Dropbox file";
+    } else if (newDriveLink.includes("wetransfer.com")) {
+      name = "WeTransfer file";
+    } else if (newDriveLink.includes("onedrive")) {
+      name = "OneDrive file";
+    }
+
+    setDriveLinks(prev => [...prev, { url: newDriveLink.trim(), name }]);
+    setNewDriveLink("");
+    setShowDriveLinkInput(false);
+    
+    toast({
+      title: "Link added",
+      description: "Your file link has been added to the submission",
+    });
+  };
+
+  const removeDriveLink = (index: number) => {
+    setDriveLinks(prev => prev.filter((_, i) => i !== index));
   };
   // Handle AI generation separately from paid tier submission
   const handleGenerateAI = async () => {
@@ -382,6 +497,12 @@ const GenerateSong = () => {
         console.log(`All files uploaded. Total URLs: ${fileUrls.length}`);
       }
 
+      // Combine file URLs with drive links
+      const allFileUrls = [
+        ...fileUrls,
+        ...driveLinks.map(link => link.url)
+      ];
+
       // For paid tiers only - create song request and redirect to Stripe
       console.log("Creating paid tier song request...");
       const { data: requestData, error: insertError } = await supabase
@@ -393,7 +514,7 @@ const GenerateSong = () => {
           tier: currentTier.label,
           price: `$${totalPrice}`,
           status: 'pending_payment',
-          file_urls: fileUrls.length > 0 ? fileUrls : null,
+          file_urls: allFileUrls.length > 0 ? allFileUrls : null,
           number_of_revisions: numberOfRevisions,
           wants_recorded_stems: wantsRecordedStems,
           wants_analog: wantsAnalog,
@@ -420,7 +541,7 @@ const GenerateSong = () => {
         body: {
           tier: currentTier.label,
           idea,
-          fileUrls: fileUrls,
+          fileUrls: allFileUrls,
           requestId: requestData.id,
           totalPrice: totalPrice,
           basePrice: currentTier.price,
@@ -595,31 +716,178 @@ const GenerateSong = () => {
                 </p>
               )}
               {currentTier.price > 0 && (
-                <>
-                  <div onClick={() => fileInputRef.current?.click()} className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors">
-                    <Plus className="w-3 h-3 text-white" />
+                <div className="space-y-4 mt-4">
+                  {/* File size info banner */}
+                  <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-white/20 rounded-xl p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Upload className="w-5 h-5 text-white" />
+                      <span className="text-white font-semibold">Upload Your Files</span>
+                    </div>
+                    <p className="text-white/70 text-sm">
+                      Up to <span className="text-white font-medium">{MAX_FILE_SIZE_MB}MB</span> per file, 
+                      <span className="text-white font-medium"> {MAX_TOTAL_SIZE_MB / 1000}GB</span> total. 
+                      For larger files, use Google Drive or Dropbox links below.
+                    </p>
                   </div>
-                  <p className="text-white/60 text-xs">
-                      Audio (.mp3, .wav), Images (.jpg, .png, .heic, etc.), Archives (.zip, .rar)
+
+                  {/* Upload buttons row */}
+                  <div className="flex gap-3">
+                    <Button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      variant="outline"
+                      className="flex-1 bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload Files
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => setShowDriveLinkInput(true)}
+                      variant="outline"
+                      className="flex-1 bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white"
+                    >
+                      <HardDrive className="w-4 h-4 mr-2" />
+                      Add Drive Link
+                    </Button>
+                  </div>
+
+                  <p className="text-white/50 text-xs text-center">
+                    Audio (.mp3, .wav, .flac), Images (.jpg, .png, .heic), Archives (.zip, .rar), PDF
                   </p>
-                  <div className="space-y-2">
-                    <input 
-                      ref={fileInputRef} 
-                      type="file" 
-                      id="files" 
-                      multiple 
-                      accept=".mp3,.wav,.m4a,.flac,.aac,.ogg,.wma,.jpg,.jpeg,.png,.gif,.webp,.bmp,.tiff,.svg,.heic,.heif,.raw,.cr2,.nef,.arw,.dng,.pdf,.zip,.rar,.7z" 
-                      onChange={handleFileChange} 
-                      className="hidden"
-                    />
-                    {files && files.length > 0 && (
-                      <div className="text-white/80 text-sm space-y-1">
-                        <p className="font-medium">Selected files:</p>
-                        <FileDeleter files={files} onDelete={(index) => setFiles(files.filter((_, i) => i !== index))} />
-                      </div>
+
+                  <input 
+                    ref={fileInputRef} 
+                    type="file" 
+                    id="files" 
+                    multiple 
+                    accept=".mp3,.wav,.m4a,.flac,.aac,.ogg,.wma,.jpg,.jpeg,.png,.gif,.webp,.bmp,.tiff,.svg,.heic,.heif,.raw,.cr2,.nef,.arw,.dng,.pdf,.zip,.rar,.7z" 
+                    onChange={handleFileChange} 
+                    className="hidden"
+                  />
+
+                  {/* Drive link input */}
+                  <AnimatePresence>
+                    {showDriveLinkInput && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="bg-white/10 rounded-lg p-4 space-y-3"
+                      >
+                        <Label className="text-white text-sm font-medium">
+                          Paste Google Drive, Dropbox, or WeTransfer link
+                        </Label>
+                        <div className="flex gap-2">
+                          <input
+                            type="url"
+                            value={newDriveLink}
+                            onChange={(e) => setNewDriveLink(e.target.value)}
+                            placeholder="https://drive.google.com/..."
+                            className="flex-1 bg-white/20 border border-white/30 rounded-lg px-3 py-2 text-white placeholder:text-white/40 text-sm"
+                          />
+                          <Button
+                            type="button"
+                            onClick={handleAddDriveLink}
+                            size="sm"
+                            className="bg-green-500 hover:bg-green-600 text-white"
+                          >
+                            Add
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              setShowDriveLinkInput(false);
+                              setNewDriveLink("");
+                            }}
+                            size="sm"
+                            variant="ghost"
+                            className="text-white/70 hover:text-white hover:bg-white/10"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <p className="text-white/50 text-xs">
+                          💡 Tip: Make sure your link is set to "Anyone with the link can view"
+                        </p>
+                      </motion.div>
                     )}
-                  </div>
-                </>
+                  </AnimatePresence>
+
+                  {/* Selected files list */}
+                  {(files.length > 0 || driveLinks.length > 0) && (
+                    <div className="bg-white/10 rounded-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-white font-medium text-sm">
+                          Attached Files ({files.length + driveLinks.length})
+                        </span>
+                        {files.length > 0 && (
+                          <span className="text-white/60 text-xs">
+                            {formatFileSize(getTotalFileSize())} / {MAX_TOTAL_SIZE_MB / 1000}GB
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Local files */}
+                      {files.length > 0 && (
+                        <div className="space-y-2">
+                          {files.map((file, index) => (
+                            <div 
+                              key={`file-${index}`}
+                              className="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2"
+                            >
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                {getFileIcon(file.name)}
+                                <span className="text-white/90 text-sm truncate">{file.name}</span>
+                                <span className="text-white/40 text-xs shrink-0">
+                                  ({formatFileSize(file.size)})
+                                </span>
+                              </div>
+                              <Button
+                                type="button"
+                                onClick={() => setFiles(files.filter((_, i) => i !== index))}
+                                size="sm"
+                                variant="ghost"
+                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-1 h-auto"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Drive links */}
+                      {driveLinks.length > 0 && (
+                        <div className="space-y-2">
+                          {driveLinks.map((link, index) => (
+                            <div 
+                              key={`link-${index}`}
+                              className="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2"
+                            >
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <Link className="w-4 h-4 text-green-400" />
+                                <span className="text-white/90 text-sm truncate">{link.name}</span>
+                                <span className="text-white/40 text-xs truncate max-w-[150px]">
+                                  {link.url}
+                                </span>
+                              </div>
+                              <Button
+                                type="button"
+                                onClick={() => removeDriveLink(index)}
+                                size="sm"
+                                variant="ghost"
+                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-1 h-auto"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
