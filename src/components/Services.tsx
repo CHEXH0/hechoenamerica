@@ -198,7 +198,7 @@ const Services = () => {
       </div>
       
       {/* Full-width scrolling container - outside the container */}
-      <div className="relative mt-8">
+      <div className="relative mt-8 w-full">
         {/* Mobile scroll indicators */}
         {isMobile && (
           <>
