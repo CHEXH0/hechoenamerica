@@ -1,20 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import Waveform from "./Waveform";
-import LanguageSelector from "./LanguageSelector";
 import ProfileIcon from "./ProfileIcon";
 import { motion } from "framer-motion";
-import { useTranslation } from "@/contexts/TranslationContext";
 
 const Hero = () => {
-  const { t } = useTranslation();
-  
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black text-white">
       {/* Header Controls */}
-      <div className="absolute top-4 right-4 z-20 flex items-center gap-3">
+      <div className="absolute top-4 right-4 z-20">
         <ProfileIcon />
-        <LanguageSelector />
       </div>
       
       <div className="absolute inset-0 z-0">
