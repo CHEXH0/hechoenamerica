@@ -24,6 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useUserRole } from "@/hooks/useUserRole";
 import { DeliveryForm } from "@/components/DeliveryForm";
+import { RevisionTracker } from "@/components/RevisionTracker";
 
 interface SongRequest {
   id: string;
@@ -361,7 +362,7 @@ const MyProjects = () => {
     }
   };
 
-  const handleStartWorking = async (projectId: string) => {
+  const handleStartWorking = async (projectId: string, numberOfRevisions: number = 0) => {
     try {
       const { error } = await supabase
         .from("song_requests")
@@ -369,6 +370,17 @@ const MyProjects = () => {
         .eq("id", projectId);
 
       if (error) throw error;
+
+      // Initialize revisions if the project has any
+      if (numberOfRevisions > 0) {
+        try {
+          await supabase.functions.invoke('initialize-revisions', {
+            body: { requestId: projectId }
+          });
+        } catch (revisionError) {
+          console.error("Error initializing revisions:", revisionError);
+        }
+      }
 
       // Send customer notification
       try {
@@ -663,6 +675,18 @@ const MyProjects = () => {
             )}
           </div>
 
+          {/* Revision Tracker for Client View */}
+          {!isProducerView && project.number_of_revisions && project.number_of_revisions > 0 && 
+           ["in_progress", "review", "completed"].includes(project.status) && (
+            <RevisionTracker
+              projectId={project.id}
+              numberOfRevisions={project.number_of_revisions}
+              projectStatus={project.status}
+              isProducerView={false}
+              onRevisionUpdate={fetchProjects}
+            />
+          )}
+
           {/* Producer View Actions */}
           {isProducerView && (
             <div className="flex flex-col gap-3">
@@ -686,7 +710,7 @@ const MyProjects = () => {
               {project.status === "accepted" && (
                 <Button 
                   className="w-full" 
-                  onClick={() => handleStartWorking(project.id)}
+                  onClick={() => handleStartWorking(project.id, project.number_of_revisions || 0)}
                 >
                   <Headphones className="mr-2 h-4 w-4" />
                   Start Working on Project
@@ -697,6 +721,7 @@ const MyProjects = () => {
                 <DeliveryForm
                   projectId={project.id}
                   customerEmail={project.user_email}
+                  numberOfRevisions={project.number_of_revisions || 0}
                   onDeliveryComplete={fetchProjects}
                 />
               )}

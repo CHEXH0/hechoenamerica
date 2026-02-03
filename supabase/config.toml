@@ -98,3 +98,6 @@ verify_jwt = true
 
 [functions.send-interview-invite]
 verify_jwt = false
+
+[functions.initialize-revisions]
+verify_jwt = true

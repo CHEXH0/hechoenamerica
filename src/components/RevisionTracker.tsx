@@ -1,0 +1,294 @@
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { 
+  CheckCircle, 
+  Clock, 
+  Loader2, 
+  Send, 
+  ExternalLink,
+  FileCheck,
+  AlertCircle
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+interface Revision {
+  id: string;
+  song_request_id: string;
+  revision_number: number;
+  status: string;
+  requested_at: string | null;
+  delivered_at: string | null;
+  drive_link: string | null;
+  client_notes: string | null;
+}
+
+interface RevisionTrackerProps {
+  projectId: string;
+  numberOfRevisions: number;
+  projectStatus: string;
+  isProducerView?: boolean;
+  onRevisionUpdate?: () => void;
+}
+
+const revisionStatusColors: Record<string, string> = {
+  pending: "bg-gray-500",
+  requested: "bg-yellow-500",
+  in_progress: "bg-blue-500",
+  delivered: "bg-emerald-500",
+};
+
+const revisionStatusLabels: Record<string, string> = {
+  pending: "Awaiting Request",
+  requested: "Requested",
+  in_progress: "In Progress",
+  delivered: "Delivered",
+};
+
+export const RevisionTracker = ({
+  projectId,
+  numberOfRevisions,
+  projectStatus,
+  isProducerView = false,
+  onRevisionUpdate
+}: RevisionTrackerProps) => {
+  const [revisions, setRevisions] = useState<Revision[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [requestingRevision, setRequestingRevision] = useState<number | null>(null);
+  const [revisionNotes, setRevisionNotes] = useState<Record<number, string>>({});
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchRevisions();
+  }, [projectId]);
+
+  const fetchRevisions = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("song_revisions")
+        .select("*")
+        .eq("song_request_id", projectId)
+        .order("revision_number", { ascending: true });
+
+      if (error) throw error;
+      setRevisions(data || []);
+    } catch (error) {
+      console.error("Error fetching revisions:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRequestRevision = async (revisionNumber: number) => {
+    setRequestingRevision(revisionNumber);
+    try {
+      const revision = revisions.find(r => r.revision_number === revisionNumber);
+      if (!revision) return;
+
+      const { error } = await supabase
+        .from("song_revisions")
+        .update({
+          status: "requested",
+          requested_at: new Date().toISOString(),
+          client_notes: revisionNotes[revisionNumber] || null,
+        })
+        .eq("id", revision.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Revision Requested",
+        description: `Revision ${revisionNumber} has been requested. Your producer will be notified.`,
+      });
+
+      fetchRevisions();
+      onRevisionUpdate?.();
+    } catch (error) {
+      console.error("Error requesting revision:", error);
+      toast({
+        title: "Error",
+        description: "Failed to request revision. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setRequestingRevision(null);
+    }
+  };
+
+  const allRevisionsDelivered = revisions.length > 0 && 
+    revisions.every(r => r.status === "delivered");
+
+  const nextAvailableRevision = revisions.find(r => r.status === "pending");
+  const pendingRequest = revisions.find(r => r.status === "requested" || r.status === "in_progress");
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 p-4 text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        Loading revisions...
+      </div>
+    );
+  }
+
+  if (revisions.length === 0 && numberOfRevisions > 0) {
+    return (
+      <div className="p-4 bg-muted/30 rounded-lg border border-border">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Clock className="h-4 w-4" />
+          <span className="text-sm">
+            {numberOfRevisions} revisions will be available once your producer starts working
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (revisions.length === 0) {
+    return null;
+  }
+
+  // Client view
+  if (!isProducerView) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h4 className="font-medium flex items-center gap-2">
+            <FileCheck className="h-4 w-4" />
+            Revisions ({revisions.filter(r => r.status === "delivered").length}/{numberOfRevisions})
+          </h4>
+          {allRevisionsDelivered && (
+            <Badge variant="secondary" className="bg-emerald-500/20 text-emerald-600">
+              All Revisions Complete
+            </Badge>
+          )}
+        </div>
+
+        <div className="grid gap-3">
+          {revisions.map((revision) => (
+            <Card key={revision.id} className="p-4">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">Revision {revision.revision_number}</span>
+                  <Badge className={`${revisionStatusColors[revision.status]} text-white text-xs`}>
+                    {revisionStatusLabels[revision.status]}
+                  </Badge>
+                </div>
+                {revision.drive_link && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(revision.drive_link!, "_blank")}
+                  >
+                    <ExternalLink className="mr-2 h-3 w-3" />
+                    Download
+                  </Button>
+                )}
+              </div>
+
+              {revision.status === "pending" && (
+                <div className="space-y-3">
+                  {!pendingRequest && nextAvailableRevision?.id === revision.id ? (
+                    <>
+                      <div className="space-y-2">
+                        <Label className="text-sm">Notes for Producer (optional)</Label>
+                        <Textarea
+                          placeholder="Describe what changes you'd like..."
+                          value={revisionNotes[revision.revision_number] || ""}
+                          onChange={(e) => setRevisionNotes(prev => ({
+                            ...prev,
+                            [revision.revision_number]: e.target.value
+                          }))}
+                          rows={2}
+                          maxLength={500}
+                        />
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={() => handleRequestRevision(revision.revision_number)}
+                        disabled={requestingRevision === revision.revision_number}
+                      >
+                        {requestingRevision === revision.revision_number ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Send className="mr-2 h-4 w-4" />
+                        )}
+                        Request Revision
+                      </Button>
+                    </>
+                  ) : (
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {pendingRequest 
+                        ? "Complete or receive your current revision request first"
+                        : "Not yet available"}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {revision.status === "requested" && (
+                <p className="text-sm text-yellow-600 flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  Waiting for producer...
+                  {revision.client_notes && (
+                    <span className="text-muted-foreground ml-2">
+                      Notes: "{revision.client_notes}"
+                    </span>
+                  )}
+                </p>
+              )}
+
+              {revision.status === "in_progress" && (
+                <p className="text-sm text-blue-600 flex items-center gap-1">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Producer is working on this revision
+                </p>
+              )}
+
+              {revision.status === "delivered" && revision.delivered_at && (
+                <p className="text-sm text-emerald-600 flex items-center gap-1">
+                  <CheckCircle className="h-3 w-3" />
+                  Delivered {new Date(revision.delivered_at).toLocaleDateString()}
+                </p>
+              )}
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Producer view - show status only, delivery is handled separately
+  return (
+    <div className="space-y-3">
+      <h4 className="font-medium text-sm flex items-center gap-2">
+        <FileCheck className="h-4 w-4" />
+        Revision Status ({revisions.filter(r => r.status === "delivered").length}/{numberOfRevisions})
+      </h4>
+      <div className="flex flex-wrap gap-2">
+        {revisions.map((revision) => (
+          <Badge 
+            key={revision.id}
+            variant="outline"
+            className={`${revision.status === "delivered" ? "border-emerald-500 text-emerald-600" : 
+              revision.status === "requested" ? "border-yellow-500 text-yellow-600 animate-pulse" :
+              revision.status === "in_progress" ? "border-blue-500 text-blue-600" :
+              "border-muted-foreground"}`}
+          >
+            Rev {revision.revision_number}: {revisionStatusLabels[revision.status]}
+          </Badge>
+        ))}
+      </div>
+      {!allRevisionsDelivered && (
+        <p className="text-xs text-muted-foreground">
+          Complete all revisions before sending the final project
+        </p>
+      )}
+    </div>
+  );
+};
