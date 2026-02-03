@@ -717,6 +717,18 @@ const MyProjects = () => {
                 </Button>
               )}
               
+              {/* Revision Tracker for Producer View - show status and feedback */}
+              {project.number_of_revisions && project.number_of_revisions > 0 && 
+               ["in_progress", "review", "completed"].includes(project.status) && (
+                <RevisionTracker
+                  projectId={project.id}
+                  numberOfRevisions={project.number_of_revisions}
+                  projectStatus={project.status}
+                  isProducerView={true}
+                  onRevisionUpdate={fetchProjects}
+                />
+              )}
+              
               {project.status === "in_progress" && (
                 <DeliveryForm
                   projectId={project.id}
