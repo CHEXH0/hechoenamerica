@@ -1,12 +1,23 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Music, Clock, CheckCircle, Loader2, Calendar, User, Wifi, AlertTriangle, RefreshCcw, Headphones, Users, Mail } from "lucide-react";
+import { ArrowLeft, Music, Clock, CheckCircle, Loader2, Calendar, User, Wifi, AlertTriangle, RefreshCcw, Headphones, Users, Mail, XCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -226,6 +237,7 @@ const MyProjects = () => {
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
   const [activeTab, setActiveTab] = useState("my-requests");
   const [resendingFilesId, setResendingFilesId] = useState<string | null>(null);
+  const [cancellingProjectId, setCancellingProjectId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const isProducer = userRole?.isProducer || false;
@@ -281,6 +293,35 @@ const MyProjects = () => {
       });
     } finally {
       setResendingFilesId(null);
+    }
+  };
+
+  const handleCancelProject = async (projectId: string) => {
+    setCancellingProjectId(projectId);
+    try {
+      const { error } = await supabase
+        .from("song_requests")
+        .delete()
+        .eq("id", projectId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Project Cancelled",
+        description: "Your project has been cancelled successfully.",
+      });
+
+      // Remove from local state
+      setMyRequests((prev) => prev.filter((p) => p.id !== projectId));
+    } catch (error) {
+      console.error("Error cancelling project:", error);
+      toast({
+        title: "Error",
+        description: "Failed to cancel project. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setCancellingProjectId(null);
     }
   };
 
@@ -710,6 +751,44 @@ const MyProjects = () => {
                   
                   {(project.status === "pending" || project.status === "paid") && project.acceptance_deadline && (
                     <CountdownTimer deadline={project.acceptance_deadline} />
+                  )}
+
+                  {/* Cancel button for pending projects */}
+                  {project.status === "pending" && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="mt-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
+                          disabled={cancellingProjectId === project.id}
+                        >
+                          {cancellingProjectId === project.id ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <XCircle className="mr-2 h-4 w-4" />
+                          )}
+                          Cancel Project
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Cancel this project?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to cancel this project? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Keep Project</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={() => handleCancelProject(project.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Yes, Cancel Project
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   )}
                 </div>
               )}
