@@ -99,6 +99,10 @@ export const RevisionDeliveryForm = ({
 
     setDeliveringRevision(revisionId);
     try {
+      // Get the song request ID from the revision
+      const revision = revisions.find(r => r.id === revisionId);
+      if (!revision) throw new Error("Revision not found");
+
       const { error } = await supabase
         .from("song_revisions")
         .update({
@@ -110,7 +114,19 @@ export const RevisionDeliveryForm = ({
 
       if (error) throw error;
 
-      // TODO: Send notification email to customer about revision delivery
+      // Send notification email to customer about revision delivery
+      try {
+        await supabase.functions.invoke('send-revision-notification', {
+          body: {
+            requestId: projectId,
+            revisionNumber,
+            notificationType: 'revision_delivered',
+            driveLink: link.trim()
+          }
+        });
+      } catch (notifyError) {
+        console.error("Failed to send notification:", notifyError);
+      }
 
       toast({
         title: "Revision Delivered! 🎉",

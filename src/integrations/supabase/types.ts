@@ -535,6 +535,7 @@ export type Database = {
       }
       song_revisions: {
         Row: {
+          client_feedback: string | null
           client_notes: string | null
           created_at: string
           delivered_at: string | null
@@ -548,6 +549,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          client_feedback?: string | null
           client_notes?: string | null
           created_at?: string
           delivered_at?: string | null
@@ -561,6 +563,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          client_feedback?: string | null
           client_notes?: string | null
           created_at?: string
           delivered_at?: string | null

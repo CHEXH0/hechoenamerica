@@ -11,7 +11,8 @@ import {
   Send, 
   ExternalLink,
   FileCheck,
-  AlertCircle
+  AlertCircle,
+  MessageSquare
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +26,7 @@ interface Revision {
   delivered_at: string | null;
   drive_link: string | null;
   client_notes: string | null;
+  client_feedback: string | null;
 }
 
 interface RevisionTrackerProps {
@@ -60,6 +62,8 @@ export const RevisionTracker = ({
   const [loading, setLoading] = useState(true);
   const [requestingRevision, setRequestingRevision] = useState<number | null>(null);
   const [revisionNotes, setRevisionNotes] = useState<Record<number, string>>({});
+  const [feedbackText, setFeedbackText] = useState<Record<string, string>>({});
+  const [submittingFeedback, setSubmittingFeedback] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -90,16 +94,32 @@ export const RevisionTracker = ({
       const revision = revisions.find(r => r.revision_number === revisionNumber);
       if (!revision) return;
 
+      const clientNotes = revisionNotes[revisionNumber] || null;
+
       const { error } = await supabase
         .from("song_revisions")
         .update({
           status: "requested",
           requested_at: new Date().toISOString(),
-          client_notes: revisionNotes[revisionNumber] || null,
+          client_notes: clientNotes,
         })
         .eq("id", revision.id);
 
       if (error) throw error;
+
+      // Send notification email to producer
+      try {
+        await supabase.functions.invoke('send-revision-notification', {
+          body: {
+            requestId: projectId,
+            revisionNumber,
+            notificationType: 'revision_requested',
+            clientNotes
+          }
+        });
+      } catch (notifyError) {
+        console.error("Failed to send notification:", notifyError);
+      }
 
       toast({
         title: "Revision Requested",
@@ -117,6 +137,59 @@ export const RevisionTracker = ({
       });
     } finally {
       setRequestingRevision(null);
+    }
+  };
+
+  const handleSubmitFeedback = async (revisionId: string, revisionNumber: number) => {
+    const feedback = feedbackText[revisionId];
+    if (!feedback?.trim()) {
+      toast({
+        title: "Missing Feedback",
+        description: "Please enter your feedback before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSubmittingFeedback(revisionId);
+    try {
+      const { error } = await supabase
+        .from("song_revisions")
+        .update({ client_feedback: feedback.trim() })
+        .eq("id", revisionId);
+
+      if (error) throw error;
+
+      // Send notification email to producer
+      try {
+        await supabase.functions.invoke('send-revision-notification', {
+          body: {
+            requestId: projectId,
+            revisionNumber,
+            notificationType: 'feedback_submitted',
+            feedback: feedback.trim()
+          }
+        });
+      } catch (notifyError) {
+        console.error("Failed to send notification:", notifyError);
+      }
+
+      toast({
+        title: "Feedback Submitted",
+        description: "Your feedback has been sent to the producer.",
+      });
+
+      setFeedbackText(prev => ({ ...prev, [revisionId]: "" }));
+      fetchRevisions();
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit feedback. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmittingFeedback(null);
     }
   };
 
@@ -250,11 +323,54 @@ export const RevisionTracker = ({
                 </p>
               )}
 
-              {revision.status === "delivered" && revision.delivered_at && (
-                <p className="text-sm text-emerald-600 flex items-center gap-1">
-                  <CheckCircle className="h-3 w-3" />
-                  Delivered {new Date(revision.delivered_at).toLocaleDateString()}
-                </p>
+              {revision.status === "delivered" && (
+                <div className="space-y-3">
+                  <p className="text-sm text-emerald-600 flex items-center gap-1">
+                    <CheckCircle className="h-3 w-3" />
+                    Delivered {revision.delivered_at && new Date(revision.delivered_at).toLocaleDateString()}
+                  </p>
+
+                  {/* Feedback Section */}
+                  {revision.client_feedback ? (
+                    <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-center gap-2 text-blue-600 text-sm font-medium mb-1">
+                        <MessageSquare className="h-3 w-3" />
+                        Your Feedback
+                      </div>
+                      <p className="text-sm text-muted-foreground">{revision.client_feedback}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label className="text-sm flex items-center gap-1">
+                        <MessageSquare className="h-3 w-3" />
+                        Share Feedback (optional)
+                      </Label>
+                      <Textarea
+                        placeholder="Let your producer know what you think..."
+                        value={feedbackText[revision.id] || ""}
+                        onChange={(e) => setFeedbackText(prev => ({
+                          ...prev,
+                          [revision.id]: e.target.value
+                        }))}
+                        rows={2}
+                        maxLength={500}
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleSubmitFeedback(revision.id, revision.revision_number)}
+                        disabled={submittingFeedback === revision.id || !feedbackText[revision.id]?.trim()}
+                      >
+                        {submittingFeedback === revision.id ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Send className="mr-2 h-4 w-4" />
+                        )}
+                        Submit Feedback
+                      </Button>
+                    </div>
+                  )}
+                </div>
               )}
             </Card>
           ))}
@@ -284,6 +400,18 @@ export const RevisionTracker = ({
           </Badge>
         ))}
       </div>
+      {/* Show client feedback for producer */}
+      {revisions.some(r => r.client_feedback) && (
+        <div className="space-y-2 pt-2 border-t border-border">
+          <h5 className="text-xs font-medium text-muted-foreground">Client Feedback</h5>
+          {revisions.filter(r => r.client_feedback).map(revision => (
+            <div key={revision.id} className="p-2 bg-blue-50 dark:bg-blue-950/20 rounded text-sm">
+              <span className="font-medium text-blue-600">Rev {revision.revision_number}:</span>{" "}
+              <span className="text-muted-foreground">{revision.client_feedback}</span>
+            </div>
+          ))}
+        </div>
+      )}
       {!allRevisionsDelivered && (
         <p className="text-xs text-muted-foreground">
           Complete all revisions before sending the final project
