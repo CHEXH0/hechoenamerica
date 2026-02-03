@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Music, Clock, CheckCircle, Loader2, Calendar, User, Wifi, AlertTriangle, RefreshCcw, Headphones, Users, Mail, XCircle } from "lucide-react";
+import { ArrowLeft, Music, Clock, CheckCircle, Loader2, Calendar, User, Wifi, AlertTriangle, RefreshCcw, Headphones, Users, Mail, XCircle, MessageSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -68,6 +68,7 @@ const statusLabels: Record<string, string> = {
   review: "Under Review",
   completed: "Completed",
   refunded: "Refunded",
+  cancellation_requested: "Cancellation Requested",
 };
 
 const statusColors: Record<string, string> = {
@@ -79,6 +80,7 @@ const statusColors: Record<string, string> = {
   review: "bg-purple-500",
   completed: "bg-emerald-500",
   refunded: "bg-red-500",
+  cancellation_requested: "bg-amber-600",
 };
 
 const getStatusProgress = (status: string): number => {
@@ -238,6 +240,7 @@ const MyProjects = () => {
   const [activeTab, setActiveTab] = useState("my-requests");
   const [resendingFilesId, setResendingFilesId] = useState<string | null>(null);
   const [cancellingProjectId, setCancellingProjectId] = useState<string | null>(null);
+  const [requestingCancellationId, setRequestingCancellationId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const isProducer = userRole?.isProducer || false;
@@ -322,6 +325,39 @@ const MyProjects = () => {
       });
     } finally {
       setCancellingProjectId(null);
+    }
+  };
+
+  const handleRequestCancellation = async (projectId: string) => {
+    setRequestingCancellationId(projectId);
+    try {
+      const { error } = await supabase
+        .from("song_requests")
+        .update({ status: "cancellation_requested" })
+        .eq("id", projectId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Cancellation Requested",
+        description: "Your cancellation request has been submitted for review. We'll get back to you soon.",
+      });
+
+      // Update local state
+      setMyRequests((prev) =>
+        prev.map((p) =>
+          p.id === projectId ? { ...p, status: "cancellation_requested" } : p
+        )
+      );
+    } catch (error) {
+      console.error("Error requesting cancellation:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit cancellation request. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setRequestingCancellationId(null);
     }
   };
 
@@ -753,8 +789,8 @@ const MyProjects = () => {
                     <CountdownTimer deadline={project.acceptance_deadline} />
                   )}
 
-                  {/* Cancel button for pending projects */}
-                  {project.status === "pending" && (
+                  {/* Cancel button for pre-acceptance projects (full refund) */}
+                  {(project.status === "pending" || project.status === "paid") && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button 
@@ -775,7 +811,9 @@ const MyProjects = () => {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Cancel this project?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to cancel this project? This action cannot be undone.
+                            {project.status === "paid" 
+                              ? "You will receive a full refund. This action cannot be undone."
+                              : "Are you sure you want to cancel this project? This action cannot be undone."}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -784,11 +822,62 @@ const MyProjects = () => {
                             onClick={() => handleCancelProject(project.id)}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           >
-                            Yes, Cancel Project
+                            Yes, Cancel {project.status === "paid" ? "& Get Refund" : "Project"}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
+                  )}
+
+                  {/* Request cancellation for post-acceptance projects (needs review) */}
+                  {["accepted", "in_progress", "review"].includes(project.status) && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="mt-2 text-amber-600 hover:text-amber-600 hover:bg-amber-500/10 border-amber-500/30"
+                          disabled={requestingCancellationId === project.id}
+                        >
+                          {requestingCancellationId === project.id ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <MessageSquare className="mr-2 h-4 w-4" />
+                          )}
+                          Request Cancellation
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Request Cancellation</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Since a producer has already started working on your project, your cancellation request will be reviewed by our team. Refunds are determined on a case-by-case basis depending on the work completed.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Keep Project</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={() => handleRequestCancellation(project.id)}
+                            className="bg-amber-600 text-white hover:bg-amber-700"
+                          >
+                            Submit Request
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+
+                  {/* Cancellation requested status message */}
+                  {project.status === "cancellation_requested" && (
+                    <div className="mt-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                      <div className="flex items-center gap-2 text-amber-600">
+                        <MessageSquare className="h-4 w-4" />
+                        <span className="text-sm font-medium">Cancellation Under Review</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        We're reviewing your request and will get back to you soon.
+                      </p>
+                    </div>
                   )}
                 </div>
               )}
