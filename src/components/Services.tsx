@@ -3,11 +3,31 @@ import { motion, useMotionValue, useAnimationFrame } from "framer-motion";
 import { Headphones, Mic, Music, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from "@/contexts/TranslationContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSwipeScroll } from "@/hooks/useSwipeScroll";
 import abletonLogo from "@/assets/ableton-logo.png";
 
 const Services = () => {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+  
+  // Mobile swipe scroll with snap-to-card
+  const mobileItemWidth = 144 + 16; // card width (w-36) + gap
+  const {
+    scrollRef,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+    scrollToDirection,
+    updateScrollIndicators,
+  } = useSwipeScroll({
+    itemWidth: mobileItemWidth,
+    onScrollChange: (left, right) => {
+      setCanScrollLeft(left);
+      setCanScrollRight(right);
+    },
+  });
 
   const services = [
     {
@@ -77,35 +97,13 @@ const Services = () => {
   const duplicatedPlatforms = [...platforms, ...platforms, ...platforms];
   
   const [scrollDirection, setScrollDirection] = useState<'left' | 'right' | 'none'>('none');
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
-  const baseSpeed = 0.8; // slower pixels per frame
+  const baseSpeed = 0.8;
   
   // Calculate the reset point (one full set of platforms)
-  const itemWidth = 176 + 24; // w-44 (176px) + gap-6 (24px)
+  const itemWidth = 176 + 24;
   const resetPoint = platforms.length * itemWidth;
-
-  // Update scroll indicators for mobile
-  const updateScrollIndicators = () => {
-    if (scrollContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-    }
-  };
-
-  const handleMobileScroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = 200;
-      scrollContainerRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-  };
 
   useAnimationFrame(() => {
     if (scrollDirection === 'none') return;
@@ -114,7 +112,6 @@ const Services = () => {
     const speed = scrollDirection === 'left' ? -baseSpeed : baseSpeed;
     let newX = currentX + speed;
     
-    // Seamless loop: reset position when we've scrolled one full set
     if (newX <= -resetPoint) {
       newX = 0;
     } else if (newX >= 0 && scrollDirection === 'right') {
@@ -129,19 +126,19 @@ const Services = () => {
     const rect = containerRef.current.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const containerWidth = rect.width;
-    const centerZone = containerWidth * 0.1; // 10% center zone = more responsive
+    const centerZone = containerWidth * 0.1;
     
     if (mouseX < (containerWidth - centerZone) / 2) {
-      setScrollDirection('left'); // Mouse on left = scroll left
+      setScrollDirection('left');
     } else if (mouseX > (containerWidth + centerZone) / 2) {
-      setScrollDirection('right'); // Mouse on right = scroll right
+      setScrollDirection('right');
     } else {
-      setScrollDirection('none'); // Center = pause
+      setScrollDirection('none');
     }
   };
 
   const handleMouseLeave = () => {
-    setScrollDirection('none'); // Stop scrolling when mouse leaves
+    setScrollDirection('none');
   };
 
   return (
@@ -206,14 +203,14 @@ const Services = () => {
         {isMobile && (
           <>
             <button
-              onClick={() => handleMobileScroll('left')}
+              onClick={() => scrollToDirection('left')}
               className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm border border-white/20 flex items-center justify-center transition-opacity ${canScrollLeft ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
               aria-label="Scroll left"
             >
               <ChevronLeft className="w-4 h-4 text-white" />
             </button>
             <button
-              onClick={() => handleMobileScroll('right')}
+              onClick={() => scrollToDirection('right')}
               className={`absolute right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm border border-white/20 flex items-center justify-center transition-opacity ${canScrollRight ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
               aria-label="Scroll right"
             >
@@ -223,11 +220,14 @@ const Services = () => {
         )}
 
         <div 
-          ref={isMobile ? scrollContainerRef : containerRef}
-          className={`w-full relative ${isMobile ? 'overflow-x-auto scrollbar-hide' : 'overflow-hidden'}`}
+          ref={isMobile ? scrollRef : containerRef}
+          className={`w-full relative ${isMobile ? 'overflow-x-auto scrollbar-hide touch-pan-x' : 'overflow-hidden'}`}
           onMouseMove={!isMobile ? handleMouseMove : undefined}
           onMouseLeave={!isMobile ? handleMouseLeave : undefined}
           onScroll={isMobile ? updateScrollIndicators : undefined}
+          onTouchStart={isMobile ? handleTouchStart : undefined}
+          onTouchMove={isMobile ? handleTouchMove : undefined}
+          onTouchEnd={isMobile ? handleTouchEnd : undefined}
         >
           {/* Gradient masks for smooth fade effect - desktop only */}
           {!isMobile && (
@@ -239,11 +239,11 @@ const Services = () => {
           
           {/* Scrolling track */}
           {isMobile ? (
-            <div className="flex gap-4 px-4">
+            <div className="flex gap-4 px-4 snap-x snap-mandatory">
               {platforms.map((platform, index) => (
                 <div
                   key={`${platform.name}-${index}`}
-                  className="flex-shrink-0 w-36 bg-black/40 backdrop-blur-md border border-purple-400/20 rounded-xl p-4 text-center"
+                  className="flex-shrink-0 w-36 bg-black/40 backdrop-blur-md border border-purple-400/20 rounded-xl p-4 text-center snap-start"
                 >
                   <div className="w-12 h-12 mx-auto mb-2 bg-white/10 rounded-lg flex items-center justify-center">
                     <img 
