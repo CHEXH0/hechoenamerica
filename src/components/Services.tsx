@@ -1,13 +1,11 @@
 import React, { useRef, useState } from "react";
 import { motion, useMotionValue, useAnimationFrame } from "framer-motion";
 import { Headphones, Mic, Music, ChevronLeft, ChevronRight } from "lucide-react";
-import { useTranslation } from "@/contexts/TranslationContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSwipeScroll } from "@/hooks/useSwipeScroll";
 import abletonLogo from "@/assets/ableton-logo.png";
 
 const Services = () => {
-  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -150,7 +148,7 @@ const Services = () => {
           transition={{ duration: 0.6 }}
           className="text-3xl md:text-4xl font-bold text-center text-white mb-12"
         >
-          {t.services.title}
+          Our Services
         </motion.h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

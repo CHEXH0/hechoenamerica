@@ -2,13 +2,11 @@ import React, { useRef, useState, useCallback } from "react";
 import { motion, useMotionValue, useAnimationFrame } from "framer-motion";
 import { Music, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useTranslation } from "@/contexts/TranslationContext";
 import { useProducers } from "@/hooks/useProducers";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSwipeScroll } from "@/hooks/useSwipeScroll";
 
 const FeaturedProducers = () => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: producers = [], isLoading } = useProducers();
   const isMobile = useIsMobile();
@@ -95,7 +93,7 @@ const FeaturedProducers = () => {
             transition={{ duration: 0.6 }}
             className="text-3xl md:text-4xl font-bold text-center text-white mb-12"
           >
-            {t.featuredProducers.title}
+            Featured Producers
           </motion.h2>
           <div className="grid grid-cols-2 gap-6">
             {[...Array(2)].map((_, index) => (
@@ -117,8 +115,8 @@ const FeaturedProducers = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="text-3xl md:text-4xl font-bold text-center text-white"
-        >
-          {t.featuredProducers.title}
+          >
+            Featured Producers
         </motion.h2>
       </div>
       
