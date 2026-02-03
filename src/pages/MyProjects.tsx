@@ -790,7 +790,7 @@ const MyProjects = () => {
                   )}
 
                   {/* Cancel button for pre-acceptance projects (full refund) */}
-                  {(project.status === "pending" || project.status === "paid") && (
+                  {(project.status === "pending" || project.status === "pending_payment" || project.status === "paid") && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button 
