@@ -1,10 +1,11 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import { motion, useMotionValue, useAnimationFrame } from "framer-motion";
 import { Music, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "@/contexts/TranslationContext";
 import { useProducers } from "@/hooks/useProducers";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSwipeScroll } from "@/hooks/useSwipeScroll";
 
 const FeaturedProducers = () => {
   const { t } = useTranslation();
@@ -16,32 +17,29 @@ const FeaturedProducers = () => {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
-  const baseSpeed = 1.5; // faster pixels per frame
+  const baseSpeed = 1.5;
   
-  // Calculate the max scroll distance
-  const itemWidth = isMobile ? 280 + 16 : 400 + 24; // card width + gap
+  // Mobile swipe scroll with snap-to-card
+  const mobileItemWidth = 280 + 16; // card width + gap
+  const {
+    scrollRef,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+    scrollToDirection,
+    updateScrollIndicators,
+  } = useSwipeScroll({
+    itemWidth: mobileItemWidth,
+    onScrollChange: (left, right) => {
+      setCanScrollLeft(left);
+      setCanScrollRight(right);
+    },
+  });
+  
+  // Calculate the max scroll distance for desktop
+  const itemWidth = 400 + 24;
   const maxScroll = producers.length > 0 ? (producers.length - 2) * itemWidth : 0;
-
-  // Update scroll indicators for mobile
-  const updateScrollIndicators = () => {
-    if (scrollContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-    }
-  };
-
-  const handleMobileScroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = isMobile ? 296 : 424;
-      scrollContainerRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-  };
 
   useAnimationFrame(() => {
     if (scrollDirection === 'none' || producers.length === 0) return;
@@ -130,14 +128,14 @@ const FeaturedProducers = () => {
         {isMobile && (
           <>
             <button
-              onClick={() => handleMobileScroll('left')}
+              onClick={() => scrollToDirection('left')}
               className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/60 backdrop-blur-sm border border-white/20 flex items-center justify-center transition-opacity ${canScrollLeft ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
               aria-label="Scroll left"
             >
               <ChevronLeft className="w-5 h-5 text-white" />
             </button>
             <button
-              onClick={() => handleMobileScroll('right')}
+              onClick={() => scrollToDirection('right')}
               className={`absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/60 backdrop-blur-sm border border-white/20 flex items-center justify-center transition-opacity ${canScrollRight ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
               aria-label="Scroll right"
             >
@@ -147,11 +145,14 @@ const FeaturedProducers = () => {
         )}
 
         <div 
-          ref={isMobile ? scrollContainerRef : containerRef}
-          className={`w-full relative ${isMobile ? 'overflow-x-auto scrollbar-hide' : 'overflow-hidden'}`}
+          ref={isMobile ? scrollRef : containerRef}
+          className={`w-full relative ${isMobile ? 'overflow-x-auto scrollbar-hide touch-pan-x' : 'overflow-hidden'}`}
           onMouseMove={!isMobile ? handleMouseMove : undefined}
           onMouseLeave={!isMobile ? handleMouseLeave : undefined}
           onScroll={isMobile ? updateScrollIndicators : undefined}
+          onTouchStart={isMobile ? handleTouchStart : undefined}
+          onTouchMove={isMobile ? handleTouchMove : undefined}
+          onTouchEnd={isMobile ? handleTouchEnd : undefined}
         >
           {/* Gradient masks for smooth fade effect - desktop only */}
           {!isMobile && (
@@ -163,14 +164,14 @@ const FeaturedProducers = () => {
           
           {/* Scrolling track */}
           {isMobile ? (
-            <div className="flex gap-4 px-4">
+            <div className="flex gap-4 px-4 snap-x snap-mandatory">
               {displayProducers.map((producer, index) => (
                 <motion.div
                   key={`${producer.name}-${index}`}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6 }}
-                  className="relative group cursor-pointer flex-shrink-0 w-[280px]"
+                  className="relative group cursor-pointer flex-shrink-0 w-[280px] snap-start"
                   onClick={() => handleProducerClick(producer.slug)}
                 >
                   <div className="relative overflow-hidden rounded-lg aspect-square">
