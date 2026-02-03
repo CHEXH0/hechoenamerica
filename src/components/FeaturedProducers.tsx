@@ -1,23 +1,47 @@
 import React, { useRef, useState } from "react";
 import { motion, useMotionValue, useAnimationFrame } from "framer-motion";
-import { Music } from "lucide-react";
+import { Music, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "@/contexts/TranslationContext";
 import { useProducers } from "@/hooks/useProducers";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const FeaturedProducers = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: producers = [], isLoading } = useProducers();
+  const isMobile = useIsMobile();
   
   const [scrollDirection, setScrollDirection] = useState<'left' | 'right' | 'none'>('none');
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const baseSpeed = 1.5; // faster pixels per frame
   
   // Calculate the max scroll distance
-  const itemWidth = 400 + 24; // card width + gap
+  const itemWidth = isMobile ? 280 + 16 : 400 + 24; // card width + gap
   const maxScroll = producers.length > 0 ? (producers.length - 2) * itemWidth : 0;
+
+  // Update scroll indicators for mobile
+  const updateScrollIndicators = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  const handleMobileScroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = isMobile ? 296 : 424;
+      scrollContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   useAnimationFrame(() => {
     if (scrollDirection === 'none' || producers.length === 0) return;
@@ -101,50 +125,109 @@ const FeaturedProducers = () => {
       </div>
       
       {/* Full-width scrolling container */}
-      <div 
-        ref={containerRef}
-        className="w-full overflow-hidden relative"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-      >
-        {/* Gradient masks for smooth fade effect */}
-        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
-        
-        {/* Infinite scrolling track */}
-        <motion.div
-          className="flex gap-6 px-6"
-          style={{ x }}
-        >
-          {displayProducers.map((producer, index) => (
-            <motion.div
-              key={`${producer.name}-${index}`}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              whileHover={{ scale: 1.02 }}
-              className="relative group cursor-pointer flex-shrink-0 w-[400px]"
-              onClick={() => handleProducerClick(producer.slug)}
+      <div className="relative">
+        {/* Mobile scroll indicators */}
+        {isMobile && (
+          <>
+            <button
+              onClick={() => handleMobileScroll('left')}
+              className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/60 backdrop-blur-sm border border-white/20 flex items-center justify-center transition-opacity ${canScrollLeft ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+              aria-label="Scroll left"
             >
-              <div className="relative overflow-hidden rounded-lg aspect-square">
-                <img
-                  src={producer.image}
-                  alt={producer.name}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                  <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
-                    {producer.name}
-                    <Music size={18} className="text-green-400" />
-                  </h3>
-                  <p className="text-sm text-gray-300">{producer.country}</p>
-                  <p className="text-sm text-gray-300/50">{producer.genre}</p>
-                </div>
-              </div>
+              <ChevronLeft className="w-5 h-5 text-white" />
+            </button>
+            <button
+              onClick={() => handleMobileScroll('right')}
+              className={`absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/60 backdrop-blur-sm border border-white/20 flex items-center justify-center transition-opacity ${canScrollRight ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+              aria-label="Scroll right"
+            >
+              <ChevronRight className="w-5 h-5 text-white" />
+            </button>
+          </>
+        )}
+
+        <div 
+          ref={isMobile ? scrollContainerRef : containerRef}
+          className={`w-full relative ${isMobile ? 'overflow-x-auto scrollbar-hide' : 'overflow-hidden'}`}
+          onMouseMove={!isMobile ? handleMouseMove : undefined}
+          onMouseLeave={!isMobile ? handleMouseLeave : undefined}
+          onScroll={isMobile ? updateScrollIndicators : undefined}
+        >
+          {/* Gradient masks for smooth fade effect - desktop only */}
+          {!isMobile && (
+            <>
+              <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+            </>
+          )}
+          
+          {/* Scrolling track */}
+          {isMobile ? (
+            <div className="flex gap-4 px-4">
+              {displayProducers.map((producer, index) => (
+                <motion.div
+                  key={`${producer.name}-${index}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                  className="relative group cursor-pointer flex-shrink-0 w-[280px]"
+                  onClick={() => handleProducerClick(producer.slug)}
+                >
+                  <div className="relative overflow-hidden rounded-lg aspect-square">
+                    <img
+                      src={producer.image}
+                      alt={producer.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                      <h3 className="text-lg font-bold mb-1 flex items-center gap-2">
+                        {producer.name}
+                        <Music size={16} className="text-green-400" />
+                      </h3>
+                      <p className="text-xs text-gray-300">{producer.country}</p>
+                      <p className="text-xs text-gray-300/50">{producer.genre}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <motion.div
+              className="flex gap-6 px-6"
+              style={{ x }}
+            >
+              {displayProducers.map((producer, index) => (
+                <motion.div
+                  key={`${producer.name}-${index}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                  whileHover={{ scale: 1.02 }}
+                  className="relative group cursor-pointer flex-shrink-0 w-[400px]"
+                  onClick={() => handleProducerClick(producer.slug)}
+                >
+                  <div className="relative overflow-hidden rounded-lg aspect-square">
+                    <img
+                      src={producer.image}
+                      alt={producer.name}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                      <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
+                        {producer.name}
+                        <Music size={18} className="text-green-400" />
+                      </h3>
+                      <p className="text-sm text-gray-300">{producer.country}</p>
+                      <p className="text-sm text-gray-300/50">{producer.genre}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
             </motion.div>
-          ))}
-        </motion.div>
+          )}
+        </div>
       </div>
     </section>
   );

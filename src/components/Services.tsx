@@ -1,11 +1,13 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { motion, useMotionValue, useAnimationFrame } from "framer-motion";
-import { Headphones, Mic, Music } from "lucide-react";
+import { Headphones, Mic, Music, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from "@/contexts/TranslationContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import abletonLogo from "@/assets/ableton-logo.png";
 
 const Services = () => {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
 
   const services = [
     {
@@ -75,13 +77,35 @@ const Services = () => {
   const duplicatedPlatforms = [...platforms, ...platforms, ...platforms];
   
   const [scrollDirection, setScrollDirection] = useState<'left' | 'right' | 'none'>('none');
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const baseSpeed = 0.8; // slower pixels per frame
   
   // Calculate the reset point (one full set of platforms)
   const itemWidth = 176 + 24; // w-44 (176px) + gap-6 (24px)
   const resetPoint = platforms.length * itemWidth;
+
+  // Update scroll indicators for mobile
+  const updateScrollIndicators = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  const handleMobileScroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 200;
+      scrollContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   useAnimationFrame(() => {
     if (scrollDirection === 'none') return;
@@ -177,38 +201,86 @@ const Services = () => {
       </div>
       
       {/* Full-width scrolling container - outside the container */}
-      <div 
-        ref={containerRef}
-        className="w-full overflow-hidden mt-8 relative"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-      >
-        {/* Gradient masks for smooth fade effect - contained within this div */}
-        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
-        
-        {/* Infinite scrolling track */}
-        <motion.div
-          className="flex gap-6"
-          style={{ x }}
-        >
-          {duplicatedPlatforms.map((platform, index) => (
-            <div
-              key={`${platform.name}-${index}`}
-              className="flex-shrink-0 w-44 bg-black/40 backdrop-blur-md border border-purple-400/20 rounded-xl p-5 text-center hover:border-purple-400/40 hover:bg-black/60 transition-all duration-300 group"
+      <div className="relative mt-8">
+        {/* Mobile scroll indicators */}
+        {isMobile && (
+          <>
+            <button
+              onClick={() => handleMobileScroll('left')}
+              className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm border border-white/20 flex items-center justify-center transition-opacity ${canScrollLeft ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+              aria-label="Scroll left"
             >
-              <div className="w-14 h-14 mx-auto mb-3 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-colors">
-                <img 
-                  src={platform.logo} 
-                  alt={`${platform.name} logo`} 
-                  className="w-10 h-10 object-contain"
-                />
-              </div>
-              <h4 className="text-sm font-semibold text-white mb-1">{platform.name}</h4>
-              <p className="text-purple-300 text-xs italic">"{platform.tagline}"</p>
+              <ChevronLeft className="w-4 h-4 text-white" />
+            </button>
+            <button
+              onClick={() => handleMobileScroll('right')}
+              className={`absolute right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm border border-white/20 flex items-center justify-center transition-opacity ${canScrollRight ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+              aria-label="Scroll right"
+            >
+              <ChevronRight className="w-4 h-4 text-white" />
+            </button>
+          </>
+        )}
+
+        <div 
+          ref={isMobile ? scrollContainerRef : containerRef}
+          className={`w-full relative ${isMobile ? 'overflow-x-auto scrollbar-hide' : 'overflow-hidden'}`}
+          onMouseMove={!isMobile ? handleMouseMove : undefined}
+          onMouseLeave={!isMobile ? handleMouseLeave : undefined}
+          onScroll={isMobile ? updateScrollIndicators : undefined}
+        >
+          {/* Gradient masks for smooth fade effect - desktop only */}
+          {!isMobile && (
+            <>
+              <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+            </>
+          )}
+          
+          {/* Scrolling track */}
+          {isMobile ? (
+            <div className="flex gap-4 px-4">
+              {platforms.map((platform, index) => (
+                <div
+                  key={`${platform.name}-${index}`}
+                  className="flex-shrink-0 w-36 bg-black/40 backdrop-blur-md border border-purple-400/20 rounded-xl p-4 text-center"
+                >
+                  <div className="w-12 h-12 mx-auto mb-2 bg-white/10 rounded-lg flex items-center justify-center">
+                    <img 
+                      src={platform.logo} 
+                      alt={`${platform.name} logo`} 
+                      className="w-8 h-8 object-contain"
+                    />
+                  </div>
+                  <h4 className="text-xs font-semibold text-white mb-1">{platform.name}</h4>
+                  <p className="text-purple-300 text-[10px] italic leading-tight">"{platform.tagline}"</p>
+                </div>
+              ))}
             </div>
-          ))}
-        </motion.div>
+          ) : (
+            <motion.div
+              className="flex gap-6"
+              style={{ x }}
+            >
+              {duplicatedPlatforms.map((platform, index) => (
+                <div
+                  key={`${platform.name}-${index}`}
+                  className="flex-shrink-0 w-44 bg-black/40 backdrop-blur-md border border-purple-400/20 rounded-xl p-5 text-center hover:border-purple-400/40 hover:bg-black/60 transition-all duration-300 group"
+                >
+                  <div className="w-14 h-14 mx-auto mb-3 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                    <img 
+                      src={platform.logo} 
+                      alt={`${platform.name} logo`} 
+                      className="w-10 h-10 object-contain"
+                    />
+                  </div>
+                  <h4 className="text-sm font-semibold text-white mb-1">{platform.name}</h4>
+                  <p className="text-purple-300 text-xs italic">"{platform.tagline}"</p>
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </div>
       </div>
     </section>
   );
