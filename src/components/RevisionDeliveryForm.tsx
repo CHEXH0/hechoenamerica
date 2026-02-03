@@ -150,7 +150,8 @@ export const RevisionDeliveryForm = ({
   const allRevisionsDelivered = revisions.length > 0 && 
     revisions.every(r => r.status === "delivered");
 
-  const requestedRevisions = revisions.filter(r => r.status === "requested");
+  // Show both pending and requested revisions - producers can deliver proactively
+  const deliverableRevisions = revisions.filter(r => r.status === "pending" || r.status === "requested");
   const deliveredCount = revisions.filter(r => r.status === "delivered").length;
 
   if (loading) {
@@ -188,20 +189,20 @@ export const RevisionDeliveryForm = ({
             You can now send the final project
           </p>
         </div>
-      ) : requestedRevisions.length === 0 ? (
+      ) : deliverableRevisions.length === 0 ? (
         <div className="flex items-center gap-2 text-muted-foreground py-4">
           <AlertCircle className="h-4 w-4" />
-          <span className="text-sm">Waiting for client to request revisions...</span>
+          <span className="text-sm">No revisions available to deliver</span>
         </div>
       ) : (
         <div className="space-y-4">
-          {requestedRevisions.map((revision) => (
-            <Card key={revision.id} className="p-4 border-yellow-500/30 bg-yellow-500/5">
+          {deliverableRevisions.map((revision) => (
+            <Card key={revision.id} className={`p-4 ${revision.status === "requested" ? "border-yellow-500/30 bg-yellow-500/5" : "border-border"}`}>
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <span className="font-medium">Revision {revision.revision_number}</span>
-                  <Badge className="ml-2 bg-yellow-500 text-white text-xs">
-                    Requested
+                  <Badge className={`ml-2 text-xs ${revision.status === "requested" ? "bg-yellow-500 text-white" : "bg-muted text-muted-foreground"}`}>
+                    {revision.status === "requested" ? "Requested" : "Available"}
                   </Badge>
                 </div>
                 {revision.requested_at && (
