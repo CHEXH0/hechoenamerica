@@ -533,6 +533,56 @@ export type Database = {
           },
         ]
       }
+      song_revisions: {
+        Row: {
+          client_notes: string | null
+          created_at: string
+          delivered_at: string | null
+          drive_folder_id: string | null
+          drive_link: string | null
+          id: string
+          requested_at: string | null
+          revision_number: number
+          song_request_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          client_notes?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          drive_folder_id?: string | null
+          drive_link?: string | null
+          id?: string
+          requested_at?: string | null
+          revision_number: number
+          song_request_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          client_notes?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          drive_folder_id?: string | null
+          drive_link?: string | null
+          id?: string
+          requested_at?: string | null
+          revision_number?: number
+          song_request_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "song_revisions_song_request_id_fkey"
+            columns: ["song_request_id"]
+            isOneToOne: false
+            referencedRelation: "song_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
