@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, X, Plus, Minus, Trash2, CreditCard } from 'lucide-react';
+import { ShoppingCart, X, Plus, Minus, Trash2, CreditCard, Tag, Check, Loader2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
 import { useCart } from '@/hooks/useCart';
@@ -19,7 +18,63 @@ interface CartProps {
 export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
   const { items, updateQuantity, removeItem, clearCart, getItemCount, getTotalPrice } = useCart();
   const { user } = useAuth();
-  const [isCheckingOut, setIsCheckingOut] = React.useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast({
+        title: "Coupon Required",
+        description: "Please enter a coupon code.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsValidatingCoupon(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('validate-coupon', {
+        body: { coupon_code: couponCode.trim().toUpperCase() }
+      });
+
+      if (error) throw error;
+
+      if (data?.valid) {
+        setAppliedCoupon(couponCode.trim().toUpperCase());
+        toast({
+          title: "Coupon Applied! 🎉",
+          description: data.message || `Discount will be applied at checkout.`,
+        });
+      } else {
+        toast({
+          title: "Invalid Coupon",
+          description: data?.message || "This coupon code is not valid or has expired.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Coupon validation error:', error);
+      toast({
+        title: "Coupon Error",
+        description: "Unable to validate coupon. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsValidatingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode('');
+    toast({
+      title: "Coupon Removed",
+      description: "The discount has been removed from your cart.",
+    });
+  };
 
   const handleCheckout = async () => {
     if (!user) {
@@ -48,20 +103,18 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
           items: items.map(item => ({
             product_id: item.product_id,
             quantity: item.quantity
-          }))
+          })),
+          coupon_code: appliedCoupon || undefined
         }
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       if (data?.url) {
-        // Open Stripe checkout in new tab
         window.open(data.url, '_blank');
-        
-        // Clear cart after successful checkout initiation
         clearCart();
+        setAppliedCoupon(null);
+        setCouponCode('');
         onClose();
         
         toast({
@@ -71,7 +124,6 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
       } else {
         throw new Error('No checkout URL received');
       }
-
     } catch (error) {
       console.error('Checkout error:', error);
       toast({
@@ -208,15 +260,68 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                 )}
               </div>
 
-              {/* Footer with total and checkout */}
+              {/* Footer with coupon, total and checkout */}
               {items.length > 0 && (
                 <div className="p-6 border-t border-purple-500/30 bg-black/20">
                   <div className="space-y-4">
+                    {/* Coupon Code Section */}
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-300 flex items-center gap-2">
+                        <Tag className="h-4 w-4 text-pink-400" />
+                        Coupon Code
+                      </label>
+                      {appliedCoupon ? (
+                        <div className="flex items-center justify-between bg-green-500/20 border border-green-500/40 rounded-lg px-3 py-2">
+                          <div className="flex items-center gap-2">
+                            <Check className="h-4 w-4 text-green-400" />
+                            <span className="text-green-400 font-semibold">{appliedCoupon}</span>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleRemoveCoupon}
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-7 px-2"
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Enter coupon code"
+                            value={couponCode}
+                            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                            className="bg-black/30 border-purple-500/30 text-white placeholder:text-gray-500 focus:border-pink-400"
+                            onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
+                          />
+                          <Button
+                            onClick={handleApplyCoupon}
+                            disabled={isValidatingCoupon || !couponCode.trim()}
+                            variant="outline"
+                            className="border-pink-400/50 text-pink-400 hover:bg-pink-500/20 hover:border-pink-400 shrink-0"
+                          >
+                            {isValidatingCoupon ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              'Apply'
+                            )}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+
+                    <Separator className="bg-purple-500/20" />
+
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-semibold text-gray-300">Total:</span>
-                      <span className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-                        ${getTotalPrice().toFixed(2)}
-                      </span>
+                      <div className="text-right">
+                        <span className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+                          ${getTotalPrice().toFixed(2)}
+                        </span>
+                        {appliedCoupon && (
+                          <p className="text-xs text-green-400">Discount applied at checkout</p>
+                        )}
+                      </div>
                     </div>
                     
                     <Button
