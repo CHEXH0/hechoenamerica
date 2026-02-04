@@ -527,7 +527,33 @@ export const ProducerProjects = () => {
                     {new Date(project.created_at).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {/* Payout Button - Show prominently for completed unpaid projects */}
+                      {project.status === 'completed' && !project.producer_paid_at && (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => handleProcessPayout(project.id)}
+                          disabled={processingPayoutId === project.id}
+                          className="bg-emerald-600 hover:bg-emerald-700"
+                        >
+                          {processingPayoutId === project.id ? (
+                            <RefreshCw className="h-4 w-4 animate-spin mr-1" />
+                          ) : (
+                            <DollarSign className="h-4 w-4 mr-1" />
+                          )}
+                          Get Paid
+                        </Button>
+                      )}
+                      
+                      {/* Show paid badge for completed projects */}
+                      {project.status === 'completed' && project.producer_paid_at && (
+                        <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
+                          <DollarSign className="h-3 w-3 mr-1" />
+                          Paid
+                        </Badge>
+                      )}
+
                       {/* View Details */}
                       <Dialog>
                         <DialogTrigger asChild>
