@@ -10,8 +10,10 @@ import {
   Globe,
   Instagram,
   MessageCircle,
-  Loader2
+  Loader2,
+  CreditCard
 } from "lucide-react";
+import { StripeConnectOnboarding } from "@/components/StripeConnectOnboarding";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -407,6 +409,15 @@ const ProducerProfile = () => {
                 )}
               </CardContent>
             </Card>
+          </motion.div>
+
+          {/* Stripe Connect - Automatic Payouts */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+          >
+            <StripeConnectOnboarding producerId={producerProfile.id} />
           </motion.div>
 
           {/* Social Links */}
