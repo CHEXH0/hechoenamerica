@@ -120,12 +120,12 @@ const Treats = () => {
       // Resolve or create audio element for this product
       let currentAudio = audioElements[productId];
       const product = allProducts?.find(p => p.id === productId);
-      const preferredUrl = productId === 's001'
-        ? 'https://eapbuoqkhckqaswfjexv.supabase.co/storage/v1/object/public/audio-samples/s001/MY%20keys%20audio.mp3'
-        : (product?.audio_preview_url || null);
+      
+      // Use the database URL directly - files are stored at root of audio-samples bucket
+      const audioUrl = product?.audio_preview_url || null;
 
-      if (!currentAudio && preferredUrl) {
-        currentAudio = new Audio(preferredUrl);
+      if (!currentAudio && audioUrl) {
+        currentAudio = new Audio(audioUrl);
         currentAudio.preload = 'metadata';
         setAudioElements(prev => ({ ...prev, [productId]: currentAudio! }));
       }
@@ -150,42 +150,14 @@ const Treats = () => {
         audioElements[playingWaveform].currentTime = 0;
       }
 
-      // Try to play the configured audio file
+      // Try to play the audio file
       try {
         await currentAudio.play();
         setPlayingWaveform(productId);
         currentAudio.addEventListener('ended', () => setPlayingWaveform(null), { once: true });
       } catch (err) {
-        // If s001 fails, try the alternate storage path "MY keys audio.mp3"
-        if (productId === 's001') {
-          const altUrl1 = 'https://eapbuoqkhckqaswfjexv.supabase.co/storage/v1/object/public/audio-samples/s001/MY%20keys%20audio.mp3';
-          try {
-            currentAudio.src = altUrl1;
-            currentAudio.load();
-            await currentAudio.play();
-            setPlayingWaveform(productId);
-            currentAudio.addEventListener('ended', () => setPlayingWaveform(null), { once: true });
-            setAudioElements(prev => ({ ...prev, [productId]: currentAudio! }));
-            return;
-          } catch (err2) {
-            console.error('First fallback failed, trying root path...', err2);
-            try {
-              const altUrl2 = 'https://eapbuoqkhckqaswfjexv.supabase.co/storage/v1/object/public/audio-samples/MY%20keys%20audio.mp3';
-              currentAudio.src = altUrl2;
-              await currentAudio.play();
-              setPlayingWaveform(productId);
-              currentAudio.addEventListener('ended', () => setPlayingWaveform(null), { once: true });
-              setAudioElements(prev => ({ ...prev, [productId]: currentAudio! }));
-              return;
-            } catch (err3) {
-              console.error('All fallbacks failed:', err3);
-              toast({ title: 'Audio Error', description: 'Could not play audio file.', variant: 'destructive' });
-            }
-          }
-        } else {
-          console.error('Error playing audio:', err);
-          toast({ title: 'Audio Error', description: 'Could not play audio file.', variant: 'destructive' });
-        }
+        console.error('Error playing audio:', err);
+        toast({ title: 'Audio Error', description: 'Could not play audio file.', variant: 'destructive' });
       }
     } catch (error) {
       console.error('Unexpected audio error:', error);
