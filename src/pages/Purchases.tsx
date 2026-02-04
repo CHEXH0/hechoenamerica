@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Package, Calendar, DollarSign, Music, Mic, Candy, Download } from "lucide-react";
+import { ArrowLeft, Package, Calendar, DollarSign, Music, Mic, Candy, Download, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import { usePurchases } from "@/hooks/usePurchases";
+import { usePurchases, useDeletePurchase, useDeleteAllPurchases } from "@/hooks/usePurchases";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -18,11 +18,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const Purchases = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { data: purchases, isLoading, error } = usePurchases();
+  const deletePurchase = useDeletePurchase();
+  const deleteAllPurchases = useDeleteAllPurchases();
 
   if (authLoading) {
     return (
@@ -242,8 +255,35 @@ const Purchases = () => {
           transition={{ delay: 0.2 }}
         >
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Purchase History</CardTitle>
+              {purchases && purchases.length > 0 && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm">
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Clear All
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Clear all purchase history?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently delete all your purchase records. Your downloaded files will not be affected, but you won't be able to re-download them from this page.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteAllPurchases.mutate()}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete All
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
             </CardHeader>
             <CardContent>
               {isLoading ? (
@@ -278,6 +318,7 @@ const Purchases = () => {
                           <TableHead>Price</TableHead>
                           <TableHead>Date</TableHead>
                           <TableHead>Download</TableHead>
+                          <TableHead className="w-[50px]"></TableHead>
                         </TableRow>
                       </TableHeader>
                     <TableBody>
@@ -323,6 +364,36 @@ const Purchases = () => {
                                 Download
                               </Button>
                             )}
+                          </TableCell>
+                          <TableCell>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="text-muted-foreground hover:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete this purchase?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This will remove "{purchase.product_name}" from your purchase history. You won't be able to re-download it from this page.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => deletePurchase.mutate(purchase.id)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </TableCell>
                         </TableRow>
                       ))}
