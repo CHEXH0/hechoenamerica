@@ -171,7 +171,7 @@ const PaymentSuccess = () => {
               asChild
               className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white border-0 px-8 py-6"
             >
-              <Link to="/admin">
+              <Link to="/purchases">
                 <Download className="h-5 w-5 mr-2" />
                 View My Downloads
               </Link>

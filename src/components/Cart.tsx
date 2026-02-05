@@ -119,7 +119,7 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
         
         toast({
           title: "Redirecting to Checkout",
-          description: "Opening Stripe checkout in a new tab...",
+          description: "Opening checkout in a new tab...",
         });
       } else {
         throw new Error('No checkout URL received');
@@ -128,7 +128,7 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
       console.error('Checkout error:', error);
       toast({
         title: "Checkout Failed",
-        description: error instanceof Error ? error.message : "Please try again or sync products to Stripe first.",
+        description: error instanceof Error ? error.message : "Please try again or sync products first.",
         variant: "destructive",
       });
     } finally {
@@ -340,7 +340,7 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                       ) : (
                         <CreditCard className="h-5 w-5 mr-2" />
                       )}
-                      {isCheckingOut ? 'Processing...' : 'Checkout with Stripe'}
+                      {isCheckingOut ? 'Processing...' : 'Checkout'}
                     </Button>
                     
                     <Button

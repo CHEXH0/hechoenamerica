@@ -574,7 +574,7 @@ const GenerateSong = () => {
       // Note: Producer assignment happens when a producer accepts via Discord
       // Discord notification is sent AFTER payment verification in verify-song-payment
       
-      console.log("Initiating Stripe checkout...");
+      console.log("Initiating checkout...");
 
       const { data: sessionData, error } = await supabase.functions.invoke('create-song-checkout', {
         body: {
@@ -595,12 +595,12 @@ const GenerateSong = () => {
       });
 
       if (error) {
-        console.error("Stripe checkout error:", error);
+        console.error("Checkout error:", error);
         throw error;
       }
       
       if (sessionData?.url) {
-        console.log("Redirecting to Stripe checkout...");
+        console.log("Redirecting to checkout...");
         window.location.href = sessionData.url;
       }
     } catch (error) {

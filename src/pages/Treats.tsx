@@ -292,7 +292,7 @@ const Treats = () => {
         window.open(data.url, '_blank');
         toast({
           title: "Redirecting to Checkout",
-          description: "Opening Stripe checkout in a new tab...",
+          description: "Opening checkout in a new tab...",
         });
       } else {
         throw new Error('No checkout URL received');
@@ -301,7 +301,7 @@ const Treats = () => {
       console.error('Buy now error:', error);
       toast({
         title: "Purchase Failed",
-        description: error instanceof Error ? error.message : "Please try again or sync products to Stripe first.",
+        description: error instanceof Error ? error.message : "Please try again or sync products first.",
         variant: "destructive",
       });
     }
@@ -311,7 +311,7 @@ const Treats = () => {
     if (!user) {
       toast({
         title: "Authentication Required",
-        description: "Please log in to sync products to Stripe.",
+        description: "Please log in to sync products",
         variant: "destructive",
       });
       return;
@@ -338,7 +338,7 @@ const Treats = () => {
       console.error('Error syncing products:', error);
       toast({
         title: "Sync Failed",
-        description: "Failed to sync products to Stripe. Please try again.",
+        description: "Failed to sync products. Please try again.",
         variant: "destructive",
       });
     } finally {

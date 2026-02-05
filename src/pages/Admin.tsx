@@ -310,7 +310,7 @@ const Admin = () => {
       console.error('Sync error:', err);
       toast({
         title: "Sync Failed",
-        description: "Failed to sync products to Stripe. Please try again.",
+        description: "Failed to sync products. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -562,7 +562,7 @@ const Admin = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground mb-4">
-                      Sync products from Supabase to Stripe for payment processing.
+                      Sync products from Supabase for payment processing.
                     </p>
                     <Button 
                       onClick={handleSyncProducts}

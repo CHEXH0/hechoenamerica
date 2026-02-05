@@ -282,7 +282,6 @@ serve(async (req) => {
         body: {
           requestId,
           notificationType: 'file_delivered',
-          driveLink: downloadUrl,
         }
       });
     } catch (discordError) {
