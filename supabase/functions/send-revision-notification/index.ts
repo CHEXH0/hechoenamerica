@@ -102,7 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
                   <p>Please review the request and deliver the revision as soon as possible.</p>
                 </div>
                 <div class="cta">
-                  <a href="https://hechoenamerica.lovable.app/my-projects" class="button">View Project</a>
+                  <a href="https://hechoenamericastudio.com/my-projects" class="button">View Project</a>
                 </div>
               </div>
               <div class="footer">
@@ -150,7 +150,7 @@ const handler = async (req: Request): Promise<Response> => {
                 </div>
                 <div class="cta">
                   ${driveLink ? `<a href="${driveLink}" class="button">Download Revision ${revisionNumber}</a><br>` : ''}
-                  <a href="https://hechoenamerica.lovable.app/my-projects" class="secondary-button">View in Dashboard</a>
+                  <a href="https://hechoenamericastudio.com/my-projects" class="secondary-button">View in Dashboard</a>
                 </div>
               </div>
               <div class="footer">
@@ -204,7 +204,7 @@ const handler = async (req: Request): Promise<Response> => {
                   </div>
                 </div>
                 <div class="cta">
-                  <a href="https://hechoenamerica.lovable.app/my-projects" class="button">View Project</a>
+                  <a href="https://hechoenamericastudio.com/my-projects" class="button" style="color: #ffffff" >View Project</a>
                 </div>
               </div>
               <div class="footer">

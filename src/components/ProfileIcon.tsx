@@ -75,7 +75,7 @@ const ProfileIcon = () => {
           className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
         >
           <ShoppingBag className="h-4 w-4 mr-2" />
-          My Purchases
+          My Treats
         </DropdownMenuItem>
         {roleData?.isProducer && (
           <DropdownMenuItem 

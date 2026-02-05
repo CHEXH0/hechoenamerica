@@ -201,10 +201,10 @@ const Purchases = () => {
           </Button>
           
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent mb-2">
-            My Purchases
+            My Treats
           </h1>
           <p className="text-muted-foreground">
-            Track your treats and purchases from the marketplace
+            Track your treats from the marketplace
           </p>
         </motion.div>
 

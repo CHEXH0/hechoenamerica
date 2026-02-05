@@ -228,12 +228,12 @@ const ProducerApplicationForm = () => {
             >
               <CheckCircle className="h-20 w-20 text-green-400 mx-auto" />
             </motion.div>
-            <h3 className="text-3xl font-bold text-white mb-4">Application Received!</h3>
-            <p className="text-gray-300 text-lg max-w-md mx-auto mb-6">
+            <h3 className="text-3xl font-bold text-gray-1000 mb-4">Application Received!</h3>
+            <p className="text-gray-800 text-lg max-w-md mx-auto mb-6">
               Thank you for your interest in joining our producer network! Check your email for a confirmation with next steps.
             </p>
             <div className="bg-indigo-900/30 border border-indigo-500/40 rounded-lg p-4 max-w-md mx-auto">
-              <p className="text-indigo-300 text-sm flex items-center justify-center gap-2">
+              <p className="text-indigo-100 text-sm flex items-center justify-center gap-2">
                 <span className="text-xl">💬</span>
                 <span>
                   <strong>Note:</strong> If approved, you'll use Discord to receive and accept projects from artists.

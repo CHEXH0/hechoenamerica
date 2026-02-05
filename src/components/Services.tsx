@@ -56,7 +56,7 @@ const Services = () => {
     },
     {
       name: "Ableton Live",
-      logo: abletonLogo,
+      logo: "/laptop-uploads/ableton.jpg",
       tagline: "Creative tools for music makers",
     },
     {
@@ -67,27 +67,27 @@ const Services = () => {
     {
       name: "Cubase",
       logo: "/laptop-uploads/Cubase.png",
-      tagline: "Professional music production",
+      tagline: "Keeps Your Creativity Flowing",
     },
     {
       name: "Logic Pro",
-      logo: "/lovable-uploads/b0915421-1e88-4e72-af78-b3f03acea982.png",
-      tagline: "Powerful. Creative. Intuitive.",
+      logo: "/laptop-uploads/logic-pro.png",
+      tagline: "Intelligence. Brilliance on board",
     },
     {
       name: "Studio One",
-      logo: "/lovable-uploads/d5eed490-6d34-4af5-8428-15981ab0f9c3.png",
-      tagline: "The future of recording",
+      logo: "/laptop-uploads/studio-one.png",
+      tagline: "One DAW for All",
     },
     {
       name: "Reason",
-      logo: "/laptop-uploads/Synth.png",
-      tagline: "Make music your way",
+      logo: "/laptop-uploads/reason.jpg",
+      tagline: "Sound Like You",
     },
     {
       name: "Reaper",
-      logo: "/laptop-uploads/mixing-mastering.jpg",
-      tagline: "Digital audio workstation",
+      logo: "/laptop-uploads/reaper.png",
+      tagline: "Rapid Environment for Audio Production, Engineering, and Recording",
     },
   ];
 
