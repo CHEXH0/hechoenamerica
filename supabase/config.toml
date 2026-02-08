@@ -107,3 +107,9 @@ verify_jwt = true
 
 [functions.validate-coupon]
 verify_jwt = false
+
+[functions.process-cancellation-request]
+verify_jwt = true
+
+[functions.notify-cancellation-request]
+verify_jwt = true
