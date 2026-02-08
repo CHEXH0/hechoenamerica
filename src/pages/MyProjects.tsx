@@ -332,6 +332,7 @@ const MyProjects = () => {
   const handleRequestCancellation = async (projectId: string) => {
     setRequestingCancellationId(projectId);
     try {
+      // Update status to cancellation_requested
       const { error } = await supabase
         .from("song_requests")
         .update({ status: "cancellation_requested" })
@@ -339,9 +340,22 @@ const MyProjects = () => {
 
       if (error) throw error;
 
+      // Send notification emails to all parties
+      try {
+        await supabase.functions.invoke('notify-cancellation-request', {
+          body: {
+            requestId: projectId,
+            reason: "Customer requested cancellation via My Projects page"
+          }
+        });
+      } catch (notifyError) {
+        console.error("Failed to send cancellation notifications:", notifyError);
+        // Don't throw - the status update succeeded
+      }
+
       toast({
         title: "Cancellation Requested",
-        description: "Your cancellation request has been submitted for review. We'll get back to you soon.",
+        description: "Your cancellation request has been submitted for review. You'll receive a confirmation email shortly.",
       });
 
       // Update local state
