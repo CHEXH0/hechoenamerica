@@ -675,7 +675,7 @@ const GenerateSong = () => {
           <div className="w-24 h-20 mx-auto">
             <img src="/laptop-uploads/HEA_White.png" alt="HechoEnAmerica Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-2">🎶Create Your Song🎶</h1>
+          <h1 className="text-5xl md:text-6xl font-bold text-white mb-2">🎶Create Your Sound🎶</h1>
           <p className="text-2xl text-white/90 font-medium">
             LA MUSIC ES MEDICINA
           </p>

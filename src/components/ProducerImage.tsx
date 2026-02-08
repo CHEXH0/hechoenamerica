@@ -54,7 +54,7 @@ const ProducerImage = ({ image, name }: ProducerImageProps) => {
               transform: 'perspective(100px) rotateX(15deg)'
             }}
           >
-            {showAngel ? '😇' : '😈'}
+            {showAngel ? '' : ''}
           </motion.div>
         </motion.div>
       </div>

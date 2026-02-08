@@ -750,7 +750,7 @@ const Treats = () => {
             <TabsList className="grid w-full h-full grid-cols-3 bg-black/30 backdrop-blur-md border border-purple-500/20 text-xs sm:text-sm">
               <TabsTrigger 
                 value="samples" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-pink-400 text-gray-400 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-pink-700 text-gray-300 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
               >
                 <FileAudio className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="hidden sm:inline">Audio Samples</span>
@@ -758,7 +758,7 @@ const Treats = () => {
               </TabsTrigger>
               <TabsTrigger 
                 value="vsts" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-red-500/20 data-[state=active]:text-purple-400 text-gray-400 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-red-500/20 data-[state=active]:text-purple-700 text-gray-300 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
               >
                 <Disc3 className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="hidden sm:inline">VST Plugins</span>
@@ -766,7 +766,7 @@ const Treats = () => {
               </TabsTrigger>
               <TabsTrigger 
                 value="candies" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-red-400 text-gray-400 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-red-700 text-gray-300 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
               >
                 <Candy className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="hidden sm:inline">Sweet Treats</span>
