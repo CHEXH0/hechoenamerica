@@ -105,11 +105,39 @@ serve(async (req) => {
     } else if (notificationType === 'producer_assigned') {
       embed = createProducerAssignedEmbed(songRequest, requestId);
       content = `🎧 Producer has been assigned to a project!`;
-    } else {
+    } else if (notificationType === 'cancellation_processed') {
+      // Cancellation notification - do NOT repost as new request
+      const { action: cancellationAction, refundAmount: refundAmountStr } = await req.json().catch(() => ({}));
+      embed = {
+        title: cancellationAction === 'approve' ? "❌ Project Cancelled" : "ℹ️ Cancellation Denied",
+        color: cancellationAction === 'approve' ? 0xE74C3C : 0xF59E0B,
+        fields: [
+          { name: "📋 Request ID", value: `\`${requestId.substring(0, 8)}...\``, inline: true },
+          { name: "🎯 Tier", value: songRequest.tier.toUpperCase(), inline: true },
+          { name: "📧 Customer", value: songRequest.user_email, inline: true },
+          { name: "💰 Refund", value: refundAmountStr || 'None', inline: true },
+        ],
+        timestamp: new Date().toISOString(),
+      };
+      content = cancellationAction === 'approve' 
+        ? `❌ Project has been cancelled and refunded.`
+        : `ℹ️ Cancellation request was denied. Project continues.`;
+    } else if (notificationType === 'producer_changed') {
+      // Producer change - repost for new producer acceptance
+      embed = createNewRequestEmbed(songRequest, requestId);
+      const genreKey = songRequest.genre_category?.toLowerCase() || 'other';
+      const roleMention = genreRoleMap[genreKey] || genreRoleMap['other'];
+      content = `🔄 **@${roleMention}** - Producer changed! ${songRequest.tier.toUpperCase()} project needs a new producer!`;
+    } else if (notificationType === 'new_request') {
       embed = createNewRequestEmbed(songRequest, requestId);
       const genreKey = songRequest.genre_category?.toLowerCase() || 'other';
       const roleMention = genreRoleMap[genreKey] || genreRoleMap['other'];
       content = `🚨 **@${roleMention}** - New ${songRequest.tier.toUpperCase()} song request needs a producer!`;
+    } else {
+      // Unknown notification type - log and create a generic status embed
+      console.warn('Unknown notification type:', notificationType);
+      embed = createStatusChangeEmbed(songRequest, songRequest.status, songRequest.status, requestId);
+      content = `📊 Project update for ${songRequest.tier.toUpperCase()} request.`;
     }
 
     // Build message payload

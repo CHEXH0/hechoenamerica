@@ -221,6 +221,19 @@ serve(async (req) => {
               return;
             }
 
+            // Check if this producer is blocked from accepting this project
+            const blockedIds = songRequest.blocked_producer_ids || [];
+            if (blockedIds.includes(clickingProducer.id)) {
+              await followUpInteraction(
+                applicationId,
+                interactionToken,
+                `⛔ <@${discordUserId}> You were previously assigned to this project and cannot accept it again.`,
+                interaction.message?.embeds || [],
+                false
+              );
+              return;
+            }
+
             // Update status to accepted AND assign the producer
             const { error: updateError } = await supabase
               .from('song_requests')
