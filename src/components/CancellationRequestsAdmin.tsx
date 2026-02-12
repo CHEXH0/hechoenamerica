@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { AlertCircle, CheckCircle, XCircle, DollarSign, User, Music, Calendar, Loader2, RefreshCw } from "lucide-react";
+import { AlertCircle, CheckCircle, XCircle, DollarSign, User, Music, Calendar, Loader2, RefreshCw, UserMinus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -58,9 +58,11 @@ export const CancellationRequestsAdmin = () => {
   const [requests, setRequests] = useState<CancellationRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [changingProducerId, setChangingProducerId] = useState<string | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<CancellationRequest | null>(null);
   const [refundPercentage, setRefundPercentage] = useState<string>("100");
   const [adminNotes, setAdminNotes] = useState("");
+  const [changeReason, setChangeReason] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -81,7 +83,6 @@ export const CancellationRequestsAdmin = () => {
 
       if (error) throw error;
 
-      // Fetch revisions for each request to help assess progress
       const requestsWithRevisions = await Promise.all(
         (data || []).map(async (request) => {
           const { data: revisions } = await supabase
@@ -90,47 +91,29 @@ export const CancellationRequestsAdmin = () => {
             .eq("song_request_id", request.id)
             .order("revision_number", { ascending: true });
 
-          return {
-            ...request,
-            revisions: revisions || [],
-          };
+          return { ...request, revisions: revisions || [] };
         })
       );
 
       setRequests(requestsWithRevisions);
     } catch (error) {
       console.error("Error fetching cancellation requests:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch cancellation requests",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to fetch cancellation requests", variant: "destructive" });
     } finally {
       setLoading(false);
     }
   };
 
   const calculateRecommendedRefund = (request: CancellationRequest): number => {
-    // If no producer assigned, full refund
     if (!request.assigned_producer_id) return 100;
-
-    // Check revision progress
     const deliveredRevisions = request.revisions?.filter(r => r.status === 'delivered').length || 0;
     const totalRevisions = request.number_of_revisions || 0;
-
-    // If work hasn't started (no revisions delivered), 100% refund
     if (deliveredRevisions === 0) return 100;
-
-    // If all revisions delivered (project nearly complete), no refund
     if (totalRevisions > 0 && deliveredRevisions >= totalRevisions) return 0;
-
-    // Partial refund based on progress
     if (totalRevisions > 0) {
       const progressPercentage = (deliveredRevisions / totalRevisions) * 100;
       return Math.max(0, Math.round(100 - progressPercentage));
     }
-
-    // Default: 50% if work has started but we can't determine exact progress
     return 50;
   };
 
@@ -141,15 +124,12 @@ export const CancellationRequestsAdmin = () => {
     if (!request.assigned_producer_id) {
       return <Badge variant="secondary">No Producer Assigned</Badge>;
     }
-
     if (deliveredRevisions === 0) {
       return <Badge className="bg-green-500">Not Started</Badge>;
     }
-
     if (totalRevisions > 0 && deliveredRevisions >= totalRevisions) {
       return <Badge variant="destructive">Almost Complete</Badge>;
     }
-
     return (
       <Badge className="bg-amber-500">
         {deliveredRevisions}/{totalRevisions} Revisions Delivered
@@ -178,22 +158,42 @@ export const CancellationRequestsAdmin = () => {
         description: data.message,
       });
 
-      // Reset form
       setSelectedRequest(null);
       setRefundPercentage("100");
       setAdminNotes("");
-
-      // Refresh list
       fetchCancellationRequests();
     } catch (error) {
       console.error("Error processing cancellation:", error);
-      toast({
-        title: "Error",
-        description: `Failed to ${action} cancellation request`,
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: `Failed to ${action} cancellation request`, variant: "destructive" });
     } finally {
       setProcessingId(null);
+    }
+  };
+
+  const handleChangeProducer = async (request: CancellationRequest) => {
+    setChangingProducerId(request.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("change-producer", {
+        body: {
+          requestId: request.id,
+          reason: changeReason || "Admin initiated producer change due to cancellation request",
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Producer Changed",
+        description: data.message,
+      });
+
+      setChangeReason("");
+      fetchCancellationRequests();
+    } catch (error) {
+      console.error("Error changing producer:", error);
+      toast({ title: "Error", description: "Failed to change producer", variant: "destructive" });
+    } finally {
+      setChangingProducerId(null);
     }
   };
 
@@ -230,7 +230,7 @@ export const CancellationRequestsAdmin = () => {
               )}
             </CardTitle>
             <CardDescription>
-              Review and process client cancellation requests
+              Review cancellation requests — approve, deny, or change the producer instead
             </CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={fetchCancellationRequests}>
@@ -302,135 +302,185 @@ export const CancellationRequestsAdmin = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            size="sm"
-                            onClick={() => {
-                              setSelectedRequest(request);
-                              setRefundPercentage(recommendedRefund.toString());
-                            }}
-                          >
-                            Review
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="max-w-lg">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Review Cancellation Request</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Decide whether to approve or deny this cancellation request.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
+                      <div className="flex gap-2">
+                        {/* Review / Approve / Deny Dialog */}
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                setSelectedRequest(request);
+                                setRefundPercentage(recommendedRefund.toString());
+                              }}
+                            >
+                              Review
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="max-w-lg">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Review Cancellation Request</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Decide whether to approve or deny this cancellation request.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
 
-                          <div className="space-y-4 py-4">
-                            {/* Project Details */}
-                            <div className="grid grid-cols-2 gap-4 text-sm">
-                              <div>
-                                <Label className="text-muted-foreground">Client</Label>
-                                <p className="font-medium">{request.user_email}</p>
+                            <div className="space-y-4 py-4">
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <Label className="text-muted-foreground">Client</Label>
+                                  <p className="font-medium">{request.user_email}</p>
+                                </div>
+                                <div>
+                                  <Label className="text-muted-foreground">Project</Label>
+                                  <p className="font-medium">{request.tier}</p>
+                                </div>
+                                <div>
+                                  <Label className="text-muted-foreground">Producer</Label>
+                                  <p className="font-medium">{request.producer?.name || "Not assigned"}</p>
+                                </div>
+                                <div>
+                                  <Label className="text-muted-foreground">Price</Label>
+                                  <p className="font-medium">{request.price}</p>
+                                </div>
                               </div>
-                              <div>
-                                <Label className="text-muted-foreground">Project</Label>
-                                <p className="font-medium">{request.tier}</p>
+
+                              <div className="bg-muted/50 p-3 rounded-lg">
+                                <Label className="text-muted-foreground">Progress Status</Label>
+                                <div className="mt-1">{getProgressBadge(request)}</div>
+                                {request.revisions && request.revisions.length > 0 && (
+                                  <p className="text-xs text-muted-foreground mt-2">
+                                    {request.revisions.filter(r => r.status === 'delivered').length} of{" "}
+                                    {request.number_of_revisions || 0} revisions delivered
+                                  </p>
+                                )}
                               </div>
+
                               <div>
-                                <Label className="text-muted-foreground">Producer</Label>
-                                <p className="font-medium">
-                                  {request.producer?.name || "Not assigned"}
+                                <Label className="text-muted-foreground">Song Idea</Label>
+                                <p className="text-sm mt-1 line-clamp-3">{request.song_idea}</p>
+                              </div>
+
+                              <div>
+                                <Label>Refund Percentage</Label>
+                                <Select value={refundPercentage} onValueChange={setRefundPercentage}>
+                                  <SelectTrigger className="mt-1">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="100">100% - Full Refund</SelectItem>
+                                    <SelectItem value="75">75% - Minor Progress</SelectItem>
+                                    <SelectItem value="50">50% - Significant Work Done</SelectItem>
+                                    <SelectItem value="25">25% - Mostly Complete</SelectItem>
+                                    <SelectItem value="0">0% - No Refund</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Recommended: {recommendedRefund}% based on producer progress
                                 </p>
                               </div>
+
                               <div>
-                                <Label className="text-muted-foreground">Price</Label>
-                                <p className="font-medium">{request.price}</p>
+                                <Label>Admin Notes (sent to client)</Label>
+                                <Textarea
+                                  value={adminNotes}
+                                  onChange={(e) => setAdminNotes(e.target.value)}
+                                  placeholder="Optional: Explain the decision..."
+                                  className="mt-1"
+                                  rows={3}
+                                />
                               </div>
                             </div>
 
-                            {/* Progress Info */}
-                            <div className="bg-muted/50 p-3 rounded-lg">
-                              <Label className="text-muted-foreground">Progress Status</Label>
-                              <div className="mt-1">{getProgressBadge(request)}</div>
-                              {request.revisions && request.revisions.length > 0 && (
-                                <p className="text-xs text-muted-foreground mt-2">
-                                  {request.revisions.filter(r => r.status === 'delivered').length} of{" "}
-                                  {request.number_of_revisions || 0} revisions delivered
-                                </p>
-                              )}
-                            </div>
-
-                            {/* Song Idea Preview */}
-                            <div>
-                              <Label className="text-muted-foreground">Song Idea</Label>
-                              <p className="text-sm mt-1 line-clamp-3">{request.song_idea}</p>
-                            </div>
-
-                            {/* Refund Selection */}
-                            <div>
-                              <Label>Refund Percentage</Label>
-                              <Select
-                                value={refundPercentage}
-                                onValueChange={setRefundPercentage}
+                            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                              <AlertDialogCancel onClick={() => setSelectedRequest(null)}>
+                                Cancel
+                              </AlertDialogCancel>
+                              <Button
+                                variant="outline"
+                                onClick={() => handleProcessRequest("deny")}
+                                disabled={processingId === request.id}
+                                className="border-amber-500 text-amber-600 hover:bg-amber-50"
                               >
-                                <SelectTrigger className="mt-1">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="100">100% - Full Refund</SelectItem>
-                                  <SelectItem value="75">75% - Minor Progress</SelectItem>
-                                  <SelectItem value="50">50% - Significant Work Done</SelectItem>
-                                  <SelectItem value="25">25% - Mostly Complete</SelectItem>
-                                  <SelectItem value="0">0% - No Refund</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Recommended: {recommendedRefund}% based on producer progress
-                              </p>
-                            </div>
+                                {processingId === request.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                ) : (
+                                  <XCircle className="h-4 w-4 mr-2" />
+                                )}
+                                Deny Request
+                              </Button>
+                              <Button
+                                onClick={() => handleProcessRequest("approve")}
+                                disabled={processingId === request.id}
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                {processingId === request.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                ) : (
+                                  <CheckCircle className="h-4 w-4 mr-2" />
+                                )}
+                                Approve & Refund {refundPercentage}%
+                              </Button>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
 
-                            {/* Admin Notes */}
-                            <div>
-                              <Label>Admin Notes (sent to client)</Label>
-                              <Textarea
-                                value={adminNotes}
-                                onChange={(e) => setAdminNotes(e.target.value)}
-                                placeholder="Optional: Explain the decision..."
-                                className="mt-1"
-                                rows={3}
-                              />
-                            </div>
-                          </div>
+                        {/* Change Producer Dialog */}
+                        {request.assigned_producer_id && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="outline" className="border-blue-500 text-blue-600 hover:bg-blue-50">
+                                <UserMinus className="h-4 w-4 mr-1" />
+                                Change Producer
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Change Producer</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This will remove <strong>{request.producer?.name}</strong> from the project, pay them proportionally for work completed ({request.revisions?.filter(r => r.status === 'delivered').length || 0}/{request.number_of_revisions || 0} revisions), block them from re-accepting, and repost to Discord for a new producer.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
 
-                          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                            <AlertDialogCancel onClick={() => setSelectedRequest(null)}>
-                              Cancel
-                            </AlertDialogCancel>
-                            <Button
-                              variant="outline"
-                              onClick={() => handleProcessRequest("deny")}
-                              disabled={processingId === request.id}
-                              className="border-amber-500 text-amber-600 hover:bg-amber-50"
-                            >
-                              {processingId === request.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                              ) : (
-                                <XCircle className="h-4 w-4 mr-2" />
-                              )}
-                              Deny Request
-                            </Button>
-                            <Button
-                              onClick={() => handleProcessRequest("approve")}
-                              disabled={processingId === request.id}
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              {processingId === request.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                              ) : (
-                                <CheckCircle className="h-4 w-4 mr-2" />
-                              )}
-                              Approve & Refund {refundPercentage}%
-                            </Button>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                              <div className="space-y-4 py-4">
+                                <div className="bg-muted/50 p-3 rounded-lg text-sm">
+                                  <p><strong>Current Producer:</strong> {request.producer?.name}</p>
+                                  <p><strong>Progress:</strong> {request.revisions?.filter(r => r.status === 'delivered').length || 0} of {request.number_of_revisions || 0} revisions delivered</p>
+                                  <p className="text-muted-foreground mt-1">
+                                    The old producer will be compensated proportionally (85% producer share × progress ratio).
+                                  </p>
+                                </div>
+
+                                <div>
+                                  <Label>Reason for Change (sent to producer)</Label>
+                                  <Textarea
+                                    value={changeReason}
+                                    onChange={(e) => setChangeReason(e.target.value)}
+                                    placeholder="Optional: Explain why the producer is being changed..."
+                                    className="mt-1"
+                                    rows={3}
+                                  />
+                                </div>
+                              </div>
+
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <Button
+                                  onClick={() => handleChangeProducer(request)}
+                                  disabled={changingProducerId === request.id}
+                                  className="bg-blue-600 hover:bg-blue-700"
+                                >
+                                  {changingProducerId === request.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                  ) : (
+                                    <UserMinus className="h-4 w-4 mr-2" />
+                                  )}
+                                  Change Producer & Repost
+                                </Button>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 );

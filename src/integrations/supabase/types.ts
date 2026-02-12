@@ -438,6 +438,7 @@ export type Database = {
         Row: {
           acceptance_deadline: string | null
           assigned_producer_id: string | null
+          blocked_producer_ids: string[] | null
           complexity_level: string | null
           created_at: string
           file_urls: string[] | null
@@ -465,6 +466,7 @@ export type Database = {
         Insert: {
           acceptance_deadline?: string | null
           assigned_producer_id?: string | null
+          blocked_producer_ids?: string[] | null
           complexity_level?: string | null
           created_at?: string
           file_urls?: string[] | null
@@ -492,6 +494,7 @@ export type Database = {
         Update: {
           acceptance_deadline?: string | null
           assigned_producer_id?: string | null
+          blocked_producer_ids?: string[] | null
           complexity_level?: string | null
           created_at?: string
           file_urls?: string[] | null

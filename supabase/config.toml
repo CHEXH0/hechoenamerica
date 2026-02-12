@@ -113,3 +113,6 @@ verify_jwt = true
 
 [functions.notify-cancellation-request]
 verify_jwt = true
+
+[functions.change-producer]
+verify_jwt = true
