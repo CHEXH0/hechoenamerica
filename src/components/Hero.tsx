@@ -9,7 +9,7 @@ const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black text-white">
       {/* Header Controls */}
-      <div className="absolute top-4 right-4 z-20 flex items-center gap-1">
+      <div className="absolute top-4 right-14 z-20 flex items-center gap-1">
         <CustomerServicePanel />
         <ProfileIcon />
       </div>
