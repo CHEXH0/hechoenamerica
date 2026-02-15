@@ -527,15 +527,9 @@ export const StorageManagement = () => {
               </AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => selectAllInCategory(stats.other.items, 'other')}
-                  >
-                    {stats.other.items.every(i => selectedFiles.includes(i.path))
-                      ? 'Deselect All'
-                      : 'Select All'}
-                  </Button>
+                  <p className="text-xs text-muted-foreground italic">
+                    These assets (product images, audio samples, etc.) are protected and cannot be deleted from here.
+                  </p>
                   <ScrollArea className="h-48">
                     <div className="space-y-1">
                       {stats.other.items.map((item) => (
@@ -543,10 +537,6 @@ export const StorageManagement = () => {
                           key={item.path}
                           className="flex items-center gap-2 p-2 hover:bg-muted/50 rounded text-sm"
                         >
-                          <Checkbox
-                            checked={selectedFiles.includes(item.path)}
-                            onCheckedChange={() => toggleFileSelection(item.path)}
-                          />
                           <span className="flex-1 truncate">{item.name}</span>
                           <span className="text-muted-foreground">{formatBytes(item.size)}</span>
                         </div>
