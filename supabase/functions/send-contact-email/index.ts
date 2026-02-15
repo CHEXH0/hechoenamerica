@@ -65,12 +65,70 @@ serve(async (req: Request) => {
       websiteUrl,
     } = body;
 
+    // Input validation
     if (!name || !email) {
       return new Response(
         JSON.stringify({ error: "Missing required fields (name, email)" }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid email format" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Length limits
+    if (typeof name !== 'string' || name.length > 100) {
+      return new Response(
+        JSON.stringify({ error: "Name must be under 100 characters" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+    if (email.length > 255) {
+      return new Response(
+        JSON.stringify({ error: "Email must be under 255 characters" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+    if (message && message.length > 10000) {
+      return new Response(
+        JSON.stringify({ error: "Message must be under 10000 characters" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+    if (subject && subject.length > 200) {
+      return new Response(
+        JSON.stringify({ error: "Subject must be under 200 characters" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+    if (fileUrls && fileUrls.length > 10) {
+      return new Response(
+        JSON.stringify({ error: "Too many file attachments (max 10)" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Validate file URLs are from expected Supabase storage domain
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+    if (fileUrls && fileUrls.length > 0) {
+      for (const url of fileUrls) {
+        if (typeof url !== 'string' || !url.startsWith(supabaseUrl)) {
+          return new Response(
+            JSON.stringify({ error: "Invalid file URL" }),
+            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+          );
+        }
+      }
+    }
+
+    // Sanitize inputs for HTML email rendering
+    const sanitize = (text: string) => text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     const toAddress = "hechoenamerica369@gmail.com";
 
@@ -83,16 +141,16 @@ serve(async (req: Request) => {
         );
       }
 
-      console.log("Processing producer application from:", name, email);
+      console.log("Processing producer application from:", sanitize(name));
 
-      // Render business email with application details
+      // Render business email with sanitized application details
       const businessHtml = await renderAsync(
         React.createElement(ProducerApplicationEmail, {
-          name,
-          email,
-          country,
-          genres,
-          bio,
+          name: sanitize(name),
+          email: sanitize(email),
+          country: sanitize(country),
+          genres: genres.map(g => sanitize(g)),
+          bio: sanitize(bio),
           imageUrl: imageUrl || "",
           spotifyUrl: spotifyUrl || undefined,
           youtubeUrl: youtubeUrl || undefined,
@@ -107,7 +165,7 @@ serve(async (req: Request) => {
         from: "Hecho En America <team@hechoenamericastudio.com>",
       to: [toAddress],
       reply_to: email,
-      subject: `🎵 New Producer Application: ${name}`,
+      subject: `🎵 New Producer Application: ${sanitize(name)}`,
         html: businessHtml,
       });
 
@@ -121,7 +179,7 @@ serve(async (req: Request) => {
 
       // Render and send confirmation email to applicant
       const confirmationHtml = await renderAsync(
-        React.createElement(ProducerApplicationConfirmation, { name })
+        React.createElement(ProducerApplicationConfirmation, { name: sanitize(name) })
       );
 
       const { error: confirmError } = await resend.emails.send({
@@ -152,11 +210,11 @@ serve(async (req: Request) => {
     }
 
     // Add file links to message if provided
-    let fullMessage = message;
+    let fullMessage = sanitize(message);
     if (fileUrls && fileUrls.length > 0) {
       fullMessage += "\n\n=== Attached Files ===\n";
       fileUrls.forEach((url, index) => {
-        const fileName = url.split('/').pop() || `File ${index + 1}`;
+        const fileName = sanitize(url.split('/').pop() || `File ${index + 1}`);
         fullMessage += `\n${index + 1}. ${fileName}\n   Download: ${url}`;
       });
     }
@@ -164,10 +222,10 @@ serve(async (req: Request) => {
     // Render React Email template for business
     const businessHtml = await renderAsync(
       React.createElement(ContactFormEmail, {
-        name,
-        email,
-        country: country ?? "Not specified",
-        subject: subject || "New message from HechoEnAmerica website",
+        name: sanitize(name),
+        email: sanitize(email),
+        country: sanitize(country ?? "Not specified"),
+        subject: sanitize(subject || "New message from HechoEnAmerica website"),
         message: fullMessage,
       })
     );
@@ -177,7 +235,7 @@ serve(async (req: Request) => {
       from: "Hecho En America <team@hechoenamericastudio.com>",
       to: [toAddress],
       reply_to: email,
-      subject: subject || `New contact form message from ${name}`,
+      subject: sanitize(subject || `New contact form message from ${name}`),
       html: businessHtml,
     });
 
@@ -190,7 +248,7 @@ serve(async (req: Request) => {
     }
 
     // Send confirmation to user
-    const userMessage = `Thank you for your submission!\n\nWe've received your request:\n\n${message}`;
+    const userMessage = `Thank you for your submission!\n\nWe've received your request:\n\n${sanitize(message)}`;
     const userHtml = await renderAsync(
       React.createElement(ContactFormEmail, {
         name: "HechoEnAmerica Team",
