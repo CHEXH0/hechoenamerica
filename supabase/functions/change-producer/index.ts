@@ -38,13 +38,15 @@ serve(async (req) => {
     
     // Will verify project ownership below if not admin
 
-    const { requestId, reason, producerPayoutPercentage, changeFee } = await req.json();
+    const { requestId, reason, producerPayoutPercentage, changeFee, adminAssignProducerId } = await req.json();
     if (!requestId) throw new Error("Missing requestId");
     
     const payoutPercent = typeof producerPayoutPercentage === 'number' ? producerPayoutPercentage : null;
-    const flatChangeFee = typeof changeFee === 'number' ? changeFee : 25; // Default $25 change fee
+    // Admin direct assignment: no client fee. Client-initiated: default $25
+    const isAdminDirectAssign = !!adminAssignProducerId && isAdmin;
+    const flatChangeFee = isAdminDirectAssign ? 0 : (typeof changeFee === 'number' ? changeFee : 25);
 
-    logStep("Processing producer change", { requestId, reason, payoutPercent, flatChangeFee });
+    logStep("Processing producer change", { requestId, reason, payoutPercent, flatChangeFee, isAdminDirectAssign, adminAssignProducerId });
 
     // Fetch the song request with producer and revisions
     const { data: songRequest, error: fetchError } = await supabase
@@ -187,43 +189,115 @@ serve(async (req) => {
     // Block the old producer and unassign
     const existingBlocked = songRequest.blocked_producer_ids || [];
     const updatedBlocked = [...existingBlocked, oldProducerId];
+    const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
-    const { error: updateError } = await supabase
-      .from("song_requests")
-      .update({
-        assigned_producer_id: null,
-        blocked_producer_ids: updatedBlocked,
-        status: "paid", // Reset to paid so new producer can accept
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", requestId);
+    if (isAdminDirectAssign) {
+      // Admin direct assignment: assign the new producer immediately
+      const { error: updateError } = await supabase
+        .from("song_requests")
+        .update({
+          assigned_producer_id: adminAssignProducerId,
+          blocked_producer_ids: updatedBlocked,
+          status: "accepted",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", requestId);
 
-    if (updateError) throw new Error(`Failed to update request: ${updateError.message}`);
+      if (updateError) throw new Error(`Failed to update request: ${updateError.message}`);
 
-    logStep("Producer unassigned and blocked", { oldProducerId, updatedBlocked });
+      logStep("Admin direct assignment: old producer blocked, new producer assigned", { oldProducerId, newProducerId: adminAssignProducerId });
 
-    // Reset acceptance deadline (48 hours from now)
-    const newDeadline = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
-    await supabase
-      .from("song_requests")
-      .update({ acceptance_deadline: newDeadline })
-      .eq("id", requestId);
+      // Fetch new producer details for email
+      const { data: newProducer } = await supabase
+        .from("producers")
+        .select("id, name, email")
+        .eq("id", adminAssignProducerId)
+        .single();
 
-    // Send Discord notification for new producer to accept
-    try {
-      await supabase.functions.invoke("send-discord-notification", {
-        body: {
-          requestId,
-          notificationType: "producer_changed",
-        },
-      });
-      logStep("Discord notification sent for producer change");
-    } catch (discordError) {
-      logStep("Failed to send Discord notification", { error: discordError });
+      // Email the new producer about the assignment
+      if (newProducer?.email) {
+        try {
+          await resend.emails.send({
+            from: "HechoEnAmerica <team@hechoenamericastudio.com>",
+            to: [newProducer.email],
+            reply_to: "team@hechoenamericastudio.com",
+            subject: `🎵 New Project Assignment - ${songRequest.tier}`,
+            html: `
+              <!DOCTYPE html>
+              <html>
+              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <div style="background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+                  <h1 style="color: white; margin: 0; font-size: 24px;">🎵 New Project Assignment</h1>
+                </div>
+                <div style="background: #ffffff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px;">
+                  <p>Hi ${newProducer.name},</p>
+                  <p>You've been assigned a new <strong>${songRequest.tier}</strong> project by the admin team.</p>
+                  
+                  <div style="background: #EEF2FF; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #6366F1;">
+                    <h3 style="margin-top: 0; color: #3730A3;">Project Details</h3>
+                    <p style="margin: 4px 0;"><strong>Tier:</strong> ${songRequest.tier}</p>
+                    <p style="margin: 4px 0;"><strong>Genre:</strong> ${songRequest.genre_category || 'Not specified'}</p>
+                    <p style="margin: 4px 0;"><strong>Song Idea:</strong> ${songRequest.song_idea.length > 200 ? songRequest.song_idea.substring(0, 200) + '...' : songRequest.song_idea}</p>
+                  </div>
+
+                  <p>Please log in to your dashboard to review the project and start working on it. If you're unable to take on this project, please contact the admin team as soon as possible.</p>
+
+                  <div style="text-align: center; margin: 30px 0;">
+                    <a href="${APP_URL}/my-projects" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+                      View Project
+                    </a>
+                  </div>
+                  
+                  <p style="font-size: 14px; color: #888; text-align: center;">Questions? Reply to this email.</p>
+                  <p style="color: #666; margin-top: 30px;">— The Hecho En America Team</p>
+                </div>
+              </body>
+              </html>
+            `,
+          });
+          logStep("New producer notified via email", { email: newProducer.email });
+        } catch (emailError) {
+          logStep("Failed to email new producer", { error: emailError });
+        }
+      }
+    } else {
+      // Client-initiated: unassign and repost to Discord
+      const { error: updateError } = await supabase
+        .from("song_requests")
+        .update({
+          assigned_producer_id: null,
+          blocked_producer_ids: updatedBlocked,
+          status: "paid",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", requestId);
+
+      if (updateError) throw new Error(`Failed to update request: ${updateError.message}`);
+
+      logStep("Producer unassigned and blocked", { oldProducerId, updatedBlocked });
+
+      // Reset acceptance deadline (48 hours from now)
+      const newDeadline = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
+      await supabase
+        .from("song_requests")
+        .update({ acceptance_deadline: newDeadline })
+        .eq("id", requestId);
+
+      // Send Discord notification for new producer to accept
+      try {
+        await supabase.functions.invoke("send-discord-notification", {
+          body: {
+            requestId,
+            notificationType: "producer_changed",
+          },
+        });
+        logStep("Discord notification sent for producer change");
+      } catch (discordError) {
+        logStep("Failed to send Discord notification", { error: discordError });
+      }
     }
 
     // Email old producer about the change and their compensation
-    const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
     if (oldProducerEmail) {
       try {
@@ -356,7 +430,9 @@ serve(async (req) => {
       deliveredRevisions,
       totalRevisions,
       changeFee: flatChangeFee,
-      message: `Producer changed. ${oldProducerName} ${producerPayoutCents > 0 ? `will receive $${(producerPayoutCents / 100).toFixed(2)} for work completed` : 'received no payout (no work delivered)'}. $${flatChangeFee} change fee applied. Project reposted for new producer.`,
+      message: isAdminDirectAssign
+        ? `Producer changed. ${oldProducerName} removed. New producer assigned and notified via email.${producerPayoutCents > 0 ? ` ${oldProducerName} will receive $${(producerPayoutCents / 100).toFixed(2)} for work completed.` : ''}`
+        : `Producer changed. ${oldProducerName} ${producerPayoutCents > 0 ? `will receive $${(producerPayoutCents / 100).toFixed(2)} for work completed` : 'received no payout (no work delivered)'}. $${flatChangeFee} change fee applied. Project reposted for new producer.`,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
