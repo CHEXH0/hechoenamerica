@@ -2,13 +2,15 @@ import React from "react";
 import { Link } from "react-router-dom";
 import Waveform from "./Waveform";
 import ProfileIcon from "./ProfileIcon";
+import CustomerServicePanel from "./CustomerServicePanel";
 import { motion } from "framer-motion";
 
 const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black text-white">
       {/* Header Controls */}
-      <div className="absolute top-4 right-4 z-20">
+      <div className="absolute top-4 right-4 z-20 flex items-center gap-1">
+        <CustomerServicePanel />
         <ProfileIcon />
       </div>
       
