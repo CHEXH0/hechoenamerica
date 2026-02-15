@@ -108,8 +108,8 @@ serve(async (req) => {
     const origin = req.headers.get("origin") || "https://hechoenamericastudio.com";
     const accountLink = await stripe.accountLinks.create({
       account: accountId,
-      refresh_url: `${origin}/admin?connect_refresh=true`,
-      return_url: `${origin}/admin?connect_success=true`,
+      refresh_url: `${origin}/producer-profile?connect_refresh=true`,
+      return_url: `${origin}/producer-profile?connect_success=true`,
       type: "account_onboarding",
     });
 
