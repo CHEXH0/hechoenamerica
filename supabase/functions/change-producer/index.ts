@@ -26,22 +26,25 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Verify admin access
+    // Verify user access (admin or project owner)
     const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
     if (authError || !user) throw new Error("Unauthorized");
 
-    const { data: adminCheck } = await supabase
+    const { data: isAdmin } = await supabase
       .rpc('has_role', { _user_id: user.id, _role: 'admin' });
+    
+    // Will verify project ownership below if not admin
 
-    if (!adminCheck) throw new Error("Only admins can change producers");
-
-    const { requestId, reason } = await req.json();
+    const { requestId, reason, producerPayoutPercentage, changeFee } = await req.json();
     if (!requestId) throw new Error("Missing requestId");
+    
+    const payoutPercent = typeof producerPayoutPercentage === 'number' ? producerPayoutPercentage : null;
+    const flatChangeFee = typeof changeFee === 'number' ? changeFee : 25; // Default $25 change fee
 
-    logStep("Processing producer change", { requestId, reason });
+    logStep("Processing producer change", { requestId, reason, payoutPercent, flatChangeFee });
 
     // Fetch the song request with producer and revisions
     const { data: songRequest, error: fetchError } = await supabase
@@ -51,6 +54,11 @@ serve(async (req) => {
       .single();
 
     if (fetchError || !songRequest) throw new Error(`Request not found: ${fetchError?.message}`);
+
+    // Verify access: must be admin or project owner
+    if (!isAdmin && songRequest.user_id !== user.id) {
+      throw new Error("You can only change producers on your own projects");
+    }
 
     if (!songRequest.assigned_producer_id) {
       throw new Error("No producer is currently assigned to this project");
@@ -74,7 +82,7 @@ serve(async (req) => {
     let producerPayoutCents = 0;
     let payoutMethod = "none";
 
-    if (deliveredRevisions > 0 && songRequest.payment_intent_id) {
+    if (songRequest.payment_intent_id) {
       const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
         apiVersion: "2025-08-27.basil",
       });
@@ -83,8 +91,15 @@ serve(async (req) => {
 
       if (paymentIntent.status === "succeeded") {
         const totalAmountCents = paymentIntent.amount;
-        // Calculate what proportion of work was completed
-        const progressRatio = totalRevisions > 0 ? deliveredRevisions / totalRevisions : 0.5;
+        
+        // Use admin-set percentage if provided, otherwise calculate from progress
+        let progressRatio: number;
+        if (payoutPercent !== null) {
+          progressRatio = payoutPercent / 100;
+        } else {
+          progressRatio = totalRevisions > 0 ? deliveredRevisions / totalRevisions : (deliveredRevisions > 0 ? 0.5 : 0);
+        }
+        
         // Producer gets their share (85%) proportional to work completed
         const producerTotalShare = Math.round(totalAmountCents * (1 - PLATFORM_FEE_PERCENT / 100));
         producerPayoutCents = Math.round(producerTotalShare * progressRatio);
@@ -96,6 +111,7 @@ serve(async (req) => {
           producerPayoutCents,
           deliveredRevisions,
           totalRevisions,
+          adminSetPercent: payoutPercent,
         });
 
         // Check if old producer has Stripe Connect for automatic payout
@@ -129,6 +145,41 @@ serve(async (req) => {
         } else if (producerPayoutCents > 0) {
           payoutMethod = "manual_required";
           logStep("Old producer not on Stripe Connect, manual payout needed");
+        }
+
+        // Charge flat change fee to the client
+        let changeFeeCharged = false;
+        if (flatChangeFee > 0) {
+          const changeFeeCents = flatChangeFee * 100;
+          try {
+            // Get customer from original payment
+            const customerId = typeof paymentIntent.customer === 'string' ? paymentIntent.customer : paymentIntent.customer?.id;
+            const paymentMethodId = typeof paymentIntent.payment_method === 'string' ? paymentIntent.payment_method : paymentIntent.payment_method?.id;
+            
+            if (customerId && paymentMethodId) {
+              const changeFeeIntent = await stripe.paymentIntents.create({
+                amount: changeFeeCents,
+                currency: "usd",
+                customer: customerId,
+                payment_method: paymentMethodId,
+                off_session: true,
+                confirm: true,
+                description: `Producer change fee - ${songRequest.tier} project`,
+                metadata: {
+                  request_id: requestId,
+                  type: "producer_change_fee",
+                },
+              });
+              changeFeeCharged = changeFeeIntent.status === "succeeded";
+              logStep("Change fee charged", { amount: flatChangeFee, status: changeFeeIntent.status });
+            } else {
+              logStep("Cannot charge change fee - no customer/payment method on file");
+            }
+          } catch (feeError) {
+            logStep("Failed to charge change fee", {
+              error: feeError instanceof Error ? feeError.message : String(feeError),
+            });
+          }
         }
       }
     }
@@ -304,7 +355,8 @@ serve(async (req) => {
       payoutMethod,
       deliveredRevisions,
       totalRevisions,
-      message: `Producer changed. ${oldProducerName} ${producerPayoutCents > 0 ? `will receive $${(producerPayoutCents / 100).toFixed(2)} for work completed` : 'received no payout (no work delivered)'}. Project reposted for new producer.`,
+      changeFee: flatChangeFee,
+      message: `Producer changed. ${oldProducerName} ${producerPayoutCents > 0 ? `will receive $${(producerPayoutCents / 100).toFixed(2)} for work completed` : 'received no payout (no work delivered)'}. $${flatChangeFee} change fee applied. Project reposted for new producer.`,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
