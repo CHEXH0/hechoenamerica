@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
+import { Trash2 } from "lucide-react";
 import { Check, X, User, Music, Globe, ExternalLink, Loader2, AlertCircle, Calendar, CheckCircle2, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -163,6 +164,31 @@ export const ProducerApplicationsAdmin = ({ onApprovalSuccess }: ProducerApplica
     }
   };
 
+  const handleDeleteApplication = async (applicationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('contact_submissions')
+        .delete()
+        .eq('id', applicationId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Application Removed",
+        description: "The rejected application has been removed from the list.",
+      });
+
+      fetchApplications();
+    } catch (error: any) {
+      console.error('Error deleting application:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete application",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
@@ -312,6 +338,17 @@ export const ProducerApplicationsAdmin = ({ onApprovalSuccess }: ProducerApplica
                               <X className="h-4 w-4" />
                             </Button>
                           </>
+                        )}
+                        {app.application_status === 'rejected' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => handleDeleteApplication(app.id)}
+                            title="Remove from list"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         )}
                       </div>
                     </TableCell>
