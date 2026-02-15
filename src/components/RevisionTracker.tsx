@@ -12,8 +12,12 @@ import {
   ExternalLink,
   FileCheck,
   AlertCircle,
-  MessageSquare
+  MessageSquare,
+  Video,
+  Link as LinkIcon
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { RevisionChat } from "@/components/RevisionChat";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -27,6 +31,8 @@ interface Revision {
   drive_link: string | null;
   client_notes: string | null;
   client_feedback: string | null;
+  wants_meeting: boolean | null;
+  meeting_link: string | null;
 }
 
 interface RevisionTrackerProps {
@@ -62,6 +68,7 @@ export const RevisionTracker = ({
   const [loading, setLoading] = useState(true);
   const [requestingRevision, setRequestingRevision] = useState<number | null>(null);
   const [revisionNotes, setRevisionNotes] = useState<Record<number, string>>({});
+  const [wantsMeeting, setWantsMeeting] = useState<Record<number, boolean>>({});
   const [feedbackText, setFeedbackText] = useState<Record<string, string>>({});
   const [submittingFeedback, setSubmittingFeedback] = useState<string | null>(null);
   const { toast } = useToast();
@@ -102,6 +109,7 @@ export const RevisionTracker = ({
           status: "requested",
           requested_at: new Date().toISOString(),
           client_notes: clientNotes,
+          wants_meeting: wantsMeeting[revisionNumber] || false,
         })
         .eq("id", revision.id);
 
@@ -280,6 +288,20 @@ export const RevisionTracker = ({
                           maxLength={500}
                         />
                       </div>
+                      <div className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg">
+                        <Video className="h-4 w-4 text-muted-foreground" />
+                        <div className="flex-1">
+                          <Label className="text-sm">Request Google Meet</Label>
+                          <p className="text-xs text-muted-foreground">Ask your producer for a video call</p>
+                        </div>
+                        <Switch
+                          checked={wantsMeeting[revision.revision_number] || false}
+                          onCheckedChange={(checked) => setWantsMeeting(prev => ({
+                            ...prev,
+                            [revision.revision_number]: checked
+                          }))}
+                        />
+                      </div>
                       <Button
                         size="sm"
                         onClick={() => handleRequestRevision(revision.revision_number)}
@@ -305,15 +327,30 @@ export const RevisionTracker = ({
               )}
 
               {revision.status === "requested" && (
-                <p className="text-sm text-yellow-600 flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  Waiting for producer...
+                <div className="space-y-2">
+                  <p className="text-sm text-yellow-600 flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    Waiting for producer...
+                  </p>
                   {revision.client_notes && (
-                    <span className="text-muted-foreground ml-2">
+                    <p className="text-xs text-muted-foreground">
                       Notes: "{revision.client_notes}"
-                    </span>
+                    </p>
                   )}
-                </p>
+                  {revision.wants_meeting && (
+                    <div className="flex items-center gap-2 text-xs p-2 bg-muted/30 rounded">
+                      <Video className="h-3 w-3 text-primary" />
+                      <span>Google Meet requested</span>
+                      {revision.meeting_link ? (
+                        <a href={revision.meeting_link} target="_blank" rel="noopener noreferrer" className="text-primary underline ml-auto">
+                          Join Meeting
+                        </a>
+                      ) : (
+                        <span className="text-muted-foreground ml-auto">Pending link from producer</span>
+                      )}
+                    </div>
+                  )}
+                </div>
               )}
 
               {revision.status === "in_progress" && (
@@ -329,6 +366,15 @@ export const RevisionTracker = ({
                     <CheckCircle className="h-3 w-3" />
                     Delivered {revision.delivered_at && new Date(revision.delivered_at).toLocaleDateString()}
                   </p>
+
+                  {revision.meeting_link && (
+                    <div className="flex items-center gap-2 text-xs p-2 bg-muted/30 rounded">
+                      <Video className="h-3 w-3 text-primary" />
+                      <a href={revision.meeting_link} target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                        Google Meet Link
+                      </a>
+                    </div>
+                  )}
 
                   {/* Feedback Section */}
                   {revision.client_feedback ? (
@@ -371,6 +417,11 @@ export const RevisionTracker = ({
                     </div>
                   )}
                 </div>
+              )}
+
+              {/* Chat - visible on non-pending revisions */}
+              {revision.status !== "pending" && (
+                <RevisionChat revisionId={revision.id} isProducerView={false} />
               )}
             </Card>
           ))}

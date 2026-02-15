@@ -401,6 +401,41 @@ export type Database = {
         }
         Relationships: []
       }
+      revision_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          revision_id: string
+          sender_id: string
+          sender_role: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          revision_id: string
+          sender_id: string
+          sender_role: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          revision_id?: string
+          sender_id?: string
+          sender_role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revision_messages_revision_id_fkey"
+            columns: ["revision_id"]
+            isOneToOne: false
+            referencedRelation: "song_revisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           created_at: string
@@ -548,11 +583,13 @@ export type Database = {
           drive_folder_id: string | null
           drive_link: string | null
           id: string
+          meeting_link: string | null
           requested_at: string | null
           revision_number: number
           song_request_id: string
           status: string
           updated_at: string
+          wants_meeting: boolean | null
         }
         Insert: {
           client_feedback?: string | null
@@ -562,11 +599,13 @@ export type Database = {
           drive_folder_id?: string | null
           drive_link?: string | null
           id?: string
+          meeting_link?: string | null
           requested_at?: string | null
           revision_number: number
           song_request_id: string
           status?: string
           updated_at?: string
+          wants_meeting?: boolean | null
         }
         Update: {
           client_feedback?: string | null
@@ -576,11 +615,13 @@ export type Database = {
           drive_folder_id?: string | null
           drive_link?: string | null
           id?: string
+          meeting_link?: string | null
           requested_at?: string | null
           revision_number?: number
           song_request_id?: string
           status?: string
           updated_at?: string
+          wants_meeting?: boolean | null
         }
         Relationships: [
           {
