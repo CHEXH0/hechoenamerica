@@ -41,6 +41,11 @@ interface CancellationRequest {
   assigned_producer_id: string | null;
   payment_intent_id: string | null;
   number_of_revisions: number | null;
+  wants_recorded_stems: boolean | null;
+  wants_analog: boolean | null;
+  wants_mixing: boolean | null;
+  wants_mastering: boolean | null;
+  producer_checklist: Record<string, boolean> | null;
   producer?: {
     id: string;
     name: string;
@@ -93,11 +98,15 @@ export const CancellationRequestsAdmin = () => {
             .eq("song_request_id", request.id)
             .order("revision_number", { ascending: true });
 
-          return { ...request, revisions: revisions || [] };
+          const castChecklist = (val: any): Record<string, boolean> | null => {
+            if (val && typeof val === 'object' && !Array.isArray(val)) return val as Record<string, boolean>;
+            return null;
+          };
+          return { ...request, revisions: revisions || [], producer_checklist: castChecklist(request.producer_checklist) };
         })
       );
 
-      setRequests(requestsWithRevisions);
+      setRequests(requestsWithRevisions as CancellationRequest[]);
     } catch (error) {
       console.error("Error fetching cancellation requests:", error);
       toast({ title: "Error", description: "Failed to fetch cancellation requests", variant: "destructive" });
@@ -108,34 +117,71 @@ export const CancellationRequestsAdmin = () => {
 
   const calculateRecommendedRefund = (request: CancellationRequest): number => {
     if (!request.assigned_producer_id) return 100;
+
+    // Calculate checklist progress
+    const checklist = request.producer_checklist || {};
+    const checklistItems = ["base_production"];
+    if (request.wants_recorded_stems) checklistItems.push("stems");
+    if (request.wants_analog) checklistItems.push("analog");
+    if (request.wants_mixing) checklistItems.push("mixing");
+    if (request.wants_mastering) checklistItems.push("mastering");
+    const checklistCompleted = checklistItems.filter(k => checklist[k]).length;
+    const checklistTotal = checklistItems.length;
+
+    // Calculate revision progress
     const deliveredRevisions = request.revisions?.filter(r => r.status === 'delivered').length || 0;
     const totalRevisions = request.number_of_revisions || 0;
-    if (deliveredRevisions === 0) return 100;
-    if (totalRevisions > 0 && deliveredRevisions >= totalRevisions) return 0;
-    if (totalRevisions > 0) {
-      const progressPercentage = (deliveredRevisions / totalRevisions) * 100;
-      return Math.max(0, Math.round(100 - progressPercentage));
+
+    // Combine: checklist is weighted 60%, revisions 40% (if applicable)
+    let progressPercentage = 0;
+    if (totalRevisions > 0 && checklistTotal > 0) {
+      const checklistProgress = (checklistCompleted / checklistTotal) * 100;
+      const revisionProgress = (deliveredRevisions / totalRevisions) * 100;
+      progressPercentage = checklistProgress * 0.6 + revisionProgress * 0.4;
+    } else if (checklistTotal > 0) {
+      progressPercentage = (checklistCompleted / checklistTotal) * 100;
+    } else if (totalRevisions > 0) {
+      progressPercentage = (deliveredRevisions / totalRevisions) * 100;
     }
-    return 50;
+
+    if (progressPercentage === 0) return 100;
+    if (progressPercentage >= 100) return 0;
+    return Math.max(0, Math.round(100 - progressPercentage));
   };
 
   const getProgressBadge = (request: CancellationRequest) => {
     const deliveredRevisions = request.revisions?.filter(r => r.status === 'delivered').length || 0;
     const totalRevisions = request.number_of_revisions || 0;
 
+    // Checklist progress
+    const checklist = request.producer_checklist || {};
+    const checklistItems = ["base_production"];
+    if (request.wants_recorded_stems) checklistItems.push("stems");
+    if (request.wants_analog) checklistItems.push("analog");
+    if (request.wants_mixing) checklistItems.push("mixing");
+    if (request.wants_mastering) checklistItems.push("mastering");
+    const checklistCompleted = checklistItems.filter(k => checklist[k]).length;
+
     if (!request.assigned_producer_id) {
       return <Badge variant="secondary">No Producer Assigned</Badge>;
     }
-    if (deliveredRevisions === 0) {
+    if (checklistCompleted === 0 && deliveredRevisions === 0) {
       return <Badge className="bg-green-500">Not Started</Badge>;
     }
-    if (totalRevisions > 0 && deliveredRevisions >= totalRevisions) {
+    if (checklistCompleted >= checklistItems.length && totalRevisions > 0 && deliveredRevisions >= totalRevisions) {
       return <Badge variant="destructive">Almost Complete</Badge>;
     }
     return (
-      <Badge className="bg-amber-500">
-        {deliveredRevisions}/{totalRevisions} Revisions Delivered
-      </Badge>
+      <div className="flex flex-col gap-1">
+        <Badge className="bg-amber-500">
+          Checklist: {checklistCompleted}/{checklistItems.length}
+        </Badge>
+        {totalRevisions > 0 && (
+          <Badge variant="outline" className="text-xs">
+            Revisions: {deliveredRevisions}/{totalRevisions}
+          </Badge>
+        )}
+      </div>
     );
   };
 
@@ -350,9 +396,35 @@ export const CancellationRequestsAdmin = () => {
                                 </div>
                               </div>
 
-                              <div className="bg-muted/50 p-3 rounded-lg">
+                              <div className="bg-muted/50 p-3 rounded-lg space-y-2">
                                 <Label className="text-muted-foreground">Progress Status</Label>
                                 <div className="mt-1">{getProgressBadge(request)}</div>
+                                {/* Checklist detail */}
+                                {(() => {
+                                  const cl = request.producer_checklist || {};
+                                  const items: { key: string; label: string }[] = [{ key: "base_production", label: "Base Production" }];
+                                  if (request.wants_recorded_stems) items.push({ key: "stems", label: "Stems" });
+                                  if (request.wants_analog) items.push({ key: "analog", label: "Analog" });
+                                  if (request.wants_mixing) items.push({ key: "mixing", label: "Mixing" });
+                                  if (request.wants_mastering) items.push({ key: "mastering", label: "Mastering" });
+                                  return (
+                                    <div className="space-y-1 mt-2">
+                                      <p className="text-xs font-medium text-muted-foreground">Producer Checklist:</p>
+                                      {items.map(item => (
+                                        <div key={item.key} className="flex items-center gap-2 text-xs">
+                                          {cl[item.key] ? (
+                                            <CheckCircle className="h-3 w-3 text-green-500" />
+                                          ) : (
+                                            <XCircle className="h-3 w-3 text-muted-foreground" />
+                                          )}
+                                          <span className={cl[item.key] ? "text-foreground" : "text-muted-foreground"}>
+                                            {item.label}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  );
+                                })()}
                                 {request.revisions && request.revisions.length > 0 && (
                                   <p className="text-xs text-muted-foreground mt-2">
                                     {request.revisions.filter(r => r.status === 'delivered').length} of{" "}

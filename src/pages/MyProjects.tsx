@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Music, Clock, CheckCircle, Loader2, Calendar, User, Wifi, AlertTriangle, RefreshCcw, Headphones, Users, Mail, XCircle, MessageSquare, UserMinus } from "lucide-react";
+import { ProducerChecklist } from "@/components/ProducerChecklist";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -39,11 +40,20 @@ interface SongRequest {
   number_of_revisions: number | null;
   wants_mixing: boolean | null;
   wants_mastering: boolean | null;
+  wants_recorded_stems: boolean | null;
+  wants_analog: boolean | null;
   user_email: string;
   acceptance_deadline: string | null;
   refunded_at: string | null;
   file_urls: string[] | null;
+  producer_checklist: Record<string, boolean> | null;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const castChecklist = (val: any): Record<string, boolean> | null => {
+  if (val && typeof val === 'object' && !Array.isArray(val)) return val as Record<string, boolean>;
+  return null;
+};
 
 interface Purchase {
   id: string;
@@ -543,7 +553,7 @@ const MyProjects = () => {
         .order("created_at", { ascending: false });
 
       if (requestsError) throw requestsError;
-      setMyRequests(requestsData || []);
+      setMyRequests((requestsData || []).map(r => ({ ...r, producer_checklist: castChecklist(r.producer_checklist) })) as SongRequest[]);
 
       // If user is a producer, fetch their assigned projects
       if (isProducer) {
@@ -562,7 +572,7 @@ const MyProjects = () => {
             .order("created_at", { ascending: false });
 
           if (producerError) throw producerError;
-          setProducerProjects(producerProjectsData || []);
+          setProducerProjects((producerProjectsData || []).map(r => ({ ...r, producer_checklist: castChecklist(r.producer_checklist) })) as SongRequest[]);
         }
       }
 
@@ -703,6 +713,12 @@ const MyProjects = () => {
 
           {/* Options */}
           <div className="flex flex-wrap gap-2">
+            {project.wants_recorded_stems && (
+              <Badge variant="secondary">Stems</Badge>
+            )}
+            {project.wants_analog && (
+              <Badge variant="secondary">Analog</Badge>
+            )}
             {project.wants_mixing && (
               <Badge variant="secondary">Mixing</Badge>
             )}
@@ -715,6 +731,20 @@ const MyProjects = () => {
               </Badge>
             )}
           </div>
+
+          {/* Producer Checklist - shows for producer view on active projects */}
+          {isProducerView && ["in_progress", "review", "completed"].includes(project.status) && (
+            <ProducerChecklist
+              projectId={project.id}
+              wantsRecordedStems={!!project.wants_recorded_stems}
+              wantsAnalog={!!project.wants_analog}
+              wantsMixing={!!project.wants_mixing}
+              wantsMastering={!!project.wants_mastering}
+              numberOfRevisions={project.number_of_revisions || 0}
+              currentChecklist={project.producer_checklist || {}}
+              onChecklistUpdate={fetchProjects}
+            />
+          )}
 
           {/* Revision Tracker for Client View */}
           {!isProducerView && project.number_of_revisions && project.number_of_revisions > 0 && 
