@@ -373,6 +373,7 @@ export type Database = {
           purchase_date: string
           song_idea: string | null
           status: string
+          stripe_session_id: string | null
           updated_at: string
           user_id: string
         }
@@ -389,6 +390,7 @@ export type Database = {
           purchase_date?: string
           song_idea?: string | null
           status?: string
+          stripe_session_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -405,6 +407,7 @@ export type Database = {
           purchase_date?: string
           song_idea?: string | null
           status?: string
+          stripe_session_id?: string | null
           updated_at?: string
           user_id?: string
         }
