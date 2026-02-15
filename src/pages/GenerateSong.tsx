@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
@@ -11,16 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Upload, Plus, ChevronDown, HardDrive, Link, X, FileAudio, FileImage, FileArchive, File, Loader2, Info, Check, Circle } from "lucide-react";
+import { Plus, ChevronDown, HardDrive, Link, X, Loader2, Info, Check, Circle } from "lucide-react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { Progress } from "@/components/ui/progress";
-import FileDeleter from "@/components/FileDeleter";
 
-// File size limits
-const MAX_FILE_SIZE_MB = 50; // 50MB per file
-const MAX_TOTAL_SIZE_MB = 200; // 200MB total
-const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
-const MAX_TOTAL_SIZE_BYTES = MAX_TOTAL_SIZE_MB * 1024 * 1024;
+
 
 // Google Drive link type
 interface DriveLink {
@@ -61,13 +55,11 @@ const RESET_HOURS = 5;
 const GenerateSong = () => {
   const [sliderValue, setSliderValue] = useState([0]);
   const [idea, setIdea] = useState("");
-  const [files, setFiles] = useState<File[]>([]);
+  
   const [driveLinks, setDriveLinks] = useState<DriveLink[]>([]);
   const [showDriveLinkInput, setShowDriveLinkInput] = useState(false);
   const [newDriveLink, setNewDriveLink] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [currentUploadFile, setCurrentUploadFile] = useState<string>("");
   const [showTooltip, setShowTooltip] = useState(true);
   const [numberOfRevisions, setNumberOfRevisions] = useState(0);
   const [wantsRecordedStems, setWantsRecordedStems] = useState(false);
@@ -82,38 +74,13 @@ const GenerateSong = () => {
   const [aiGenerationsRemaining, setAiGenerationsRemaining] = useState<number | null>(null);
   const [nextResetTime, setNextResetTime] = useState<Date | null>(null);
   const [countdownDisplay, setCountdownDisplay] = useState<string>("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const currentTier = tiers[sliderValue[0]];
   const tierIndex = sliderValue[0];
 
-  // Calculate total file size
-  const getTotalFileSize = () => {
-    return files.reduce((total, file) => total + file.size, 0);
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
-  };
-
-  const getFileIcon = (fileName: string) => {
-    const ext = fileName.toLowerCase().split('.').pop();
-    if (['mp3', 'wav', 'm4a', 'flac', 'aac', 'ogg', 'wma'].includes(ext || '')) {
-      return <FileAudio className="w-4 h-4 text-purple-300" />;
-    }
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'svg', 'heic', 'heif'].includes(ext || '')) {
-      return <FileImage className="w-4 h-4 text-blue-300" />;
-    }
-    if (['zip', 'rar', '7z'].includes(ext || '')) {
-      return <FileArchive className="w-4 h-4 text-yellow-300" />;
-    }
-    return <File className="w-4 h-4 text-white/70" />;
-  };
 
   // Calculate total price with add-ons
   const calculateTotalPrice = () => {
@@ -221,36 +188,6 @@ const GenerateSong = () => {
       });
     }
   }, [user, toast]);
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      
-      // Check individual file sizes
-      const oversizedFiles = newFiles.filter(file => file.size > MAX_FILE_SIZE_BYTES);
-      if (oversizedFiles.length > 0) {
-        toast({
-          title: "File too large",
-          description: `Files must be under ${MAX_FILE_SIZE_MB}MB. Use Google Drive for larger files.`,
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      // Check total size
-      const currentTotal = getTotalFileSize();
-      const newTotal = currentTotal + newFiles.reduce((sum, f) => sum + f.size, 0);
-      if (newTotal > MAX_TOTAL_SIZE_BYTES) {
-        toast({
-          title: "Total size exceeded",
-          description: `Total upload limit is ${MAX_TOTAL_SIZE_MB / 1000}GB. Use Google Drive for additional files.`,
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      setFiles(prevFiles => [...prevFiles, ...newFiles]);
-    }
-  };
 
   // Handle adding Google Drive links
   const handleAddDriveLink = () => {
@@ -453,95 +390,10 @@ const GenerateSong = () => {
     }
 
     setIsSubmitting(true);
-    setUploadProgress(0);
-    setCurrentUploadFile("");
     
     try {
-      // Upload files to storage if any
-      let fileUrls: string[] = [];
-      if (files && files.length > 0) {
-        console.log(`Starting upload of ${files.length} files...`);
-        
-        const totalFiles = files.length;
-        let completedFiles = 0;
-        let totalBytes = files.reduce((sum, f) => sum + f.size, 0);
-        let uploadedBytes = 0;
-
-        for (const file of files) {
-          const timestamp = Date.now();
-          const fileName = `${user.id}/${timestamp}_${file.name}`;
-          
-          setCurrentUploadFile(file.name);
-          console.log(`Uploading file: ${file.name} (${file.size} bytes)`);
-          
-          // Use XMLHttpRequest for progress tracking
-          const { data: { session } } = await supabase.auth.getSession();
-          const accessToken = session?.access_token;
-          
-          await new Promise<void>((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            const supabaseUrl = "https://eapbuoqkhckqaswfjexv.supabase.co";
-            const uploadUrl = `${supabaseUrl}/storage/v1/object/product-assets/${encodeURIComponent(fileName)}`;
-            
-            xhr.upload.addEventListener('progress', (event) => {
-              if (event.lengthComputable) {
-                const fileProgress = event.loaded;
-                const currentTotalProgress = uploadedBytes + fileProgress;
-                const overallProgress = Math.round((currentTotalProgress / totalBytes) * 100);
-                setUploadProgress(Math.min(overallProgress, 99));
-              }
-            });
-            
-            xhr.addEventListener('load', () => {
-              if (xhr.status >= 200 && xhr.status < 300) {
-                uploadedBytes += file.size;
-                completedFiles++;
-                console.log(`File uploaded successfully: ${fileName}`);
-                resolve();
-              } else {
-                try {
-                  const errorResponse = JSON.parse(xhr.responseText);
-                  reject(new Error(errorResponse.message || `Upload failed with status ${xhr.status}`));
-                } catch {
-                  reject(new Error(`Upload failed with status ${xhr.status}`));
-                }
-              }
-            });
-            
-            xhr.addEventListener('error', () => {
-              reject(new Error(`Network error while uploading ${file.name}`));
-            });
-            
-            xhr.open('POST', uploadUrl, true);
-            xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`);
-            xhr.setRequestHeader('apikey', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhcGJ1b3FraGNrcWFzd2ZqZXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU4NzM0NjMsImV4cCI6MjA3MTQ0OTQ2M30.oybb51fqUbvPklFND2ah5ko3PVUDRUIulSIojuPfoWE');
-            xhr.setRequestHeader('x-upsert', 'false');
-            xhr.send(file);
-          });
-
-          // Get signed URL (valid for 1 year)
-          const { data: signedData, error: signError } = await supabase.storage
-            .from('product-assets')
-            .createSignedUrl(fileName, 31536000); // 1 year expiry
-
-          if (signError || !signedData) {
-            console.error("Signed URL error:", signError);
-            throw new Error(`Failed to create download link for ${file.name}`);
-          }
-          
-          console.log(`Created signed URL for: ${fileName}`);
-          fileUrls.push(signedData.signedUrl);
-        }
-        
-        setUploadProgress(100);
-        console.log(`All files uploaded. Total URLs: ${fileUrls.length}`);
-      }
-
-      // Combine file URLs with drive links
-      const allFileUrls = [
-        ...fileUrls,
-        ...driveLinks.map(link => link.url)
-      ];
+      // Collect drive links as file URLs
+      const allFileUrls = driveLinks.map(link => link.url);
 
       // For paid tiers only - create song request and redirect to Stripe
       console.log("Creating paid tier song request...");
@@ -814,54 +666,26 @@ const GenerateSong = () => {
                       ))}
                     </div>
                   </div>
-                  {/* File size info banner */}
+                  {/* Share files via link */}
                   <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-white/20 rounded-xl p-4">
                     <div className="flex items-center gap-3 mb-2">
-                      <Upload className="w-5 h-5 text-white" />
-                      <span className="text-white font-semibold">Upload Your Files</span>
+                      <HardDrive className="w-5 h-5 text-white" />
+                      <span className="text-white font-semibold">Share Your Files</span>
                     </div>
                     <p className="text-white/70 text-sm">
-                      Up to <span className="text-white font-medium">{MAX_FILE_SIZE_MB}MB</span> per file, 
-                      <span className="text-white font-medium"> {MAX_TOTAL_SIZE_MB / 1000}GB</span> total. 
-                      For larger files, use Google Drive or Dropbox links below.
+                      Share references, stems, or inspiration via Google Drive, Dropbox, or WeTransfer links.
                     </p>
                   </div>
 
-                  {/* Upload buttons row */}
-                  <div className="flex gap-3">
-                    <Button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      variant="outline"
-                      className="flex-1 bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white"
-                    >
-                      <Upload className="w-4 h-4 mr-2" />
-                      Upload Files
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => setShowDriveLinkInput(true)}
-                      variant="outline"
-                      className="flex-1 bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white"
-                    >
-                      <HardDrive className="w-4 h-4 mr-2" />
-                      Add Drive Link
-                    </Button>
-                  </div>
-
-                  <p className="text-white/50 text-xs text-center">
-                    Audio (.mp3, .wav, .flac), Images (.jpg, .png, .heic), Archives (.zip, .rar), PDF
-                  </p>
-
-                  <input 
-                    ref={fileInputRef} 
-                    type="file" 
-                    id="files" 
-                    multiple 
-                    accept=".mp3,.wav,.m4a,.flac,.aac,.ogg,.wma,.jpg,.jpeg,.png,.gif,.webp,.bmp,.tiff,.svg,.heic,.heif,.raw,.cr2,.nef,.arw,.dng,.pdf,.zip,.rar,.7z" 
-                    onChange={handleFileChange} 
-                    className="hidden"
-                  />
+                  <Button
+                    type="button"
+                    onClick={() => setShowDriveLinkInput(true)}
+                    variant="outline"
+                    className="w-full bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white"
+                  >
+                    <HardDrive className="w-4 h-4 mr-2" />
+                    Add Drive / Cloud Link
+                  </Button>
 
                   {/* Drive link input */}
                   <AnimatePresence>
@@ -911,77 +735,37 @@ const GenerateSong = () => {
                     )}
                   </AnimatePresence>
 
-                  {/* Selected files list */}
-                  {(files.length > 0 || driveLinks.length > 0) && (
+                  {/* Drive links list */}
+                  {driveLinks.length > 0 && (
                     <div className="bg-white/10 rounded-lg p-4 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-white font-medium text-sm">
-                          Attached Files ({files.length + driveLinks.length})
-                        </span>
-                        {files.length > 0 && (
-                          <span className="text-white/60 text-xs">
-                            {formatFileSize(getTotalFileSize())} / {MAX_TOTAL_SIZE_MB / 1000}GB
-                          </span>
-                        )}
+                      <span className="text-white font-medium text-sm">
+                        Attached Links ({driveLinks.length})
+                      </span>
+                      <div className="space-y-2">
+                        {driveLinks.map((link, index) => (
+                          <div 
+                            key={`link-${index}`}
+                            className="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2"
+                          >
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <Link className="w-4 h-4 text-green-400" />
+                              <span className="text-white/90 text-sm truncate">{link.name}</span>
+                              <span className="text-white/40 text-xs truncate max-w-[150px]">
+                                {link.url}
+                              </span>
+                            </div>
+                            <Button
+                              type="button"
+                              onClick={() => removeDriveLink(index)}
+                              size="sm"
+                              variant="ghost"
+                              className="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-1 h-auto"
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ))}
                       </div>
-                      
-                      {/* Local files */}
-                      {files.length > 0 && (
-                        <div className="space-y-2">
-                          {files.map((file, index) => (
-                            <div 
-                              key={`file-${index}`}
-                              className="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2"
-                            >
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                {getFileIcon(file.name)}
-                                <span className="text-white/90 text-sm truncate">{file.name}</span>
-                                <span className="text-white/40 text-xs shrink-0">
-                                  ({formatFileSize(file.size)})
-                                </span>
-                              </div>
-                              <Button
-                                type="button"
-                                onClick={() => setFiles(files.filter((_, i) => i !== index))}
-                                size="sm"
-                                variant="ghost"
-                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-1 h-auto"
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Drive links */}
-                      {driveLinks.length > 0 && (
-                        <div className="space-y-2">
-                          {driveLinks.map((link, index) => (
-                            <div 
-                              key={`link-${index}`}
-                              className="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2"
-                            >
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <Link className="w-4 h-4 text-green-400" />
-                                <span className="text-white/90 text-sm truncate">{link.name}</span>
-                                <span className="text-white/40 text-xs truncate max-w-[150px]">
-                                  {link.url}
-                                </span>
-                              </div>
-                              <Button
-                                type="button"
-                                onClick={() => removeDriveLink(index)}
-                                size="sm"
-                                variant="ghost"
-                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-1 h-auto"
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
@@ -1287,43 +1071,15 @@ const GenerateSong = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                {/* Upload Progress Bar */}
-                <AnimatePresence>
-                  {isSubmitting && files.length > 0 && uploadProgress < 100 && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="bg-white/20 backdrop-blur-sm rounded-xl p-4 border border-white/30 space-y-3"
-                    >
-                      <div className="flex items-center justify-between text-white">
-                        <div className="flex items-center gap-2">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          <span className="text-sm font-medium">
-                            Uploading{currentUploadFile ? `: ${currentUploadFile}` : '...'}
-                          </span>
-                        </div>
-                        <span className="text-sm font-bold">{uploadProgress}%</span>
-                      </div>
-                      <Progress 
-                        value={uploadProgress} 
-                        className="h-3 bg-white/20 [&>div]:bg-gradient-to-r [&>div]:from-green-400 [&>div]:via-emerald-500 [&>div]:to-teal-500 [&>div]:shadow-[0_0_15px_rgba(52,211,153,0.5)]"
-                      />
-                      <p className="text-white/60 text-xs text-center">
-                        Please don't close this page while uploading
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                
-                {isSubmitting && uploadProgress === 100 && (
+                {isSubmitting && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="bg-green-500/20 backdrop-blur-sm rounded-xl p-4 border border-green-500/30 text-center"
+                    className="bg-white/20 backdrop-blur-sm rounded-xl p-4 border border-white/30 text-center"
                   >
-                    <div className="flex items-center justify-center gap-2 text-green-300">
-                      <span className="text-sm font-medium">✓ Files uploaded! Redirecting to payment...</span>
+                    <div className="flex items-center justify-center gap-2 text-white">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-sm font-medium">Processing... Redirecting to payment</span>
                     </div>
                   </motion.div>
                 )}
@@ -1337,9 +1093,7 @@ const GenerateSong = () => {
                   {isSubmitting ? (
                     <span className="flex items-center gap-2">
                       <Loader2 className="h-5 w-5 animate-spin" />
-                      {files.length > 0 && uploadProgress < 100 
-                        ? `Uploading... ${uploadProgress}%` 
-                        : "Processing..."}
+                      Processing...
                     </span>
                   ) : "Submit Your Song Idea"}
                 </Button>
