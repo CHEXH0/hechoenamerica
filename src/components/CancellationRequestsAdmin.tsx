@@ -63,6 +63,8 @@ export const CancellationRequestsAdmin = () => {
   const [refundPercentage, setRefundPercentage] = useState<string>("100");
   const [adminNotes, setAdminNotes] = useState("");
   const [changeReason, setChangeReason] = useState("");
+  const [producerPayoutPercent, setProducerPayoutPercent] = useState<string>("0");
+  const [changeFee, setChangeFee] = useState<string>("25");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -176,7 +178,9 @@ export const CancellationRequestsAdmin = () => {
       const { data, error } = await supabase.functions.invoke("change-producer", {
         body: {
           requestId: request.id,
-          reason: changeReason || "Admin initiated producer change due to cancellation request",
+          reason: changeReason || "Admin initiated producer change",
+          producerPayoutPercentage: parseInt(producerPayoutPercent),
+          changeFee: parseInt(changeFee),
         },
       });
 
@@ -188,6 +192,8 @@ export const CancellationRequestsAdmin = () => {
       });
 
       setChangeReason("");
+      setProducerPayoutPercent("0");
+      setChangeFee("25");
       fetchCancellationRequests();
     } catch (error) {
       console.error("Error changing producer:", error);
@@ -445,8 +451,42 @@ export const CancellationRequestsAdmin = () => {
                                 <div className="bg-muted/50 p-3 rounded-lg text-sm">
                                   <p><strong>Current Producer:</strong> {request.producer?.name}</p>
                                   <p><strong>Progress:</strong> {request.revisions?.filter(r => r.status === 'delivered').length || 0} of {request.number_of_revisions || 0} revisions delivered</p>
-                                  <p className="text-muted-foreground mt-1">
-                                    The old producer will be compensated proportionally (85% producer share × progress ratio).
+                                </div>
+
+                                <div>
+                                  <Label>Producer Payout Percentage</Label>
+                                  <Select value={producerPayoutPercent} onValueChange={setProducerPayoutPercent}>
+                                    <SelectTrigger className="mt-1">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="0">0% - No Payout</SelectItem>
+                                      <SelectItem value="25">25% - Minimal Work</SelectItem>
+                                      <SelectItem value="50">50% - Half Complete</SelectItem>
+                                      <SelectItem value="75">75% - Mostly Complete</SelectItem>
+                                      <SelectItem value="100">100% - Full Payout</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    Producer receives this % of their 85% share based on work completed
+                                  </p>
+                                </div>
+
+                                <div>
+                                  <Label>Change Fee ($) — Charged to Client</Label>
+                                  <Select value={changeFee} onValueChange={setChangeFee}>
+                                    <SelectTrigger className="mt-1">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="0">$0 - No Fee</SelectItem>
+                                      <SelectItem value="15">$15</SelectItem>
+                                      <SelectItem value="25">$25 (Default)</SelectItem>
+                                      <SelectItem value="50">$50</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    Flat fee charged to the client for changing producers
                                   </p>
                                 </div>
 

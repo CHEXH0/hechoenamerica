@@ -81,6 +81,16 @@ serve(async (req) => {
     
     console.log('Processing Discord notification:', { requestId, notificationType, oldStatus, newStatus, driveLink, useBotApi: !!botToken });
 
+    // Only allow project-acceptance-related notifications to Discord
+    const allowedTypes = ['new_request', 'producer_changed'];
+    if (!allowedTypes.includes(notificationType)) {
+      console.log(`Skipping Discord notification for type: ${notificationType} (only accept-related notifications allowed)`);
+      return new Response(
+        JSON.stringify({ success: true, message: `Skipped Discord notification for type: ${notificationType}` }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      );
+    }
+
     // Fetch the full request details from the database
     const { data: songRequest, error: fetchError } = await supabase
       .from('song_requests')
@@ -93,51 +103,15 @@ serve(async (req) => {
       throw fetchError;
     }
 
-    let embed;
     let content;
+    const embed = createNewRequestEmbed(songRequest, requestId);
+    const genreKey = songRequest.genre_category?.toLowerCase() || 'other';
+    const roleMention = genreRoleMap[genreKey] || genreRoleMap['other'];
 
-    if (notificationType === 'file_delivered') {
-      embed = createFileDeliveredEmbed(songRequest, requestId, driveLink);
-      content = `📦 **Files Delivered!** Project has been completed and files uploaded to Google Drive.`;
-    } else if (notificationType === 'status_change') {
-      embed = createStatusChangeEmbed(songRequest, oldStatus, newStatus, requestId);
-      content = `📊 Project status updated: **${oldStatus}** → **${newStatus}**`;
-    } else if (notificationType === 'producer_assigned') {
-      embed = createProducerAssignedEmbed(songRequest, requestId);
-      content = `🎧 Producer has been assigned to a project!`;
-    } else if (notificationType === 'cancellation_processed') {
-      // Cancellation notification - do NOT repost as new request
-      const { action: cancellationAction, refundAmount: refundAmountStr } = await req.json().catch(() => ({}));
-      embed = {
-        title: cancellationAction === 'approve' ? "❌ Project Cancelled" : "ℹ️ Cancellation Denied",
-        color: cancellationAction === 'approve' ? 0xE74C3C : 0xF59E0B,
-        fields: [
-          { name: "📋 Request ID", value: `\`${requestId.substring(0, 8)}...\``, inline: true },
-          { name: "🎯 Tier", value: songRequest.tier.toUpperCase(), inline: true },
-          { name: "📧 Customer", value: songRequest.user_email, inline: true },
-          { name: "💰 Refund", value: refundAmountStr || 'None', inline: true },
-        ],
-        timestamp: new Date().toISOString(),
-      };
-      content = cancellationAction === 'approve' 
-        ? `❌ Project has been cancelled and refunded.`
-        : `ℹ️ Cancellation request was denied. Project continues.`;
-    } else if (notificationType === 'producer_changed') {
-      // Producer change - repost for new producer acceptance
-      embed = createNewRequestEmbed(songRequest, requestId);
-      const genreKey = songRequest.genre_category?.toLowerCase() || 'other';
-      const roleMention = genreRoleMap[genreKey] || genreRoleMap['other'];
+    if (notificationType === 'producer_changed') {
       content = `🔄 **@${roleMention}** - Producer changed! ${songRequest.tier.toUpperCase()} project needs a new producer!`;
-    } else if (notificationType === 'new_request') {
-      embed = createNewRequestEmbed(songRequest, requestId);
-      const genreKey = songRequest.genre_category?.toLowerCase() || 'other';
-      const roleMention = genreRoleMap[genreKey] || genreRoleMap['other'];
-      content = `🚨 **@${roleMention}** - New ${songRequest.tier.toUpperCase()} song request needs a producer!`;
     } else {
-      // Unknown notification type - log and create a generic status embed
-      console.warn('Unknown notification type:', notificationType);
-      embed = createStatusChangeEmbed(songRequest, songRequest.status, songRequest.status, requestId);
-      content = `📊 Project update for ${songRequest.tier.toUpperCase()} request.`;
+      content = `🚨 **@${roleMention}** - New ${songRequest.tier.toUpperCase()} song request needs a producer!`;
     }
 
     // Build message payload
@@ -146,9 +120,9 @@ serve(async (req) => {
       embeds: [embed],
     };
 
-    // Add Accept/Decline buttons for new requests and producer assignments
+    // Add Accept buttons for new requests and producer changes
     // Note: Interactive components only work with Bot API, not webhooks
-    if (botToken && (notificationType === 'new_request' || notificationType === 'producer_assigned')) {
+    if (botToken) {
       messagePayload.components = [
         {
           type: 1, // Action Row
