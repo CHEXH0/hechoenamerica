@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Upload, Plus, ChevronDown, HardDrive, Link, X, FileAudio, FileImage, FileArchive, File, Loader2 } from "lucide-react";
+import { Upload, Plus, ChevronDown, HardDrive, Link, X, FileAudio, FileImage, FileArchive, File, Loader2, Info, Check, Circle } from "lucide-react";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Progress } from "@/components/ui/progress";
 import FileDeleter from "@/components/FileDeleter";
 
@@ -39,19 +40,19 @@ const genreCategories = [
   { value: "other", label: "Other / Mixed" },
 ];
 const tiers = [
-  { label: "$0", price: 0, description: "Free AI Generated - for comparison", priceId: null },
-  { label: "$25", price: 25, description: "Demo Project - for ideas (30sec)", priceId: "price_1SHdNFQchHjxRXODM3DJdjEE" },
-  { label: "$125", price: 125, description: "Artist-grade quality - for production (180sec)", priceId: "price_1SHdNVQchHjxRXODn3lW4vDj" },
-  { label: "$250", price: 250, description: "Industry standard - for masterpiece (300sec)", priceId: "price_1SHdNmQchHjxRXODgqWhW9TO" }
+  { label: "$0", price: 0, description: "Free AI Generated - for comparison", priceId: null, info: "Get a quick AI-generated demo using Google Lyria 2. Great for testing ideas before committing. Limited to 3 per 5 hours." },
+  { label: "$25", price: 25, description: "Demo Project - for ideas (30sec)", priceId: "price_1SHdNFQchHjxRXODM3DJdjEE", info: "A human-produced 30-second demo by one of our producers. Perfect for pitch decks, social media teasers, or validating a concept before full production." },
+  { label: "$125", price: 125, description: "Artist-grade quality - for production (180sec)", priceId: "price_1SHdNVQchHjxRXODn3lW4vDj", info: "A full 3-minute production-ready track. Includes professional arrangement, sound design, and high-quality mix. Ideal for singles, EPs, or album tracks." },
+  { label: "$250", price: 250, description: "Industry standard - for masterpiece (300sec)", priceId: "price_1SHdNmQchHjxRXODgqWhW9TO", info: "A premium 5-minute track with top-tier production, detailed arrangement, and radio-ready quality. Includes priority producer matching and faster turnaround." }
 ];
 
 // Add-on pricing per tier (tier index: 0=free, 1=$25, 2=$125, 3=$250)
 const addOnPricing = {
-  stems: [0, 10, 25, 40],        // Recorded stems
-  analog: [0, 15, 35, 50],       // Analog equipment
-  mixing: [0, 20, 50, 75],       // Mixing service
-  mastering: [0, 15, 40, 60],    // Mastering service
-  revision: [0, 5, 15, 25],      // Per revision
+  stems: { prices: [0, 10, 25, 40], info: "Receive individual instrument/vocal tracks (stems) so you can remix, rearrange, or use them in your own DAW." },
+  analog: { prices: [0, 15, 35, 50], info: "Your track will be processed through real analog hardware (compressors, EQs, tape machines) for warmer, richer sound character." },
+  mixing: { prices: [0, 20, 50, 75], info: "Professional mixing by our engineer: balancing levels, EQ, compression, effects, and spatial positioning for a polished sound." },
+  mastering: { prices: [0, 15, 40, 60], info: "Final mastering to optimize loudness, clarity, and consistency across all playback systems. Industry-standard LUFS targeting." },
+  revision: { prices: [0, 5, 15, 25], info: "Each revision allows you to request specific changes to your track. The producer will adjust based on your feedback notes." },
 };
 
 const MAX_FREE_AI_SONGS = 3;
@@ -120,11 +121,11 @@ const GenerateSong = () => {
     
     let total = currentTier.price;
     
-    if (wantsRecordedStems) total += addOnPricing.stems[tierIndex];
-    if (wantsAnalog) total += addOnPricing.analog[tierIndex];
-    if (wantsMixing) total += addOnPricing.mixing[tierIndex];
-    if (wantsMastering) total += addOnPricing.mastering[tierIndex];
-    total += numberOfRevisions * addOnPricing.revision[tierIndex];
+    if (wantsRecordedStems) total += addOnPricing.stems.prices[tierIndex];
+    if (wantsAnalog) total += addOnPricing.analog.prices[tierIndex];
+    if (wantsMixing) total += addOnPricing.mixing.prices[tierIndex];
+    if (wantsMastering) total += addOnPricing.mastering.prices[tierIndex];
+    total += numberOfRevisions * addOnPricing.revision.prices[tierIndex];
     
     return total;
   };
@@ -712,9 +713,20 @@ const GenerateSong = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="text-white/90 text-sm mt-2"
+                    className="text-white/90 text-sm mt-2 flex items-center gap-2"
                   >
-                    {currentTier.description}
+                    <span>{currentTier.description}</span>
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <button type="button" className="inline-flex">
+                          <Info className="w-4 h-4 text-white/60 hover:text-white cursor-pointer" />
+                        </button>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-72 text-sm">
+                        <p className="font-semibold mb-1">{currentTier.label} — {currentTier.description}</p>
+                        <p className="text-muted-foreground">{currentTier.info}</p>
+                      </HoverCardContent>
+                    </HoverCard>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -750,12 +762,58 @@ const GenerateSong = () => {
               <Textarea id="idea" value={idea} onChange={e => setIdea(e.target.value)} placeholder={currentTier.price > 0 ? "Better than AI. Made by human hehe.." : "Feel free to use AI audios for your liking"} className="bg-white/20 border-white/30 text-white placeholder:text-white/50 min-h-[120px]" required 
               />
               {currentTier.price === 0 && (
-                <p className="text-white/70 text-xs leading-relaxed">
-                  💡 <span className="font-medium">Tip:</span> Be descriptive! Instead of "reggae music", try "upbeat reggae with offbeat guitar skanks, deep dub bass, one-drop drums, and melodica at 90 BPM". Include mood, instruments, and tempo for best results.
-                </p>
+                <>
+                  <p className="text-white/70 text-xs leading-relaxed">
+                    💡 <span className="font-medium">Tip:</span> Be descriptive! Instead of "reggae music", try "upbeat reggae with offbeat guitar skanks, deep dub bass, one-drop drums, and melodica at 90 BPM". Include mood, instruments, and tempo for best results.
+                  </p>
+                  {/* Prompt requirements checklist for AI tier */}
+                  <div className="bg-white/10 rounded-lg p-3 space-y-2 mt-2">
+                    <p className="text-white/80 text-xs font-semibold">Prompt Requirements:</p>
+                    <div className="space-y-1.5">
+                      {[
+                        { label: "Genre selected", met: !!selectedGenre },
+                        { label: "At least 20 characters describing your idea", met: idea.trim().length >= 20 },
+                        { label: "Mention mood or energy (e.g. chill, energetic, dark)", met: /\b(chill|energetic|dark|happy|sad|upbeat|mellow|aggressive|dreamy|epic|calm|relaxed|intense|groovy|funky|smooth|powerful|soft|hard|bright|warm|cold|melancholic|euphoric|nostalgic|ambient|lively|moody)\b/i.test(idea) },
+                        { label: "Mention at least one instrument or sound", met: /\b(guitar|bass|drum|piano|synth|808|hi-hat|kick|snare|organ|flute|violin|trumpet|sax|percussion|keys|pad|arp|strings|brass|vocal|beat|melody|chord|loop|sample|clap|cymbal|bell|harp|cello|horn|timbale|conga|bongo|melodica|marimba|ukulele|banjo)\b/i.test(idea) },
+                      ].map((req, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          {req.met ? (
+                            <Check className="w-3.5 h-3.5 text-green-400 shrink-0" />
+                          ) : (
+                            <Circle className="w-3.5 h-3.5 text-white/30 shrink-0" />
+                          )}
+                          <span className={`text-xs ${req.met ? 'text-green-300' : 'text-white/50'}`}>
+                            {req.label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
               )}
               {currentTier.price > 0 && (
                 <div className="space-y-4 mt-4">
+                  {/* Paid tier requirements */}
+                  <div className="bg-white/10 rounded-lg p-3 space-y-2">
+                    <p className="text-white/80 text-xs font-semibold">Submission Requirements:</p>
+                    <div className="space-y-1.5">
+                      {[
+                        { label: "Genre selected", met: !!selectedGenre },
+                        { label: "Describe your song idea (at least 20 characters)", met: idea.trim().length >= 20 },
+                      ].map((req, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          {req.met ? (
+                            <Check className="w-3.5 h-3.5 text-green-400 shrink-0" />
+                          ) : (
+                            <Circle className="w-3.5 h-3.5 text-white/30 shrink-0" />
+                          )}
+                          <span className={`text-xs ${req.met ? 'text-green-300' : 'text-white/50'}`}>
+                            {req.label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                   {/* File size info banner */}
                   <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-white/20 rounded-xl p-4">
                     <div className="flex items-center gap-3 mb-2">
@@ -959,9 +1017,17 @@ const GenerateSong = () => {
                       >
                         Provide recorded stems
                       </label>
+                      <HoverCard>
+                        <HoverCardTrigger asChild>
+                          <button type="button"><Info className="w-3.5 h-3.5 text-white/50 hover:text-white" /></button>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-64 text-sm">
+                          <p className="text-muted-foreground">{addOnPricing.stems.info}</p>
+                        </HoverCardContent>
+                      </HoverCard>
                     </div>
                     <span className="text-white/80 text-sm font-medium">
-                      +${addOnPricing.stems[tierIndex]}
+                      +${addOnPricing.stems.prices[tierIndex]}
                     </span>
                   </div>
 
@@ -979,9 +1045,17 @@ const GenerateSong = () => {
                       >
                         Use analog equipment
                       </label>
+                      <HoverCard>
+                        <HoverCardTrigger asChild>
+                          <button type="button"><Info className="w-3.5 h-3.5 text-white/50 hover:text-white" /></button>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-64 text-sm">
+                          <p className="text-muted-foreground">{addOnPricing.analog.info}</p>
+                        </HoverCardContent>
+                      </HoverCard>
                     </div>
                     <span className="text-white/80 text-sm font-medium">
-                      +${addOnPricing.analog[tierIndex]}
+                      +${addOnPricing.analog.prices[tierIndex]}
                     </span>
                   </div>
 
@@ -999,9 +1073,17 @@ const GenerateSong = () => {
                       >
                         Include mixing service
                       </label>
+                      <HoverCard>
+                        <HoverCardTrigger asChild>
+                          <button type="button"><Info className="w-3.5 h-3.5 text-white/50 hover:text-white" /></button>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-64 text-sm">
+                          <p className="text-muted-foreground">{addOnPricing.mixing.info}</p>
+                        </HoverCardContent>
+                      </HoverCard>
                     </div>
                     <span className="text-white/80 text-sm font-medium">
-                      +${addOnPricing.mixing[tierIndex]}
+                      +${addOnPricing.mixing.prices[tierIndex]}
                     </span>
                   </div>
 
@@ -1019,19 +1101,37 @@ const GenerateSong = () => {
                       >
                         Include mastering service
                       </label>
+                      <HoverCard>
+                        <HoverCardTrigger asChild>
+                          <button type="button"><Info className="w-3.5 h-3.5 text-white/50 hover:text-white" /></button>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-64 text-sm">
+                          <p className="text-muted-foreground">{addOnPricing.mastering.info}</p>
+                        </HoverCardContent>
+                      </HoverCard>
                     </div>
                     <span className="text-white/80 text-sm font-medium">
-                      +${addOnPricing.mastering[tierIndex]}
+                      +${addOnPricing.mastering.prices[tierIndex]}
                     </span>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="revisions" className="text-white text-sm font-medium">
-                        Number of revisions
-                      </Label>
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="revisions" className="text-white text-sm font-medium">
+                          Number of revisions
+                        </Label>
+                        <HoverCard>
+                          <HoverCardTrigger asChild>
+                            <button type="button"><Info className="w-3.5 h-3.5 text-white/50 hover:text-white" /></button>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="w-64 text-sm">
+                            <p className="text-muted-foreground">{addOnPricing.revision.info}</p>
+                          </HoverCardContent>
+                        </HoverCard>
+                      </div>
                       <span className="text-white/80 text-sm font-medium">
-                        +${numberOfRevisions * addOnPricing.revision[tierIndex]} (${addOnPricing.revision[tierIndex]}/each)
+                        +${numberOfRevisions * addOnPricing.revision.prices[tierIndex]} (${addOnPricing.revision.prices[tierIndex]}/each)
                       </span>
                     </div>
                     <Slider
@@ -1078,11 +1178,11 @@ const GenerateSong = () => {
                   </div>
                   {(wantsRecordedStems || wantsAnalog || wantsMixing || wantsMastering || numberOfRevisions > 0) && (
                     <div className="text-right text-white/70 text-xs space-y-0.5">
-                      {wantsRecordedStems && <p>Stems +${addOnPricing.stems[tierIndex]}</p>}
-                      {wantsAnalog && <p>Analog +${addOnPricing.analog[tierIndex]}</p>}
-                      {wantsMixing && <p>Mixing +${addOnPricing.mixing[tierIndex]}</p>}
-                      {wantsMastering && <p>Mastering +${addOnPricing.mastering[tierIndex]}</p>}
-                      {numberOfRevisions > 0 && <p>{numberOfRevisions}x Revisions +${numberOfRevisions * addOnPricing.revision[tierIndex]}</p>}
+                      {wantsRecordedStems && <p>Stems +${addOnPricing.stems.prices[tierIndex]}</p>}
+                      {wantsAnalog && <p>Analog +${addOnPricing.analog.prices[tierIndex]}</p>}
+                      {wantsMixing && <p>Mixing +${addOnPricing.mixing.prices[tierIndex]}</p>}
+                      {wantsMastering && <p>Mastering +${addOnPricing.mastering.prices[tierIndex]}</p>}
+                      {numberOfRevisions > 0 && <p>{numberOfRevisions}x Revisions +${numberOfRevisions * addOnPricing.revision.prices[tierIndex]}</p>}
                     </div>
                   )}
                 </div>
@@ -1173,12 +1273,17 @@ const GenerateSong = () => {
                 <Button 
                   type="button"
                   onClick={handleGenerateAI}
-                  disabled={isGeneratingAI || (aiGenerationsRemaining !== null && aiGenerationsRemaining <= 0)} 
-                  className="w-full bg-white/50 text-black hover:bg-white font-bold text-lg py-6" 
+                  disabled={isGeneratingAI || (aiGenerationsRemaining !== null && aiGenerationsRemaining <= 0) || !selectedGenre || idea.trim().length < 20 || !/\b(chill|energetic|dark|happy|sad|upbeat|mellow|aggressive|dreamy|epic|calm|relaxed|intense|groovy|funky|smooth|powerful|soft|hard|bright|warm|cold|melancholic|euphoric|nostalgic|ambient|lively|moody)\b/i.test(idea) || !/\b(guitar|bass|drum|piano|synth|808|hi-hat|kick|snare|organ|flute|violin|trumpet|sax|percussion|keys|pad|arp|strings|brass|vocal|beat|melody|chord|loop|sample|clap|cymbal|bell|harp|cello|horn|timbale|conga|bongo|melodica|marimba|ukulele|banjo)\b/i.test(idea)} 
+                  className="w-full bg-white/50 text-black hover:bg-white font-bold text-lg py-6 disabled:opacity-40 disabled:cursor-not-allowed" 
                   size="lg"
                 >
                   {isGeneratingAI ? "Generating..." : `Generate Free AI Song${aiGenerationsRemaining !== null ? ` (${aiGenerationsRemaining}/${MAX_FREE_AI_SONGS} left)` : ''}`}
                 </Button>
+                {(!selectedGenre || idea.trim().length < 20 || !/\b(chill|energetic|dark|happy|sad|upbeat|mellow|aggressive|dreamy|epic|calm|relaxed|intense|groovy|funky|smooth|powerful|soft|hard|bright|warm|cold|melancholic|euphoric|nostalgic|ambient|lively|moody)\b/i.test(idea) || !/\b(guitar|bass|drum|piano|synth|808|hi-hat|kick|snare|organ|flute|violin|trumpet|sax|percussion|keys|pad|arp|strings|brass|vocal|beat|melody|chord|loop|sample|clap|cymbal|bell|harp|cello|horn|timbale|conga|bongo|melodica|marimba|ukulele|banjo)\b/i.test(idea)) && (
+                  <p className="text-white/50 text-xs text-center">
+                    Complete all prompt requirements above to enable generation
+                  </p>
+                )}
               </div>
             ) : (
               <div className="space-y-3">
@@ -1225,8 +1330,8 @@ const GenerateSong = () => {
                 
                 <Button 
                   type="submit" 
-                  disabled={isSubmitting} 
-                  className="w-full bg-white/50 text-black hover:bg-white font-bold text-lg py-6" 
+                  disabled={isSubmitting || !selectedGenre || idea.trim().length < 20} 
+                  className="w-full bg-white/50 text-black hover:bg-white font-bold text-lg py-6 disabled:opacity-40 disabled:cursor-not-allowed" 
                   size="lg"
                 >
                   {isSubmitting ? (
@@ -1238,6 +1343,11 @@ const GenerateSong = () => {
                     </span>
                   ) : "Submit Your Song Idea"}
                 </Button>
+                {(!selectedGenre || idea.trim().length < 20) && (
+                  <p className="text-white/50 text-xs text-center">
+                    Complete all submission requirements above to continue
+                  </p>
+                )}
               </div>
             )}
           </form>
