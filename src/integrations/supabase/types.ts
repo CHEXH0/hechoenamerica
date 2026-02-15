@@ -174,6 +174,9 @@ export type Database = {
           image: string
           instagram_url: string | null
           name: string
+          showcase_video_1: string | null
+          showcase_video_2: string | null
+          showcase_video_3: string | null
           slug: string
           spotify_url: string | null
           stripe_connect_account_id: string | null
@@ -195,6 +198,9 @@ export type Database = {
           image: string
           instagram_url?: string | null
           name: string
+          showcase_video_1?: string | null
+          showcase_video_2?: string | null
+          showcase_video_3?: string | null
           slug: string
           spotify_url?: string | null
           stripe_connect_account_id?: string | null
@@ -216,6 +222,9 @@ export type Database = {
           image?: string
           instagram_url?: string | null
           name?: string
+          showcase_video_1?: string | null
+          showcase_video_2?: string | null
+          showcase_video_3?: string | null
           slug?: string
           spotify_url?: string | null
           stripe_connect_account_id?: string | null

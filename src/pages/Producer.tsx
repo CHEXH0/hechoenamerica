@@ -77,6 +77,28 @@ const Producer = () => {
             />
           </div>
         </div>
+
+        {/* Showcase Videos */}
+        {(() => {
+          const videos = [
+            (producer as any).showcase_video_1,
+            (producer as any).showcase_video_2,
+            (producer as any).showcase_video_3,
+          ].filter(Boolean);
+          if (videos.length === 0) return null;
+          return (
+            <div className="mt-16">
+              <h2 className="text-2xl font-bold text-white mb-6 text-center">{producer.name} in Action</h2>
+              <div className={`grid gap-6 ${videos.length === 1 ? 'max-w-2xl mx-auto' : videos.length === 2 ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto' : 'grid-cols-1 md:grid-cols-3'}`}>
+                {videos.map((url: string, i: number) => (
+                  <div key={i} className="rounded-xl overflow-hidden border border-purple-900/30 bg-black/30 backdrop-blur-sm">
+                    <video src={url} controls className="w-full aspect-video object-contain" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
