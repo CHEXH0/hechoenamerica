@@ -448,6 +448,7 @@ export type Database = {
           payment_intent_id: string | null
           platform_fee_cents: number | null
           price: string
+          producer_checklist: Json | null
           producer_paid_at: string | null
           producer_payout_cents: number | null
           refunded_at: string | null
@@ -476,6 +477,7 @@ export type Database = {
           payment_intent_id?: string | null
           platform_fee_cents?: number | null
           price: string
+          producer_checklist?: Json | null
           producer_paid_at?: string | null
           producer_payout_cents?: number | null
           refunded_at?: string | null
@@ -504,6 +506,7 @@ export type Database = {
           payment_intent_id?: string | null
           platform_fee_cents?: number | null
           price?: string
+          producer_checklist?: Json | null
           producer_paid_at?: string | null
           producer_payout_cents?: number | null
           refunded_at?: string | null
