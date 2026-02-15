@@ -38,6 +38,9 @@ export type ProducerProfileUpdate = {
   youtube_channel_url?: string | null;
   instagram_url?: string | null;
   website_url?: string | null;
+  showcase_video_1?: string | null;
+  showcase_video_2?: string | null;
+  showcase_video_3?: string | null;
 };
 
 export const useUpdateProducerProfile = () => {
@@ -132,6 +135,43 @@ export const useUploadProducerImage = () => {
       toast({
         title: "Upload failed",
         description: error instanceof Error ? error.message : "Failed to upload image.",
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+export const useUploadProducerVideo = () => {
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (file: File) => {
+      // Validate file size (50MB max)
+      if (file.size > 50 * 1024 * 1024) {
+        throw new Error("Video must be under 50MB");
+      }
+
+      const fileExt = file.name.split(".").pop();
+      const fileName = `producer-video-${Date.now()}.${fileExt}`;
+      const filePath = `producers/videos/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(filePath);
+
+      return urlData.publicUrl;
+    },
+    onError: (error) => {
+      console.error("Error uploading video:", error);
+      toast({
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : "Failed to upload video.",
         variant: "destructive",
       });
     },
