@@ -49,6 +49,17 @@ export const useUpdateProducerProfile = () => {
     mutationFn: async (updates: ProducerProfileUpdate) => {
       if (!user?.email) throw new Error("Not authenticated");
 
+      // Check if discord_user_id is being changed
+      const { data: currentProfile } = await supabase
+        .from("producers")
+        .select("discord_user_id, name")
+        .eq("email", user.email)
+        .single();
+
+      const discordIdChanged =
+        updates.discord_user_id !== undefined &&
+        updates.discord_user_id !== (currentProfile?.discord_user_id || null);
+
       const { data, error } = await supabase
         .from("producers")
         .update(updates)
@@ -57,6 +68,23 @@ export const useUpdateProducerProfile = () => {
         .single();
 
       if (error) throw error;
+
+      // Send email notification if Discord User ID was updated
+      if (discordIdChanged) {
+        try {
+          await supabase.functions.invoke("send-contact-email", {
+            body: {
+              name: currentProfile?.name || user.email,
+              email: "team@hechoenamericastudio.com",
+              subject: "Producer Discord ID Updated",
+              message: `Producer "${currentProfile?.name || user.email}" has updated their Discord User ID.\n\nNew Discord User ID: ${updates.discord_user_id || "(removed)"}\nPrevious Discord User ID: ${currentProfile?.discord_user_id || "(none)"}\n\nPlease update their Discord roles accordingly.`,
+            },
+          });
+        } catch (emailError) {
+          console.error("Failed to send Discord ID update email:", emailError);
+        }
+      }
+
       return data;
     },
     onSuccess: () => {
