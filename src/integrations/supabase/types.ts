@@ -571,6 +571,13 @@ export type Database = {
             foreignKeyName: "song_requests_assigned_producer_id_fkey"
             columns: ["assigned_producer_id"]
             isOneToOne: false
+            referencedRelation: "producer_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "song_requests_assigned_producer_id_fkey"
+            columns: ["assigned_producer_id"]
+            isOneToOne: false
             referencedRelation: "producers"
             referencedColumns: ["id"]
           },
@@ -665,7 +672,66 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      producer_profiles: {
+        Row: {
+          apple_music_url: string | null
+          bio: string | null
+          country: string | null
+          created_at: string | null
+          genre: string | null
+          id: string | null
+          image: string | null
+          instagram_url: string | null
+          name: string | null
+          showcase_video_1: string | null
+          showcase_video_2: string | null
+          showcase_video_3: string | null
+          slug: string | null
+          spotify_url: string | null
+          website_url: string | null
+          youtube_channel_url: string | null
+          youtube_url: string | null
+        }
+        Insert: {
+          apple_music_url?: string | null
+          bio?: string | null
+          country?: string | null
+          created_at?: string | null
+          genre?: string | null
+          id?: string | null
+          image?: string | null
+          instagram_url?: string | null
+          name?: string | null
+          showcase_video_1?: string | null
+          showcase_video_2?: string | null
+          showcase_video_3?: string | null
+          slug?: string | null
+          spotify_url?: string | null
+          website_url?: string | null
+          youtube_channel_url?: string | null
+          youtube_url?: string | null
+        }
+        Update: {
+          apple_music_url?: string | null
+          bio?: string | null
+          country?: string | null
+          created_at?: string | null
+          genre?: string | null
+          id?: string | null
+          image?: string | null
+          instagram_url?: string | null
+          name?: string | null
+          showcase_video_1?: string | null
+          showcase_video_2?: string | null
+          showcase_video_3?: string | null
+          slug?: string | null
+          spotify_url?: string | null
+          website_url?: string | null
+          youtube_channel_url?: string | null
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {

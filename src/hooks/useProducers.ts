@@ -24,7 +24,7 @@ export const useProducers = () => {
     queryKey: ["producers"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("producers")
+        .from("producer_profiles")
         .select("*")
         .order("created_at", { ascending: true });
 
@@ -39,7 +39,7 @@ export const useProducer = (slug: string) => {
     queryKey: ["producer", slug],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("producers")
+        .from("producer_profiles")
         .select("*")
         .eq("slug", slug)
         .maybeSingle();
