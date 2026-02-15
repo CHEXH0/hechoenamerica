@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Globe, X, Chrome, Monitor } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const translatedIntros: { lang: string; text: string }[] = [
   { lang: "ES", text: "Usa la función de traducción de tu navegador para ver esta página en tu idioma." },
@@ -18,6 +19,7 @@ const translatedIntros: { lang: string; text: string }[] = [
 
 const TranslateHelper = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   return (
     <>
@@ -42,13 +44,24 @@ const TranslateHelper = () => {
               onClick={() => setIsOpen(false)}
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ duration: 0.2 }}
-              className="fixed bottom-20 right-6 z-[10001] w-[360px] max-h-[75vh] overflow-y-auto rounded-xl bg-card border border-border shadow-2xl"
+              initial={{ opacity: 0, y: isMobile ? 100 : 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: isMobile ? 100 : 20 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className={
+                isMobile
+                  ? "fixed bottom-0 left-0 right-0 z-[10001] max-h-[85vh] overflow-y-auto rounded-t-2xl bg-card border-t border-border shadow-2xl"
+                  : "fixed bottom-20 right-6 z-[10001] w-[360px] max-h-[75vh] overflow-y-auto rounded-xl bg-card border border-border shadow-2xl"
+              }
             >
               <div className="p-5">
+                {/* Drag handle for mobile */}
+                {isMobile && (
+                  <div className="flex justify-center mb-3">
+                    <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+                  </div>
+                )}
+
                 {/* Header */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
@@ -140,7 +153,7 @@ const TranslateHelper = () => {
                   </div>
                 </div>
 
-                <p className="text-[11px] text-muted-foreground/60 mt-4 text-center">
+                <p className="text-[11px] text-muted-foreground/60 mt-4 text-center pb-2">
                   Translation is handled by your browser — no data is sent to us.
                 </p>
               </div>
