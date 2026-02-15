@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { AlertCircle, CheckCircle, XCircle, DollarSign, User, Music, Calendar, Loader2, RefreshCw, UserMinus } from "lucide-react";
+import { AlertCircle, CheckCircle, XCircle, DollarSign, User, Music, Calendar, Loader2, RefreshCw, UserMinus, UserPlus } from "lucide-react";
+import { useProducers } from "@/hooks/useProducers";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -39,6 +40,7 @@ interface CancellationRequest {
   updated_at: string;
   user_email: string;
   assigned_producer_id: string | null;
+  blocked_producer_ids: string[] | null;
   payment_intent_id: string | null;
   number_of_revisions: number | null;
   wants_recorded_stems: boolean | null;
@@ -70,7 +72,9 @@ export const CancellationRequestsAdmin = () => {
   const [changeReason, setChangeReason] = useState("");
   const [producerPayoutPercent, setProducerPayoutPercent] = useState<string>("0");
   const [changeFee, setChangeFee] = useState<string>("25");
+  const [selectedNewProducerId, setSelectedNewProducerId] = useState<string>("");
   const { toast } = useToast();
+  const { data: allProducers } = useProducers();
 
   useEffect(() => {
     fetchCancellationRequests();
@@ -219,6 +223,10 @@ export const CancellationRequestsAdmin = () => {
   };
 
   const handleChangeProducer = async (request: CancellationRequest) => {
+    if (!selectedNewProducerId) {
+      toast({ title: "Select a Producer", description: "Please select a new producer to assign", variant: "destructive" });
+      return;
+    }
     setChangingProducerId(request.id);
     try {
       const { data, error } = await supabase.functions.invoke("change-producer", {
@@ -226,7 +234,8 @@ export const CancellationRequestsAdmin = () => {
           requestId: request.id,
           reason: changeReason || "Admin initiated producer change",
           producerPayoutPercentage: parseInt(producerPayoutPercent),
-          changeFee: parseInt(changeFee),
+          changeFee: 0, // No fee for admin-initiated changes
+          adminAssignProducerId: selectedNewProducerId,
         },
       });
 
@@ -239,7 +248,7 @@ export const CancellationRequestsAdmin = () => {
 
       setChangeReason("");
       setProducerPayoutPercent("0");
-      setChangeFee("25");
+      setSelectedNewProducerId("");
       fetchCancellationRequests();
     } catch (error) {
       console.error("Error changing producer:", error);
@@ -515,7 +524,7 @@ export const CancellationRequestsAdmin = () => {
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Change Producer</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  This will remove <strong>{request.producer?.name}</strong> from the project, pay them proportionally for work completed ({request.revisions?.filter(r => r.status === 'delivered').length || 0}/{request.number_of_revisions || 0} revisions), block them from re-accepting, and repost to Discord for a new producer.
+                                  This will remove <strong>{request.producer?.name}</strong> from the project, pay them proportionally for work completed, and directly assign the selected new producer. The new producer will be notified via email (no Discord notification).
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
 
@@ -545,25 +554,28 @@ export const CancellationRequestsAdmin = () => {
                                 </div>
 
                                 <div>
-                                  <Label>Change Fee ($) — Charged to Client</Label>
-                                  <Select value={changeFee} onValueChange={setChangeFee}>
+                                  <Label>Assign New Producer</Label>
+                                  <Select value={selectedNewProducerId} onValueChange={setSelectedNewProducerId}>
                                     <SelectTrigger className="mt-1">
-                                      <SelectValue />
+                                      <SelectValue placeholder="Select a producer..." />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="0">$0 - No Fee</SelectItem>
-                                      <SelectItem value="15">$15</SelectItem>
-                                      <SelectItem value="25">$25 (Default)</SelectItem>
-                                      <SelectItem value="50">$50</SelectItem>
+                                      {allProducers
+                                        ?.filter(p => p.id !== request.assigned_producer_id && !request.blocked_producer_ids?.includes(p.id))
+                                        .map(p => (
+                                          <SelectItem key={p.id} value={p.id}>
+                                            {p.name} — {p.genre} ({p.country})
+                                          </SelectItem>
+                                        ))}
                                     </SelectContent>
                                   </Select>
                                   <p className="text-xs text-muted-foreground mt-1">
-                                    Flat fee charged to the client for changing producers
+                                    The selected producer will be emailed about this assignment (no Discord notification, no client fee)
                                   </p>
                                 </div>
 
                                 <div>
-                                  <Label>Reason for Change (sent to producer)</Label>
+                                  <Label>Reason for Change (sent to old producer)</Label>
                                   <Textarea
                                     value={changeReason}
                                     onChange={(e) => setChangeReason(e.target.value)}
@@ -578,15 +590,15 @@ export const CancellationRequestsAdmin = () => {
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <Button
                                   onClick={() => handleChangeProducer(request)}
-                                  disabled={changingProducerId === request.id}
+                                  disabled={changingProducerId === request.id || !selectedNewProducerId}
                                   className="bg-blue-600 hover:bg-blue-700"
                                 >
                                   {changingProducerId === request.id ? (
                                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                                   ) : (
-                                    <UserMinus className="h-4 w-4 mr-2" />
+                                    <UserPlus className="h-4 w-4 mr-2" />
                                   )}
-                                  Change Producer & Repost
+                                  Assign & Notify Producer
                                 </Button>
                               </AlertDialogFooter>
                             </AlertDialogContent>
