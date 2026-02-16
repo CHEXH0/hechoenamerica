@@ -61,7 +61,7 @@ const ProfileIcon = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48 bg-black/90 backdrop-blur-md border-gray-700">
         <DropdownMenuItem disabled className="text-gray-300 text-sm">
-          {user.email}
+          {profile?.display_name || user.email}
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-gray-700" />
         <DropdownMenuItem 
