@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, User, Mail, Lock, Trash2, Save } from "lucide-react";
+import { ArrowLeft, User, Mail, Lock, Trash2, Save, Camera } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile, useUpdateProfile, useDeleteAccount } from "@/hooks/useProfile";
@@ -10,9 +10,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import AvatarCropper from "@/components/AvatarCropper";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -31,6 +33,10 @@ const Profile = () => {
   const [deletionCode, setDeletionCode] = useState("");
   const [generatedCode, setGeneratedCode] = useState("");
   const [sendingDeletionEmail, setSendingDeletionEmail] = useState(false);
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Update form when profile loads
   useEffect(() => {
@@ -52,6 +58,44 @@ const Profile = () => {
     navigate('/auth');
     return null;
   }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.match(/^image\/(jpeg|png)$/)) {
+      toast({ title: "Invalid file", description: "Please select a .jpg or .png image.", variant: "destructive" });
+      return;
+    }
+    setSelectedFile(file);
+    setCropperOpen(true);
+    e.target.value = "";
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    if (!user?.id) return;
+    setCropperOpen(false);
+    setUploadingAvatar(true);
+    try {
+      const fileName = `avatars/${user.id}-${Date.now()}.png`;
+      const { error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(fileName, croppedBlob, { upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(fileName);
+
+      updateProfile.mutate({
+        userId: user.id,
+        updates: { avatar_url: urlData.publicUrl }
+      });
+    } catch (error) {
+      console.error("Avatar upload error:", error);
+      toast({ title: "Upload failed", description: "Could not upload your photo. Please try again.", variant: "destructive" });
+    } finally {
+      setUploadingAvatar(false);
+      setSelectedFile(null);
+    }
+  };
 
   const handleUpdateProfile = () => {
     if (!user?.id) return;
@@ -195,6 +239,41 @@ const Profile = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Avatar Upload */}
+                <div className="flex flex-col items-center gap-3">
+                  <div className="relative group">
+                    <Avatar className="h-24 w-24">
+                      {profile?.avatar_url && (
+                        <AvatarImage src={profile.avatar_url} alt="Profile" />
+                      )}
+                      <AvatarFallback className="bg-muted text-muted-foreground text-2xl">
+                        <User className="h-10 w-10" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingAvatar}
+                      className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                    >
+                      <Camera className="h-6 w-6 text-white" />
+                    </button>
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".jpg,.jpeg,.png"
+                    className="hidden"
+                    onChange={handleFileSelect}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingAvatar}
+                  >
+                    {uploadingAvatar ? "Uploading..." : "Change Photo"}
+                  </Button>
+                </div>
                 <div>
                   <Label htmlFor="email">Email Address</Label>
                   <Input
@@ -377,6 +456,12 @@ const Profile = () => {
           </motion.div>
         </div>
       </div>
+      <AvatarCropper
+        open={cropperOpen}
+        onClose={() => { setCropperOpen(false); setSelectedFile(null); }}
+        imageFile={selectedFile}
+        onCropComplete={handleCropComplete}
+      />
     </div>
   );
 };
