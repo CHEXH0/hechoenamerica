@@ -154,7 +154,7 @@ serve(async (req) => {
             <!-- Header with Gradient -->
             <div style="background: linear-gradient(135deg, #7C3AED 0%, #DB2777 50%, #DC2626 100%); padding: 48px 32px; text-align: center;">
               <h1 style="margin: 0 0 8px 0; font-size: 28px; font-weight: bold; color: white; letter-spacing: 2px;">
-                HECHO EN AMÉRICA
+                HECHO EN AMERICA
               </h1>
               <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.8); letter-spacing: 3px; text-transform: uppercase;">
                 LA MÚSICA ES MEDICINA
@@ -276,7 +276,7 @@ serve(async (req) => {
             <!-- HEA Footer -->
             <div style="text-align: center; padding: 24px; background: #18181b; border-top: 1px solid #27272a;">
               <p style="margin: 0 0 8px 0; color: #52525b; font-size: 12px;">
-                Powered by HechoEnAmérica
+                Powered by HechoEnAmerica
               </p>
               <p style="margin: 0; color: #3f3f46; font-size: 11px;">
                 Questions? Reply to this email or visit our website.

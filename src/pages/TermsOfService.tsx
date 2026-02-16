@@ -21,7 +21,7 @@ const TermsOfService = () => {
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">1. Acceptance of Terms</h2>
             <p>
-              By accessing and using Hecho En América's website and services, you accept and agree 
+              By accessing and using Hecho En America's website and services, you accept and agree 
               to be bound by these Terms of Service. If you do not agree to these terms, please 
               do not use our services.
             </p>
@@ -30,7 +30,7 @@ const TermsOfService = () => {
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">2. Services Description</h2>
             <p className="mb-4">
-              Hecho En América provides a music production platform that includes:
+              Hecho En America provides a music production platform that includes:
             </p>
             <ul className="list-disc list-inside space-y-2 ml-4">
               <li>Custom song creation connecting artists with professional producers</li>
@@ -154,7 +154,7 @@ const TermsOfService = () => {
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">12. Limitation of Liability</h2>
             <p>
-              To the maximum extent permitted by law, Hecho En América shall not be liable for 
+              To the maximum extent permitted by law, Hecho En America shall not be liable for 
               any indirect, incidental, special, consequential, or punitive damages arising from 
               your use of our services, including but not limited to delays in production delivery, 
               AI-generated content quality, or third-party service availability.

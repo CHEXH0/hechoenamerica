@@ -21,7 +21,7 @@ const PrivacyPolicy = () => {
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">1. Introduction</h2>
             <p>
-              Welcome to Hecho En América ("we," "our," or "us"). We are committed to protecting your 
+              Welcome to Hecho En America ("we," "our," or "us"). We are committed to protecting your 
               personal information and your right to privacy. This Privacy Policy explains how we collect, 
               use, disclose, and safeguard your information when you visit our website and use our music 
               production services, digital marketplace, and AI song generation tools.

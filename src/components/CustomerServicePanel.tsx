@@ -183,7 +183,7 @@ const CustomerServicePanel = () => {
           </a>
 
           <a
-            href="tel:+13059992835"
+            href="tel:+15732449607"
             className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group"
           >
             <div className="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center shrink-0">
@@ -194,7 +194,7 @@ const CustomerServicePanel = () => {
                 Call Us
               </p>
               <p className="text-xs text-gray-500">
-                +1 (305) 999-2835
+                +1 (573) 244-9607
               </p>
             </div>
           </a>

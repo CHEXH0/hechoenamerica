@@ -116,7 +116,7 @@ serve(async (req) => {
       body: JSON.stringify({
         from: 'Hecho En America <team@hechoenamericastudio.com>',
         to: [customerEmail],
-        subject: `🎵 Project Confirmed - ${tier} | Hecho En América`,
+        subject: `🎵 Project Confirmed - ${tier} | Hecho En America`,
         html: `
           <!DOCTYPE html>
           <html>
@@ -279,7 +279,7 @@ serve(async (req) => {
             <div style="text-align: center; padding: 24px; color: #999; font-size: 13px;">
               <p style="margin: 0 0 8px 0;">Questions? Reply to this email or contact us.</p>
               <p style="margin: 0;"><strong>LA MÚSICA ES MEDICINA</strong></p>
-              <p style="margin: 4px 0 0 0;">Hecho En América</p>
+              <p style="margin: 4px 0 0 0;">Hecho En America</p>
             </div>
 
           </body>

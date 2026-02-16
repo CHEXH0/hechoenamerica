@@ -185,7 +185,7 @@ serve(async (req: Request) => {
       const { error: confirmError } = await resend.emails.send({
         from: "Hecho En America <team@hechoenamericastudio.com>",
         to: [email],
-        subject: "🎉 Application Received - Hecho En América",
+        subject: "🎉 Application Received - Hecho En America",
         html: confirmationHtml,
       });
 

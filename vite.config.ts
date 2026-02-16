@@ -6,8 +6,13 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    host: "::",
+    host: true, // Better Windows compatibility than "::"
     port: 8080,
+    watch: {
+      // Enable polling for better Windows file watching reliability
+      usePolling: true,
+      interval: 1000, // Check for changes every second
+    },
   },
   plugins: [
     react(),
@@ -19,4 +24,6 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Enable more verbose logging
+  logLevel: 'info',
 }));

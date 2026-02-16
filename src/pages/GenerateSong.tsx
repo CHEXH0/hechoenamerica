@@ -529,9 +529,11 @@ const GenerateSong = () => {
             <img src="/laptop-uploads/HEA_White.png" alt="HechoEnAmerica Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-2">🎶Create Your Sound🎶</h1>
-          <p className="text-2xl text-white/90 font-medium">
-            LA MUSIC ES MEDICINA
-          </p>
+          <div className="animate-color-shift inline-block">
+            <p className="text-2xl font-medium text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-200 to-purple-300">
+              LA MUSIC ES MEDICINA
+            </p>
+          </div>
         </div>
 
         <motion.div layout className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl mb-0">

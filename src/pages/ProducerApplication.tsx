@@ -53,7 +53,7 @@ const ProducerApplication = () => {
           <p className="text-gray-300 text-lg max-w-2xl mx-auto">
             {isProducer
               ? "You're already part of the team"
-              : "Become part of Hecho En América's talented team of music producers"}
+              : "Become part of Hecho En America's talented team of music producers"}
           </p>
         </motion.div>
 
@@ -72,15 +72,15 @@ const ProducerApplication = () => {
                   className="mb-6"
                 >
                   <div className="w-24 h-24 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-full flex items-center justify-center mx-auto border border-pink-500/30">
-                    <Heart className="h-12 w-12 text-pink-400" />
+                    <Heart className="h-12 w-12 text-pink-600" />
                   </div>
                 </motion.div>
                 
-                <h2 className="text-3xl font-bold text-white mb-4">
-                  Thank You for Being Part of the Team! 🎶
+                <h2 className="text-3xl font-bold text-gray-800 mb-4">
+                  Thank You for Being Part of The Team!
                 </h2>
-                <p className="text-gray-300 text-lg max-w-md mx-auto mb-8">
-                  We appreciate everything you do as a Hecho En América producer. Head to your dashboard to manage your projects.
+                <p className="text-gray-700 text-lg max-w-md mx-auto mb-8">
+                  We appreciate everything you do as a Hecho En America producer. Head to your dashboard to manage your projects.
                 </p>
                 
                 <Link to="/producer-profile">

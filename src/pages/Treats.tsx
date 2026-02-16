@@ -995,7 +995,7 @@ const Treats = () => {
               </CardTitle>
               <CardDescription className="text-gray-900 text-lg leading-relaxed">
                 Join our network of talented music producers. Work with artists from around the world 
-                and be part of the Hecho En América family.
+                and be part of the Hecho En America family.
               </CardDescription>
             </CardHeader>
             <CardFooter className="justify-center pb-8">

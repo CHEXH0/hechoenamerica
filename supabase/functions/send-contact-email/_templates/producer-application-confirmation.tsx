@@ -21,11 +21,11 @@ export const ProducerApplicationConfirmation = ({
 }: ProducerApplicationConfirmationProps) => (
   <Html>
     <Head />
-    <Preview>Your Producer Application Has Been Received - Hecho En América</Preview>
+    <Preview>Your Producer Application Has Been Received - Hecho En America</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
-          <Heading style={h1}>HECHO EN AMÉRICA</Heading>
+          <Heading style={h1}>HECHO EN AMERICA</Heading>
           <Text style={tagline}>LA MÚSICA ES MEDICINA</Text>
         </Section>
         
@@ -37,7 +37,7 @@ export const ProducerApplicationConfirmation = ({
           <Text style={greeting}>Hey {name},</Text>
           
           <Text style={paragraph}>
-            Thank you for applying to join the <strong>Hecho En América</strong> producer network! 
+            Thank you for applying to join the <strong>Hecho En America</strong> producer network! 
             We're excited to review your application and learn more about your work.
           </Text>
           
@@ -70,7 +70,7 @@ export const ProducerApplicationConfirmation = ({
             <Text style={bulletItem}>• Receive notifications for new project opportunities</Text>
             <Text style={bulletItem}>• Accept or decline projects that match your expertise</Text>
             <Text style={bulletItem}>• Communicate with the team and other producers</Text>
-            <Text style={bulletItem}>• Get support and updates from Hecho En América</Text>
+            <Text style={bulletItem}>• Get support and updates from Hecho En America</Text>
           </Section>
           
           <Hr style={lightHr} />
@@ -85,7 +85,7 @@ export const ProducerApplicationConfirmation = ({
           
           <Text style={signature}>
             Best regards,<br />
-            <strong>The Hecho En América Team</strong>
+            <strong>The Hecho En America Team</strong>
           </Text>
         </Section>
         
@@ -93,7 +93,7 @@ export const ProducerApplicationConfirmation = ({
         
         <Section style={footer}>
           <Text style={footerText}>
-            © {new Date().getFullYear()} Hecho En América. All rights reserved.
+            © {new Date().getFullYear()} Hecho En America. All rights reserved.
           </Text>
           <Text style={footerText}>
             La Música Es Medicina 🎵

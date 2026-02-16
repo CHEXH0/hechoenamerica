@@ -97,13 +97,13 @@ serve(async (req) => {
         await resend.emails.send({
           from: 'Hecho En America <team@hechoenamericastudio.com>',
           to: [application.email],
-          subject: 'Producer Application Update - Hecho En América',
+          subject: 'Producer Application Update - Hecho En America',
           html: `
             <p>Hi ${application.name},</p>
-            <p>Thank you for your interest in joining the Hecho En América producer network.</p>
+            <p>Thank you for your interest in joining the Hecho En America producer network.</p>
             <p>After careful consideration, we've decided not to move forward with your application at this time.</p>
             <p>We encourage you to continue developing your craft and apply again in the future.</p>
-            <p>Best regards,<br>The Hecho En América Team</p>
+            <p>Best regards,<br>The Hecho En America Team</p>
           `,
         });
       } catch (emailErr) {
@@ -160,7 +160,7 @@ serve(async (req) => {
           slug: slug,
           country: application.country || 'Not specified',
           genre: appData.genres?.join(', ') || 'Not specified',
-          bio: appData.bio || 'Producer at Hecho En América',
+          bio: appData.bio || 'Producer at Hecho En America',
           image: appData.image_url || '/placeholder.svg',
           spotify_url: appData.spotify_url || null,
           youtube_url: appData.youtube_url || null,

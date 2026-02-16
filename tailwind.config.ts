@@ -79,6 +79,13 @@ export default {
           "0%, 100%": { transform: "scaleY(0.5)" },
           "50%": { transform: "scaleY(1)" },
         },
+        "color-shift": {
+          "0%": { filter: "hue-rotate(0deg)" },
+          "25%": { filter: "hue-rotate(90deg)" },
+          "50%": { filter: "hue-rotate(180deg)" },
+          "75%": { filter: "hue-rotate(270deg)" },
+          "100%": { filter: "hue-rotate(360deg)" },
+        },
         "fade-in-up": {
           "0%": {
             opacity: "0",
@@ -94,6 +101,7 @@ export default {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "waveform": "waveform 1.5s ease-in-out infinite",
+        "color-shift": "color-shift 3s ease-in-out infinite",
         "fade-in-up": "fade-in-up 0.5s ease-out",
       },
     },
