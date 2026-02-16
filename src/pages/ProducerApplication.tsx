@@ -8,6 +8,7 @@ import ProducerApplicationForm from "@/components/ProducerApplicationForm";
 import { useHiringStatus } from "@/hooks/useHiringStatus";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProducerProfile } from "@/hooks/useProducerProfile";
 
 const ProducerApplication = () => {
   useEffect(() => {
@@ -16,6 +17,7 @@ const ProducerApplication = () => {
   const { data: hiringStatus} = useHiringStatus();
   const { user } = useAuth();
   const { data: roleData } = useUserRole();
+  const { data: producerProfile } = useProducerProfile();
   
   const isHiring = hiringStatus?.enabled ?? false;
   const isProducer = roleData?.isProducer ?? false;
@@ -46,7 +48,7 @@ const ProducerApplication = () => {
           className="text-center mb-12"
         >
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-pink-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
-            {isProducer ? "Welcome, Producer!" : "Join Our Producer Network"}
+            {isProducer ? `Welcome, ${producerProfile?.name || "Producer"}!` : "Join Our Producer Network"}
           </h1>
           <p className="text-gray-300 text-lg max-w-2xl mx-auto">
             {isProducer
@@ -74,8 +76,8 @@ const ProducerApplication = () => {
                   </div>
                 </motion.div>
                 
-                <h2 className="text-3xl font-bold text-black mb-4">
-                  Thank You for Being Part of the Team!
+                <h2 className="text-3xl font-bold text-white mb-4">
+                  Thank You for Being Part of the Team! 🎶
                 </h2>
                 <p className="text-gray-300 text-lg max-w-md mx-auto mb-8">
                   We appreciate everything you do as a Hecho En América producer. Head to your dashboard to manage your projects.
