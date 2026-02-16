@@ -8,13 +8,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useProfile } from '@/hooks/useProfile';
 import { Link, useNavigate } from 'react-router-dom';
 
 const ProfileIcon = () => {
   const { user, signOut, loading } = useAuth();
   const { data: roleData } = useUserRole();
+  const { data: profile } = useProfile(user?.id);
   const navigate = useNavigate();
 
   if (loading) {
@@ -44,11 +47,16 @@ const ProfileIcon = () => {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="p-2 rounded-full hover:bg-white/10 transition-colors"
+          className="p-1 rounded-full hover:bg-white/10 transition-colors"
         >
-          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-            <User className="h-3 w-3 text-white" />
-          </div>
+          <Avatar className="h-7 w-7">
+            {profile?.avatar_url && (
+              <AvatarImage src={profile.avatar_url} alt="Profile" />
+            )}
+            <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white text-xs">
+              <User className="h-3.5 w-3.5" />
+            </AvatarFallback>
+          </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48 bg-black/90 backdrop-blur-md border-gray-700">
