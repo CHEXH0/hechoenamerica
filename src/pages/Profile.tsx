@@ -66,6 +66,11 @@ const Profile = () => {
       toast({ title: "Invalid file", description: "Please select a .jpg or .png image.", variant: "destructive" });
       return;
     }
+    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB Supabase free tier limit
+    if (file.size > MAX_FILE_SIZE) {
+      toast({ title: "File too large", description: "Maximum file size is 50MB.", variant: "destructive" });
+      return;
+    }
     setSelectedFile(file);
     setCropperOpen(true);
     e.target.value = "";
