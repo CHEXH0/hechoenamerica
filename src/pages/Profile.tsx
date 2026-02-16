@@ -27,6 +27,10 @@ const Profile = () => {
   const [sendingResetEmail, setSendingResetEmail] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletionEmailSent, setDeletionEmailSent] = useState(false);
+  const [deletionCode, setDeletionCode] = useState("");
+  const [generatedCode, setGeneratedCode] = useState("");
+  const [sendingDeletionEmail, setSendingDeletionEmail] = useState(false);
 
   // Update form when profile loads
   useEffect(() => {
@@ -85,6 +89,41 @@ const Profile = () => {
     }
   };
 
+
+  const handleSendDeletionVerification = async () => {
+    if (!user?.email) return;
+    setSendingDeletionEmail(true);
+    try {
+      // Generate a 6-digit code
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      setGeneratedCode(code);
+
+      await supabase.functions.invoke("send-contact-email", {
+        body: {
+          name: user.email,
+          email: user.email,
+          subject: "Account Deletion Verification",
+          message: `Your account deletion verification code is: ${code}\n\nIf you did not request this, please ignore this email.`,
+        },
+      });
+
+      setDeletionEmailSent(true);
+      toast({
+        title: "Verification email sent",
+        description: "Please check your email for the 6-digit verification code.",
+      });
+    } catch (error) {
+      console.error("Error sending deletion verification:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send verification email. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingDeletionEmail(false);
+    }
+  };
+
   const handleDeleteAccount = () => {
     if (deleteConfirmation !== "DELETE") {
       toast({
@@ -94,9 +133,19 @@ const Profile = () => {
       });
       return;
     }
+    if (!deletionEmailSent || deletionCode !== generatedCode) {
+      toast({
+        title: "Verification required",
+        description: "Please enter the correct verification code from your email.",
+        variant: "destructive",
+      });
+      return;
+    }
     deleteAccount.mutate();
     setDeleteDialogOpen(false);
     setDeleteConfirmation("");
+    setDeletionCode("");
+    setDeletionEmailSent(false);
   };
 
   return (
@@ -265,18 +314,48 @@ const Profile = () => {
                             <li>Song requests and project files</li>
                             <li>Any uploaded files in storage</li>
                           </ul>
-                          <div className="pt-4">
-                            <Label htmlFor="deleteConfirm" className="text-foreground font-medium">
-                              Type <span className="font-bold text-red-600">DELETE</span> to confirm:
-                            </Label>
-                            <Input
-                              id="deleteConfirm"
-                              value={deleteConfirmation}
-                              onChange={(e) => setDeleteConfirmation(e.target.value)}
-                              placeholder="Type DELETE here"
-                              className="mt-2"
-                              autoComplete="off"
-                            />
+                          <div className="pt-4 space-y-4">
+                            {!deletionEmailSent ? (
+                              <Button
+                                onClick={handleSendDeletionVerification}
+                                disabled={sendingDeletionEmail}
+                                variant="outline"
+                                className="w-full"
+                              >
+                                <Mail className="mr-2 h-4 w-4" />
+                                {sendingDeletionEmail ? "Sending..." : "Send Verification Code to Email"}
+                              </Button>
+                            ) : (
+                              <>
+                                <div>
+                                  <Label htmlFor="deletionCode" className="text-foreground font-medium">
+                                    Enter the 6-digit code sent to your email:
+                                  </Label>
+                                  <Input
+                                    id="deletionCode"
+                                    value={deletionCode}
+                                    onChange={(e) => setDeletionCode(e.target.value)}
+                                    placeholder="Enter 6-digit code"
+                                    className="mt-2"
+                                    maxLength={6}
+                                    autoComplete="off"
+                                  />
+                                </div>
+                                <div>
+                                  <Label htmlFor="deleteConfirm" className="text-foreground font-medium">
+                                    Type <span className="font-bold text-red-600">DELETE</span> to confirm:
+                                  </Label>
+                                  <Input
+                                    id="deleteConfirm"
+                                    value={deleteConfirmation}
+                                    onChange={(e) => setDeleteConfirmation(e.target.value)}
+                                    placeholder="Type DELETE here"
+                                    className="mt-2"
+                                    autoComplete="off"
+                                  />
+                                </div>
+                              </>
+                            )}
                           </div>
                         </AlertDialogDescription>
                       </AlertDialogHeader>
@@ -284,7 +363,7 @@ const Profile = () => {
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <Button
                           onClick={handleDeleteAccount}
-                          disabled={deleteConfirmation !== "DELETE" || deleteAccount.isPending}
+                          disabled={!deletionEmailSent || deleteConfirmation !== "DELETE" || deletionCode !== generatedCode || deleteAccount.isPending}
                           variant="destructive"
                         >
                           {deleteAccount.isPending ? "Deleting..." : "Delete Account"}

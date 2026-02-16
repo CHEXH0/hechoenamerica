@@ -10,8 +10,10 @@ import {
   Send, 
   CheckCircle,
   AlertCircle,
-  FileCheck
+  FileCheck,
+  Video
 } from "lucide-react";
+import { RevisionChat } from "@/components/RevisionChat";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -24,6 +26,8 @@ interface Revision {
   delivered_at: string | null;
   drive_link: string | null;
   client_notes: string | null;
+  wants_meeting: boolean | null;
+  meeting_link: string | null;
 }
 
 interface RevisionDeliveryFormProps {
@@ -43,6 +47,7 @@ export const RevisionDeliveryForm = ({
   const [loading, setLoading] = useState(true);
   const [deliveringRevision, setDeliveringRevision] = useState<string | null>(null);
   const [revisionLinks, setRevisionLinks] = useState<Record<string, string>>({});
+  const [meetingLinks, setMeetingLinks] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -103,12 +108,15 @@ export const RevisionDeliveryForm = ({
       const revision = revisions.find(r => r.id === revisionId);
       if (!revision) throw new Error("Revision not found");
 
+      const meetLink = meetingLinks[revisionId]?.trim() || null;
+
       const { error } = await supabase
         .from("song_revisions")
         .update({
           status: "delivered",
           delivered_at: new Date().toISOString(),
           drive_link: link.trim(),
+          meeting_link: meetLink,
         })
         .eq("id", revisionId);
 
@@ -219,6 +227,13 @@ export const RevisionDeliveryForm = ({
                 </div>
               )}
 
+              {revision.wants_meeting && (
+                <div className="mb-3 p-2 bg-primary/5 border border-primary/20 rounded flex items-center gap-2 text-sm">
+                  <Video className="h-4 w-4 text-primary" />
+                  <span className="font-medium">Client requested a Google Meet</span>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label className="text-sm">Download Link</Label>
                 <div className="relative">
@@ -236,6 +251,25 @@ export const RevisionDeliveryForm = ({
                   />
                 </div>
               </div>
+
+              {revision.wants_meeting && (
+                <div className="space-y-2 mt-2">
+                  <Label className="text-sm flex items-center gap-1">
+                    <Video className="h-3 w-3" />
+                    Google Meet Link (optional)
+                  </Label>
+                  <Input
+                    type="url"
+                    placeholder="https://meet.google.com/..."
+                    value={meetingLinks[revision.id] || ""}
+                    onChange={(e) => setMeetingLinks(prev => ({
+                      ...prev,
+                      [revision.id]: e.target.value
+                    }))}
+                    disabled={deliveringRevision === revision.id}
+                  />
+                </div>
+              )}
 
               <Button
                 className="w-full mt-3"
@@ -255,6 +289,9 @@ export const RevisionDeliveryForm = ({
                   </>
                 )}
               </Button>
+
+              {/* Chat with client */}
+              <RevisionChat revisionId={revision.id} isProducerView={true} />
             </Card>
           ))}
         </div>

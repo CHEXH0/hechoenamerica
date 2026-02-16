@@ -30,8 +30,26 @@ serve(async (req) => {
     );
 
     const { session_id } = await req.json();
-    if (!session_id) {
-      throw new Error("Session ID is required");
+    if (!session_id || typeof session_id !== 'string' || session_id.length > 500) {
+      throw new Error("Invalid session ID");
+    }
+
+    // Idempotency check: prevent replay attacks
+    const { data: existingPurchase } = await supabaseClient
+      .from('purchases')
+      .select('id')
+      .eq('stripe_session_id', session_id)
+      .maybeSingle();
+
+    if (existingPurchase) {
+      logStep("Session already processed, returning success", { sessionId: session_id });
+      return new Response(JSON.stringify({ 
+        success: true, 
+        message: 'Payment already verified' 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
     }
 
     logStep("Retrieving checkout session", { sessionId: session_id });
@@ -70,7 +88,7 @@ serve(async (req) => {
       throw new Error(`Failed to fetch products: ${productsError.message}`);
     }
 
-    // Create purchase records
+    // Create purchase records with stripe_session_id for idempotency
     const purchaseRecords = items.map((item: any) => {
       const product = products?.find(p => p.id === item.product_id);
       if (!product) {
@@ -84,7 +102,8 @@ serve(async (req) => {
         product_type: product.type,
         product_category: product.category,
         price: product.price,
-        purchase_date: new Date().toISOString()
+        purchase_date: new Date().toISOString(),
+        stripe_session_id: session_id,
       };
     });
 
@@ -93,6 +112,17 @@ serve(async (req) => {
       .insert(purchaseRecords);
 
     if (insertError) {
+      // Handle unique constraint violation (concurrent replay)
+      if (insertError.code === '23505') {
+        logStep("Concurrent replay detected, returning success");
+        return new Response(JSON.stringify({ 
+          success: true, 
+          message: 'Payment already verified' 
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
       throw new Error(`Failed to create purchase records: ${insertError.message}`);
     }
 

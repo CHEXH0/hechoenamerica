@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@4.0.0";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Resend } from "https://esm.sh/resend@4.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -49,6 +49,18 @@ const statusInfo: Record<string, { emoji: string; title: string; description: st
     title: 'Revision in Progress',
     description: 'We\'re working on the requested changes to your project.',
     color: '#F59E0B'
+  },
+  'refunded': {
+    emoji: '💸',
+    title: 'Refund Processed',
+    description: 'Your payment has been refunded. The funds will appear in your account within 5-10 business days.',
+    color: '#EF4444'
+  },
+  'cancellation_requested': {
+    emoji: '📋',
+    title: 'Cancellation Under Review',
+    description: 'We\'ve received your cancellation request and are reviewing it. We\'ll get back to you shortly.',
+    color: '#F59E0B'
   }
 };
 
@@ -80,7 +92,7 @@ serve(async (req) => {
     console.log('Sending customer status notification:', { requestId, oldStatus, newStatus, driveLink });
 
     // Only send notifications for meaningful status changes
-    const notifiableStatuses = ['accepted', 'in_progress', 'review', 'completed', 'revision'];
+    const notifiableStatuses = ['accepted', 'in_progress', 'review', 'completed', 'revision', 'refunded', 'cancellation_requested'];
     if (!notifiableStatuses.includes(newStatus)) {
       console.log('Status not notifiable, skipping:', newStatus);
       return new Response(

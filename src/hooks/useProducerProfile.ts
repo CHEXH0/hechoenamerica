@@ -38,6 +38,9 @@ export type ProducerProfileUpdate = {
   youtube_channel_url?: string | null;
   instagram_url?: string | null;
   website_url?: string | null;
+  showcase_video_1?: string | null;
+  showcase_video_2?: string | null;
+  showcase_video_3?: string | null;
 };
 
 export const useUpdateProducerProfile = () => {
@@ -49,6 +52,17 @@ export const useUpdateProducerProfile = () => {
     mutationFn: async (updates: ProducerProfileUpdate) => {
       if (!user?.email) throw new Error("Not authenticated");
 
+      // Check if discord_user_id is being changed
+      const { data: currentProfile } = await supabase
+        .from("producers")
+        .select("discord_user_id, name")
+        .eq("email", user.email)
+        .single();
+
+      const discordIdChanged =
+        updates.discord_user_id !== undefined &&
+        updates.discord_user_id !== (currentProfile?.discord_user_id || null);
+
       const { data, error } = await supabase
         .from("producers")
         .update(updates)
@@ -57,6 +71,23 @@ export const useUpdateProducerProfile = () => {
         .single();
 
       if (error) throw error;
+
+      // Send email notification if Discord User ID was updated
+      if (discordIdChanged) {
+        try {
+          await supabase.functions.invoke("send-contact-email", {
+            body: {
+              name: currentProfile?.name || user.email,
+              email: "team@hechoenamericastudio.com",
+              subject: "Producer Discord ID Updated",
+              message: `Producer "${currentProfile?.name || user.email}" has updated their Discord User ID.\n\nNew Discord User ID: ${updates.discord_user_id || "(removed)"}\nPrevious Discord User ID: ${currentProfile?.discord_user_id || "(none)"}\n\nPlease update their Discord roles accordingly.`,
+            },
+          });
+        } catch (emailError) {
+          console.error("Failed to send Discord ID update email:", emailError);
+        }
+      }
+
       return data;
     },
     onSuccess: () => {
@@ -104,6 +135,43 @@ export const useUploadProducerImage = () => {
       toast({
         title: "Upload failed",
         description: error instanceof Error ? error.message : "Failed to upload image.",
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+export const useUploadProducerVideo = () => {
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (file: File) => {
+      // Validate file size (50MB max)
+      if (file.size > 50 * 1024 * 1024) {
+        throw new Error("Video must be under 50MB");
+      }
+
+      const fileExt = file.name.split(".").pop();
+      const fileName = `producer-video-${Date.now()}.${fileExt}`;
+      const filePath = `producers/videos/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(filePath);
+
+      return urlData.publicUrl;
+    },
+    onError: (error) => {
+      console.error("Error uploading video:", error);
+      toast({
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : "Failed to upload video.",
         variant: "destructive",
       });
     },

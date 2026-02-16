@@ -81,6 +81,16 @@ serve(async (req) => {
     
     console.log('Processing Discord notification:', { requestId, notificationType, oldStatus, newStatus, driveLink, useBotApi: !!botToken });
 
+    // Only allow project-acceptance-related notifications to Discord
+    const allowedTypes = ['new_request', 'producer_changed'];
+    if (!allowedTypes.includes(notificationType)) {
+      console.log(`Skipping Discord notification for type: ${notificationType} (only accept-related notifications allowed)`);
+      return new Response(
+        JSON.stringify({ success: true, message: `Skipped Discord notification for type: ${notificationType}` }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      );
+    }
+
     // Fetch the full request details from the database
     const { data: songRequest, error: fetchError } = await supabase
       .from('song_requests')
@@ -93,22 +103,14 @@ serve(async (req) => {
       throw fetchError;
     }
 
-    let embed;
     let content;
+    const embed = createNewRequestEmbed(songRequest, requestId);
+    const genreKey = songRequest.genre_category?.toLowerCase() || 'other';
+    const roleMention = genreRoleMap[genreKey] || genreRoleMap['other'];
 
-    if (notificationType === 'file_delivered') {
-      embed = createFileDeliveredEmbed(songRequest, requestId, driveLink);
-      content = `📦 **Files Delivered!** Project has been completed and files uploaded to Google Drive.`;
-    } else if (notificationType === 'status_change') {
-      embed = createStatusChangeEmbed(songRequest, oldStatus, newStatus, requestId);
-      content = `📊 Project status updated: **${oldStatus}** → **${newStatus}**`;
-    } else if (notificationType === 'producer_assigned') {
-      embed = createProducerAssignedEmbed(songRequest, requestId);
-      content = `🎧 Producer has been assigned to a project!`;
+    if (notificationType === 'producer_changed') {
+      content = `🔄 **@${roleMention}** - Producer changed! ${songRequest.tier.toUpperCase()} project needs a new producer!`;
     } else {
-      embed = createNewRequestEmbed(songRequest, requestId);
-      const genreKey = songRequest.genre_category?.toLowerCase() || 'other';
-      const roleMention = genreRoleMap[genreKey] || genreRoleMap['other'];
       content = `🚨 **@${roleMention}** - New ${songRequest.tier.toUpperCase()} song request needs a producer!`;
     }
 
@@ -118,9 +120,9 @@ serve(async (req) => {
       embeds: [embed],
     };
 
-    // Add Accept/Decline buttons for new requests and producer assignments
+    // Add Accept buttons for new requests and producer changes
     // Note: Interactive components only work with Bot API, not webhooks
-    if (botToken && (notificationType === 'new_request' || notificationType === 'producer_assigned')) {
+    if (botToken) {
       messagePayload.components = [
         {
           type: 1, // Action Row

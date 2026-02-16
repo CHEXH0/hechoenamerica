@@ -1,19 +1,24 @@
 import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, UserX } from "lucide-react";
+import { ArrowLeft, UserX, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import ProducerApplicationForm from "@/components/ProducerApplicationForm";
 import { useHiringStatus } from "@/hooks/useHiringStatus";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ProducerApplication = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
   const { data: hiringStatus} = useHiringStatus();
+  const { user } = useAuth();
+  const { data: roleData } = useUserRole();
   
   const isHiring = hiringStatus?.enabled ?? false;
+  const isProducer = roleData?.isProducer ?? false;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-pink-950 py-12 px-4">
@@ -41,14 +46,53 @@ const ProducerApplication = () => {
           className="text-center mb-12"
         >
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-pink-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
-            Join Our Producer Network
+            {isProducer ? "Welcome, Producer!" : "Join Our Producer Network"}
           </h1>
           <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-            Become part of Hecho En América's talented team of music producers
+            {isProducer
+              ? "You're already part of the team"
+              : "Become part of Hecho En América's talented team of music producers"}
           </p>
         </motion.div>
 
-        {isHiring ? (
+        {isProducer ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Card className="bg-gradient-to-br from-purple-900/50 via-pink-900/30 to-red-900/50 border-purple-500/40 backdrop-blur-md">
+              <CardContent className="py-16 text-center">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 10 }}
+                  className="mb-6"
+                >
+                  <div className="w-24 h-24 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-full flex items-center justify-center mx-auto border border-pink-500/30">
+                    <Heart className="h-12 w-12 text-pink-400" />
+                  </div>
+                </motion.div>
+                
+                <h2 className="text-3xl font-bold text-white mb-4">
+                  Thank You for Being Part of the Team! 🎶
+                </h2>
+                <p className="text-gray-300 text-lg max-w-md mx-auto mb-8">
+                  We appreciate everything you do as a Hecho En América producer. Head to your dashboard to manage your projects.
+                </p>
+                
+                <Link to="/producer-profile">
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white"
+                  >
+                    Go to Dashboard
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ) : isHiring ? (
           <ProducerApplicationForm />
         ) : (
           <motion.div

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Music, Clock, CheckCircle, Loader2, Calendar, User, Wifi, AlertTriangle, RefreshCcw, Headphones, Users, Mail, XCircle, MessageSquare } from "lucide-react";
+import { ArrowLeft, Music, Clock, CheckCircle, Loader2, Calendar, User, Wifi, AlertTriangle, RefreshCcw, Headphones, Users, Mail, XCircle, MessageSquare, UserMinus } from "lucide-react";
+import { ProducerChecklist } from "@/components/ProducerChecklist";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -39,11 +40,20 @@ interface SongRequest {
   number_of_revisions: number | null;
   wants_mixing: boolean | null;
   wants_mastering: boolean | null;
+  wants_recorded_stems: boolean | null;
+  wants_analog: boolean | null;
   user_email: string;
   acceptance_deadline: string | null;
   refunded_at: string | null;
   file_urls: string[] | null;
+  producer_checklist: Record<string, boolean> | null;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const castChecklist = (val: any): Record<string, boolean> | null => {
+  if (val && typeof val === 'object' && !Array.isArray(val)) return val as Record<string, boolean>;
+  return null;
+};
 
 interface Purchase {
   id: string;
@@ -242,6 +252,7 @@ const MyProjects = () => {
   const [resendingFilesId, setResendingFilesId] = useState<string | null>(null);
   const [cancellingProjectId, setCancellingProjectId] = useState<string | null>(null);
   const [requestingCancellationId, setRequestingCancellationId] = useState<string | null>(null);
+  const [changingProducerId, setChangingProducerId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const isProducer = userRole?.isProducer || false;
@@ -339,12 +350,22 @@ const MyProjects = () => {
 
       if (error) throw error;
 
+      try {
+        await supabase.functions.invoke('notify-cancellation-request', {
+          body: {
+            requestId: projectId,
+            reason: "Customer requested cancellation via My Projects page"
+          }
+        });
+      } catch (notifyError) {
+        console.error("Failed to send cancellation notifications:", notifyError);
+      }
+
       toast({
         title: "Cancellation Requested",
-        description: "Your cancellation request has been submitted for review. We'll get back to you soon.",
+        description: "Your cancellation request has been submitted for review. You'll receive a confirmation email shortly.",
       });
 
-      // Update local state
       setMyRequests((prev) =>
         prev.map((p) =>
           p.id === projectId ? { ...p, status: "cancellation_requested" } : p
@@ -359,6 +380,36 @@ const MyProjects = () => {
       });
     } finally {
       setRequestingCancellationId(null);
+    }
+  };
+
+  const handleClientChangeProducer = async (projectId: string) => {
+    setChangingProducerId(projectId);
+    try {
+      const { data, error } = await supabase.functions.invoke("change-producer", {
+        body: {
+          requestId: projectId,
+          reason: "Client requested producer change",
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Producer Change Requested",
+        description: data.message || "Your project will be reassigned to a new producer. A $25 change fee has been applied.",
+      });
+
+      fetchProjects();
+    } catch (error) {
+      console.error("Error changing producer:", error);
+      toast({
+        title: "Error",
+        description: "Failed to change producer. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setChangingProducerId(null);
     }
   };
 
@@ -502,7 +553,7 @@ const MyProjects = () => {
         .order("created_at", { ascending: false });
 
       if (requestsError) throw requestsError;
-      setMyRequests(requestsData || []);
+      setMyRequests((requestsData || []).map(r => ({ ...r, producer_checklist: castChecklist(r.producer_checklist) })) as SongRequest[]);
 
       // If user is a producer, fetch their assigned projects
       if (isProducer) {
@@ -521,7 +572,7 @@ const MyProjects = () => {
             .order("created_at", { ascending: false });
 
           if (producerError) throw producerError;
-          setProducerProjects(producerProjectsData || []);
+          setProducerProjects((producerProjectsData || []).map(r => ({ ...r, producer_checklist: castChecklist(r.producer_checklist) })) as SongRequest[]);
         }
       }
 
@@ -662,6 +713,12 @@ const MyProjects = () => {
 
           {/* Options */}
           <div className="flex flex-wrap gap-2">
+            {project.wants_recorded_stems && (
+              <Badge variant="secondary">Stems</Badge>
+            )}
+            {project.wants_analog && (
+              <Badge variant="secondary">Analog</Badge>
+            )}
             {project.wants_mixing && (
               <Badge variant="secondary">Mixing</Badge>
             )}
@@ -674,6 +731,20 @@ const MyProjects = () => {
               </Badge>
             )}
           </div>
+
+          {/* Producer Checklist - shows for producer view on active projects */}
+          {isProducerView && ["in_progress", "review", "completed"].includes(project.status) && (
+            <ProducerChecklist
+              projectId={project.id}
+              wantsRecordedStems={!!project.wants_recorded_stems}
+              wantsAnalog={!!project.wants_analog}
+              wantsMixing={!!project.wants_mixing}
+              wantsMastering={!!project.wants_mastering}
+              numberOfRevisions={project.number_of_revisions || 0}
+              currentChecklist={project.producer_checklist || {}}
+              onChecklistUpdate={fetchProjects}
+            />
+          )}
 
           {/* Revision Tracker for Client View */}
           {!isProducerView && project.number_of_revisions && project.number_of_revisions > 0 && 
@@ -868,40 +939,81 @@ const MyProjects = () => {
 
                   {/* Request cancellation for post-acceptance projects (needs review) */}
                   {["accepted", "in_progress", "review"].includes(project.status) && (
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="mt-2 text-amber-600 hover:text-amber-600 hover:bg-amber-500/10 border-amber-500/30"
-                          disabled={requestingCancellationId === project.id}
-                        >
-                          {requestingCancellationId === project.id ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          ) : (
-                            <MessageSquare className="mr-2 h-4 w-4" />
-                          )}
-                          Request Cancellation
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Request Cancellation</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Since a producer has already started working on your project, your cancellation request will be reviewed by our team. Refunds are determined on a case-by-case basis depending on the work completed.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Keep Project</AlertDialogCancel>
-                          <AlertDialogAction 
-                            onClick={() => handleRequestCancellation(project.id)}
-                            className="bg-amber-600 text-white hover:bg-amber-700"
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {/* Change Producer */}
+                      {project.assigned_producer_id && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="text-blue-600 hover:text-blue-600 hover:bg-blue-500/10 border-blue-500/30"
+                              disabled={changingProducerId === project.id}
+                            >
+                              {changingProducerId === project.id ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <UserMinus className="mr-2 h-4 w-4" />
+                              )}
+                              Change Producer
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Change Producer?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Your project will be reassigned to a different producer. A <strong>$25 change fee</strong> will be charged to your payment method. The current producer will be compensated for any work completed.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Keep Current Producer</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => handleClientChangeProducer(project.id)}
+                                className="bg-blue-600 text-white hover:bg-blue-700"
+                              >
+                                Change Producer ($25 fee)
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+
+                      {/* Request Cancellation */}
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="text-amber-600 hover:text-amber-600 hover:bg-amber-500/10 border-amber-500/30"
+                            disabled={requestingCancellationId === project.id}
                           >
-                            Submit Request
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                            {requestingCancellationId === project.id ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <MessageSquare className="mr-2 h-4 w-4" />
+                            )}
+                            Request Cancellation
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Request Cancellation</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Since a producer has already started working on your project, your cancellation request will be reviewed by our team. Refunds are determined on a case-by-case basis depending on the work completed.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Keep Project</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => handleRequestCancellation(project.id)}
+                              className="bg-amber-600 text-white hover:bg-amber-700"
+                            >
+                              Submit Request
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   )}
 
                   {/* Cancellation requested status message */}
