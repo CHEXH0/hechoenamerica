@@ -74,8 +74,8 @@ const ProducerApplication = () => {
                   </div>
                 </motion.div>
                 
-                <h2 className="text-3xl font-bold text-white mb-4">
-                  Thank You for Being Part of the Team! 🎶
+                <h2 className="text-3xl font-bold text-black mb-4">
+                  Thank You for Being Part of the Team!
                 </h2>
                 <p className="text-gray-300 text-lg max-w-md mx-auto mb-8">
                   We appreciate everything you do as a Hecho En América producer. Head to your dashboard to manage your projects.
