@@ -116,3 +116,9 @@ verify_jwt = true
 
 [functions.change-producer]
 verify_jwt = true
+
+[functions.send-hea-contract]
+verify_jwt = true
+
+[functions.sign-hea-contract]
+verify_jwt = false

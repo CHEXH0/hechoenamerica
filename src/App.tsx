@@ -25,6 +25,7 @@ import TermsOfService from "./pages/TermsOfService";
 import ProducerApplication from "./pages/ProducerApplication";
 import ResetPassword from "./pages/ResetPassword";
 import ProducerProfile from "./pages/ProducerProfile";
+import SignContract from "./pages/SignContract";
 import CookieConsent from "./components/CookieConsent";
 
 const queryClient = new QueryClient();
@@ -59,6 +60,7 @@ const App = () => (
               <Route path="/producer-application" element={<ProducerApplication />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/producer-profile" element={<ProducerProfile />} />
+              <Route path="/sign-contract" element={<SignContract />} />
             </Routes>
             <CookieConsent />
           </BrowserRouter>

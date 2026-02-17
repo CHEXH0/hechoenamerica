@@ -9,6 +9,7 @@ import { StripeConnectOnboarding } from "@/components/StripeConnectOnboarding";
 import { StorageManagement } from "@/components/StorageManagement";
 import { ProducerApplicationsAdmin } from "@/components/ProducerApplicationsAdmin";
 import { CancellationRequestsAdmin } from "@/components/CancellationRequestsAdmin";
+import { HEAProjectsAdmin } from "@/components/HEAProjectsAdmin";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -445,6 +446,9 @@ const Admin = () => {
 
           {isAdmin && (
             <>
+              {/* HEA Projects - Direct client management */}
+              <HEAProjectsAdmin />
+
               {/* Cancellation Requests - Show at top for visibility */}
               <CancellationRequestsAdmin />
 
