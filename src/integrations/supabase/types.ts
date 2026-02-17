@@ -101,6 +101,81 @@ export type Database = {
         }
         Relationships: []
       }
+      hea_projects: {
+        Row: {
+          address: string | null
+          assigned_producer_id: string | null
+          contract_signature_name: string | null
+          contract_signed: boolean
+          contract_signed_at: string | null
+          contract_token: string | null
+          created_at: string
+          details: string | null
+          email: string
+          full_name: string
+          id: string
+          number_of_revisions: number
+          price: string
+          receipt_sent: boolean
+          status: string
+          terms: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          assigned_producer_id?: string | null
+          contract_signature_name?: string | null
+          contract_signed?: boolean
+          contract_signed_at?: string | null
+          contract_token?: string | null
+          created_at?: string
+          details?: string | null
+          email: string
+          full_name: string
+          id?: string
+          number_of_revisions?: number
+          price?: string
+          receipt_sent?: boolean
+          status?: string
+          terms?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          assigned_producer_id?: string | null
+          contract_signature_name?: string | null
+          contract_signed?: boolean
+          contract_signed_at?: string | null
+          contract_token?: string | null
+          created_at?: string
+          details?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          number_of_revisions?: number
+          price?: string
+          receipt_sent?: boolean
+          status?: string
+          terms?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hea_projects_assigned_producer_id_fkey"
+            columns: ["assigned_producer_id"]
+            isOneToOne: false
+            referencedRelation: "producer_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hea_projects_assigned_producer_id_fkey"
+            columns: ["assigned_producer_id"]
+            isOneToOne: false
+            referencedRelation: "producers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platforms: {
         Row: {
           artist_id: string
