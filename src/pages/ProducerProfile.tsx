@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import PageLoader from "@/components/PageLoader";
 import { useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, 
@@ -108,14 +109,7 @@ const ProducerProfile = () => {
   const isLoading = authLoading || roleLoading || profileLoading;
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20 flex items-center justify-center">
-        <div className="space-y-4 w-full max-w-2xl px-4">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-64 w-full" />
-        </div>
-      </div>
-    );
+    return <PageLoader message="Loading producer profile..." />;
   }
 
   if (!user) {
