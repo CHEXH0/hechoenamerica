@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import PageLoader from "@/components/PageLoader";
 import { useNavigate } from "react-router-dom";
 import { Lock, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
@@ -92,11 +93,7 @@ const ResetPassword = () => {
   };
 
   if (checkingSession) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20 flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
-      </div>
-    );
+    return <PageLoader message="Loading..." />;
   }
 
   return (
