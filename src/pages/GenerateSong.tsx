@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Plus, ChevronDown, HardDrive, Link, X, Loader2, Info, Check, Circle } from "lucide-react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Progress } from "@/components/ui/progress";
 
 
 
@@ -70,6 +71,7 @@ const GenerateSong = () => {
   const [selectedGenre, setSelectedGenre] = useState("");
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [aiProgress, setAiProgress] = useState("");
+  const [aiProgressPercent, setAiProgressPercent] = useState(0);
   const [generatedAudioUrl, setGeneratedAudioUrl] = useState<string | null>(null);
   const [aiGenerationsRemaining, setAiGenerationsRemaining] = useState<number | null>(null);
   const [nextResetTime, setNextResetTime] = useState<Date | null>(null);
@@ -276,13 +278,22 @@ const GenerateSong = () => {
     }
 
     setIsGeneratingAI(true);
+    setAiProgressPercent(0);
     setAiProgress("Connecting to Google Lyria 2...");
+
+    // Simulate progress while waiting for the API
+    const progressInterval = setInterval(() => {
+      setAiProgressPercent(prev => {
+        if (prev >= 90) return 90;
+        return prev + Math.random() * 8;
+      });
+    }, 600);
 
     try {
       const genreText = selectedGenre ? genreCategories.find(g => g.value === selectedGenre)?.label || selectedGenre : "";
       const fullPrompt = genreText ? `${genreText} style: ${idea}` : idea;
       
-      setAiProgress("Generating your AI music... This may take a moment.");
+      setAiProgress("Generating your AI music...");
       
       const { data, error } = await supabase.functions.invoke('generate-music', {
         body: { prompt: fullPrompt }
@@ -303,6 +314,7 @@ const GenerateSong = () => {
           });
           setAiProgress("");
           setIsGeneratingAI(false);
+          clearInterval(progressInterval);
           return;
         }
         throw new Error(data.error);
@@ -336,6 +348,7 @@ const GenerateSong = () => {
         const audioUrl = URL.createObjectURL(blob);
         
         setGeneratedAudioUrl(audioUrl);
+        setAiProgressPercent(100);
         setAiProgress("");
         toast({
           title: "🎵 Music Generated!",
@@ -353,6 +366,7 @@ const GenerateSong = () => {
         variant: "destructive"
       });
     } finally {
+      clearInterval(progressInterval);
       setIsGeneratingAI(false);
     }
   };
@@ -984,9 +998,10 @@ const GenerateSong = () => {
                 >
                   <div className="bg-white/20 rounded-lg p-4">
                     {isGeneratingAI && (
-                      <div className="flex items-center gap-3">
-                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-                        <span className="text-white font-medium">{aiProgress}</span>
+                      <div className="space-y-3">
+                        <span className="text-white font-medium text-sm">{aiProgress}</span>
+                        <Progress value={aiProgressPercent} className="h-3 bg-white/20 [&>div]:bg-gradient-to-r [&>div]:from-purple-400 [&>div]:to-pink-400" />
+                        <span className="text-white/60 text-xs">{Math.round(aiProgressPercent)}%</span>
                       </div>
                     )}
                     
