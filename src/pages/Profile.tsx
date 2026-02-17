@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import PageLoader from "@/components/PageLoader";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, User, Mail, Lock, Trash2, Save, Camera } from "lucide-react";
 import { motion } from "framer-motion";
@@ -48,7 +47,11 @@ const Profile = () => {
   }, [profile]);
 
   if (authLoading || isLoading) {
-    return <PageLoader message="Loading profile..." />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20 flex items-center justify-center">
+        <Skeleton className="h-8 w-48" />
+      </div>
+    );
   }
 
   if (!user) {

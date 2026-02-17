@@ -1,5 +1,4 @@
 import { useState } from "react";
-import PageLoader from "@/components/PageLoader";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Package, Calendar, DollarSign, Music, Mic, Candy, Download, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -39,7 +38,11 @@ const Purchases = () => {
   const deleteAllPurchases = useDeleteAllPurchases();
 
   if (authLoading) {
-    return <PageLoader message="Loading purchases..." />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20 flex items-center justify-center">
+        <Skeleton className="h-8 w-48" />
+      </div>
+    );
   }
 
   if (!user) {

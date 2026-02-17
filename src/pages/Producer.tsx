@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import PageLoader from "@/components/PageLoader";
 import { useParams, Link } from "react-router-dom";
 import ProducerHeader from "../components/ProducerHeader";
 import ProducerImage from "../components/ProducerImage";
@@ -19,7 +18,13 @@ const Producer = () => {
   }, []);
 
   if (isLoading) {
-    return <PageLoader message="Loading producer..." />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 text-white flex items-center justify-center">
+        <div className="text-center bg-black/30 backdrop-blur-lg p-8 rounded-3xl border border-purple-900/20">
+          <div className="animate-pulse">Loading producer...</div>
+        </div>
+      </div>
+    );
   }
 
   if (!producer) {

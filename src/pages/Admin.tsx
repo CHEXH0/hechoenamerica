@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import PageLoader from "@/components/PageLoader";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload, Users, User, Database, TrendingUp, DollarSign, FileText, HardDrive, UserPlus } from "lucide-react";
@@ -197,7 +196,11 @@ const Admin = () => {
   };
 
   if (authLoading || roleLoading) {
-    return <PageLoader message="Loading dashboard..." />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20 flex items-center justify-center">
+        <Skeleton className="h-8 w-48" />
+      </div>
+    );
   }
 
   if (!user) {

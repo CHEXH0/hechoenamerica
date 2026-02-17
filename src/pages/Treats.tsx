@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import PageLoader from "@/components/PageLoader";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft, FileAudio, Disc3, Candy, Play, Download, ShoppingCart, Bell, BellRing, RefreshCw, Plus, Users } from "lucide-react";
@@ -87,7 +86,21 @@ const Treats = () => {
 
   // Show loading state
   if (isLoading) {
-    return <PageLoader message="Loading treats..." />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-pink-950 flex items-center justify-center">
+        <motion.div
+          animate={{
+            rotate: 360
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="w-12 h-12 border-4 border-pink-500/30 border-t-pink-400 rounded-full"
+        />
+      </div>
+    );
   }
 
   // Show error state
