@@ -43,7 +43,7 @@ const tiers = [
 
 // Add-on pricing per tier (tier index: 0=free, 1=$25, 2=$125, 3=$250)
 const addOnPricing = {
-  stems: { prices: [0, 10, 25, 40], info: "We record individual instrument/vocal tracks (stems) so we can provide the best quality for your sound. Either as stems you can use later or for use of producer." },
+  stems: { prices: [0, 10, 25, 40], info: "We record individual instrument/vocal tracks (stems) so we can provide the best quality for your sound. Either as stems you can use later or for use of the producer's time." },
   analog: { prices: [0, 15, 35, 50], info: "Your track will be processed through real analog hardware (compressors, EQs, tape machines) for warmer, richer sound character." },
   mixing: { prices: [0, 20, 50, 75], info: "Professional mixing by our engineer: balancing levels, EQ, compression, effects, and spatial positioning for a polished sound." },
   mastering: { prices: [0, 15, 40, 60], info: "Final mastering to optimize loudness, clarity, and consistency across all playback systems. Industry-standard LUFS targeting." },
@@ -796,7 +796,7 @@ const GenerateSong = () => {
                     variant="ghost" 
                     className="w-full justify-between bg-white/10 hover:bg-white/20 text-white p-4 rounded-lg"
                   >
-                    <span className="text-lg font-semibold"> Production Settings</span>
+                    <span className="text-lg font-semibold"> Production Settings (Required)</span>
                     <ChevronDown className={`h-5 w-5 transition-transform ${isOptionsOpen ? 'rotate-180' : ''}`} />
                   </Button>
                 </CollapsibleTrigger>
