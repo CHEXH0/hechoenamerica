@@ -67,6 +67,7 @@ const GenerateSong = () => {
   const [wantsAnalog, setWantsAnalog] = useState(false);
   const [wantsMixing, setWantsMixing] = useState(false);
   const [wantsMastering, setWantsMastering] = useState(false);
+  const [wantsNoneOfAbove, setWantsNoneOfAbove] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState("");
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
@@ -383,6 +384,18 @@ const GenerateSong = () => {
       toast({
         title: "Missing information",
         description: "Please share your idea",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate production settings requirement
+    const hasAnyAddOn = wantsRecordedStems || wantsAnalog || wantsMixing || wantsMastering;
+    if (!hasAnyAddOn && !wantsNoneOfAbove) {
+      setIsOptionsOpen(true);
+      toast({
+        title: "Production Settings required",
+        description: "Please select your production preferences or choose 'None of the above'.",
         variant: "destructive"
       });
       return;
@@ -808,7 +821,7 @@ const GenerateSong = () => {
                       <Checkbox 
                         id="stems" 
                         checked={wantsRecordedStems}
-                        onCheckedChange={(checked) => setWantsRecordedStems(checked as boolean)}
+                        onCheckedChange={(checked) => { setWantsRecordedStems(checked as boolean); if (checked) setWantsNoneOfAbove(false); }}
                         className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
                       />
                       <label
@@ -836,7 +849,7 @@ const GenerateSong = () => {
                       <Checkbox 
                         id="analog" 
                         checked={wantsAnalog}
-                        onCheckedChange={(checked) => setWantsAnalog(checked as boolean)}
+                        onCheckedChange={(checked) => { setWantsAnalog(checked as boolean); if (checked) setWantsNoneOfAbove(false); }}
                         className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
                       />
                       <label
@@ -864,7 +877,7 @@ const GenerateSong = () => {
                       <Checkbox 
                         id="mixing" 
                         checked={wantsMixing}
-                        onCheckedChange={(checked) => setWantsMixing(checked as boolean)}
+                        onCheckedChange={(checked) => { setWantsMixing(checked as boolean); if (checked) setWantsNoneOfAbove(false); }}
                         className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
                       />
                       <label
@@ -892,7 +905,7 @@ const GenerateSong = () => {
                       <Checkbox 
                         id="mastering" 
                         checked={wantsMastering}
-                        onCheckedChange={(checked) => setWantsMastering(checked as boolean)}
+                        onCheckedChange={(checked) => { setWantsMastering(checked as boolean); if (checked) setWantsNoneOfAbove(false); }}
                         className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
                       />
                       <label
@@ -914,6 +927,53 @@ const GenerateSong = () => {
                       +${addOnPricing.mastering.prices[tierIndex]}
                     </span>
                   </div>
+
+                  <div className="border-t border-white/10 my-2" />
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Checkbox 
+                        id="noneOfAbove" 
+                        checked={wantsNoneOfAbove}
+                        onCheckedChange={(checked) => {
+                          const val = checked as boolean;
+                          setWantsNoneOfAbove(val);
+                          if (val) {
+                            setWantsRecordedStems(false);
+                            setWantsAnalog(false);
+                            setWantsMixing(false);
+                            setWantsMastering(false);
+                          }
+                        }}
+                        className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
+                      />
+                      <label
+                        htmlFor="noneOfAbove"
+                        className="text-white text-sm font-medium leading-none cursor-pointer"
+                      >
+                        None of the above
+                      </label>
+                      <HoverCard>
+                        <HoverCardTrigger asChild>
+                          <button type="button"><Info className="w-3.5 h-3.5 text-white/50 hover:text-white" /></button>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-72 text-sm">
+                          <p className="text-muted-foreground">
+                            By selecting this, you agree to receive a raw production only. Your deliverable will be an unprocessed track without professional mixing, mastering, or individually recorded stems. The final result may sound rough or unpolished compared to a fully produced track.
+                          </p>
+                        </HoverCardContent>
+                      </HoverCard>
+                    </div>
+                    <span className="text-white/50 text-sm font-medium">$0</span>
+                  </div>
+
+                  {wantsNoneOfAbove && (
+                    <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-yellow-200 text-xs leading-relaxed">
+                      <strong>What to expect:</strong> You will receive a raw, unprocessed production file. No mixing (level balancing, EQ, effects), no mastering (loudness optimization, final polish), and no individually recorded stems will be included. The track may not be ready for commercial release without additional post-production.
+                    </div>
+                  )}
+
+                  <div className="border-t border-white/10 my-2" />
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
