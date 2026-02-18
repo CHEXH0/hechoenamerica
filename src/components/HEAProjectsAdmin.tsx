@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Send, FileText, RefreshCw, Loader2, Check, Trash2 } from "lucide-react";
+import { Plus, Edit, Send, FileText, RefreshCw, Loader2, Check, Trash2, Download, Mail } from "lucide-react";
 
 interface HEAProject {
   id: string;
@@ -65,6 +65,7 @@ export const HEAProjectsAdmin = () => {
   const [editingProject, setEditingProject] = useState<HEAProject | null>(null);
   const [saving, setSaving] = useState(false);
   const [sendingContract, setSendingContract] = useState<string | null>(null);
+  const [sendingSignedContract, setSendingSignedContract] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Form state
@@ -198,6 +199,72 @@ export const HEAProjectsAdmin = () => {
     }
   };
 
+  const handleDownloadContract = (project: HEAProject) => {
+    const producerName = getProducerName(project.assigned_producer_id);
+    const signedDate = project.contract_signed_at
+      ? new Date(project.contract_signed_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+      : "";
+
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"/><title>HEA Contract - ${project.full_name}</title>
+<style>
+  body{font-family:Arial,Helvetica,sans-serif;margin:40px;color:#222;line-height:1.6}
+  h1{font-size:24px;margin-bottom:4px}h2{font-size:16px;margin-top:24px;border-bottom:1px solid #ccc;padding-bottom:4px}
+  table{width:100%;border-collapse:collapse;margin:12px 0}td{padding:6px 0;font-size:14px}
+  .label{color:#666;width:140px}.sig-box{border:1px solid #ccc;border-radius:8px;padding:16px;margin-top:24px;background:#f9f9f9}
+  .footer{margin-top:40px;font-size:12px;color:#888;text-align:center;border-top:1px solid #eee;padding-top:12px}
+  @media print{body{margin:20px}button{display:none!important}}
+</style></head><body>
+<h1>HECHO EN AMERICA</h1>
+<p style="color:#666;font-size:14px;">Music Production Contract & Receipt</p>
+<h2>Project Details</h2>
+<table>
+  <tr><td class="label">Client:</td><td>${project.full_name}</td></tr>
+  <tr><td class="label">Email:</td><td>${project.email}</td></tr>
+  ${project.address ? `<tr><td class="label">Address:</td><td>${project.address}</td></tr>` : ""}
+  <tr><td class="label">Producer:</td><td>${producerName}</td></tr>
+  <tr><td class="label">Revisions:</td><td>${project.number_of_revisions}</td></tr>
+</table>
+<h2>Receipt</h2>
+<table>
+  <tr style="border-bottom:1px solid #ddd"><td>Music Production Services</td><td style="text-align:right">$${project.price}</td></tr>
+  <tr><td><strong>Total</strong></td><td style="text-align:right"><strong>$${project.price}</strong></td></tr>
+</table>
+${project.details ? `<h2>Scope of Work</h2><p style="white-space:pre-wrap">${project.details}</p>` : ""}
+${project.terms ? `<h2>Terms & Conditions</h2><p style="white-space:pre-wrap;font-size:13px">${project.terms}</p>` : ""}
+<div class="sig-box">
+  <h2 style="border:none;margin-top:0">Signature</h2>
+  <p><strong>Signed by:</strong> ${project.contract_signature_name || "—"}</p>
+  <p><strong>Date:</strong> ${signedDate}</p>
+  <p style="color:green;font-weight:bold">✓ Contract Electronically Signed</p>
+</div>
+<div class="footer">© ${new Date().getFullYear()} Hecho En America Studio. All rights reserved. • team@hechoenamericastudio.com</div>
+</body></html>`;
+
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+      setTimeout(() => printWindow.print(), 500);
+    }
+  };
+
+  const handleSendSignedContract = async (project: HEAProject) => {
+    setSendingSignedContract(project.id);
+    try {
+      const { error } = await supabase.functions.invoke("send-hea-contract", {
+        body: { projectId: project.id, sendSigned: true },
+      });
+      if (error) throw error;
+      toast({ title: "Sent", description: `Signed contract emailed to ${project.email}` });
+    } catch (err: any) {
+      console.error("Error sending signed contract:", err);
+      toast({ title: "Error", description: "Failed to send signed contract", variant: "destructive" });
+    } finally {
+      setSendingSignedContract(null);
+    }
+  };
+
   const handleDelete = async (id: string) => {
     setDeletingId(id);
     const { error } = await supabase.from("hea_projects").delete().eq("id", id);
@@ -305,6 +372,31 @@ export const HEAProjectsAdmin = () => {
                           <Send className="h-4 w-4" />
                         )}
                       </Button>
+                      {project.contract_signed && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDownloadContract(project)}
+                            title="Download Signed Contract PDF"
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleSendSignedContract(project)}
+                            disabled={sendingSignedContract === project.id}
+                            title="Email Signed Contract"
+                          >
+                            {sendingSignedContract === project.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Mail className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"

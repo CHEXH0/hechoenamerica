@@ -29,7 +29,7 @@ serve(async (req) => {
     const isAdmin = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
     if (!isAdmin.data) throw new Error("Admin access required");
 
-    const { projectId } = await req.json();
+    const { projectId, sendSigned } = await req.json();
     if (!projectId) throw new Error("Missing projectId");
 
     // Fetch the project
@@ -58,6 +58,11 @@ serve(async (req) => {
     const escapeHtml = (str: string) =>
       str?.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") || "";
 
+    const isSigned = sendSigned && project.contract_signed;
+    const signedDate = project.contract_signed_at
+      ? new Date(project.contract_signed_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+      : "";
+
     // Contract + Receipt Email
     const html = `
 <!DOCTYPE html>
@@ -69,7 +74,7 @@ serve(async (req) => {
     <!-- Header -->
     <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:40px 30px;text-align:center;">
       <h1 style="color:#fff;margin:0;font-size:28px;letter-spacing:1px;">HECHO EN AMERICA</h1>
-      <p style="color:#888;margin:8px 0 0;font-size:14px;">Music Production Contract & Receipt</p>
+      <p style="color:#888;margin:8px 0 0;font-size:14px;">${isSigned ? "Signed Contract & Receipt" : "Music Production Contract & Receipt"}</p>
     </div>
 
     <!-- Content -->
@@ -78,7 +83,9 @@ serve(async (req) => {
         Hello <strong style="color:#fff;">${escapeHtml(project.full_name)}</strong>,
       </p>
       <p style="color:#aaa;font-size:14px;line-height:1.6;">
-        Thank you for choosing Hecho En America Studio. Below are the details of your project agreement.
+        ${isSigned
+          ? "Please find below your signed contract and receipt for your records."
+          : "Thank you for choosing Hecho En America Studio. Below are the details of your project agreement."}
       </p>
 
       <!-- Project Details -->
@@ -114,6 +121,16 @@ serve(async (req) => {
         <p style="color:#aaa;font-size:13px;line-height:1.6;white-space:pre-wrap;">${escapeHtml(project.terms)}</p>
       </div>` : ""}
 
+      ${isSigned ? `
+      <!-- Signature Block -->
+      <div style="background:#0d2818;border:1px solid #1a5c2e;border-radius:8px;padding:20px;margin:20px 0;">
+        <h2 style="color:#4ade80;font-size:18px;margin:0 0 12px;">✓ Contract Signed</h2>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr><td style="color:#888;padding:6px 0;font-size:14px;">Signed by:</td><td style="color:#fff;padding:6px 0;font-size:14px;font-weight:bold;">${escapeHtml(project.contract_signature_name || "")}</td></tr>
+          <tr><td style="color:#888;padding:6px 0;font-size:14px;">Date:</td><td style="color:#fff;padding:6px 0;font-size:14px;">${signedDate}</td></tr>
+        </table>
+      </div>
+      ` : `
       <!-- Sign CTA -->
       <div style="text-align:center;margin:30px 0;">
         <a href="${signUrl}" style="display:inline-block;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;text-decoration:none;padding:14px 40px;border-radius:8px;font-size:16px;font-weight:bold;">
@@ -121,6 +138,7 @@ serve(async (req) => {
         </a>
         <p style="color:#666;font-size:12px;margin-top:12px;">Click the button above to review and electronically sign your contract.</p>
       </div>
+      `}
     </div>
 
     <!-- Footer -->
@@ -132,21 +150,27 @@ serve(async (req) => {
 </body>
 </html>`;
 
+    const emailSubject = isSigned
+      ? `Signed Contract — ${project.full_name} | HEA`
+      : `Your HEA Project Contract — ${project.full_name}`;
+
     const emailResponse = await resend.emails.send({
       from: "Hecho En America <team@hechoenamericastudio.com>",
       to: [project.email],
       reply_to: "team@hechoenamericastudio.com",
-      subject: `Your HEA Project Contract — ${project.full_name}`,
+      subject: emailSubject,
       html,
     });
 
     console.log("Email sent:", emailResponse);
 
-    // Update project status
-    await supabase
-      .from("hea_projects")
-      .update({ status: "contract_sent", receipt_sent: true })
-      .eq("id", projectId);
+    // Only update status if sending unsigned contract
+    if (!isSigned) {
+      await supabase
+        .from("hea_projects")
+        .update({ status: "contract_sent", receipt_sent: true })
+        .eq("id", projectId);
+    }
 
     return new Response(
       JSON.stringify({ success: true }),
