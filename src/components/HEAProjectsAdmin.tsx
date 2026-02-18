@@ -103,8 +103,18 @@ export const HEAProjectsAdmin = () => {
   };
 
   const fetchProducers = async () => {
-    const { data } = await supabase.from("producers").select("id, name, email");
-    if (data) setProducers(data);
+    // Only fetch producers who are admins
+    const { data: adminIds } = await supabase.rpc("get_admin_producer_ids");
+    if (adminIds && adminIds.length > 0) {
+      const ids = adminIds.map((r: any) => r);
+      const { data } = await supabase
+        .from("producers")
+        .select("id, name, email")
+        .in("id", ids);
+      if (data) setProducers(data);
+    } else {
+      setProducers([]);
+    }
   };
 
   const openNewProject = () => {
