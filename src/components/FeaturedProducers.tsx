@@ -5,11 +5,13 @@ import { useNavigate } from "react-router-dom";
 import { useProducers } from "@/hooks/useProducers";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSwipeScroll } from "@/hooks/useSwipeScroll";
+import { useAuth } from "@/contexts/AuthContext";
 
 const FeaturedProducers = () => {
   const navigate = useNavigate();
   const { data: producers = [], isLoading } = useProducers();
   const isMobile = useIsMobile();
+  const { user } = useAuth();
   
   const [scrollDirection, setScrollDirection] = useState<'left' | 'right' | 'none'>('none');
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -110,14 +112,30 @@ const FeaturedProducers = () => {
   return (
     <section id="featured-producers" className="py-20 bg-black overflow-hidden">
       <div className="container mx-auto px-4 mb-12">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-3xl md:text-4xl font-bold text-center text-white"
+        {user ? (
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-3xl md:text-4xl font-bold text-center text-white"
           >
             Featured Producers
-        </motion.h2>
+          </motion.h2>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center max-w-3xl mx-auto"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Your Music, Our Producers
+            </h2>
+            <p className="text-base md:text-lg text-gray-400 leading-relaxed">
+              Hecho En America connects you with world-class producers who bring your musical vision to life — from recording and mixing to mastering and beyond.
+            </p>
+          </motion.div>
+        )}
       </div>
       
       {/* Full-width scrolling container */}
