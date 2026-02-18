@@ -132,7 +132,7 @@ const FeaturedProducers = () => {
               Your Music, Our Producers
             </h2>
             <p className="text-base md:text-lg text-gray-400 leading-relaxed">
-              Hecho En America connects you with world-class producers who bring your musical vision to life — from recording and mixing to mastering and beyond.
+              Hecho En America connects you with world-class producers from around the world who bring your musical vision to life — all from the comfort of your home.
             </p>
           </motion.div>
         )}

@@ -36,14 +36,14 @@ const genreCategories = [
 ];
 const tiers = [
   { label: "$0", price: 0, description: "Free AI Generated - for comparison", priceId: null, info: "Get a quick AI-generated demo using Google Lyria 2. Great for testing ideas before committing. Limited to 3 per 5 hours." },
-  { label: "$25", price: 25, description: "Demo Project - for ideas (30sec)", priceId: "price_1SHdNFQchHjxRXODM3DJdjEE", info: "A human-produced 30-second demo by one of our producers. Perfect for pitch decks, social media teasers, or validating a concept before full production." },
-  { label: "$125", price: 125, description: "Artist-grade quality - for production (180sec)", priceId: "price_1SHdNVQchHjxRXODn3lW4vDj", info: "A full 3-minute production-ready track. Includes professional arrangement, sound design, and high-quality mix. Ideal for singles, EPs, or album tracks." },
-  { label: "$250", price: 250, description: "Industry standard - for masterpiece (300sec)", priceId: "price_1SHdNmQchHjxRXODgqWhW9TO", info: "A premium 5-minute track with top-tier production, detailed arrangement, and radio-ready quality. Includes priority producer matching and faster turnaround." }
+  { label: "$25", price: 25, description: "Demo Project - for ideas (≈30sec)", priceId: "price_1SHdNFQchHjxRXODM3DJdjEE", info: "A human-produced demo track by one of our producers. Perfect for pitch decks, social media teasers, or validating a concept before full production." },
+  { label: "$125", price: 125, description: "Artist-grade quality - for production (≈180sec)", priceId: "price_1SHdNVQchHjxRXODn3lW4vDj", info: "A full production-ready track. Includes professional arrangement, sound design, and high-quality mix. Ideal for singles, EPs, or album tracks." },
+  { label: "$250", price: 250, description: "Industry standard - for masterpiece (≈300sec)", priceId: "price_1SHdNmQchHjxRXODgqWhW9TO", info: "A premium track with top-tier production, detailed arrangement, and radio-ready quality. Includes priority producer matching and faster turnaround." }
 ];
 
 // Add-on pricing per tier (tier index: 0=free, 1=$25, 2=$125, 3=$250)
 const addOnPricing = {
-  stems: { prices: [0, 10, 25, 40], info: "Receive individual instrument/vocal tracks (stems) so you can remix, rearrange, or use them in your own DAW." },
+  stems: { prices: [0, 10, 25, 40], info: "We record individual instrument/vocal tracks (stems) so we can provide the best quality for your sound. Either as stems you can use later or for use of producer." },
   analog: { prices: [0, 15, 35, 50], info: "Your track will be processed through real analog hardware (compressors, EQs, tape machines) for warmer, richer sound character." },
   mixing: { prices: [0, 20, 50, 75], info: "Professional mixing by our engineer: balancing levels, EQ, compression, effects, and spatial positioning for a polished sound." },
   mastering: { prices: [0, 15, 40, 60], info: "Final mastering to optimize loudness, clarity, and consistency across all playback systems. Industry-standard LUFS targeting." },
@@ -796,7 +796,7 @@ const GenerateSong = () => {
                     variant="ghost" 
                     className="w-full justify-between bg-white/10 hover:bg-white/20 text-white p-4 rounded-lg"
                   >
-                    <span className="text-lg font-semibold">Additional Options</span>
+                    <span className="text-lg font-semibold"> Production Settings</span>
                     <ChevronDown className={`h-5 w-5 transition-transform ${isOptionsOpen ? 'rotate-180' : ''}`} />
                   </Button>
                 </CollapsibleTrigger>

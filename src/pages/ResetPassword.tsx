@@ -33,7 +33,7 @@ const ResetPassword = () => {
       } else {
         toast({
           title: "Invalid link",
-          description: "This password reset link is invalid or has expired. Please request a new one from your profile.",
+          description: "This password reset link is invalid or has expired. Please request a new one.",
           variant: "destructive",
         });
       }
