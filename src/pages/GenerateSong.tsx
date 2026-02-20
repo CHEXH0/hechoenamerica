@@ -542,58 +542,39 @@ const GenerateSong = () => {
     }
   };
 
-  // Generate smooth gradient colors based on slider position
-  const getGradientColors = () => {
-    const position = sliderValue[0];
-    const colors = [
-      {
-        start: "hsl(280, 70%, 40%)",
-        end: "hsl(220, 70%, 50%)",
-      },
-      // Purple-blue (Free)
-      {
-        start: "hsl(320, 70%, 50%)",
-        end: "hsl(280, 70%, 60%)",
-      },
-      // Magenta-purple (Demo)
-      {
-        start: "hsl(0, 70%, 50%)",
-        end: "hsl(340, 70%, 50%)",
-      },
-      // Red (Artist)
-      {
-        start: "hsl(30, 80%, 50%)",
-        end: "hsl(20, 80%, 50%)",
-      }, // Orange (Industry)
-    ];
-    return colors[position];
-  };
+  // All gradient layers per tier
+  const gradientLayers = [
+    { start: "hsl(280, 70%, 40%)", end: "hsl(220, 70%, 50%)" },   // Free: purple-blue
+    { start: "hsl(320, 70%, 50%)", end: "hsl(280, 70%, 60%)" },   // $25: magenta-purple
+    { start: "hsl(0, 70%, 50%)",   end: "hsl(340, 70%, 50%)" },   // $125: red-pink
+    { start: "hsl(30, 80%, 50%)",  end: "hsl(20, 80%, 50%)" },    // $250: orange
+  ];
 
   // Get slider color based on position
   const getSliderColor = () => {
-    const position = sliderValue[0];
     const colors = [
       "linear-gradient(90deg, hsl(280, 70%, 50%), hsl(220, 70%, 50%))",
-      // Purple-blue gradient (Free)
       "linear-gradient(90deg, hsl(320, 70%, 60%), hsl(280, 70%, 60%))",
-      // Magenta-purple gradient (Demo)
       "linear-gradient(90deg, hsl(0, 70%, 60%), hsl(340, 70%, 60%))",
-      // Red-pink gradient (Artist)
-      "linear-gradient(90deg, hsl(30, 80%, 60%), hsl(20, 80%, 60%))", // Orange gradient (Industry)
+      "linear-gradient(90deg, hsl(30, 80%, 60%), hsl(20, 80%, 60%))",
     ];
-    return colors[position];
+    return colors[sliderValue[0]];
   };
+
   return (
-    <motion.div
-      className="relative min-h-screen flex items-center justify-center overflow-hidden p-4"
-      animate={{
-        background: `linear-gradient(135deg, ${getGradientColors().start}, ${getGradientColors().end})`,
-      }}
-      transition={{
-        duration: 0.6,
-        ease: "easeInOut",
-      }}
-    >
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden p-4">
+      {/* Gradient layers — fade in/out via opacity for reliable cross-browser transition */}
+      {gradientLayers.map((layer, i) => (
+        <motion.div
+          key={i}
+          className="absolute inset-0"
+          animate={{ opacity: sliderValue[0] === i ? 1 : 0 }}
+          transition={{ duration: 0.6, ease: "easeInOut" }}
+          style={{
+            background: `linear-gradient(135deg, ${layer.start}, ${layer.end})`,
+          }}
+        />
+      ))}
       <div className="absolute inset-0 bg-black/20" />
 
       <motion.div
@@ -1309,7 +1290,8 @@ const GenerateSong = () => {
           </Button>
         </div>
       </motion.div>
-    </motion.div>
+    </div>
+
   );
 };
 export default GenerateSong;
