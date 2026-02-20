@@ -271,7 +271,7 @@ const ProducerApplicationForm = () => {
             <h2 className="text-3xl font-bold text-gray-800 mb-4">
               Sign In Required
             </h2>
-            <p className="text-gray-900 text-lg max-w-md mx-auto mb-8">
+            <p className="text-gray-600 text-lg max-w-md mx-auto mb-8">
               You need to be signed in to submit a producer application. This helps us link your application to your account.
             </p>
             
