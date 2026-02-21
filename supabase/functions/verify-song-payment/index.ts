@@ -26,8 +26,36 @@ serve(async (req) => {
     if (!resendKey) throw new Error("RESEND_API_KEY is not set");
 
     const { session_id } = await req.json();
-    if (!session_id) {
-      throw new Error("Session ID is required");
+    if (!session_id || typeof session_id !== 'string' || session_id.length > 500) {
+      throw new Error("Invalid session ID");
+    }
+
+    // Idempotency check: if this session was already verified, return early
+    const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.57.2");
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    );
+
+    const { data: existingRequest } = await supabaseAdmin
+      .from("song_requests")
+      .select("id, status")
+      .eq("stripe_session_id", session_id)
+      .maybeSingle();
+
+    if (existingRequest && existingRequest.status === "paid") {
+      logStep("Payment already verified, skipping duplicate", { sessionId: session_id });
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: "Payment already verified",
+          alreadyVerified: true,
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        },
+      );
     }
 
     logStep("Retrieving checkout session", { sessionId: session_id });
@@ -381,12 +409,7 @@ serve(async (req) => {
 
     logStep("All emails sent successfully");
 
-    // Update song request status to completed
-    const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.57.2");
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    );
+    // Update song request status to completed (reuse supabaseAdmin from above)
 
     if (requestId) {
       const updateData: Record<string, any> = {
