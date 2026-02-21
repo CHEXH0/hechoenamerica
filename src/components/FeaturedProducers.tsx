@@ -161,25 +161,48 @@ const FeaturedProducers = () => {
             </Link>
           </div>
         ) : (
-          <div className="flex justify-center items-center gap-3 mt-6 text-2xl md:text-3xl flex-wrap">
-            <span>🇺🇸</span>
-            <span>🇧🇷</span>
-            <span>🇨🇴</span>
-            <span>🇲🇽</span>
-            <span>🇦🇷</span>
-            <span>🇨🇺</span>
-            <span>🇵🇷</span>
-            <span>🇩🇴</span>
-            <span>🇵🇪</span>
-            <span>🇨🇱</span>
-            <span>🇪🇸</span>
-            <span>🇯🇲</span>
-            <span>🇬🇧</span>
-            <span>🇫🇷</span>
-            <span>🇩🇪</span>
-            <span>🇯🇵</span>
-            <span>🇰🇷</span>
-            <span>🇳🇬</span>
+          <div className="flex justify-center items-center gap-3 md:gap-4 mt-6 flex-wrap px-4">
+            {[
+              { code: "us", name: "USA" },
+              { code: "br", name: "Brazil" },
+              { code: "co", name: "Colombia" },
+              { code: "mx", name: "Mexico" },
+              { code: "ar", name: "Argentina" },
+              { code: "cu", name: "Cuba" },
+              { code: "pr", name: "Puerto Rico" },
+              { code: "do", name: "Dominican Republic" },
+              { code: "pe", name: "Peru" },
+              { code: "cl", name: "Chile" },
+              { code: "es", name: "Spain" },
+              { code: "jm", name: "Jamaica" },
+              { code: "gb", name: "United Kingdom" },
+              { code: "fr", name: "France" },
+              { code: "de", name: "Germany" },
+              { code: "jp", name: "Japan" },
+              { code: "kr", name: "South Korea" },
+              { code: "ng", name: "Nigeria" },
+              { code: "it", name: "Italy" },
+              { code: "ca", name: "Canada" },
+              { code: "au", name: "Australia" },
+              { code: "gh", name: "Ghana" },
+              { code: "se", name: "Sweden" },
+              { code: "tr", name: "Turkey" },
+            ].map((flag, i) => (
+              <motion.img
+                key={flag.code}
+                src={`https://flagcdn.com/w40/${flag.code}.png`}
+                srcSet={`https://flagcdn.com/w80/${flag.code}.png 2x`}
+                alt={flag.name}
+                title={flag.name}
+                width={32}
+                height={24}
+                initial={{ opacity: 0, scale: 0.5 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: i * 0.06 }}
+                viewport={{ once: true }}
+                className="rounded-sm shadow-md hover:scale-125 transition-transform duration-200 cursor-default"
+              />
+            ))}
           </div>
         )}
       </div>
@@ -205,7 +228,6 @@ const FeaturedProducers = () => {
             </button>
           </>
         )}
-
         <div 
           ref={isMobile ? scrollRef : containerRef}
           className={`w-full relative ${isMobile ? 'overflow-x-auto scrollbar-hide touch-pan-x' : 'overflow-hidden'}`}
