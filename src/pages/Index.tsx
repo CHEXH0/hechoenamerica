@@ -18,7 +18,7 @@ const Index = () => {
       <Services />
       <section className="py-20 bg-gradient-to-b from-black to-purple-900/20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-8">
+          <h2 className="text-3xl md:text-4xl font-bold heading-gradient mb-8">
             Ready to Create Your Next Hit?
           </h2>
           <Button 
