@@ -93,7 +93,7 @@ const FeaturedProducers = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-3xl md:text-4xl font-bold text-center text-white mb-12"
+            className="text-3xl md:text-4xl font-bold text-center heading-gradient mb-12"
           >
             Featured Producers
           </motion.h2>
@@ -117,7 +117,7 @@ const FeaturedProducers = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-3xl md:text-4xl font-bold text-center text-white"
+            className="text-3xl md:text-4xl font-bold text-center heading-gradient"
           >
             Featured Producers
           </motion.h2>
@@ -128,7 +128,7 @@ const FeaturedProducers = () => {
             transition={{ duration: 0.6 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold heading-gradient mb-4">
               Your Music, Our Producers
             </h2>
             <p className="text-base md:text-lg text-gray-400 leading-relaxed">

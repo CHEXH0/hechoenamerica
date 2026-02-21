@@ -107,6 +107,10 @@
 }
 
 @layer utilities {
+  .heading-gradient {
+    @apply text-transparent bg-clip-text bg-gradient-to-b from-white via-white/80 to-white/40 tracking-wider font-display;
+  }
+
   /* Hide scrollbar for Chrome, Safari and Opera */
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
