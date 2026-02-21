@@ -421,7 +421,7 @@ const ProducerProfile = () => {
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Choose one emoji to display on your producer card
+                    Optional — choose one emoji to display on your producer card
                   </p>
                 </div>
               </CardContent>
