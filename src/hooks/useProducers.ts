@@ -17,6 +17,7 @@ export interface Producer {
   youtube_channel_url?: string;
   instagram_url?: string;
   website_url?: string;
+  emoji?: string;
 }
 
 export const useProducers = () => {

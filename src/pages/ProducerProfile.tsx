@@ -78,6 +78,7 @@ const ProducerProfile = () => {
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [showcaseVideos, setShowcaseVideos] = useState<(string | null)[]>([null, null, null]);
   const [uploadingVideoIndex, setUploadingVideoIndex] = useState<number | null>(null);
+  const [emoji, setEmoji] = useState("");
 
   // Populate form when profile loads
   useEffect(() => {
@@ -102,6 +103,7 @@ const ProducerProfile = () => {
         (producerProfile as any).showcase_video_2 || null,
         (producerProfile as any).showcase_video_3 || null,
       ]);
+      setEmoji((producerProfile as any).emoji || "");
     }
   }, [producerProfile]);
 
@@ -221,6 +223,7 @@ const ProducerProfile = () => {
       showcase_video_1: showcaseVideos[0] || null,
       showcase_video_2: showcaseVideos[1] || null,
       showcase_video_3: showcaseVideos[2] || null,
+      emoji: emoji || null,
     });
   };
 
@@ -389,6 +392,37 @@ const ProducerProfile = () => {
                     placeholder="Tell listeners about yourself, your style, and your experience..."
                     rows={4}
                   />
+                </div>
+
+                {/* Profile Emoji */}
+                <div>
+                  <Label htmlFor="emoji">Profile Emoji</Label>
+                  <div className="flex items-center gap-3 mt-1">
+                    <Input
+                      id="emoji"
+                      value={emoji}
+                      onChange={(e) => {
+                        // Only allow a single emoji (take last character if pasting multiple)
+                        const val = e.target.value;
+                        if (val.length <= 2) {
+                          setEmoji(val);
+                        } else {
+                          // Take the last entered segment (handles multi-codepoint emoji)
+                          const segments = [...val];
+                          setEmoji(segments[segments.length - 1]);
+                        }
+                      }}
+                      placeholder="🎵"
+                      className="w-20 text-center text-2xl"
+                      maxLength={2}
+                    />
+                    {emoji && (
+                      <span className="text-3xl">{emoji}</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Choose one emoji to display on your producer card
+                  </p>
                 </div>
               </CardContent>
             </Card>
