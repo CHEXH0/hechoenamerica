@@ -759,6 +759,7 @@ export type Database = {
           bio: string | null
           country: string | null
           created_at: string | null
+          emoji: string | null
           genre: string | null
           id: string | null
           image: string | null
@@ -778,6 +779,7 @@ export type Database = {
           bio?: string | null
           country?: string | null
           created_at?: string | null
+          emoji?: string | null
           genre?: string | null
           id?: string | null
           image?: string | null
@@ -797,6 +799,7 @@ export type Database = {
           bio?: string | null
           country?: string | null
           created_at?: string | null
+          emoji?: string | null
           genre?: string | null
           id?: string | null
           image?: string | null
