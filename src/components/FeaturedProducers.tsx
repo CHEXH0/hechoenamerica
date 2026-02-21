@@ -163,8 +163,8 @@ const FeaturedProducers = () => {
       
       {/* Full-width scrolling container */}
       <div className="relative">
-        {/* Scroll arrows */}
-        {isMobile ? (
+        {/* Scroll arrows - mobile only */}
+        {isMobile && (
           <>
             <button
               onClick={() => scrollToDirection('left')}
@@ -179,23 +179,6 @@ const FeaturedProducers = () => {
               aria-label="Scroll right"
             >
               <ChevronRight className="w-5 h-5 text-white" />
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              onClick={() => scrollDesktop('left')}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-black/60 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all"
-              aria-label="Scroll left"
-            >
-              <ChevronLeft className="w-6 h-6 text-white" />
-            </button>
-            <button
-              onClick={() => scrollDesktop('right')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-black/60 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all"
-              aria-label="Scroll right"
-            >
-              <ChevronRight className="w-6 h-6 text-white" />
             </button>
           </>
         )}
