@@ -151,14 +151,37 @@ const FeaturedProducers = () => {
             </p>
           </motion.div>
         )}
-        <div className="text-center mt-4">
-          <Link
-            to="/producers"
-            className="text-sm text-purple-400 hover:text-purple-300 underline underline-offset-4 transition-colors"
-          >
-            See All Producers →
-          </Link>
-        </div>
+        {user ? (
+          <div className="text-center mt-4">
+            <Link
+              to="/producers"
+              className="text-sm text-purple-400 hover:text-purple-300 underline underline-offset-4 transition-colors"
+            >
+              See All Producers →
+            </Link>
+          </div>
+        ) : (
+          <div className="flex justify-center items-center gap-3 mt-6 text-2xl md:text-3xl flex-wrap">
+            <span>🇺🇸</span>
+            <span>🇧🇷</span>
+            <span>🇨🇴</span>
+            <span>🇲🇽</span>
+            <span>🇦🇷</span>
+            <span>🇨🇺</span>
+            <span>🇵🇷</span>
+            <span>🇩🇴</span>
+            <span>🇵🇪</span>
+            <span>🇨🇱</span>
+            <span>🇪🇸</span>
+            <span>🇯🇲</span>
+            <span>🇬🇧</span>
+            <span>🇫🇷</span>
+            <span>🇩🇪</span>
+            <span>🇯🇵</span>
+            <span>🇰🇷</span>
+            <span>🇳🇬</span>
+          </div>
+        )}
       </div>
       
       {/* Full-width scrolling container */}
