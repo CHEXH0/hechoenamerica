@@ -549,7 +549,7 @@ export const CancellationRequestsAdmin = () => {
                                     </SelectContent>
                                   </Select>
                                   <p className="text-xs text-muted-foreground mt-1">
-                                    Producer receives this % of their 85% share based on work completed
+                                    Producer receives this % of their 94% share based on work completed
                                   </p>
                                 </div>
 

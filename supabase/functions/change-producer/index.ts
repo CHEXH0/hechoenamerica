@@ -9,7 +9,7 @@ const corsHeaders = {
 };
 
 const APP_URL = 'https://hechoenamericastudio.com';
-const PLATFORM_FEE_PERCENT = 15;
+const PLATFORM_FEE_PERCENT = 6;
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
