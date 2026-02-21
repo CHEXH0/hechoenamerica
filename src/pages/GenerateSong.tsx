@@ -618,7 +618,8 @@ const GenerateSong = () => {
               className="w-full h-full object-contain"
             />
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-2">🎶Create Your Sound🎶</h1>
+          <h1 className="text-5xl md:text-6xl font-bold heading-gradient mb-2">Create Your Sound</h1>
+          <p className="text-2xl mt-1">🎶🎶</p>
           <div className="animate-color-shift inline-block">
             <p className="text-2xl font-medium text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-200 to-purple-300">
               LA MUSIC ES MEDICINE
