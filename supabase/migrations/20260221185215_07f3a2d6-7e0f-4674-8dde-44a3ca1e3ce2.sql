@@ -1,0 +1,1 @@
+ALTER TABLE public.producers ALTER COLUMN emoji SET DEFAULT NULL;
