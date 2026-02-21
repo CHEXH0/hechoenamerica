@@ -56,7 +56,7 @@ const Producer = () => {
         <ProducerHeader />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <ProducerImage image={producer.image} name={producer.name} />
+          <ProducerImage image={producer.image} name={producer.name} emoji={(producer as any).emoji} />
 
           <div className="space-y-8">
             <ProducerInfo 

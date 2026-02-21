@@ -244,6 +244,7 @@ export type Database = {
           created_at: string
           discord_user_id: string | null
           email: string | null
+          emoji: string | null
           genre: string
           id: string
           image: string
@@ -268,6 +269,7 @@ export type Database = {
           created_at?: string
           discord_user_id?: string | null
           email?: string | null
+          emoji?: string | null
           genre: string
           id?: string
           image: string
@@ -292,6 +294,7 @@ export type Database = {
           created_at?: string
           discord_user_id?: string | null
           email?: string | null
+          emoji?: string | null
           genre?: string
           id?: string
           image?: string

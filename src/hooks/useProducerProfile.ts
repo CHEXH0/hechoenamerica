@@ -41,6 +41,7 @@ export type ProducerProfileUpdate = {
   showcase_video_1?: string | null;
   showcase_video_2?: string | null;
   showcase_video_3?: string | null;
+  emoji?: string | null;
 };
 
 export const useUpdateProducerProfile = () => {
