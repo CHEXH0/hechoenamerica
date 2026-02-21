@@ -1,8 +1,8 @@
-import React, { useRef, useState, useCallback } from "react";
+import React, { useRef, useState, useCallback, useMemo } from "react";
 
 import { motion, useMotionValue, useAnimationFrame } from "framer-motion";
 import { Music, ChevronLeft, ChevronRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useProducers } from "@/hooks/useProducers";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSwipeScroll } from "@/hooks/useSwipeScroll";
@@ -19,7 +19,7 @@ const FeaturedProducers = () => {
   const [canScrollRight, setCanScrollRight] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
-  const baseSpeed = 1.5;
+  const baseSpeed = 4;
   
   // Mobile swipe scroll with snap-to-card
   const mobileItemWidth = 280 + 16; // card width + gap
@@ -90,8 +90,15 @@ const FeaturedProducers = () => {
     x.set(newX);
   }, [x, itemWidth, maxScroll]);
 
-  // No duplication needed - using the original producers list
-  const displayProducers = producers;
+  // Randomize producer order on each mount
+  const displayProducers = useMemo(() => {
+    const shuffled = [...producers];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }, [producers]);
 
   if (isLoading) {
     return (
@@ -144,6 +151,14 @@ const FeaturedProducers = () => {
             </p>
           </motion.div>
         )}
+        <div className="text-center mt-4">
+          <Link
+            to="/producers"
+            className="text-sm text-purple-400 hover:text-purple-300 underline underline-offset-4 transition-colors"
+          >
+            See All Producers →
+          </Link>
+        </div>
       </div>
       
       {/* Full-width scrolling container */}

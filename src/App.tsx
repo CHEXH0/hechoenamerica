@@ -26,6 +26,7 @@ import ProducerApplication from "./pages/ProducerApplication";
 import ResetPassword from "./pages/ResetPassword";
 import ProducerProfile from "./pages/ProducerProfile";
 import SignContract from "./pages/SignContract";
+import Producers from "./pages/Producers";
 import HEAProjects from "./pages/HEAProjects";
 import CookieConsent from "./components/CookieConsent";
 
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="/treats" element={<Treats />} />
               <Route path="/coming-soon" element={<ComingSoon />} />
               <Route path="/producer/:id" element={<Producer />} />
+              <Route path="/producers" element={<Producers />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/profile" element={<Profile />} />
