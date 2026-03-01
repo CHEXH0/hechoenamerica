@@ -24,13 +24,20 @@ const TranslateHelper = () => {
   return (
     <>
       {/* Floating Globe Button - bottom right */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-[9999] p-3 rounded-full bg-black/60 backdrop-blur-xl border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.5)] hover:bg-black/80 transition-all duration-200 group"
-        aria-label="Translate this page"
-      >
-        <Globe className="h-5 w-5 text-white/80 group-hover:text-white transition-colors" />
-      </button>
+      <div className="fixed bottom-6 right-6 z-[9999] flex items-center gap-2 group">
+        <span
+          className="pointer-events-none text-sm font-medium text-white/90 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-lg opacity-0 translate-x-2 scale-90 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-200"
+        >
+          Translate?
+        </span>
+        <button
+          onClick={() => setIsOpen(true)}
+          className="p-3 rounded-full bg-black/60 backdrop-blur-xl border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.5)] hover:bg-black/80 transition-all duration-200"
+          aria-label="Translate this page"
+        >
+          <Globe className="h-5 w-5 text-white/80 group-hover:text-white transition-colors" />
+        </button>
+      </div>
 
       {/* Modal */}
       <AnimatePresence>
