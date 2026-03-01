@@ -4,14 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -92,13 +85,15 @@ const CustomerServicePanel = () => {
             Customer Support
           </SheetTitle>
           <SheetDescription className="text-gray-400">
-            Need help? Send us a message.
+            Have a question or need help? Send us a message and we'll respond shortly.
           </SheetDescription>
         </SheetHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 mt-6">
           <div className="space-y-2">
-            <Label htmlFor="cs-name" className="text-gray-300">Name</Label>
+            <Label htmlFor="cs-name" className="text-gray-300">
+              Name
+            </Label>
             <Input
               id="cs-name"
               value={name}
@@ -109,7 +104,9 @@ const CustomerServicePanel = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="cs-email" className="text-gray-300">Email</Label>
+            <Label htmlFor="cs-email" className="text-gray-300">
+              Email
+            </Label>
             <Input
               id="cs-email"
               type="email"
@@ -121,7 +118,9 @@ const CustomerServicePanel = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="cs-subject" className="text-gray-300">Subject</Label>
+            <Label htmlFor="cs-subject" className="text-gray-300">
+              Subject
+            </Label>
             <Input
               id="cs-subject"
               value={subject}
@@ -132,7 +131,9 @@ const CustomerServicePanel = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="cs-message" className="text-gray-300">Message</Label>
+            <Label htmlFor="cs-message" className="text-gray-300">
+              Message
+            </Label>
             <Textarea
               id="cs-message"
               value={message}
@@ -148,11 +149,7 @@ const CustomerServicePanel = () => {
             disabled={sending}
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
           >
-            {sending ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4 mr-2" />
-            )}
+            {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
             Send Message
           </Button>
         </form>
@@ -161,9 +158,7 @@ const CustomerServicePanel = () => {
 
         {/* Urgent Contact */}
         <div className="space-y-4 pb-6">
-          <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
-            Need urgent help?
-          </h3>
+          <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">Need urgent help?</h3>
 
           <a
             href="mailto:team@hechoenamericastudio.com"
@@ -176,32 +171,24 @@ const CustomerServicePanel = () => {
               <p className="text-sm font-medium text-white group-hover:text-purple-300 transition-colors">
                 Email Us Directly
               </p>
-              <p className="text-xs text-gray-500">
-                team@hechoenamericastudio.com
-              </p>
+              <p className="text-xs text-gray-500">team@hechoenamericastudio.com</p>
             </div>
           </a>
 
           <a
-            href="tel:+15732449607"
+            href="tel:+19516083989"
             className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group"
           >
             <div className="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center shrink-0">
               <Phone className="h-5 w-5 text-pink-400" />
             </div>
             <div>
-              <p className="text-sm font-medium text-white group-hover:text-pink-300 transition-colors">
-                Call Us
-              </p>
-              <p className="text-xs text-gray-500">
-                +1 (573) 244-9607
-              </p>
+              <p className="text-sm font-medium text-white group-hover:text-pink-300 transition-colors">Call Us</p>
+              <p className="text-xs text-gray-500">+1 (951) 608-3989</p>
             </div>
           </a>
 
-          <p className="text-xs text-gray-600 text-center">
-            Available Mon–Fri, 10 AM – 6 PM EST
-          </p>
+          <p className="text-xs text-gray-600 text-center">Available Mon–Fri, 10 AM – 6 PM EST</p>
         </div>
       </SheetContent>
     </Sheet>
