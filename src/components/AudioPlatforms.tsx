@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
-const AudioPlatforms = () => {
+const AudioPlatforms = React.memo(() => {
   const platforms = [
     {
       name: "Instagram",
@@ -69,7 +69,7 @@ const AudioPlatforms = () => {
                   <div className="absolute bottom-5 right-2 text-sm opacity-20 blur-sm pointer-events-none z-10">{platform.emojis[3]}</div>
                   <div className="absolute top-6 left-8 text-xs opacity-10 blur-sm pointer-events-none z-10">{platform.emojis[4]}</div>
                   
-                  <img src={platform.image} alt={platform.name} className="w-16 h-16 mb-4 relative z-20" />
+                  <img src={platform.image} alt={platform.name} className="w-16 h-16 mb-4 relative z-20" loading="lazy" />
                   <span className="text-white font-medium relative z-20">{platform.name}</span>
                 </motion.a>
               );
@@ -100,7 +100,7 @@ const AudioPlatforms = () => {
                       <ArrowRight className="h-8 w-8 text-white" />
                     </div>
                   ) : (
-                    <img src={platform.image} alt={platform.name} className="w-16 h-16 mb-4 relative z-20" />
+                    <img src={platform.image} alt={platform.name} className="w-16 h-16 mb-4 relative z-20" loading="lazy" />
                   )}
                   <span className="text-white font-medium relative z-20">{platform.name}</span>
                 </Link>
@@ -111,6 +111,8 @@ const AudioPlatforms = () => {
       </div>
     </section>
   );
-};
+});
+
+AudioPlatforms.displayName = 'AudioPlatforms';
 
 export default AudioPlatforms;
