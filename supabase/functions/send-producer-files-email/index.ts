@@ -137,6 +137,12 @@ serve(async (req) => {
     if (songRequest.wants_recorded_stems) addOns.push("Stems");
     if (songRequest.number_of_revisions > 0) addOns.push(`${songRequest.number_of_revisions} Revision(s)`);
 
+    // Audio quality
+    const bitDepth = songRequest.bit_depth || "24";
+    const sampleRate = songRequest.sample_rate || "44.1";
+    const bitDepthLabels: Record<string, string> = { "16": "16-bit", "24": "24-bit", "32": "32-bit float" };
+    const qualityDisplay = `${bitDepthLabels[bitDepth] || bitDepth + "-bit"} / ${sampleRate} kHz`;
+
     // Send email with file download links
     const emailResponse = await resend.emails.send({
       from: "HechoEnAmerica <team@hechoenamericastudio.com>",
@@ -185,9 +191,13 @@ serve(async (req) => {
                   <td style="padding: 6px 0; color: #666;">Add-ons:</td>
                   <td style="padding: 6px 0;">${addOns.join(", ")}</td>
                 </tr>
-                `
+                 `
                     : ""
                 }
+                <tr>
+                  <td style="padding: 6px 0; color: #666;">Quality:</td>
+                  <td style="padding: 6px 0; font-weight: 600;">${qualityDisplay}</td>
+                </tr>
               </table>
             </div>
 
