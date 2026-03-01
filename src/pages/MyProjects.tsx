@@ -733,7 +733,7 @@ const MyProjects = () => {
             {project.wants_mastering && (
               <Badge variant="secondary">Mastering</Badge>
             )}
-            {project.number_of_revisions && project.number_of_revisions > 0 && (
+            {(project.number_of_revisions ?? 0) > 0 && (
               <Badge variant="secondary">
                 {project.number_of_revisions} Revisions
               </Badge>
@@ -755,7 +755,7 @@ const MyProjects = () => {
           )}
 
           {/* Revision Tracker for Client View */}
-          {!isProducerView && project.number_of_revisions && project.number_of_revisions > 0 && 
+          {!isProducerView && (project.number_of_revisions ?? 0) > 0 && 
            ["in_progress", "review", "completed"].includes(project.status) && (
             <RevisionTracker
               projectId={project.id}
@@ -797,7 +797,7 @@ const MyProjects = () => {
               )}
               
               {/* Revision Tracker for Producer View - show status and feedback */}
-              {project.number_of_revisions && project.number_of_revisions > 0 && 
+              {(project.number_of_revisions ?? 0) > 0 && 
                ["in_progress", "review", "completed"].includes(project.status) && (
                 <RevisionTracker
                   projectId={project.id}
