@@ -160,7 +160,7 @@ const CountdownTimer = ({ deadline }: { deadline: string }) => {
           <span className="font-semibold">Deadline Expired</span>
         </div>
         <p className="text-sm text-muted-foreground">
-          Processing refund if no producer accepted...
+          Processing refund...
         </p>
       </div>
     );
@@ -217,7 +217,7 @@ const CountdownTimer = ({ deadline }: { deadline: string }) => {
       </div>
       
       <p className="text-xs text-muted-foreground mt-2 text-center">
-        A producer will accept your project within this window
+        Waiting for a producer to accept
       </p>
     </div>
   );
@@ -363,7 +363,7 @@ const MyProjects = () => {
 
       toast({
         title: "Cancellation Requested",
-        description: "Your cancellation request has been submitted for review. You'll receive a confirmation email shortly.",
+        description: "Request submitted. We'll review it shortly.",
       });
 
       setMyRequests((prev) =>
@@ -397,7 +397,7 @@ const MyProjects = () => {
 
       toast({
         title: "Producer Change Requested",
-        description: data.message || "Your project will be reassigned to a new producer. A $25 change fee has been applied.",
+        description: data.message || "Your project will be reassigned. A $25 fee applies.",
       });
 
       fetchProjects();
@@ -832,9 +832,9 @@ const MyProjects = () => {
                     <Mail className="h-6 w-6" />
                     <span className="font-semibold text-lg">Check Your Email!</span>
                   </div>
-                  <p className="text-sm text-muted-foreground text-center px-4">
-                    We've sent you an email with your download link. Check your inbox (and spam folder).
-                  </p>
+                   <p className="text-sm text-muted-foreground text-center px-4">
+                     Download link sent to your email. Check inbox and spam.
+                   </p>
                   <p className="text-xs text-muted-foreground">
                     Download link expires in 7 days
                   </p>
@@ -846,7 +846,7 @@ const MyProjects = () => {
                     <span className="font-medium">Payment Refunded</span>
                   </div>
                   <p className="text-sm text-muted-foreground text-center">
-                    No producer was available within 48 hours. Your payment has been fully refunded.
+                    No producer available. Your payment has been refunded.
                   </p>
                   <Button 
                     variant="outline" 
@@ -920,8 +920,8 @@ const MyProjects = () => {
                           <AlertDialogTitle>Cancel this project?</AlertDialogTitle>
                           <AlertDialogDescription>
                             {project.status === "paid" 
-                              ? "You will receive a full refund. This action cannot be undone."
-                              : "Are you sure you want to cancel this project? This action cannot be undone."}
+                               ? "You will receive a full refund. This cannot be undone."
+                               : "This will cancel your project permanently."}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -962,7 +962,7 @@ const MyProjects = () => {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Change Producer?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Your project will be reassigned to a different producer. A <strong>$25 change fee</strong> will be charged to your payment method. The current producer will be compensated for any work completed.
+                                Your project will be reassigned. A <strong>$25 fee</strong> applies.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -999,7 +999,7 @@ const MyProjects = () => {
                           <AlertDialogHeader>
                             <AlertDialogTitle>Request Cancellation</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Since a producer has already started working on your project, your cancellation request will be reviewed by our team. Refunds are determined on a case-by-case basis depending on the work completed.
+                              Work has already started. Our team will review your request and determine any refund.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -1067,7 +1067,7 @@ const MyProjects = () => {
                 My Projects
               </h1>
               <p className="text-muted-foreground">
-                {isProducer ? "Manage your requests and producer assignments" : "Track the progress of your song requests"}
+                {isProducer ? "Manage requests and assignments" : "Track your song requests"}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -1105,9 +1105,9 @@ const MyProjects = () => {
                     <CardContent className="py-12 text-center">
                       <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                       <h3 className="text-lg font-semibold mb-2">No Requests Yet</h3>
-                      <p className="text-muted-foreground mb-4">
-                        You haven't submitted any song requests as a customer.
-                      </p>
+                       <p className="text-muted-foreground mb-4">
+                         No song requests yet.
+                       </p>
                       <Button onClick={() => navigate("/generate-song")}>
                         Create Your First Song
                       </Button>
@@ -1139,12 +1139,12 @@ const MyProjects = () => {
                     <CardContent className="py-12 text-center">
                       <Headphones className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                       <h3 className="text-lg font-semibold mb-2">No Producer Projects Yet</h3>
-                      <p className="text-muted-foreground mb-4">
-                        You haven't accepted any projects as a producer yet.
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Check Discord for new project notifications to accept!
-                      </p>
+                       <p className="text-muted-foreground mb-4">
+                         No assigned projects yet.
+                       </p>
+                       <p className="text-sm text-muted-foreground">
+                         Check Discord for new projects.
+                       </p>
                     </CardContent>
                   </Card>
                 ) : (
@@ -1175,9 +1175,9 @@ const MyProjects = () => {
                 <CardContent className="py-12 text-center">
                   <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">No Projects Yet</h3>
-                  <p className="text-muted-foreground mb-4">
-                    You haven't submitted any song requests yet.
-                  </p>
+                   <p className="text-muted-foreground mb-4">
+                     No song requests yet.
+                   </p>
                   <Button onClick={() => navigate("/generate-song")}>
                     Create Your First Song
                   </Button>

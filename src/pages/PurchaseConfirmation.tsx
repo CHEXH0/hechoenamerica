@@ -81,9 +81,9 @@ const PurchaseConfirmation = () => {
           <h1 className="text-3xl font-bold text-white">
             Purchase Successful!
           </h1>
-          <p className="text-white/80 text-lg">
-            Thank you for your purchase. Your order has been confirmed.
-          </p>
+           <p className="text-white/80 text-lg">
+             Your order has been confirmed.
+           </p>
           {purchaseDetails && (
             <div className="bg-white/5 rounded-lg p-4 border border-white/10 mt-4 text-left space-y-3">
               <h3 className="text-white font-semibold">Purchase Details:</h3>
@@ -169,9 +169,9 @@ const PurchaseConfirmation = () => {
           <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
 
-        <p className="text-white/60 text-sm">
-          Check your email for order details and download links.
-        </p>
+         <p className="text-white/60 text-sm">
+           Check your email for details.
+         </p>
       </motion.div>
     </div>
   );

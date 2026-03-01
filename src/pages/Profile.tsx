@@ -225,7 +225,7 @@ const Profile = () => {
             Profile Settings
           </h1>
           <p className="text-muted-foreground">
-            Manage your account settings and preferences
+            Manage your account
           </p>
         </motion.div>
 
@@ -289,7 +289,7 @@ const Profile = () => {
                     className="bg-muted/50 cursor-not-allowed"
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Email address cannot be changed after account activation.
+                    Email cannot be changed.
                   </p>
                 </div>
                 <div>
@@ -337,10 +337,9 @@ const Profile = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  For security reasons, password changes require email verification. 
-                  Click below to receive a password reset link.
-                </p>
+                 <p className="text-sm text-muted-foreground">
+                   Click below to receive a password reset link via email.
+                 </p>
                 <Button 
                   onClick={handleSendPasswordResetEmail}
                   disabled={sendingResetEmail}
@@ -370,9 +369,9 @@ const Profile = () => {
                 <div className="space-y-4">
                   <div>
                     <h3 className="font-semibold text-red-600 dark:text-red-400">Delete Account</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Permanently delete your account and all associated data. This action cannot be undone.
-                    </p>
+                     <p className="text-sm text-muted-foreground">
+                       Permanently delete your account and all data. This cannot be undone.
+                     </p>
                   </div>
                   <AlertDialog open={deleteDialogOpen} onOpenChange={(open) => {
                     setDeleteDialogOpen(open);
@@ -388,10 +387,9 @@ const Profile = () => {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription className="space-y-4">
-                          <p>
-                            This action cannot be undone. This will permanently delete your account
-                            and remove all your data from our servers, including:
-                          </p>
+                           <p>
+                             This will permanently delete your account and all data, including:
+                           </p>
                           <ul className="list-disc pl-5 text-sm space-y-1">
                             <li>Your profile information</li>
                             <li>All purchases and order history</li>

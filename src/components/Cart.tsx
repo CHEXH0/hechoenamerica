@@ -80,7 +80,7 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
     if (!user) {
       toast({
         title: "Authentication Required",
-        description: "Please log in to complete your purchase.",
+        description: "Please log in first.",
         variant: "destructive",
       });
       return;
@@ -89,7 +89,7 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
     if (items.length === 0) {
       toast({
         title: "Cart is Empty",
-        description: "Add some items to your cart first.",
+        description: "Add items to your cart first.",
         variant: "destructive",
       });
       return;
@@ -128,7 +128,7 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
       console.error('Checkout error:', error);
       toast({
         title: "Checkout Failed",
-        description: error instanceof Error ? error.message : "Please try again or sync products first.",
+        description: error instanceof Error ? error.message : "Please try again.",
         variant: "destructive",
       });
     } finally {
