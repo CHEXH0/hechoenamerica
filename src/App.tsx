@@ -1,5 +1,5 @@
 
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +10,7 @@ import TranslateHelper from "@/components/TranslateHelper";
 import { TranslationProvider } from "@/contexts/TranslationContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import CookieConsent from "@/components/CookieConsent";
+import { toast } from "sonner";
 
 // Eagerly load the landing page for fast first paint
 import Index from "./pages/Index";
@@ -54,46 +55,59 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TranslationProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <ScrollToTop />
-            <TranslateHelper />
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/treats" element={<Treats />} />
-                <Route path="/coming-soon" element={<ComingSoon />} />
-                <Route path="/producer/:id" element={<Producer />} />
-                <Route path="/producers" element={<Producers />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/purchases" element={<Purchases />} />
-                <Route path="/payment-success" element={<PaymentSuccess />} />
-                <Route path="/purchase-confirmation" element={<PurchaseConfirmation />} />
-                <Route path="/generate-song" element={<GenerateSong />} />
-                <Route path="/my-projects" element={<MyProjects />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/terms-of-service" element={<TermsOfService />} />
-                <Route path="/producer-application" element={<ProducerApplication />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/producer-profile" element={<ProducerProfile />} />
-                <Route path="/hea-projects" element={<HEAProjects />} />
-                <Route path="/sign-contract" element={<SignContract />} />
-              </Routes>
-            </Suspense>
-            <CookieConsent />
-          </BrowserRouter>
-        </TooltipProvider>
-      </TranslationProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  // Global safety net: catch unhandled promise rejections to prevent white screens
+  useEffect(() => {
+    const handler = (event: PromiseRejectionEvent) => {
+      console.error("Unhandled rejection:", event.reason);
+      toast.error("An error occurred. Please try again.");
+      event.preventDefault();
+    };
+    window.addEventListener("unhandledrejection", handler);
+    return () => window.removeEventListener("unhandledrejection", handler);
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TranslationProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <ScrollToTop />
+              <TranslateHelper />
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/treats" element={<Treats />} />
+                  <Route path="/coming-soon" element={<ComingSoon />} />
+                  <Route path="/producer/:id" element={<Producer />} />
+                  <Route path="/producers" element={<Producers />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/admin" element={<Admin />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/purchases" element={<Purchases />} />
+                  <Route path="/payment-success" element={<PaymentSuccess />} />
+                  <Route path="/purchase-confirmation" element={<PurchaseConfirmation />} />
+                  <Route path="/generate-song" element={<GenerateSong />} />
+                  <Route path="/my-projects" element={<MyProjects />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/terms-of-service" element={<TermsOfService />} />
+                  <Route path="/producer-application" element={<ProducerApplication />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/producer-profile" element={<ProducerProfile />} />
+                  <Route path="/hea-projects" element={<HEAProjects />} />
+                  <Route path="/sign-contract" element={<SignContract />} />
+                </Routes>
+              </Suspense>
+              <CookieConsent />
+            </BrowserRouter>
+          </TooltipProvider>
+        </TranslationProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
