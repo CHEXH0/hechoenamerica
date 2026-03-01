@@ -936,11 +936,12 @@ const GenerateSong = () => {
 
                 <CollapsibleContent className="space-y-2">
                   <div className="space-y-4 bg-white/10 p-4 rounded-lg">
-                    <div className="flex items-center justify-between">
+                    <div className={`flex items-center justify-between transition-opacity ${wantsNoneOfAbove ? 'opacity-40 pointer-events-none' : ''}`}>
                       <div className="flex items-center space-x-3">
                         <Checkbox
                           id="stems"
                           checked={wantsRecordedStems}
+                          disabled={wantsNoneOfAbove}
                           onCheckedChange={(checked) => {
                             setWantsRecordedStems(checked as boolean);
                             if (checked) setWantsNoneOfAbove(false);
@@ -966,11 +967,12 @@ const GenerateSong = () => {
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    <div className={`flex items-center justify-between transition-opacity ${wantsNoneOfAbove ? 'opacity-40 pointer-events-none' : ''}`}>
                       <div className="flex items-center space-x-3">
                         <Checkbox
                           id="analog"
                           checked={wantsAnalog}
+                          disabled={wantsNoneOfAbove}
                           onCheckedChange={(checked) => {
                             setWantsAnalog(checked as boolean);
                             if (checked) setWantsNoneOfAbove(false);
@@ -996,11 +998,12 @@ const GenerateSong = () => {
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    <div className={`flex items-center justify-between transition-opacity ${wantsNoneOfAbove ? 'opacity-40 pointer-events-none' : ''}`}>
                       <div className="flex items-center space-x-3">
                         <Checkbox
                           id="mixing"
                           checked={wantsMixing}
+                          disabled={wantsNoneOfAbove}
                           onCheckedChange={(checked) => {
                             setWantsMixing(checked as boolean);
                             if (checked) setWantsNoneOfAbove(false);
@@ -1027,12 +1030,12 @@ const GenerateSong = () => {
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    <div className={`flex items-center justify-between transition-opacity ${wantsNoneOfAbove ? 'opacity-40 pointer-events-none' : ''}`}>
                       <div className="flex items-center space-x-3">
                         <Checkbox
                           id="mastering"
                           checked={wantsMastering}
-                          disabled={!wantsMixing}
+                          disabled={!wantsMixing || wantsNoneOfAbove}
                           onCheckedChange={(checked) => {
                             setWantsMastering(checked as boolean);
                             if (checked) setWantsNoneOfAbove(false);
@@ -1062,6 +1065,54 @@ const GenerateSong = () => {
                     </div>
                     {!wantsMixing && (
                       <p className="text-white/50 text-xs ml-6 -mt-1">Requires mixing service</p>
+                    )}
+
+                    <div className="border-t border-white/10 my-2" />
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <Checkbox
+                          id="noneOfAbove"
+                          checked={wantsNoneOfAbove}
+                          onCheckedChange={(checked) => {
+                            const val = checked as boolean;
+                            setWantsNoneOfAbove(val);
+                            if (val) {
+                              setWantsRecordedStems(false);
+                              setWantsAnalog(false);
+                              setWantsMixing(false);
+                              setWantsMastering(false);
+                            }
+                          }}
+                          className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
+                        />
+                        <label
+                          htmlFor="noneOfAbove"
+                          className="text-white text-sm font-medium leading-none cursor-pointer"
+                        >
+                          None of the above
+                        </label>
+                        <HoverCard>
+                          <HoverCardTrigger asChild>
+                            <button type="button">
+                              <Info className="w-3.5 h-3.5 text-white/50 hover:text-white" />
+                            </button>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="w-72 text-sm">
+                            <p className="text-muted-foreground">
+                              Raw production only. No mixing, mastering, or stems included. May sound unpolished.
+                            </p>
+                          </HoverCardContent>
+                        </HoverCard>
+                      </div>
+                      <span className="text-white/50 text-sm font-medium">$0</span>
+                    </div>
+
+                    {wantsNoneOfAbove && (
+                      <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-yellow-200 text-xs leading-relaxed overflow-hidden">
+                        <strong>Note:</strong> You will receive a raw file. No mixing, mastering, or stems included.
+                        Additional post-production may be needed for release.
+                      </div>
                     )}
 
                     <div className="border-t border-white/10 my-2" />
@@ -1128,54 +1179,6 @@ const GenerateSong = () => {
                         </p>
                       )}
                     </div>
-
-                    <div className="border-t border-white/10 my-2" />
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Checkbox
-                          id="noneOfAbove"
-                          checked={wantsNoneOfAbove}
-                          onCheckedChange={(checked) => {
-                            const val = checked as boolean;
-                            setWantsNoneOfAbove(val);
-                            if (val) {
-                              setWantsRecordedStems(false);
-                              setWantsAnalog(false);
-                              setWantsMixing(false);
-                              setWantsMastering(false);
-                            }
-                          }}
-                          className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
-                        />
-                        <label
-                          htmlFor="noneOfAbove"
-                          className="text-white text-sm font-medium leading-none cursor-pointer"
-                        >
-                          None of the above
-                        </label>
-                        <HoverCard>
-                          <HoverCardTrigger asChild>
-                            <button type="button">
-                              <Info className="w-3.5 h-3.5 text-white/50 hover:text-white" />
-                            </button>
-                          </HoverCardTrigger>
-                          <HoverCardContent className="w-72 text-sm">
-                            <p className="text-muted-foreground">
-                              Raw production only. No mixing, mastering, or stems included. May sound unpolished.
-                            </p>
-                          </HoverCardContent>
-                        </HoverCard>
-                      </div>
-                      <span className="text-white/50 text-sm font-medium">$0</span>
-                    </div>
-
-                    {wantsNoneOfAbove && (
-                      <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-yellow-200 text-xs leading-relaxed overflow-hidden">
-                        <strong>Note:</strong> You will receive a raw file. No mixing, mastering, or stems included.
-                        Additional post-production may be needed for release.
-                      </div>
-                    )}
 
                     <div className="border-t border-white/10 my-2" />
 
