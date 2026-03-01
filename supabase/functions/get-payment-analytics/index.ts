@@ -121,8 +121,8 @@ serve(async (req) => {
 
     const pendingPayoutAmount = pendingPayouts.reduce((sum, r) => {
       const price = parseFloat(r.price) || 0;
-      // Estimate 94% for producer (6% platform fee)
-      return sum + (price * 0.94);
+      // Estimate 90% for producer (10% platform fee)
+      return sum + (price * 0.90);
     }, 0);
 
     // Get producers with Stripe Connect status
@@ -169,7 +169,7 @@ serve(async (req) => {
           id: r.id,
           tier: r.tier,
           price: r.price,
-          estimatedPayout: (parseFloat(r.price) || 0) * 0.94,
+          estimatedPayout: (parseFloat(r.price) || 0) * 0.90,
           producer: r.producers,
           createdAt: r.created_at,
         })),

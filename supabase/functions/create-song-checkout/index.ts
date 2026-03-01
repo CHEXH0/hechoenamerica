@@ -12,8 +12,8 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CREATE-SONG-CHECKOUT] ${step}${detailsStr}`);
 };
 
-// Platform fee percentage (6%)
-const PLATFORM_FEE_PERCENT = 6;
+// Platform fee percentage (10%)
+const PLATFORM_FEE_PERCENT = 10;
 // Acceptance deadline in hours
 const ACCEPTANCE_DEADLINE_HOURS = 48;
 

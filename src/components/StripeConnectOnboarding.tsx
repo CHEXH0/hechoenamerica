@@ -177,7 +177,7 @@ export const StripeConnectOnboarding = ({ producerId }: StripeConnectOnboardingP
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  94% of project value (after 6% platform fee)
+                  90% of project value (after 10% platform fee)
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-green-500" />

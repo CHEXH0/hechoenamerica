@@ -659,7 +659,7 @@ export const ProducerProjects = () => {
                                 </div>
                                 {project.producer_payout_cents && (
                                   <div className="bg-emerald-500/10 p-3 rounded-lg">
-                                    <p className="text-xs text-muted-foreground">Your Payout (94%)</p>
+                                    <p className="text-xs text-muted-foreground">Your Payout (90%)</p>
                                     <p className="font-medium text-emerald-600">
                                       ${(project.producer_payout_cents / 100).toFixed(2)}
                                     </p>
