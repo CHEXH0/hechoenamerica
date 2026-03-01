@@ -91,7 +91,7 @@ const MAX_FREE_AI_SONGS = 3;
 const RESET_HOURS = 5;
 
 const GenerateSong = () => {
-  const [sliderValue, setSliderValue] = useState([0]);
+  const [sliderValue, setSliderValue] = useState([2]);
   const [idea, setIdea] = useState("");
 
   const [driveLinks, setDriveLinks] = useState<DriveLink[]>([]);
