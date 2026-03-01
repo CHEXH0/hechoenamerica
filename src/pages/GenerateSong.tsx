@@ -87,6 +87,23 @@ const addOnPricing = {
   },
 };
 
+// Quality upgrade pricing per tier (index 0=free, 1=$25, 2=$125, 3=$250)
+const qualityPricing = {
+  bitDepth: {
+    "16": [0, 0, 0, 0],
+    "24": [0, 0, 0, 0],       // included
+    "32": [0, 5, 15, 25],     // 32-bit float surcharge
+  } as Record<string, number[]>,
+  sampleRate: {
+    "44.1": [0, 0, 0, 0],    // included
+    "48": [0, 5, 10, 15],
+    "88.2": [0, 10, 20, 30],
+    "96": [0, 15, 30, 45],
+    "176.4": [0, 20, 40, 60],
+    "192": [0, 25, 50, 75],
+  } as Record<string, number[]>,
+};
+
 const MAX_FREE_AI_SONGS = 3;
 const RESET_HOURS = 5;
 
@@ -135,6 +152,10 @@ const GenerateSong = () => {
     if (wantsMixing) total += addOnPricing.mixing.prices[tierIndex];
     if (wantsMastering) total += addOnPricing.mastering.prices[tierIndex];
     total += numberOfRevisions * addOnPricing.revision.prices[tierIndex];
+
+    // Quality surcharges
+    total += (qualityPricing.bitDepth[selectedBitDepth]?.[tierIndex] || 0);
+    total += (qualityPricing.sampleRate[selectedSampleRate]?.[tierIndex] || 0);
 
     return total;
   };
@@ -1063,9 +1084,15 @@ const GenerateSong = () => {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="16">16-bit</SelectItem>
-                              <SelectItem value="24">24-bit</SelectItem>
-                              <SelectItem value="32">32-bit float</SelectItem>
+                              {Object.entries(qualityPricing.bitDepth).map(([val, prices]) => {
+                                const surcharge = prices[tierIndex];
+                                const labels: Record<string, string> = { "16": "16-bit", "24": "24-bit", "32": "32-bit float" };
+                                return (
+                                  <SelectItem key={val} value={val}>
+                                    {labels[val]}{surcharge > 0 ? ` (+$${surcharge})` : ""}
+                                  </SelectItem>
+                                );
+                              })}
                             </SelectContent>
                           </Select>
                         </div>
@@ -1076,16 +1103,23 @@ const GenerateSong = () => {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="44.1">44.1 kHz</SelectItem>
-                              <SelectItem value="48">48 kHz</SelectItem>
-                              <SelectItem value="88.2">88.2 kHz</SelectItem>
-                              <SelectItem value="96">96 kHz</SelectItem>
-                              <SelectItem value="176.4">176.4 kHz</SelectItem>
-                              <SelectItem value="192">192 kHz</SelectItem>
+                              {Object.entries(qualityPricing.sampleRate).map(([val, prices]) => {
+                                const surcharge = prices[tierIndex];
+                                return (
+                                  <SelectItem key={val} value={val}>
+                                    {val} kHz{surcharge > 0 ? ` (+$${surcharge})` : ""}
+                                  </SelectItem>
+                                );
+                              })}
                             </SelectContent>
                           </Select>
                         </div>
                       </div>
+                      {((qualityPricing.bitDepth[selectedBitDepth]?.[tierIndex] || 0) > 0 || (qualityPricing.sampleRate[selectedSampleRate]?.[tierIndex] || 0) > 0) && (
+                        <p className="text-white/60 text-xs mt-1">
+                          Quality upgrade: +${(qualityPricing.bitDepth[selectedBitDepth]?.[tierIndex] || 0) + (qualityPricing.sampleRate[selectedSampleRate]?.[tierIndex] || 0)}
+                        </p>
+                      )}
                     </div>
 
                     <div className="border-t border-white/10 my-2" />
