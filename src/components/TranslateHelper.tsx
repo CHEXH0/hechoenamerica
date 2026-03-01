@@ -35,7 +35,7 @@ const TranslateHelper = () => {
       setWordIndex(0);
       intervalRef.current = setInterval(() => {
         setWordIndex(prev => (prev + 1) % translateWords.length);
-      }, 400);
+      }, 700);
     } else {
       if (intervalRef.current) clearInterval(intervalRef.current);
       setWordIndex(0);
