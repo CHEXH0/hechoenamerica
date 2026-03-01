@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, FileAudio, Disc3, Candy, Play, Download, ShoppingCart, Bell, BellRing, RefreshCw, Plus, Users } from "lucide-react";
+import { ArrowLeft, FileAudio, Disc3, Candy, Play, Download, ShoppingCart, Bell, BellRing, RefreshCw, Plus, Users, Info } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -793,6 +793,10 @@ const Treats = () => {
                   Audio Samples
                 </h2>
                 <p className="text-gray-300 text-lg">High-quality samples for your next hit production</p>
+                <div className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-400/20">
+                  <Info className="h-4 w-4 text-purple-400 flex-shrink-0" />
+                  <span className="text-purple-300 text-sm">All audio samples are original HechoEnAmerica creations</span>
+                </div>
               </motion.div>
               <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 md:gap-8 px-4 sm:px-0">
                 {products.samples.map(product => renderProductCard(product, <FileAudio className="h-6 w-6" />, 'samples'))}
@@ -818,6 +822,10 @@ const Treats = () => {
                   VST Plugins
                 </h2>
                 <p className="text-gray-300 text-lg">Professional VST3 and VST instruments for your DAW</p>
+                <div className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-400/20">
+                  <Info className="h-4 w-4 text-purple-400 flex-shrink-0" />
+                  <span className="text-purple-300 text-sm">All VST plugins are original HechoEnAmerica creations</span>
+                </div>
                 {products.vsts.length > vstItemsPerPage && (
                   <p className="text-gray-400 text-sm mt-2">
                     Showing {((vstCurrentPage - 1) * vstItemsPerPage) + 1}-{Math.min(vstCurrentPage * vstItemsPerPage, products.vsts.length)} of {products.vsts.length} plugins
