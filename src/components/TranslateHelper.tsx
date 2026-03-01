@@ -51,17 +51,27 @@ const TranslateHelper = () => {
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           {isHovering && (
             <motion.span
-              key={wordIndex}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
-              className="pointer-events-none text-sm font-medium text-white/90 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-lg whitespace-nowrap"
+              initial={{ opacity: 0, scale: 0.9, x: 8 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.9, x: 8 }}
+              transition={{ duration: 0.2 }}
+              className="pointer-events-none text-sm font-medium bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-lg whitespace-nowrap overflow-hidden"
             >
-              {translateWords[wordIndex]}
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={wordIndex}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  className="inline-block text-white/90"
+                >
+                  {translateWords[wordIndex]}
+                </motion.span>
+              </AnimatePresence>
             </motion.span>
           )}
         </AnimatePresence>
