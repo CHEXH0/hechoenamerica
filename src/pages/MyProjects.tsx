@@ -715,8 +715,8 @@ const MyProjects = () => {
 
           {/* Audio Quality */}
           <div className="flex flex-wrap gap-2">
-            <Badge variant="outline">{project.bit_depth || '24'}-bit</Badge>
-            <Badge variant="outline">{project.sample_rate || '44.1'} kHz</Badge>
+            <Badge variant="outline">🎚️ {project.bit_depth || '24'}-bit depth</Badge>
+            <Badge variant="outline">🎛️ {project.sample_rate || '44.1'} kHz sample rate</Badge>
           </div>
 
           {/* Options */}
