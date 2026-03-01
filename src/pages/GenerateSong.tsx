@@ -1111,11 +1111,12 @@ const GenerateSong = () => {
                       <div className="flex justify-between text-white/50 text-xs">
                         <span>0</span>
                         <span>1</span>
-                        <span>Note: You will receive a raw file. No mixing, mastering, or recorded stems included. Additional post-production may be needed for release.</span>
+                        <span>2</span>
                         <span>3</span>
                         <span>4</span>
                         <span>5</span>
                       </div>
+                      <p className="text-white/40 text-xs mt-1">Note: You will receive a raw file. No mixing, mastering, or recorded stems included. Additional post-production may be needed for release.</p>
                     </div>
                   </div>
                 </CollapsibleContent>
