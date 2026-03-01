@@ -36,30 +36,30 @@ const tiers = [
   {
     label: "$0",
     price: 0,
-    description: "Free AI Generated - for comparison",
+    description: "Free AI Demo",
     priceId: null,
-    info: "Get a quick AI-generated demo using Google Lyria 2. Great for testing ideas before committing. Limited to 3 per 5 hours.",
+    info: "Quick AI demo via Google Lyria 2. Great for testing ideas. Limited to 3 per 5 hours.",
   },
   {
     label: "$25",
     price: 25,
-    description: "Demo Project - for ideas (≈30sec)",
+    description: "Demo (~30sec)",
     priceId: "price_1SHdNFQchHjxRXODM3DJdjEE",
-    info: "A human-produced demo track by one of our producers. Perfect for pitch decks, social media teasers, or validating a concept before full production.",
+    info: "A short human-produced demo. Great for pitches or social media teasers.",
   },
   {
     label: "$125",
     price: 125,
-    description: "Artist-grade quality - for production (≈180sec)",
+    description: "Full Track (~180sec)",
     priceId: "price_1SHdNVQchHjxRXODn3lW4vDj",
-    info: "A full production-ready track. Includes professional arrangement, sound design, and high-quality mix. Ideal for singles, EPs, or album tracks.",
+    info: "Production-ready track with pro arrangement and mix. Ideal for singles or albums.",
   },
   {
     label: "$250",
     price: 250,
-    description: "Industry standard - for masterpiece (≈300sec)",
+    description: "Premium (~300sec)",
     priceId: "price_1SHdNmQchHjxRXODgqWhW9TO",
-    info: "A premium track with top-tier production, detailed arrangement, and radio-ready quality. Includes priority producer matching and faster turnaround.",
+    info: "Top-tier production with priority matching and faster delivery.",
   },
 ];
 
@@ -67,23 +67,23 @@ const tiers = [
 const addOnPricing = {
   stems: {
     prices: [0, 10, 25, 40],
-    info: "We record individual instrument/vocal tracks (stems) so we can provide the best quality for your sound. Either as stems you can use later or for use of the producer's time.",
+    info: "Receive individual instrument tracks (stems) for flexible editing.",
   },
   analog: {
     prices: [0, 15, 35, 50],
-    info: "Your track will be processed through real analog hardware (compressors, EQs, tape machines) for warmer, richer sound character.",
+    info: "Processed through real analog hardware for a warmer sound.",
   },
   mixing: {
     prices: [0, 20, 50, 75],
-    info: "Professional mixing by our engineer: balancing levels, EQ, compression, effects, and spatial positioning for a polished sound.",
+    info: "Pro mixing: levels, EQ, compression, and effects.",
   },
   mastering: {
     prices: [0, 15, 40, 60],
-    info: "Final mastering to optimize loudness, clarity, and consistency across all playback systems. Industry-standard LUFS targeting.",
+    info: "Final polish for loudness, clarity, and consistency.",
   },
   revision: {
     prices: [0, 5, 15, 25],
-    info: "Each revision allows you to request specific changes to your track. The producer will adjust based on your feedback notes.",
+    info: "Request specific changes to your track based on your feedback.",
   },
 };
 
@@ -608,7 +608,7 @@ const GenerateSong = () => {
         transition={{
           duration: 0.6,
         }}
-        className="max-w-3xl w-full z-10"
+        className="max-w-3xl w-full z-10 overflow-hidden"
       >
         <div className="text-center mb-12">
           <div className="w-24 h-20 mx-auto">
@@ -630,7 +630,7 @@ const GenerateSong = () => {
           </div>
         </div>
 
-        <motion.div layout className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl mb-0">
+        <motion.div layout className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl mb-0 overflow-hidden">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4 relative">
               <Label className="text-white text-lg font-semibold">Select Price</Label>
@@ -700,8 +700,8 @@ const GenerateSong = () => {
               </Select>
               <p className="text-white/60 text-xs">
                 {currentTier.price === 0
-                  ? "This style will guide the AI music generation"
-                  : "We'll match you with a producer who specializes in this style"}
+                  ? "Guides the AI generation"
+                  : "We'll match you with a fitting producer"}
               </p>
             </div>
 
@@ -724,9 +724,8 @@ const GenerateSong = () => {
               {currentTier.price === 0 && (
                 <>
                   <p className="text-white/70 text-xs leading-relaxed">
-                    💡 <span className="font-medium">Tip:</span> Be descriptive! Instead of "reggae music", try "upbeat
-                    reggae with offbeat guitar skanks, deep dub bass, one-drop drums, and melodica at 90 BPM". Include
-                    mood, instruments, and tempo for best results.
+                    💡 <span className="font-medium">Tip:</span> Be descriptive! Include mood, instruments, and tempo
+                    for best results.
                   </p>
                   {/* Prompt requirements checklist for AI tier */}
                   <div className="bg-white/10 rounded-lg p-3 space-y-2 mt-2">
@@ -783,13 +782,13 @@ const GenerateSong = () => {
                     </div>
                   </div>
                   {/* Share files via link */}
-                  <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-white/20 rounded-xl p-4">
+                  <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-white/20 rounded-xl p-4 overflow-hidden">
                     <div className="flex items-center gap-3 mb-2">
-                      <HardDrive className="w-5 h-5 text-white" />
-                      <span className="text-white font-semibold">Share Your Files</span>
+                      <HardDrive className="w-5 h-5 text-white shrink-0" />
+                      <span className="text-white font-semibold">Share Files</span>
                     </div>
                     <p className="text-white/70 text-sm">
-                      Share references, stems, or inspiration via Google Drive, Dropbox, or WeTransfer links.
+                      Add links from Google Drive, Dropbox, or WeTransfer.
                     </p>
                   </div>
 
@@ -1055,9 +1054,7 @@ const GenerateSong = () => {
                           </HoverCardTrigger>
                           <HoverCardContent className="w-72 text-sm">
                             <p className="text-muted-foreground">
-                              By selecting this, you agree to receive a raw production only. Your deliverable will be an
-                              unprocessed track without professional mixing, mastering, or individually recorded stems.
-                              The final result may sound rough or unpolished compared to a fully produced track.
+                              Raw production only. No mixing, mastering, or stems included. May sound unpolished.
                             </p>
                           </HoverCardContent>
                         </HoverCard>
@@ -1066,11 +1063,9 @@ const GenerateSong = () => {
                     </div>
 
                     {wantsNoneOfAbove && (
-                      <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-yellow-200 text-xs leading-relaxed">
-                        <strong>What to expect:</strong> You will receive a raw, unprocessed production file. No mixing
-                        (level balancing, EQ, effects), no mastering (loudness optimization, final polish), and no
-                        individually recorded stems will be included. The track may not be ready for commercial release
-                        without additional post-production.
+                      <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-yellow-200 text-xs leading-relaxed overflow-hidden">
+                        <strong>Note:</strong> You will receive a raw file. No mixing, mastering, or stems included.
+                        Additional post-production may be needed for release.
                       </div>
                     )}
 

@@ -101,6 +101,18 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Prevent text overflow when browser translates to longer languages */
+  * {
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  p, span, label, h1, h2, h3, h4, h5, h6, li, a, button {
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-display;
   }
