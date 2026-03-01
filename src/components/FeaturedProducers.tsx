@@ -155,10 +155,10 @@ const FeaturedProducers = () => {
               className="text-center max-w-3xl mx-auto"
             >
               <h2 className="text-3xl md:text-4xl font-bold heading-gradient mb-4">
-                Your Music, Worldly Producers
+                Your Music, Global Producers
               </h2>
               <p className="text-base md:text-lg text-gray-400 leading-relaxed">
-                Hecho En America connects you with world-class producers from around the world who bring your musical vision to life — all from the comfort of your home.
+                Connect with top producers worldwide who bring your vision to life.
               </p>
             </motion.div>
             <div className="flex justify-center items-center gap-3 md:gap-4 mt-6 flex-wrap px-4">

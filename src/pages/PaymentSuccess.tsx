@@ -47,7 +47,7 @@ const PaymentSuccess = () => {
         console.error('Payment verification error:', error);
         toast({
           title: "Verification Error",
-          description: "There was an issue verifying your payment. Please check your purchase history.",
+          description: "Could not verify payment. Check your purchase history.",
           variant: "destructive",
         });
       } finally {
@@ -121,9 +121,9 @@ const PaymentSuccess = () => {
             <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent mb-6">
               Payment Successful!
             </h1>
-            <p className="text-xl text-gray-300 leading-relaxed">
-              Thank you for your purchase! Your treats are now available in your account.
-            </p>
+             <p className="text-xl text-gray-300 leading-relaxed">
+               Your treats are now available in your account.
+             </p>
           </motion.div>
 
           {/* Purchase Summary */}
@@ -208,10 +208,9 @@ const PaymentSuccess = () => {
             className="mt-12 p-6 bg-black/30 rounded-lg border border-purple-500/20"
           >
             <h3 className="text-lg font-semibold text-white mb-2">What's Next?</h3>
-            <p className="text-gray-400 text-sm">
-              Your purchases are now available in your account. You can access them anytime from your downloads page.
-              Need help? Contact our support team.
-            </p>
+             <p className="text-gray-400 text-sm">
+               Access your purchases anytime from the downloads page. Need help? Contact support.
+             </p>
           </motion.div>
         </motion.div>
       </div>
