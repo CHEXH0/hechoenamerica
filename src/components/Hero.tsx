@@ -27,9 +27,9 @@ const Hero = () => {
         >
           <motion.div 
             className="w-32 h-32 mx-auto mb-8"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            initial={{ opacity: 0.7 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
           >
             <img
               src="/lovable-uploads/d5eed490-6d34-4af5-8428-15981ab0f9c3.png"
