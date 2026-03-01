@@ -416,7 +416,7 @@ const Treats = () => {
             alt={product.name} 
             className="w-full h-full object-cover" 
             whileHover={{
-              scale: 1.1
+              scale: 1.03
             }} 
             transition={{
               duration: 0.3
@@ -428,8 +428,8 @@ const Treats = () => {
           <motion.div 
             className="absolute top-4 right-4 w-16 h-16 rounded-lg overflow-hidden border-2 border-pink-400/50" 
             animate={{
-              scale: hoveredCard === product.id ? 1.2 : 1,
-              rotate: hoveredCard === product.id ? 5 : 0
+              scale: hoveredCard === product.id ? 1.05 : 1,
+              rotate: hoveredCard === product.id ? 2 : 0
             }} 
             transition={{
               duration: 0.3
@@ -444,11 +444,11 @@ const Treats = () => {
               onClick={() => handlePlayWaveform(product.id)} 
               className={`absolute bottom-4 left-4 ${playingWaveform === product.id ? 'bg-red-500 hover:bg-red-400' : 'bg-pink-500 hover:bg-pink-400'} text-white p-3 rounded-full transition-colors duration-200 shadow-lg`} 
               whileHover={{
-                scale: 1.1
+                scale: 1.05
               }} 
               whileTap={{
-                scale: 0.95
-              }} 
+                scale: 0.97
+              }}
               title={playingWaveform === product.id ? 'Stop audio' : 'Play preview'}
             >
               {playingWaveform === product.id ? 
@@ -506,8 +506,8 @@ const Treats = () => {
                 <motion.div 
                   className="inline-block p-4 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full mb-3" 
                   whileHover={{
-                    scale: 1.1,
-                    rotate: 5
+                    scale: 1.05,
+                    rotate: 2
                   }} 
                   transition={{
                     duration: 0.3
@@ -526,7 +526,7 @@ const Treats = () => {
             <motion.span 
               className="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-sm border border-purple-400/30" 
               whileHover={{
-                scale: 1.05
+                scale: 1.02
               }}
             >
               {product.type}
@@ -535,7 +535,7 @@ const Treats = () => {
               <motion.span 
                 className="bg-pink-500/20 text-pink-300 px-3 py-1 rounded-full text-sm border border-pink-400/30" 
                 whileHover={{
-                  scale: 1.05
+                  scale: 1.02
                 }}
               >
                 {product.duration}
@@ -545,7 +545,7 @@ const Treats = () => {
               <motion.span 
                 className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm border border-blue-400/30" 
                 whileHover={{
-                  scale: 1.05
+                  scale: 1.02
                 }}
               >
                 {product.size}
@@ -555,7 +555,7 @@ const Treats = () => {
               <motion.span 
                 className="bg-green-500/20 text-green-300 px-3 py-1 rounded-full text-sm border border-green-400/30" 
                 whileHover={{
-                  scale: 1.05
+                  scale: 1.02
                 }}
               >
                 {product.weight}
@@ -570,7 +570,7 @@ const Treats = () => {
             <motion.div 
               className="text-center"
               whileHover={{
-                scale: 1.05
+                scale: 1.02
               }}
             >
               <span className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
@@ -681,12 +681,12 @@ const Treats = () => {
       <motion.div 
         className="absolute top-20 left-10 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl"
         animate={{
-          x: [0, 100, 0],
-          y: [0, -50, 0],
-          scale: [1, 1.2, 1]
+          x: [0, 40, 0],
+          y: [0, -20, 0],
+          scale: [1, 1.08, 1]
         }}
         transition={{
-          duration: 20,
+          duration: 30,
           repeat: Infinity,
           ease: "easeInOut"
         }}
@@ -694,12 +694,12 @@ const Treats = () => {
       <motion.div 
         className="absolute bottom-20 right-10 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"
         animate={{
-          x: [0, -80, 0],
-          y: [0, 60, 0],
-          scale: [1.2, 1, 1.2]
+          x: [0, -30, 0],
+          y: [0, 25, 0],
+          scale: [1.05, 1, 1.05]
         }}
         transition={{
-          duration: 25,
+          duration: 35,
           repeat: Infinity,
           ease: "easeInOut"
         }}
@@ -708,10 +708,10 @@ const Treats = () => {
         className="absolute top-1/2 left-1/2 w-64 h-64 bg-red-500/5 rounded-full blur-2xl"
         animate={{
           rotate: [0, 360],
-          scale: [0.8, 1.3, 0.8]
+          scale: [0.9, 1.1, 0.9]
         }}
         transition={{
-          duration: 30,
+          duration: 45,
           repeat: Infinity,
           ease: "linear"
         }}
@@ -787,9 +787,9 @@ const Treats = () => {
         <div className="text-center mb-16">
           <motion.h1 
             className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-red-400 bg-clip-text text-transparent mb-6"
-            initial={{ opacity: 0, scale: 0.5 }}
+            initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
           >
             TREATS
           </motion.h1>
