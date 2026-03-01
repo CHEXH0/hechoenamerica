@@ -1103,7 +1103,7 @@ const GenerateSong = () => {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {Object.entries(qualityPricing.sampleRate).map(([val, prices]) => {
+                              {Object.entries(qualityPricing.sampleRate).sort(([a], [b]) => parseFloat(a) - parseFloat(b)).map(([val, prices]) => {
                                 const surcharge = prices[tierIndex];
                                 return (
                                   <SelectItem key={val} value={val}>
