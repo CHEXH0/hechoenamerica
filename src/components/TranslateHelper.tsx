@@ -60,7 +60,7 @@ const TranslateHelper = () => {
               transition={{ duration: 0.2 }}
               className="pointer-events-none text-sm font-medium bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-lg whitespace-nowrap overflow-hidden"
             >
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="wait" initial={false}>
                 <motion.span
                   key={wordIndex}
                   initial={{ opacity: 0, y: 8 }}
