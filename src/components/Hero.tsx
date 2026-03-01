@@ -5,7 +5,7 @@ import ProfileIcon from "./ProfileIcon";
 import CustomerServicePanel from "./CustomerServicePanel";
 import { motion } from "framer-motion";
 
-const Hero = () => {
+const Hero = React.memo(() => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black text-white">
       {/* Header Controls */}
@@ -52,6 +52,8 @@ const Hero = () => {
       </div>
     </section>
   );
-};
+});
+
+Hero.displayName = 'Hero';
 
 export default Hero;
