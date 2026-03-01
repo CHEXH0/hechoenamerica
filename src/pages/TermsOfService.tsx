@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 const TermsOfService = () => {
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
+      <div className="container mx-auto px-4 py-12 max-w-4xl overflow-hidden">
         <Link 
           to="/" 
           className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 mb-8"
@@ -19,162 +19,134 @@ const TermsOfService = () => {
         
         <div className="space-y-8 text-gray-300">
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">1. Acceptance of Terms</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">1. Acceptance</h2>
             <p>
-              By accessing and using Hecho En America's website and services, you accept and agree 
-              to be bound by these Terms of Service. If you do not agree to these terms, please 
-              do not use our services.
+              By using our website and services, you agree to these Terms. If you do not agree, please do not use our services.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">2. Services Description</h2>
-            <p className="mb-4">
-              Hecho En America provides a music production platform that includes:
-            </p>
+            <h2 className="text-2xl font-semibold text-white mb-4">2. Services</h2>
+            <p className="mb-4">Hecho En America offers:</p>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>Custom song creation connecting artists with professional producers</li>
-              <li>Professional recording, mixing, and mastering services (international travel and online)</li>
-              <li>A digital marketplace ("Treats") for purchasing sample packs, presets, and music production tools</li>
-              <li>AI-powered song generation</li>
-              <li>A structured revision and collaboration workflow between clients and producers</li>
-              <li>File delivery via Google Drive integration or direct download</li>
+              <li>Custom songs connecting artists with producers</li>
+              <li>Recording, mixing, and mastering</li>
+              <li>A digital shop ("Treats") for samples, presets, and tools</li>
+              <li>AI song generation</li>
+              <li>Revision and collaboration tools</li>
+              <li>File delivery via Google Drive or direct download</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">3. User Accounts</h2>
-            <p className="mb-4">When you create an account with us, you agree to:</p>
+            <h2 className="text-2xl font-semibold text-white mb-4">3. Accounts</h2>
+            <p className="mb-4">When creating an account, you agree to:</p>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>Provide accurate and complete information including a valid email address</li>
-              <li>Complete email verification before accessing account features</li>
-              <li>Use a strong password (we check passwords against known breach databases for your security)</li>
-              <li>Maintain the security of your account credentials</li>
-              <li>Accept responsibility for all activities under your account</li>
-              <li>Notify us immediately of any unauthorized use</li>
+              <li>Provide accurate info and a valid email</li>
+              <li>Verify your email before accessing features</li>
+              <li>Use a strong password</li>
+              <li>Keep your credentials secure</li>
+              <li>Accept responsibility for all account activity</li>
+              <li>Report unauthorized use immediately</li>
             </ul>
             <p className="mt-4">
-              Your email address cannot be changed once verified. You may delete your account at any 
-              time, which permanently removes all associated data.
+              Your email cannot be changed once verified. You may delete your account at any time.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">4. Custom Song Requests</h2>
-            <p className="mb-4">When ordering a custom song, you agree to the following:</p>
+            <h2 className="text-2xl font-semibold text-white mb-4">4. Custom Songs</h2>
+            <p className="mb-4">When ordering a custom song:</p>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>You will provide a clear song idea, genre preference, and any required production specifications at the time of order</li>
-              <li>A producer will be assigned to your project based on genre and availability</li>
-              <li>Producers must accept assignments within a designated timeframe; unaccepted projects will be reassigned</li>
-              <li>Your order includes a specified number of revisions based on your selected tier</li>
-              <li>You may provide feedback and request revisions through our revision chat system</li>
-              <li>Delivery times are estimates and vary based on project complexity and producer workload</li>
-              <li>Final delivery is contingent on all designated revisions being completed</li>
+              <li>Provide a clear idea, genre, and production needs</li>
+              <li>A producer will be assigned based on genre and availability</li>
+              <li>Unaccepted projects will be reassigned</li>
+              <li>Revisions are included based on your tier</li>
+              <li>Feedback is given through our revision chat</li>
+              <li>Delivery times are estimates</li>
             </ul>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">5. Cancellations & Refunds</h2>
-            <p className="mb-4">Our cancellation and refund policy operates as follows:</p>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li><strong>Before production begins:</strong> Projects in "pending," "pending payment," or "paid" status may be cancelled for a full refund</li>
-              <li><strong>During active production:</strong> Projects that have been accepted or are in progress require a cancellation request for admin review</li>
-              <li>Refund amounts for in-progress projects are calculated based on production progress: 60% weighted on checklist completion and 40% on revision delivery</li>
-              <li>All refunds are processed through Stripe to the original payment method</li>
-              <li>Digital marketplace purchases ("Treats") are non-refundable once downloaded</li>
+              <li><strong>Before production:</strong> Full refund available</li>
+              <li><strong>During production:</strong> Requires admin review</li>
+              <li>Refund amount depends on production progress</li>
+              <li>Refunds go to the original payment method via Stripe</li>
+              <li>Digital shop purchases are non-refundable once downloaded</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">6. Purchases and Payments</h2>
-            <p className="mb-4">By making a purchase, you agree that:</p>
+            <h2 className="text-2xl font-semibold text-white mb-4">6. Payments</h2>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>All payment information provided is accurate and you are authorized to use the payment method</li>
-              <li>Payments are processed securely through Stripe — we never store your full card details</li>
-              <li>Prices are displayed in the applicable currency and are subject to change without notice</li>
-              <li>Valid coupon codes may be applied at checkout for eligible discounts</li>
-              <li>Producer payouts are handled via Stripe Connect and are subject to platform fees</li>
+              <li>Payment info must be accurate and authorized</li>
+              <li>Payments are processed securely via Stripe</li>
+              <li>Prices may change without notice</li>
+              <li>Coupon codes may be applied at checkout</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">7. AI Song Generation</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">7. AI Songs</h2>
             <p>
-              Our AI song generation feature creates music based on your text prompts and genre selections. 
-              AI-generated content is provided as-is and may vary in quality. We do not guarantee that 
-              AI-generated songs will meet specific creative expectations. Usage of the AI generation 
-              feature is subject to fair use limits.
+              AI-generated music is based on your text and genre input. Quality may vary. Usage is subject to fair use limits.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">8. Intellectual Property</h2>
             <p>
-              Upon full payment, you receive a license to use purchased content (custom songs, sample packs, 
-              presets, and other digital products) for personal or commercial purposes as specified at the 
-              time of purchase. We retain ownership of our branding, website content, platform design, and 
-              proprietary production techniques. Producer-created content rights are transferred to the 
-              client upon full payment and project completion.
+              After full payment, you receive a license to use purchased content. We retain ownership of our branding and platform. Producer content rights transfer to you upon payment.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">9. Content Delivery</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">9. Delivery</h2>
             <p>
-              Digital products and custom songs are delivered through your account dashboard, direct download 
-              links, or via Google Drive integration. When using Google Drive delivery, you must authorize 
-              our application to upload files to your Drive. We only access the permissions strictly necessary 
-              for file delivery and do not read, modify, or delete any other files in your Google account.
+              Products are delivered via your dashboard, download links, or Google Drive. We only access what's needed for delivery.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">10. Producer Applications</h2>
             <p>
-              Producers may apply to join our platform through the producer application process. Acceptance 
-              is at our sole discretion. Approved producers are onboarded via Stripe Connect for payment 
-              processing and must maintain professional standards of communication and delivery quality.
+              Producers may apply to join our platform. Acceptance is at our discretion. Approved producers are paid via Stripe Connect.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">11. Prohibited Uses</h2>
-            <p className="mb-4">You may not use our services to:</p>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>Violate any applicable laws or regulations</li>
-              <li>Infringe on intellectual property rights of others</li>
-              <li>Upload malicious content or attempt to harm our systems</li>
-              <li>Resell or redistribute purchased content without authorization</li>
-              <li>Misuse the AI song generation feature for harmful or illegal content</li>
-              <li>Create fraudulent accounts or impersonate other users</li>
-              <li>Attempt to circumvent payment or access controls</li>
+              <li>Breaking any laws</li>
+              <li>Infringing on others' rights</li>
+              <li>Uploading harmful content</li>
+              <li>Reselling content without permission</li>
+              <li>Misusing AI generation</li>
+              <li>Creating fake accounts</li>
+              <li>Bypassing payment controls</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">12. Limitation of Liability</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">12. Liability</h2>
             <p>
-              To the maximum extent permitted by law, Hecho En America shall not be liable for 
-              any indirect, incidental, special, consequential, or punitive damages arising from 
-              your use of our services, including but not limited to delays in production delivery, 
-              AI-generated content quality, or third-party service availability.
+              We are not liable for indirect damages from using our services, including delays or AI quality issues.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">13. Changes to Terms</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">13. Changes</h2>
             <p>
-              We reserve the right to modify these terms at any time. We will notify users of 
-              significant changes through our website or email. Continued use of our services 
-              after changes constitutes acceptance of the new terms.
+              We may update these terms at any time. Continued use means you accept the changes.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">14. Contact</h2>
             <p>
-              For questions about these Terms of Service, please contact us through our 
-              website's contact form on the home page.
+              Questions? Use our contact form on the home page.
             </p>
           </section>
         </div>

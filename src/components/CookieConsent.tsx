@@ -46,7 +46,7 @@ const CookieConsent = () => {
             <Cookie className="w-5 h-5 text-purple-400 mt-0.5 shrink-0" />
             <div className="space-y-3">
               <p className="text-sm text-gray-300 leading-relaxed pr-4">
-                We use essential cookies for authentication and site functionality. No tracking cookies are used. By continuing, you agree to our{" "}
+                We use essential cookies for login and site features. No tracking. See our{" "}
                 <Link to="/privacy-policy" className="text-purple-400 hover:text-purple-300 underline underline-offset-2">
                   Privacy Policy
                 </Link>.

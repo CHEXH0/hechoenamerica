@@ -97,8 +97,8 @@ const Auth = () => {
         }
       } else {
         toast({
-          title: "Verify your email!",
-          description: "We've sent a verification link to your email. Please click it to activate your account before signing in.",
+          title: "Check your email!",
+          description: "We sent a verification link. Click it to activate your account.",
           duration: 10000,
         });
         setEmail('');
@@ -215,7 +215,7 @@ const Auth = () => {
                 Welcome
               </CardTitle>
               <CardDescription className="text-gray-900">
-                Sign in to your account or create a new one
+                Sign in or create a new account
               </CardDescription>
             </CardHeader>
 
@@ -338,7 +338,7 @@ const Auth = () => {
                           {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </Button>
                       </div>
-                      <p className="text-xs text-gray-900">Password must be at least 6 characters and not found in known data breaches</p>
+                      <p className="text-xs text-gray-900">Min. 6 characters, must not be in known breaches</p>
                     </div>
                     <Button
                       type="submit"
