@@ -92,7 +92,7 @@ const CustomerServicePanel = () => {
             Customer Support
           </SheetTitle>
           <SheetDescription className="text-gray-400">
-            Have a question or need help? Send us a message and we'll respond shortly.
+            Need help? Send us a message.
           </SheetDescription>
         </SheetHeader>
 

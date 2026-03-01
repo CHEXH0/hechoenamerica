@@ -9,8 +9,7 @@ const Footer = () => {
           <div className="text-center md:text-left">
             <h3 className="text-xl font-bold heading-gradient mb-2">Hecho En America Studio</h3>
             <p className="text-gray-400 text-sm max-w-md">
-              A secure production portal using Google Drive integration to allow authorized 
-              producers to upload high-resolution media assets directly to artists & users.
+              A secure production portal for producers to deliver high-quality media to artists.
             </p>
           </div>
           

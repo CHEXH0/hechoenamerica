@@ -230,13 +230,13 @@ const ProducerApplicationForm = () => {
             </motion.div>
             <h3 className="text-3xl font-bold text-gray-1000 mb-4">Application Received!</h3>
             <p className="text-gray-800 text-lg max-w-md mx-auto mb-6">
-              Thank you for your interest in joining our producer network! Check your email for a confirmation with next steps.
+              Thanks for applying! Check your email for next steps.
             </p>
             <div className="bg-indigo-900/30 border border-indigo-500/40 rounded-lg p-4 max-w-md mx-auto">
               <p className="text-indigo-100 text-sm flex items-center justify-center gap-2">
                 <span className="text-xl">💬</span>
                 <span>
-                  <strong>Note:</strong> If approved, you'll use Discord to receive and accept projects from artists.
+                  <strong>Note:</strong> If approved, you'll use Discord to manage projects.
                 </span>
               </p>
             </div>
@@ -272,7 +272,7 @@ const ProducerApplicationForm = () => {
               Sign In Required
             </h2>
             <p className="text-gray-900 text-lg max-w-md mx-auto mb-8">
-              You need to be signed in to submit a producer application. This helps us link your application to your account.
+              Please sign in to submit your application.
             </p>
             
             <Link to="/auth?redirect=/producer-application">
@@ -303,7 +303,7 @@ const ProducerApplicationForm = () => {
             Become a Producer
           </CardTitle>
           <CardDescription className="text-gray-800 text-lg leading-relaxed max-w-2xl mx-auto">
-            Join our network of talented producers. Fill out the application below and we'll review your submission.
+            Apply to join our producer network. We'll review your submission.
           </CardDescription>
         </CardHeader>
         

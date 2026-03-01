@@ -34,11 +34,11 @@ const ComingSoon = () => {
           </h1>
           
           <p className="text-xl md:text-2xl text-gray-300 mb-8">
-            We're working on something amazing for you. Our sample pack collection will be available soon!
+            Our sample pack collection will be available soon!
           </p>
           
           <p className="text-lg text-gray-400 mb-12">
-            Stay tuned for high-quality audio samples from HechoEnAmerica Studio.
+            High-quality audio samples from HechoEnAmerica Studio.
           </p>
           
           <Link 
