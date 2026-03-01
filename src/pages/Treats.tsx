@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { ArrowLeft, FileAudio, Disc3, Candy, Play, Download, ShoppingCart, Bell, BellRing, RefreshCw, Plus, Users, Info } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, FileAudio, Disc3, Candy, Play, Download, ShoppingCart, Bell, BellRing, RefreshCw, Plus, Users, Info, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { useAuth } from "@/contexts/AuthContext";
 import { Cart } from "@/components/Cart";
 import { useCart } from "@/hooks/useCart";
+import { usePurchases } from "@/hooks/usePurchases";
 import { Badge } from "@/components/ui/badge";
 
 
@@ -23,7 +24,19 @@ const Treats = () => {
   const { data: allProducts, isLoading, error } = useProducts();
   const { user } = useAuth();
   const isAdmin = user?.email === 'hechoenamerica369@gmail.com';
-  const { addItem, getItemCount } = useCart();
+  const { addItem, getItemCount, items: cartItems } = useCart();
+  const { data: purchases } = usePurchases();
+  const navigate = useNavigate();
+
+  // Check if a product is already purchased
+  const isProductPurchased = (productId: string) => {
+    return purchases?.some(p => p.product_id === productId && p.status === 'completed') ?? false;
+  };
+
+  // Check if a product is already in cart
+  const isProductInCart = (productId: string) => {
+    return cartItems.some(item => item.product_id === productId);
+  };
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [playingWaveform, setPlayingWaveform] = useState<string | null>(null);
   const [audioElements, setAudioElements] = useState<{
@@ -247,6 +260,26 @@ const Treats = () => {
       return;
     }
 
+    // Prevent adding already purchased products
+    if (isProductPurchased(product.id)) {
+      toast({
+        title: "Already Purchased",
+        description: "You already own this product. Check your Purchases page.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Prevent adding duplicates to cart
+    if (isProductInCart(product.id)) {
+      toast({
+        title: "Already in Cart",
+        description: `${product.name} is already in your cart.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     addItem(product);
     toast({
       title: "Added to Cart! 🛒",
@@ -269,6 +302,16 @@ const Treats = () => {
       toast({
         title: "Coming Soon",
         description: "This treat will be available soon. Use 'Notify Me' to get updates!",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Prevent repurchasing
+    if (isProductPurchased(product.id)) {
+      toast({
+        title: "Already Purchased",
+        description: "You already own this product. Check your Purchases page.",
         variant: "destructive",
       });
       return;
@@ -535,7 +578,27 @@ const Treats = () => {
               </span>
             </motion.div>
             
-            {category !== 'candies' && 
+            {category !== 'candies' && isProductPurchased(product.id) && (
+              <motion.div 
+                className="flex flex-col gap-2 w-full items-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <div className="flex items-center gap-2 text-green-400 mb-1">
+                  <CheckCircle className="h-5 w-5" />
+                  <span className="font-semibold text-sm">Already Purchased</span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => navigate('/purchases')}
+                  className="border-green-400/50 text-green-400 hover:bg-green-500/20 hover:border-green-400 w-full"
+                >
+                  Go to My Purchases
+                </Button>
+              </motion.div>
+            )}
+            {category !== 'candies' && !isProductPurchased(product.id) && 
               <motion.div 
                 className="flex flex-col gap-2 w-full" 
                 whileHover={{
@@ -554,10 +617,11 @@ const Treats = () => {
                 <Button 
                   size="sm" 
                   onClick={() => handleAddToCart(product)}
-                  className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white border-0 w-full"
+                  disabled={isProductInCart(product.id)}
+                  className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white border-0 w-full disabled:opacity-50"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Add to Cart
+                  {isProductInCart(product.id) ? 'Already in Cart' : 'Add to Cart'}
                 </Button>
               </motion.div>
             }
