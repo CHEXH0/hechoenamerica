@@ -1,7 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Globe, X, Chrome, Monitor } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+
+const translateWords = [
+  "Translate?", "¿Traducir?", "翻译？", "Перевести?", "Traduire?",
+  "Übersetzen?", "翻訳？", "번역?", "Traduzir?", "Dịch?",
+  "Traduci?", "Çevir?", "ترجمه؟", "अनुवाद?", "Tłumaczyć?",
+];
 
 const translatedIntros: { lang: string; text: string }[] = [
   { lang: "ES", text: "Usa la función de traducción de tu navegador para ver esta página en tu idioma." },
@@ -19,17 +25,46 @@ const translatedIntros: { lang: string; text: string }[] = [
 
 const TranslateHelper = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+  const [wordIndex, setWordIndex] = useState(0);
   const isMobile = useIsMobile();
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (isHovering) {
+      setWordIndex(0);
+      intervalRef.current = setInterval(() => {
+        setWordIndex(prev => (prev + 1) % translateWords.length);
+      }, 400);
+    } else {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      setWordIndex(0);
+    }
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [isHovering]);
 
   return (
     <>
       {/* Floating Globe Button - bottom right */}
-      <div className="fixed bottom-6 right-6 z-[9999] flex items-center gap-2 group">
-        <span
-          className="pointer-events-none text-sm font-medium text-white/90 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-lg opacity-0 translate-x-2 scale-90 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-200"
-        >
-          Translate?
-        </span>
+      <div
+        className="fixed bottom-6 right-6 z-[9999] flex items-center gap-2 group"
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+      >
+        <AnimatePresence mode="wait">
+          {isHovering && (
+            <motion.span
+              key={wordIndex}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.15 }}
+              className="pointer-events-none text-sm font-medium text-white/90 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-lg whitespace-nowrap"
+            >
+              {translateWords[wordIndex]}
+            </motion.span>
+          )}
+        </AnimatePresence>
         <button
           onClick={() => setIsOpen(true)}
           className="p-3 rounded-full bg-black/60 backdrop-blur-xl border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.5)] hover:bg-black/80 transition-all duration-200"
