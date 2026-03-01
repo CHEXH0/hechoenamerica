@@ -32,6 +32,8 @@ interface SongRequest {
   wants_mastering: boolean | null;
   wants_analog: boolean | null;
   wants_recorded_stems: boolean | null;
+  bit_depth: string | null;
+  sample_rate: string | null;
   // Payment tracking fields
   payment_intent_id: string | null;
   acceptance_deadline: string | null;
@@ -586,6 +588,16 @@ export const ProducerProjects = () => {
                               <div>
                                 <Label className="text-muted-foreground">Genre</Label>
                                 <p className="font-medium">{getGenreLabel(project.genre_category)}</p>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label className="text-muted-foreground">Bit Depth</Label>
+                                <p className="font-medium">{project.bit_depth || '24'}-bit</p>
+                              </div>
+                              <div>
+                                <Label className="text-muted-foreground">Sample Rate</Label>
+                                <p className="font-medium">{project.sample_rate || '44.1'} kHz</p>
                               </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">

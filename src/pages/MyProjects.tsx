@@ -47,6 +47,8 @@ interface SongRequest {
   refunded_at: string | null;
   file_urls: string[] | null;
   producer_checklist: Record<string, boolean> | null;
+  bit_depth: string | null;
+  sample_rate: string | null;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -710,6 +712,12 @@ const MyProjects = () => {
               </div>
             </div>
           )}
+
+          {/* Audio Quality */}
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline">{project.bit_depth || '24'}-bit</Badge>
+            <Badge variant="outline">{project.sample_rate || '44.1'} kHz</Badge>
+          </div>
 
           {/* Options */}
           <div className="flex flex-wrap gap-2">
