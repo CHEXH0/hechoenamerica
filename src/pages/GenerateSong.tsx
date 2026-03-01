@@ -616,6 +616,8 @@ const GenerateSong = () => {
               src="/laptop-uploads/HEA_White.png"
               alt="HechoEnAmerica Logo"
               className="w-full h-full object-contain"
+              loading="eager"
+              fetchPriority="high"
             />
           </div>
 
