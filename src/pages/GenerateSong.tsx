@@ -107,6 +107,7 @@ const GenerateSong = () => {
   const [wantsNoneOfAbove, setWantsNoneOfAbove] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState("");
+  const [customGenre, setCustomGenre] = useState("");
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [aiProgress, setAiProgress] = useState("");
   const [aiProgressPercent, setAiProgressPercent] = useState(0);
@@ -331,7 +332,9 @@ const GenerateSong = () => {
     }, 600);
 
     try {
-      const genreText = selectedGenre
+      const genreText = selectedGenre === "other" && customGenre.trim()
+        ? customGenre.trim()
+        : selectedGenre
         ? genreCategories.find((g) => g.value === selectedGenre)?.label || selectedGenre
         : "";
       const fullPrompt = genreText ? `${genreText} style: ${idea}` : idea;
@@ -486,7 +489,7 @@ const GenerateSong = () => {
           wants_analog: wantsAnalog,
           wants_mixing: wantsMixing,
           wants_mastering: wantsMastering,
-          genre_category: selectedGenre || null,
+          genre_category: selectedGenre === "other" && customGenre.trim() ? `other:${customGenre.trim()}` : selectedGenre || null,
         })
         .select()
         .single();
@@ -686,7 +689,7 @@ const GenerateSong = () => {
 
             <div className="space-y-2">
               <Label className="text-white text-lg font-semibold">Genre / Style</Label>
-              <Select value={selectedGenre} onValueChange={setSelectedGenre}>
+              <Select value={selectedGenre} onValueChange={(val) => { setSelectedGenre(val); if (val !== "other") setCustomGenre(""); }}>
                 <SelectTrigger className="bg-white/20 border-white/30 text-white">
                   <SelectValue placeholder="Select your preferred genre" />
                 </SelectTrigger>
@@ -698,6 +701,16 @@ const GenerateSong = () => {
                   ))}
                 </SelectContent>
               </Select>
+              {selectedGenre === "other" && (
+                <input
+                  type="text"
+                  value={customGenre}
+                  onChange={(e) => setCustomGenre(e.target.value)}
+                  placeholder="Type your genre (e.g. Afrobeat, Country, Jazz Fusion)"
+                  className="w-full mt-2 px-3 py-2 rounded-md bg-white/20 border border-white/30 text-white placeholder:text-white/50 text-sm focus:outline-none focus:ring-2 focus:ring-white/40"
+                  maxLength={60}
+                />
+              )}
               <p className="text-white/60 text-xs">
                 {currentTier.price === 0
                   ? "Guides the AI generation"
@@ -732,7 +745,7 @@ const GenerateSong = () => {
                     <p className="text-white/80 text-xs font-semibold">Prompt Requirements:</p>
                     <div className="space-y-1.5">
                       {[
-                        { label: "Genre selected", met: !!selectedGenre },
+                         { label: "Genre selected", met: !!selectedGenre && (selectedGenre !== "other" || customGenre.trim().length > 0) },
                         { label: "At least 20 characters describing your idea", met: idea.trim().length >= 20 },
                         {
                           label: "Mention mood or energy (e.g. chill, energetic, dark)",
@@ -767,7 +780,7 @@ const GenerateSong = () => {
                     <p className="text-white/80 text-xs font-semibold">Submission Requirements:</p>
                     <div className="space-y-1.5">
                       {[
-                        { label: "Genre selected", met: !!selectedGenre },
+                        { label: "Genre selected", met: !!selectedGenre && (selectedGenre !== "other" || customGenre.trim().length > 0) },
                         { label: "Describe your song idea (at least 20 characters)", met: idea.trim().length >= 20 },
                       ].map((req, i) => (
                         <div key={i} className="flex items-center gap-2">
@@ -1229,7 +1242,7 @@ const GenerateSong = () => {
                   disabled={
                     isGeneratingAI ||
                     (aiGenerationsRemaining !== null && aiGenerationsRemaining <= 0) ||
-                    !selectedGenre ||
+                    !selectedGenre || (selectedGenre === "other" && !customGenre.trim()) ||
                     idea.trim().length < 20 ||
                     !/\b(chill|energetic|dark|happy|sad|upbeat|mellow|aggressive|dreamy|epic|calm|relaxed|intense|groovy|funky|smooth|powerful|soft|hard|bright|warm|cold|melancholic|euphoric|nostalgic|ambient|lively|moody)\b/i.test(
                       idea,
@@ -1245,7 +1258,7 @@ const GenerateSong = () => {
                     ? "Generating..."
                     : `Generate Free AI Song${aiGenerationsRemaining !== null ? ` (${aiGenerationsRemaining}/${MAX_FREE_AI_SONGS} left)` : ""}`}
                 </Button>
-                {(!selectedGenre ||
+                {(!selectedGenre || (selectedGenre === "other" && !customGenre.trim()) ||
                   idea.trim().length < 20 ||
                   !/\b(chill|energetic|dark|happy|sad|upbeat|mellow|aggressive|dreamy|epic|calm|relaxed|intense|groovy|funky|smooth|powerful|soft|hard|bright|warm|cold|melancholic|euphoric|nostalgic|ambient|lively|moody)\b/i.test(
                     idea,
@@ -1275,7 +1288,7 @@ const GenerateSong = () => {
 
                 <Button
                   type="submit"
-                  disabled={isSubmitting || !selectedGenre || idea.trim().length < 20}
+                  disabled={isSubmitting || !selectedGenre || (selectedGenre === "other" && !customGenre.trim()) || idea.trim().length < 20}
                   className="w-full bg-white/50 text-black hover:bg-white font-bold text-lg py-6 disabled:opacity-40 disabled:cursor-not-allowed"
                   size="lg"
                 >
@@ -1288,7 +1301,7 @@ const GenerateSong = () => {
                     "Submit Your Song Idea"
                   )}
                 </Button>
-                {(!selectedGenre || idea.trim().length < 20) && (
+                {(!selectedGenre || (selectedGenre === "other" && !customGenre.trim()) || idea.trim().length < 20) && (
                   <p className="text-white/50 text-xs text-center">
                     Complete all submission requirements above to continue
                   </p>
