@@ -899,17 +899,17 @@ const GenerateSong = () => {
 
                 <CollapsibleContent className="space-y-2">
                   <div className="space-y-4 bg-white/10 p-4 rounded-lg">
-                    <div className="flex items-center justify-between">
+                    <div className={`flex items-center justify-between transition-opacity ${wantsNoneOfAbove ? 'opacity-30 pointer-events-none' : ''}`}>
                       <div className="flex items-center space-x-3">
                         <Checkbox
                         id="stems"
                         checked={wantsRecordedStems}
+                        disabled={wantsNoneOfAbove}
                         onCheckedChange={(checked) => {
                           setWantsRecordedStems(checked as boolean);
                           if (checked) setWantsNoneOfAbove(false);
                         }}
                         className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary" />
-
                         <label htmlFor="stems" className="text-white text-sm font-medium leading-none cursor-pointer">
                           Provide recorded stems
                         </label>
@@ -929,17 +929,17 @@ const GenerateSong = () => {
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    <div className={`flex items-center justify-between transition-opacity ${wantsNoneOfAbove ? 'opacity-30 pointer-events-none' : ''}`}>
                       <div className="flex items-center space-x-3">
                         <Checkbox
                         id="analog"
                         checked={wantsAnalog}
+                        disabled={wantsNoneOfAbove}
                         onCheckedChange={(checked) => {
                           setWantsAnalog(checked as boolean);
                           if (checked) setWantsNoneOfAbove(false);
                         }}
                         className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary" />
-
                         <label htmlFor="analog" className="text-white text-sm font-medium leading-none cursor-pointer">
                           Use analog equipment
                         </label>
@@ -959,17 +959,19 @@ const GenerateSong = () => {
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    <div className={`flex items-center justify-between transition-opacity ${wantsNoneOfAbove ? 'opacity-30 pointer-events-none' : ''}`}>
                       <div className="flex items-center space-x-3">
                         <Checkbox
                         id="mixing"
                         checked={wantsMixing}
+                        disabled={wantsNoneOfAbove}
                         onCheckedChange={(checked) => {
-                          setWantsMixing(checked as boolean);
-                          if (checked) setWantsNoneOfAbove(false);
+                          const val = checked as boolean;
+                          setWantsMixing(val);
+                          if (val) setWantsNoneOfAbove(false);
+                          if (!val) setWantsMastering(false);
                         }}
                         className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary" />
-
                         <label htmlFor="mixing" className="text-white text-sm font-medium leading-none cursor-pointer">
                           Include mixing service
                         </label>
@@ -989,21 +991,18 @@ const GenerateSong = () => {
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    <div className={`flex items-center justify-between transition-opacity ${wantsNoneOfAbove || !wantsMixing ? 'opacity-30 pointer-events-none' : ''}`}>
                       <div className="flex items-center space-x-3">
                         <Checkbox
                         id="mastering"
                         checked={wantsMastering}
+                        disabled={wantsNoneOfAbove || !wantsMixing}
                         onCheckedChange={(checked) => {
                           setWantsMastering(checked as boolean);
                           if (checked) setWantsNoneOfAbove(false);
                         }}
                         className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary" />
-
-                        <label
-                        htmlFor="mastering"
-                        className="text-white text-sm font-medium leading-none cursor-pointer">
-
+                        <label htmlFor="mastering" className="text-white text-sm font-medium leading-none cursor-pointer">
                           Include mastering service
                         </label>
                         <HoverCard>
@@ -1021,6 +1020,9 @@ const GenerateSong = () => {
                         +${addOnPricing.mastering.prices[tierIndex]}
                       </span>
                     </div>
+                    {!wantsMixing && !wantsNoneOfAbove && (
+                      <p className="text-white/40 text-xs ml-8">Mastering requires mixing service to be selected</p>
+                    )}
 
                     <div className="border-t border-white/10 my-2" />
 
