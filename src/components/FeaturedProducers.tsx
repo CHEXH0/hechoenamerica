@@ -187,6 +187,10 @@ const FeaturedProducers = () => {
                 { code: "gh", name: "Ghana" },
                 { code: "se", name: "Sweden" },
                 { code: "tr", name: "Turkey" },
+                { code: "cn", name: "China" },
+                { code: "vn", name: "Vietnam" },
+                { code: "ru", name: "Russia" },
+                { code: "ua", name: "Ukraine" },
               ].map((flag, i) => (
                 <motion.img
                   key={flag.code}
