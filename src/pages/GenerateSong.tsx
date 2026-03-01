@@ -1060,6 +1060,9 @@ const GenerateSong = () => {
                         +${addOnPricing.mastering.prices[tierIndex]}
                       </span>
                     </div>
+                    {!wantsMixing && (
+                      <p className="text-white/50 text-xs ml-6 -mt-1">Requires mixing service</p>
+                    )}
 
                     <div className="border-t border-white/10 my-2" />
 
