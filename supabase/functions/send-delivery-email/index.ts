@@ -95,6 +95,12 @@ serve(async (req) => {
     };
     const genreDisplay = genreDisplayNames[songRequest.genre_category] || songRequest.genre_category || "Custom";
 
+    // Audio quality
+    const bitDepth = songRequest.bit_depth || "24";
+    const sampleRate = songRequest.sample_rate || "44.1";
+    const bitDepthLabels: Record<string, string> = { "16": "16-bit", "24": "24-bit", "32": "32-bit float" };
+    const qualityDisplay = `${bitDepthLabels[bitDepth] || bitDepth + "-bit"} / ${sampleRate} kHz`;
+
     // Sanitize custom message (basic HTML escaping)
     const sanitizedMessage = customMessage
       ? customMessage.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>")
@@ -275,6 +281,10 @@ serve(async (req) => {
                   <tr>
                     <td style="padding: 8px 0; color: #a1a1aa; font-size: 14px;">Genre:</td>
                     <td style="padding: 8px 0; color: white; font-weight: 600; text-align: right;">${genreDisplay}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #a1a1aa; font-size: 14px;">Quality:</td>
+                    <td style="padding: 8px 0; color: white; font-weight: 600; text-align: right;">${qualityDisplay}</td>
                   </tr>
                 </table>
               </div>

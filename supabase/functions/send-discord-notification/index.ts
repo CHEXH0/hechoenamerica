@@ -279,6 +279,12 @@ function createNewRequestEmbed(songRequest: any, requestId: string) {
     addOnBreakdown.push(`🔄 ${songRequest.number_of_revisions}x Revisions: +$${cost}`);
   }
 
+  // Audio quality info
+  const bitDepth = songRequest.bit_depth || "24";
+  const sampleRate = songRequest.sample_rate || "44.1";
+  const bitDepthLabels: Record<string, string> = { "16": "16-bit", "24": "24-bit", "32": "32-bit float" };
+  const qualityText = `${bitDepthLabels[bitDepth] || bitDepth + "-bit"} / ${sampleRate} kHz`;
+
   const totalPrice = basePrice + addOnTotal;
 
   const embed = {
@@ -347,6 +353,35 @@ function createNewRequestEmbed(songRequest: any, requestId: string) {
     value: priceBreakdownText,
     inline: false,
   });
+
+  // Audio quality field
+  embed.fields.push({
+    name: "🎛️ Audio Quality",
+    value: qualityText,
+    inline: true,
+  });
+
+  // Production settings summary
+  const productionSettings: string[] = [];
+  if (songRequest.wants_recorded_stems) productionSettings.push("🎹 Stems");
+  if (songRequest.wants_analog) productionSettings.push("📻 Analog");
+  if (songRequest.wants_mixing) productionSettings.push("🎚️ Mixing");
+  if (songRequest.wants_mastering) productionSettings.push("🔊 Mastering");
+  if (songRequest.number_of_revisions > 0) productionSettings.push(`🔄 ${songRequest.number_of_revisions}x Revisions`);
+  
+  if (productionSettings.length > 0) {
+    embed.fields.push({
+      name: "⚙️ Production Settings",
+      value: productionSettings.join(" · "),
+      inline: true,
+    });
+  } else {
+    embed.fields.push({
+      name: "⚙️ Production Settings",
+      value: "Raw production only",
+      inline: true,
+    });
+  }
 
   // Files section
   if (songRequest.file_urls && songRequest.file_urls.length > 0) {

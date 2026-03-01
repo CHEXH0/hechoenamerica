@@ -563,6 +563,7 @@ export type Database = {
         Row: {
           acceptance_deadline: string | null
           assigned_producer_id: string | null
+          bit_depth: string | null
           blocked_producer_ids: string[] | null
           complexity_level: string | null
           created_at: string
@@ -577,6 +578,7 @@ export type Database = {
           producer_paid_at: string | null
           producer_payout_cents: number | null
           refunded_at: string | null
+          sample_rate: string | null
           song_idea: string
           status: string
           stripe_session_id: string | null
@@ -592,6 +594,7 @@ export type Database = {
         Insert: {
           acceptance_deadline?: string | null
           assigned_producer_id?: string | null
+          bit_depth?: string | null
           blocked_producer_ids?: string[] | null
           complexity_level?: string | null
           created_at?: string
@@ -606,6 +609,7 @@ export type Database = {
           producer_paid_at?: string | null
           producer_payout_cents?: number | null
           refunded_at?: string | null
+          sample_rate?: string | null
           song_idea: string
           status?: string
           stripe_session_id?: string | null
@@ -621,6 +625,7 @@ export type Database = {
         Update: {
           acceptance_deadline?: string | null
           assigned_producer_id?: string | null
+          bit_depth?: string | null
           blocked_producer_ids?: string[] | null
           complexity_level?: string | null
           created_at?: string
@@ -635,6 +640,7 @@ export type Database = {
           producer_paid_at?: string | null
           producer_payout_cents?: number | null
           refunded_at?: string | null
+          sample_rate?: string | null
           song_idea?: string
           status?: string
           stripe_session_id?: string | null

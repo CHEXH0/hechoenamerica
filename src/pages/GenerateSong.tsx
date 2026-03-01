@@ -512,6 +512,8 @@ const GenerateSong = () => {
           wants_analog: wantsAnalog,
           wants_mixing: wantsMixing,
           wants_mastering: wantsMastering,
+          bit_depth: selectedBitDepth,
+          sample_rate: selectedSampleRate,
           genre_category: selectedGenre === "other" && customGenre.trim() ? `other:${customGenre.trim()}` : selectedGenre || null,
         })
         .select()
