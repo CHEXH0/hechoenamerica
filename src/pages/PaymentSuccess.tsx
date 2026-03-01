@@ -34,13 +34,17 @@ const PaymentSuccess = () => {
           throw error;
         }
 
-        if (data?.purchases) {
-          setPurchases(data.purchases);
+        if (data?.success) {
+          if (data.purchases) {
+            setPurchases(data.purchases);
+          }
           setVerificationComplete(true);
           
           toast({
             title: "Payment Successful! 🎉",
-            description: "Your purchase has been completed and recorded.",
+            description: data.message === 'Payment already verified' 
+              ? "Your purchase was already recorded." 
+              : "Your purchase has been completed and recorded.",
           });
         }
       } catch (error) {
