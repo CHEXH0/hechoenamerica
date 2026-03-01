@@ -108,6 +108,8 @@ const GenerateSong = () => {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState("");
   const [customGenre, setCustomGenre] = useState("");
+  const [selectedBitDepth, setSelectedBitDepth] = useState("24");
+  const [selectedSampleRate, setSelectedSampleRate] = useState("44.1");
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [aiProgress, setAiProgress] = useState("");
   const [aiProgressPercent, setAiProgressPercent] = useState(0);
@@ -1032,6 +1034,58 @@ const GenerateSong = () => {
                       <span className="text-white/80 text-sm font-medium">
                         +${addOnPricing.mastering.prices[tierIndex]}
                       </span>
+                    </div>
+
+                    <div className="border-t border-white/10 my-2" />
+
+                    {/* Audio Quality Settings */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Label className="text-white text-sm font-semibold">Audio Quality</Label>
+                        <HoverCard>
+                          <HoverCardTrigger asChild>
+                            <button type="button">
+                              <Info className="w-3.5 h-3.5 text-white/50 hover:text-white" />
+                            </button>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="w-72 text-sm">
+                            <p className="text-muted-foreground">
+                              Higher bit depth = more dynamic range. Higher sample rate = more frequency detail. 24-bit / 48kHz is standard for professional production.
+                            </p>
+                          </HoverCardContent>
+                        </HoverCard>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <Label className="text-white/70 text-xs">Bit Depth</Label>
+                          <Select value={selectedBitDepth} onValueChange={setSelectedBitDepth}>
+                            <SelectTrigger className="bg-white/20 border-white/30 text-white text-sm h-9">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="16">16-bit</SelectItem>
+                              <SelectItem value="24">24-bit</SelectItem>
+                              <SelectItem value="32">32-bit float</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-white/70 text-xs">Sample Rate</Label>
+                          <Select value={selectedSampleRate} onValueChange={setSelectedSampleRate}>
+                            <SelectTrigger className="bg-white/20 border-white/30 text-white text-sm h-9">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="44.1">44.1 kHz</SelectItem>
+                              <SelectItem value="48">48 kHz</SelectItem>
+                              <SelectItem value="88.2">88.2 kHz</SelectItem>
+                              <SelectItem value="96">96 kHz</SelectItem>
+                              <SelectItem value="176.4">176.4 kHz</SelectItem>
+                              <SelectItem value="192">192 kHz</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="border-t border-white/10 my-2" />
