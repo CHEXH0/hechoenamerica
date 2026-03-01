@@ -1,0 +1,1 @@
+UPDATE public.products SET price = '$36.99', updated_at = now() WHERE id = 'v001';
