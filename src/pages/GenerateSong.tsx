@@ -1004,6 +1004,7 @@ const GenerateSong = () => {
                           onCheckedChange={(checked) => {
                             setWantsMixing(checked as boolean);
                             if (checked) setWantsNoneOfAbove(false);
+                            if (!checked) setWantsMastering(false);
                           }}
                           className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
                         />
@@ -1031,11 +1032,12 @@ const GenerateSong = () => {
                         <Checkbox
                           id="mastering"
                           checked={wantsMastering}
+                          disabled={!wantsMixing}
                           onCheckedChange={(checked) => {
                             setWantsMastering(checked as boolean);
                             if (checked) setWantsNoneOfAbove(false);
                           }}
-                          className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
+                          className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary disabled:opacity-40"
                         />
                         <label
                           htmlFor="mastering"
