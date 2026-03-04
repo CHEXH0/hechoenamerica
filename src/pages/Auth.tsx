@@ -19,19 +19,25 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const { user } = useAuth();
   const navigate = useNavigate();
+  const searchParams = new URLSearchParams(window.location.search);
+  const redirectTo = searchParams.get('redirect');
 
   // Redirect if already authenticated
   useEffect(() => {
     if (user) {
-      // Check if there's a pending song request
-      const pendingSongRequest = localStorage.getItem('pendingSongRequest');
-      if (pendingSongRequest) {
-        navigate('/generate-song');
+      if (redirectTo) {
+        navigate(redirectTo);
       } else {
-        navigate('/');
+        // Check if there's a pending song request
+        const pendingSongRequest = localStorage.getItem('pendingSongRequest');
+        if (pendingSongRequest) {
+          navigate('/generate-song');
+        } else {
+          navigate('/');
+        }
       }
     }
-  }, [user, navigate]);
+  }, [user, navigate, redirectTo]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
