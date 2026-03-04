@@ -77,7 +77,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = 'https://hechoenamericastudio.com/';
       
       const { error } = await supabase.auth.signUp({
         email,
@@ -134,7 +134,7 @@ const Auth = () => {
     setSendingReset(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: 'https://hechoenamericastudio.com/reset-password',
       });
 
       if (error) throw error;
