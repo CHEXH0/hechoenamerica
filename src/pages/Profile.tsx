@@ -116,7 +116,7 @@ const Profile = () => {
     setSendingResetEmail(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-        redirectTo: 'https://hechoenamericastudio.com/reset-password',
+        redirectTo: `${window.location.origin}/reset-password`,
       });
 
       if (error) throw error;

@@ -19,25 +19,19 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const { user } = useAuth();
   const navigate = useNavigate();
-  const searchParams = new URLSearchParams(window.location.search);
-  const redirectTo = searchParams.get('redirect');
 
   // Redirect if already authenticated
   useEffect(() => {
     if (user) {
-      if (redirectTo) {
-        navigate(redirectTo);
+      // Check if there's a pending song request
+      const pendingSongRequest = localStorage.getItem('pendingSongRequest');
+      if (pendingSongRequest) {
+        navigate('/generate-song');
       } else {
-        // Check if there's a pending song request
-        const pendingSongRequest = localStorage.getItem('pendingSongRequest');
-        if (pendingSongRequest) {
-          navigate('/generate-song');
-        } else {
-          navigate('/');
-        }
+        navigate('/');
       }
     }
-  }, [user, navigate, redirectTo]);
+  }, [user, navigate]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +71,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const redirectUrl = 'https://hechoenamericastudio.com/';
+      const redirectUrl = `${window.location.origin}/`;
       
       const { error } = await supabase.auth.signUp({
         email,
@@ -134,7 +128,7 @@ const Auth = () => {
     setSendingReset(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://hechoenamericastudio.com/reset-password',
+        redirectTo: `${window.location.origin}/reset-password`,
       });
 
       if (error) throw error;
