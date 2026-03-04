@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,10 +19,17 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectPath = searchParams.get('redirect');
 
   // Redirect if already authenticated
   useEffect(() => {
     if (user) {
+      // Honor explicit redirect param (e.g. from producer application)
+      if (redirectPath) {
+        navigate(redirectPath);
+        return;
+      }
       // Check if there's a pending song request
       const pendingSongRequest = localStorage.getItem('pendingSongRequest');
       if (pendingSongRequest) {
@@ -31,7 +38,7 @@ const Auth = () => {
         navigate('/');
       }
     }
-  }, [user, navigate]);
+  }, [user, navigate, redirectPath]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +78,9 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = redirectPath 
+        ? `${window.location.origin}/auth?redirect=${encodeURIComponent(redirectPath)}`
+        : `${window.location.origin}/`;
       
       const { error } = await supabase.auth.signUp({
         email,
