@@ -78,7 +78,9 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = redirectPath 
+        ? `${window.location.origin}/auth?redirect=${encodeURIComponent(redirectPath)}`
+        : `${window.location.origin}/`;
       
       const { error } = await supabase.auth.signUp({
         email,
