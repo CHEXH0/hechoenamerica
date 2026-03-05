@@ -11,12 +11,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  pending: { label: "Pending Review", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30", icon: <Clock className="h-3 w-3" /> },
-  approved: { label: "Price Set – Awaiting Response", color: "bg-blue-500/20 text-blue-400 border-blue-500/30", icon: <DollarSign className="h-3 w-3" /> },
-  accepted: { label: "Accepted – Awaiting Payment", color: "bg-green-500/20 text-green-400 border-green-500/30", icon: <CheckCircle className="h-3 w-3" /> },
-  paid: { label: "Paid", color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30", icon: <CheckCircle className="h-3 w-3" /> },
-  declined: { label: "Declined", color: "bg-red-500/20 text-red-400 border-red-500/30", icon: <XCircle className="h-3 w-3" /> },
-  rejected: { label: "Not Available", color: "bg-gray-500/20 text-gray-400 border-gray-500/30", icon: <XCircle className="h-3 w-3" /> },
+  pending: { label: "Pending Review", color: "bg-yellow-900/40 text-yellow-300 border-yellow-600/40", icon: <Clock className="h-3 w-3" /> },
+  approved: { label: "Price Set – Awaiting Response", color: "bg-blue-900/40 text-blue-300 border-blue-600/40", icon: <DollarSign className="h-3 w-3" /> },
+  accepted: { label: "Accepted – Awaiting Payment", color: "bg-green-900/40 text-green-300 border-green-600/40", icon: <CheckCircle className="h-3 w-3" /> },
+  paid: { label: "Paid", color: "bg-emerald-900/40 text-emerald-300 border-emerald-600/40", icon: <CheckCircle className="h-3 w-3" /> },
+  declined: { label: "Declined", color: "bg-red-900/40 text-red-300 border-red-600/40", icon: <XCircle className="h-3 w-3" /> },
+  rejected: { label: "Not Available", color: "bg-gray-800/40 text-gray-300 border-gray-600/40", icon: <XCircle className="h-3 w-3" /> },
 };
 
 const ChamoyRequestCard = () => {
@@ -55,8 +55,9 @@ const ChamoyRequestCard = () => {
     <div className="space-y-6">
       {/* Main request card */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <Card className="bg-gradient-to-br from-red-900/40 via-pink-900/30 to-orange-900/40 border-red-500/30 backdrop-blur-md overflow-hidden">
-          <CardHeader className="text-center pb-2">
+        <Card className="bg-[#1a0a0e] border-red-800/50 backdrop-blur-md overflow-hidden shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-red-900/30 via-pink-900/20 to-orange-900/30 pointer-events-none" />
+          <CardHeader className="text-center pb-2 relative z-10">
             <div className="flex justify-center mb-4">
               <img
                 src="/laptop-uploads/Gomas_Chamoy.png"
@@ -74,17 +75,17 @@ const ChamoyRequestCard = () => {
 
           {user ? (
             <>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-3 relative z-10">
                 <Textarea
                   placeholder="Describe your ideal chamoy gummy... (flavor, shape, size, quantity, special requests)"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="bg-black/40 border-red-500/30 text-white placeholder:text-gray-500 min-h-[100px] focus:border-orange-400/60"
+                  className="bg-black/60 border-red-800/40 text-white placeholder:text-gray-500 min-h-[100px] focus:border-orange-500/60"
                   maxLength={1000}
                 />
-                <p className="text-xs text-gray-500 text-right">{description.length}/1000</p>
+                <p className="text-xs text-gray-400 text-right">{description.length}/1000</p>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="relative z-10">
                 <Button
                   onClick={handleSubmit}
                   disabled={!description.trim() || createRequest.isPending}
@@ -100,7 +101,7 @@ const ChamoyRequestCard = () => {
               </CardFooter>
             </>
           ) : (
-            <CardFooter className="justify-center pb-6">
+            <CardFooter className="justify-center pb-6 relative z-10">
               <p className="text-gray-400">Please sign in to submit a custom candy request.</p>
             </CardFooter>
           )}
@@ -120,7 +121,7 @@ const ChamoyRequestCard = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
               >
-                <Card className="bg-black/40 border-gray-700/50 backdrop-blur-sm">
+                <Card className="bg-[#0d0d0d] border-gray-700/50">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <Badge className={`${config.color} border gap-1`}>
@@ -136,10 +137,10 @@ const ChamoyRequestCard = () => {
                     <p className="text-gray-300 text-sm">{req.description}</p>
 
                     {req.status === "approved" && req.admin_price && (
-                      <div className="bg-blue-900/30 border border-blue-500/30 rounded-lg p-4 space-y-3">
+                      <div className="bg-blue-950/60 border border-blue-700/40 rounded-lg p-4 space-y-3">
                         <div className="flex items-center justify-between">
                           <span className="text-blue-300 font-medium">Quoted Price:</span>
-                          <span className="text-2xl font-bold text-blue-400">${req.admin_price}</span>
+                          <span className="text-2xl font-bold text-blue-300">${req.admin_price}</span>
                         </div>
                         {req.admin_description && (
                           <p className="text-sm text-gray-300">{req.admin_description}</p>
@@ -148,7 +149,7 @@ const ChamoyRequestCard = () => {
                           <Button
                             onClick={() => respondRequest.mutate({ id: req.id, accepted: true })}
                             disabled={respondRequest.isPending}
-                            className="flex-1 bg-green-600 hover:bg-green-500 text-white"
+                            className="flex-1 bg-green-700 hover:bg-green-600 text-white"
                           >
                             <CheckCircle className="h-4 w-4 mr-2" />
                             Accept
@@ -157,7 +158,7 @@ const ChamoyRequestCard = () => {
                             onClick={() => respondRequest.mutate({ id: req.id, accepted: false })}
                             disabled={respondRequest.isPending}
                             variant="outline"
-                            className="flex-1 border-red-500/50 text-red-400 hover:bg-red-500/20"
+                            className="flex-1 border-red-600/50 text-red-300 hover:bg-red-900/30 hover:text-red-200"
                           >
                             <XCircle className="h-4 w-4 mr-2" />
                             Decline
@@ -167,12 +168,12 @@ const ChamoyRequestCard = () => {
                     )}
 
                     {req.status === "accepted" && (
-                      <div className="bg-green-900/30 border border-green-500/30 rounded-lg p-4">
+                      <div className="bg-green-950/60 border border-green-700/40 rounded-lg p-4">
                         <p className="text-green-300 mb-3">You accepted the offer of <strong>${req.admin_price}</strong>. Proceed to payment:</p>
                         <Button
                           onClick={() => handlePay(req)}
                           disabled={payingId === req.id}
-                          className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white"
+                          className="w-full bg-gradient-to-r from-green-700 to-emerald-700 hover:from-green-600 hover:to-emerald-600 text-white"
                         >
                           {payingId === req.id ? (
                             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -185,7 +186,7 @@ const ChamoyRequestCard = () => {
                     )}
 
                     {req.status === "paid" && (
-                      <div className="bg-emerald-900/30 border border-emerald-500/30 rounded-lg p-3">
+                      <div className="bg-emerald-950/60 border border-emerald-700/40 rounded-lg p-3">
                         <p className="text-emerald-300 text-sm flex items-center gap-2">
                           <CheckCircle className="h-4 w-4" /> Payment received! Your order is being prepared.
                         </p>
