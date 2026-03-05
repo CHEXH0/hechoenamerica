@@ -62,6 +62,57 @@ export type Database = {
         }
         Relationships: []
       }
+      chamoy_requests: {
+        Row: {
+          admin_description: string | null
+          admin_price: string | null
+          admin_reviewed_at: string | null
+          created_at: string
+          description: string
+          id: string
+          paid_at: string | null
+          status: string
+          stripe_session_id: string | null
+          updated_at: string
+          user_accepted: boolean | null
+          user_email: string
+          user_id: string
+          user_responded_at: string | null
+        }
+        Insert: {
+          admin_description?: string | null
+          admin_price?: string | null
+          admin_reviewed_at?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          paid_at?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_accepted?: boolean | null
+          user_email: string
+          user_id: string
+          user_responded_at?: string | null
+        }
+        Update: {
+          admin_description?: string | null
+          admin_price?: string | null
+          admin_reviewed_at?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          paid_at?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_accepted?: boolean | null
+          user_email?: string
+          user_id?: string
+          user_responded_at?: string | null
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           application_status: string | null
