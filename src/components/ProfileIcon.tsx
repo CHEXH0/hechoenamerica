@@ -85,7 +85,7 @@ const ProfileIcon = () => {
           <ShoppingBag className="h-4 w-4 mr-2" />
           My Treats
         </DropdownMenuItem>
-        {roleData?.isProducer && !roleData?.isAdmin && (
+        {roleData?.isProducer && (
           <DropdownMenuItem 
             onClick={() => navigate('/producer-profile')}
             className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
