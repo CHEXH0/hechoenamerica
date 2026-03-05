@@ -255,11 +255,11 @@ const FeaturedProducers = () => {
           {isMobile ? (
             <div className="flex gap-4 px-4 snap-x snap-mandatory">
               {displayProducers.map((producer, index) => (
-                <motion.div
+              <motion.div
                   key={`${producer.name}-${index}`}
                   initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
                   className="relative group cursor-pointer flex-shrink-0 w-[280px] snap-start"
                   onClick={() => handleProducerClick(producer.slug)}
                 >
