@@ -7,12 +7,14 @@ import { useProducers } from "@/hooks/useProducers";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSwipeScroll } from "@/hooks/useSwipeScroll";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const FeaturedProducers = () => {
   const navigate = useNavigate();
   const { data: producers = [], isLoading } = useProducers();
   const isMobile = useIsMobile();
   const { user } = useAuth();
+  const { data: userRole } = useUserRole();
   
   const [scrollDirection, setScrollDirection] = useState<'left' | 'right' | 'none'>('none');
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -127,7 +129,7 @@ const FeaturedProducers = () => {
   return (
     <section id="featured-producers" className="py-20 bg-black overflow-hidden">
       <div className="container mx-auto px-4 mb-12">
-        {user && producers.length >= 5 ? (
+        {userRole?.hasAccess && producers.length >= 5 ? (
           <>
             <motion.h2
               initial={{ opacity: 0, y: 20 }}

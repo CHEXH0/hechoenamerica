@@ -1,12 +1,44 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Music, ArrowLeft } from "lucide-react";
+import { Music, ArrowLeft, Shield } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useProducers } from "@/hooks/useProducers";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Producers = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const { data: userRole, isLoading: roleLoading } = useUserRole();
   const { data: producers = [], isLoading } = useProducers();
+
+  if (authLoading || roleLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Skeleton className="h-8 w-48" />
+      </div>
+    );
+  }
+
+  if (!userRole?.hasAccess) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Card className="bg-gray-900 border-gray-800">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <Shield className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-white mb-2">Access Denied</h3>
+              <p className="text-gray-400 mb-4">Only producers and admins can view this page.</p>
+              <Button onClick={() => navigate('/')} variant="outline">Go Home</Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white">
