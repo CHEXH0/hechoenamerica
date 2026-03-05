@@ -9,6 +9,7 @@ import { StripeConnectOnboarding } from "@/components/StripeConnectOnboarding";
 import { StorageManagement } from "@/components/StorageManagement";
 import { ProducerApplicationsAdmin } from "@/components/ProducerApplicationsAdmin";
 import { CancellationRequestsAdmin } from "@/components/CancellationRequestsAdmin";
+import ChamoyRequestsAdmin from "@/components/ChamoyRequestsAdmin";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -447,6 +448,9 @@ const Admin = () => {
             <>
               {/* Cancellation Requests - Show at top for visibility */}
               <CancellationRequestsAdmin />
+
+              {/* Chamoy Gummy Requests */}
+              <ChamoyRequestsAdmin />
 
               {/* Hiring Status Control */}
               <HiringStatusControl />
