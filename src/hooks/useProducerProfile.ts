@@ -94,6 +94,7 @@ export const useUpdateProducerProfile = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["producerProfile"] });
       queryClient.invalidateQueries({ queryKey: ["producers"] });
+      queryClient.invalidateQueries({ queryKey: ["producer"] });
       toast({
         title: "Profile updated",
         description: "Your producer profile has been saved successfully.",
