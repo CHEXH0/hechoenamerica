@@ -115,8 +115,10 @@ const ProducerApplicationForm = () => {
   };
 
   const onSubmit = async (data: FormData) => {
+    console.log("ProducerApplicationForm: onSubmit called with data:", data);
     if (!imageFile) {
       setImageError("Please upload a brand image");
+      console.log("ProducerApplicationForm: No image file uploaded");
       return;
     }
 
@@ -309,7 +311,7 @@ const ProducerApplicationForm = () => {
         
         <CardContent className="px-6 md:px-12 pb-10">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit, (errors) => { console.error("ProducerApplicationForm: Validation errors:", errors); })} className="space-y-8">
               {/* Basic Info Section */}
               <div className="grid md:grid-cols-2 gap-6">
                 <FormField
