@@ -7,14 +7,12 @@ import { useProducers } from "@/hooks/useProducers";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSwipeScroll } from "@/hooks/useSwipeScroll";
 import { useAuth } from "@/contexts/AuthContext";
-import { useUserRole } from "@/hooks/useUserRole";
 
 const FeaturedProducers = () => {
   const navigate = useNavigate();
   const { data: producers = [], isLoading } = useProducers();
   const isMobile = useIsMobile();
   const { user } = useAuth();
-  const { data: userRole } = useUserRole();
   
   const [scrollDirection, setScrollDirection] = useState<'left' | 'right' | 'none'>('none');
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -129,7 +127,7 @@ const FeaturedProducers = () => {
   return (
     <section id="featured-producers" className="py-20 bg-black overflow-hidden">
       <div className="container mx-auto px-4 mb-12">
-        {userRole?.hasAccess && producers.length >= 5 ? (
+        {user && producers.length >= 5 ? (
           <>
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
@@ -257,11 +255,11 @@ const FeaturedProducers = () => {
           {isMobile ? (
             <div className="flex gap-4 px-4 snap-x snap-mandatory">
               {displayProducers.map((producer, index) => (
-              <motion.div
+                <motion.div
                   key={`${producer.name}-${index}`}
                   initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
                   className="relative group cursor-pointer flex-shrink-0 w-[280px] snap-start"
                   onClick={() => handleProducerClick(producer.slug)}
                 >
