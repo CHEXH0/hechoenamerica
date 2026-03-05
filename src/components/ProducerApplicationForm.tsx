@@ -115,8 +115,10 @@ const ProducerApplicationForm = () => {
   };
 
   const onSubmit = async (data: FormData) => {
+    console.log("ProducerApplicationForm: onSubmit called with data:", data);
     if (!imageFile) {
       setImageError("Please upload a brand image");
+      console.log("ProducerApplicationForm: No image file uploaded");
       return;
     }
 
