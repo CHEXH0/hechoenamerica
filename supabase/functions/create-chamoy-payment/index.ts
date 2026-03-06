@@ -13,6 +13,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log("[CREATE-CHAMOY-PAYMENT] Function started");
+    
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY not set");
 
@@ -29,6 +31,7 @@ serve(async (req) => {
     if (userError || !userData.user?.email) throw new Error("Not authenticated");
 
     const { request_id } = await req.json();
+    console.log("[CREATE-CHAMOY-PAYMENT] Request ID:", request_id);
     if (!request_id) throw new Error("Missing request_id");
 
     // Fetch the chamoy request
@@ -39,7 +42,10 @@ serve(async (req) => {
       .eq("user_id", userData.user.id)
       .single();
 
-    if (fetchError || !chamoyReq) throw new Error("Request not found");
+    if (fetchError || !chamoyReq) {
+      console.error("[CREATE-CHAMOY-PAYMENT] Fetch error:", fetchError);
+      throw new Error("Request not found");
+    }
     if (chamoyReq.status !== "accepted") throw new Error("Request not in accepted state");
     if (!chamoyReq.admin_price) throw new Error("No price set");
 

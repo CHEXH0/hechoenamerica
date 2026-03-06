@@ -41,11 +41,15 @@ const ChamoyRequestCard = () => {
         body: { request_id: request.id },
       });
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       if (data?.url) {
-        window.open(data.url, "_blank");
+        window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL returned");
       }
-    } catch {
-      toast({ title: "Error", description: "Failed to create payment.", variant: "destructive" });
+    } catch (err: any) {
+      console.error("Chamoy payment error:", err);
+      toast({ title: "Error", description: err?.message || "Failed to create payment.", variant: "destructive" });
     } finally {
       setPayingId(null);
     }
