@@ -148,6 +148,28 @@ export const useAdminUpdateChamoyRequest = () => {
   });
 };
 
+export const useDeleteChamoyRequest = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("chamoy_requests")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chamoy-requests-admin"] });
+      queryClient.invalidateQueries({ queryKey: ["chamoy-requests"] });
+      toast({ title: "Request deleted" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete request.", variant: "destructive" });
+    },
+  });
+};
+
 export const useRespondChamoyRequest = () => {
   const queryClient = useQueryClient();
 
