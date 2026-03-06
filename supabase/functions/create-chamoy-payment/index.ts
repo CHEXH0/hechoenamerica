@@ -94,11 +94,7 @@ serve(async (req) => {
       },
     });
 
-    // Update the request with the stripe session id
-    const adminClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
+    // Update the request with the stripe session id (reuse adminClient from above)
     await adminClient
       .from("chamoy_requests")
       .update({ stripe_session_id: session.id })
