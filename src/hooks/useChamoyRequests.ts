@@ -12,12 +12,29 @@ export type ChamoyRequest = {
   admin_price: string | null;
   admin_description: string | null;
   admin_reviewed_at: string | null;
+  admin_notes: string | null;
   user_accepted: boolean | null;
   user_responded_at: string | null;
   stripe_session_id: string | null;
   paid_at: string | null;
+  customer_name: string | null;
+  customer_phone: string | null;
+  customer_email: string | null;
+  shipping_address: string | null;
+  shipping_status: string;
+  tracking_number: string | null;
+  shipped_at: string | null;
+  delivered_at: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type ChamoyRequestInput = {
+  description: string;
+  customer_name: string;
+  customer_phone: string;
+  customer_email: string;
+  shipping_address: string;
 };
 
 export const useChamoyRequests = () => {
@@ -58,14 +75,18 @@ export const useCreateChamoyRequest = () => {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async (description: string) => {
+    mutationFn: async (input: ChamoyRequestInput) => {
       if (!user?.id || !user?.email) throw new Error("Not authenticated");
       const { data, error } = await supabase
         .from("chamoy_requests")
         .insert({
           user_id: user.id,
           user_email: user.email,
-          description,
+          description: input.description,
+          customer_name: input.customer_name,
+          customer_phone: input.customer_phone,
+          customer_email: input.customer_email,
+          shipping_address: input.shipping_address,
         })
         .select()
         .single();
@@ -86,16 +107,40 @@ export const useAdminUpdateChamoyRequest = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, admin_price, admin_description, status }: { id: string; admin_price: string; admin_description: string; status: string }) => {
+    mutationFn: async ({ id, admin_price, admin_description, status, admin_notes, shipping_status, tracking_number }: {
+      id: string;
+      admin_price?: string;
+      admin_description?: string;
+      status?: string;
+      admin_notes?: string;
+      shipping_status?: string;
+      tracking_number?: string;
+    }) => {
+      const updates: Record<string, any> = {};
+      if (admin_price !== undefined) updates.admin_price = admin_price;
+      if (admin_description !== undefined) updates.admin_description = admin_description;
+      if (status !== undefined) updates.status = status;
+      if (admin_notes !== undefined) updates.admin_notes = admin_notes;
+      if (shipping_status !== undefined) {
+        updates.shipping_status = shipping_status;
+        if (shipping_status === "shipped") updates.shipped_at = new Date().toISOString();
+        if (shipping_status === "delivered") updates.delivered_at = new Date().toISOString();
+      }
+      if (tracking_number !== undefined) updates.tracking_number = tracking_number;
+      if (status !== undefined || admin_price !== undefined) {
+        updates.admin_reviewed_at = new Date().toISOString();
+      }
+
       const { error } = await supabase
         .from("chamoy_requests")
-        .update({ admin_price, admin_description, status, admin_reviewed_at: new Date().toISOString() })
+        .update(updates)
         .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["chamoy-requests-admin"] });
-      toast({ title: "Request updated", description: "The chamoy request has been reviewed." });
+      queryClient.invalidateQueries({ queryKey: ["chamoy-requests"] });
+      toast({ title: "Request updated" });
     },
     onError: () => {
       toast({ title: "Error", description: "Failed to update request.", variant: "destructive" });
