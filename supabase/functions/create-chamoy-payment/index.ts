@@ -31,19 +31,29 @@ serve(async (req) => {
     if (userError || !userData.user?.email) throw new Error("Not authenticated");
 
     const { request_id } = await req.json();
-    console.log("[CREATE-CHAMOY-PAYMENT] Request ID:", request_id);
+    console.log("[CREATE-CHAMOY-PAYMENT] Request ID:", request_id, "User ID:", userData.user.id);
     if (!request_id) throw new Error("Missing request_id");
 
-    // Fetch the chamoy request
-    const { data: chamoyReq, error: fetchError } = await supabaseClient
+    // Use service role client to bypass RLS for server-side lookup
+    const adminClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    // Fetch the chamoy request using admin client
+    const { data: chamoyReq, error: fetchError } = await adminClient
       .from("chamoy_requests")
       .select("*")
       .eq("id", request_id)
       .eq("user_id", userData.user.id)
-      .single();
+      .maybeSingle();
 
-    if (fetchError || !chamoyReq) {
+    if (fetchError) {
       console.error("[CREATE-CHAMOY-PAYMENT] Fetch error:", fetchError);
+      throw new Error("Failed to fetch request");
+    }
+    if (!chamoyReq) {
+      console.error("[CREATE-CHAMOY-PAYMENT] No request found for id:", request_id, "user:", userData.user.id);
       throw new Error("Request not found");
     }
     if (chamoyReq.status !== "accepted") throw new Error("Request not in accepted state");
