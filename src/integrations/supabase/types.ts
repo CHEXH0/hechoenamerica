@@ -65,14 +65,23 @@ export type Database = {
       chamoy_requests: {
         Row: {
           admin_description: string | null
+          admin_notes: string | null
           admin_price: string | null
           admin_reviewed_at: string | null
           created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          delivered_at: string | null
           description: string
           id: string
           paid_at: string | null
+          shipped_at: string | null
+          shipping_address: string | null
+          shipping_status: string
           status: string
           stripe_session_id: string | null
+          tracking_number: string | null
           updated_at: string
           user_accepted: boolean | null
           user_email: string
@@ -81,14 +90,23 @@ export type Database = {
         }
         Insert: {
           admin_description?: string | null
+          admin_notes?: string | null
           admin_price?: string | null
           admin_reviewed_at?: string | null
           created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          delivered_at?: string | null
           description: string
           id?: string
           paid_at?: string | null
+          shipped_at?: string | null
+          shipping_address?: string | null
+          shipping_status?: string
           status?: string
           stripe_session_id?: string | null
+          tracking_number?: string | null
           updated_at?: string
           user_accepted?: boolean | null
           user_email: string
@@ -97,14 +115,23 @@ export type Database = {
         }
         Update: {
           admin_description?: string | null
+          admin_notes?: string | null
           admin_price?: string | null
           admin_reviewed_at?: string | null
           created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          delivered_at?: string | null
           description?: string
           id?: string
           paid_at?: string | null
+          shipped_at?: string | null
+          shipping_address?: string | null
+          shipping_status?: string
           status?: string
           stripe_session_id?: string | null
+          tracking_number?: string | null
           updated_at?: string
           user_accepted?: boolean | null
           user_email?: string
