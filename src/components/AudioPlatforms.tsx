@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { Candy } from "lucide-react";
 
 const AudioPlatforms = React.memo(() => {
   const platforms = [
@@ -96,8 +96,8 @@ const AudioPlatforms = React.memo(() => {
                   <div className="absolute top-6 left-8 text-xs opacity-10 blur-sm pointer-events-none z-10">{platform.emojis[4]}</div>
                   
                   {platform.isIcon ? (
-                    <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center mb-4 relative z-20">
-                      <ArrowRight className="h-8 w-8 text-white" />
+                    <div className="w-16 h-16 rounded-full bg-pink-500 flex items-center justify-center mb-4 relative z-20">
+                      <Candy className="h-8 w-8 text-white" />
                     </div>
                   ) : (
                     <img src={platform.image} alt={platform.name} className="w-16 h-16 mb-4 relative z-20" loading="lazy" />

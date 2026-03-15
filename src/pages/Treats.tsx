@@ -825,15 +825,15 @@ const Treats = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
         >
-          <Tabs defaultValue="samples" className="space-y-12">
+           <Tabs defaultValue="candies" className="space-y-12">
             <TabsList className="grid w-full h-full grid-cols-3 bg-black/30 backdrop-blur-md border border-purple-500/20 text-xs sm:text-sm">
               <TabsTrigger 
-                value="samples" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-pink-700 text-gray-300 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
+                value="candies" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-red-700 text-gray-300 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
               >
-                <FileAudio className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="hidden sm:inline">Audio Samples</span>
-                <span className="sm:hidden">Samples</span>
+                <Candy className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="hidden sm:inline">Sweet Treats</span>
+                <span className="sm:hidden">Treats</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="vsts" 
@@ -844,12 +844,12 @@ const Treats = () => {
                 <span className="sm:hidden">VSTs</span>
               </TabsTrigger>
               <TabsTrigger 
-                value="candies" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-red-700 text-gray-300 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
+                value="samples" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-pink-700 text-gray-300 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
               >
-                <Candy className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="hidden sm:inline">Sweet Treats</span>
-                <span className="sm:hidden">Treats</span>
+                <FileAudio className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="hidden sm:inline">Audio Samples</span>
+                <span className="sm:hidden">Samples</span>
               </TabsTrigger>
             </TabsList>
 
