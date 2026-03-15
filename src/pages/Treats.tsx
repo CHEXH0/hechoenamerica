@@ -18,7 +18,6 @@ import { Cart } from "@/components/Cart";
 import { useCart } from "@/hooks/useCart";
 import { usePurchases } from "@/hooks/usePurchases";
 import { Badge } from "@/components/ui/badge";
-import ChamoyRequestCard from "@/components/ChamoyRequestCard";
 import { useSearchParams } from "react-router-dom";
 
 
