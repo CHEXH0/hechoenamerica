@@ -18,7 +18,7 @@ const GomasChamoy = () => {
   const [searchParams] = useSearchParams();
   const { data: allProducts, isLoading } = useProducts();
   const { user } = useAuth();
-  const { addItem, getItemCount, items: cartItems } = useCart();
+  const { addItem, removeItem, updateQuantity, getItemCount, items: cartItems } = useCart();
   const [cartOpen, setCartOpen] = useState(false);
 
   const candyProducts = React.useMemo(
