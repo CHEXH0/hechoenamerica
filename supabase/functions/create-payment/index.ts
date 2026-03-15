@@ -12,6 +12,13 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CREATE-PAYMENT] ${step}${detailsStr}`);
 };
 
+// Latin American country codes for shipping restrictions
+const LATIN_AMERICA_COUNTRIES = [
+  "MX", "GT", "HN", "SV", "NI", "CR", "PA", // Central America
+  "CO", "VE", "EC", "PE", "BO", "CL", "AR", "UY", "PY", "BR", // South America
+  "CU", "DO", "PR", "HT", "JM", "TT", "BB", "BS", "BZ", "GY", "SR", // Caribbean & others
+];
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -28,16 +35,21 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
 
+    // Try to authenticate user (optional for guest checkout)
+    let user = null;
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
-    const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    if (authHeader && authHeader !== "Bearer ") {
+      const token = authHeader.replace("Bearer ", "");
+      try {
+        const { data: userData } = await supabaseClient.auth.getUser(token);
+        user = userData.user;
+        logStep("User authenticated", { userId: user?.id, email: user?.email });
+      } catch {
+        logStep("Auth token invalid, proceeding as guest");
+      }
+    } else {
+      logStep("No auth header, proceeding as guest checkout");
+    }
 
     const { items, coupon_code } = await req.json();
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -48,23 +60,25 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-    // Check if Stripe customer exists
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    let customerId;
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-      logStep("Found existing Stripe customer", { customerId });
-    } else {
-      const customer = await stripe.customers.create({
-        email: user.email,
-        metadata: { supabase_user_id: user.id }
-      });
-      customerId = customer.id;
-      logStep("Created new Stripe customer", { customerId });
+    // If authenticated, find or create Stripe customer
+    let customerId: string | undefined;
+    if (user?.email) {
+      const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+      if (customers.data.length > 0) {
+        customerId = customers.data[0].id;
+        logStep("Found existing Stripe customer", { customerId });
+      } else {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          metadata: { supabase_user_id: user.id }
+        });
+        customerId = customer.id;
+        logStep("Created new Stripe customer", { customerId });
+      }
     }
 
     // Get product details from Supabase to verify prices
-    const productIds = items.map(item => item.product_id);
+    const productIds = items.map((item: any) => item.product_id);
     const { data: products, error: productsError } = await supabaseClient
       .from('products')
       .select('*')
@@ -79,13 +93,20 @@ serve(async (req) => {
 
     // Find corresponding Stripe prices for each product
     const lineItems = [];
+    let hasPhysicalProduct = false;
+
     for (const item of items) {
-      const product = products?.find(p => p.id === item.product_id);
+      const product = products?.find((p: any) => p.id === item.product_id);
       if (!product) {
         throw new Error(`Product ${item.product_id} not found or inactive`);
       }
 
-      // Search for Stripe price with matching supabase product id (fetch all, we'll validate activity)
+      // Check if this is a physical product (candies category needs shipping)
+      if (product.category === "candies") {
+        hasPhysicalProduct = true;
+      }
+
+      // Search for Stripe price with matching supabase product id
       const prices = await stripe.prices.search({
         query: `metadata['supabase_product_id']:'${item.product_id}'`,
       });
@@ -94,16 +115,13 @@ serve(async (req) => {
       const activePrice = prices.data.find((p: any) => p.active);
 
       if (activePrice) {
-        // Use the active price directly
         priceId = activePrice.id;
       } else if (prices.data.length > 0) {
-        // We have prices but none are active -> either reactivate if amount matches or create a fresh active price
-        // Parse amount from product.price like "$12.99" or "Free"
         const priceStr = String(product.price).replace(/[$,]/g, '');
         let desiredAmount: number;
 
         if (/^free$/i.test(priceStr.trim())) {
-          desiredAmount = 0; // Free items are $0.00
+          desiredAmount = 0;
         } else {
           desiredAmount = Math.round(parseFloat(priceStr) * 100);
           if (!Number.isFinite(desiredAmount) || desiredAmount < 0) {
@@ -113,12 +131,10 @@ serve(async (req) => {
 
         const anyPrice: any = prices.data[0];
         if (typeof anyPrice.unit_amount === 'number' && anyPrice.unit_amount === desiredAmount) {
-          // Same amount: try reactivating the existing price
           await stripe.prices.update(anyPrice.id, { active: true });
           priceId = anyPrice.id;
           logStep("Reactivated existing Stripe price", { priceId, amount: desiredAmount });
         } else {
-          // Different amount or missing: create a new active price under the same Stripe product
           const stripeProductId = typeof anyPrice.product === 'string' ? anyPrice.product : anyPrice.product.id;
           const newPrice = await stripe.prices.create({
             product: stripeProductId,
@@ -127,20 +143,17 @@ serve(async (req) => {
             metadata: { supabase_product_id: product.id },
           });
           priceId = newPrice.id;
-          logStep("Created new active Stripe price (no active found)", { priceId, amount: desiredAmount });
+          logStep("Created new active Stripe price", { priceId, amount: desiredAmount });
         }
       } else {
-        // No price found at all - create Stripe product and price on the fly based on Supabase product
         logStep("No existing Stripe price found, creating...", { productId: item.product_id });
 
-        // Find or create Stripe product first
         const existingProducts = await stripe.products.search({
           query: `metadata['supabase_id']:'${product.id}'`,
         });
 
         let stripeProduct = existingProducts.data[0];
         if (!stripeProduct) {
-          // Build a safe images array only if we have a valid absolute URL
           const origin = req.headers.get("origin") ?? "";
           let images: string[] = [];
           if (product.image) {
@@ -151,16 +164,13 @@ serve(async (req) => {
               try {
                 const absolute = new URL(img, origin).href;
                 images = [absolute];
-              } catch (_) {
-                // Ignore invalid image URL
-              }
+              } catch (_) {}
             }
           }
 
           stripeProduct = await stripe.products.create({
             name: product.name,
             description: product.description,
-            // Only pass images if valid
             ...(images.length ? { images } : {}),
             metadata: {
               supabase_id: product.id,
@@ -171,12 +181,11 @@ serve(async (req) => {
           logStep("Created Stripe product on-the-fly", { stripeProductId: stripeProduct.id });
         }
 
-        // Parse amount from product.price like "$12.99" or "Free"
         const priceStr = String(product.price).replace(/[$,]/g, '');
         let priceAmount: number;
         
         if (/^free$/i.test(priceStr.trim())) {
-          priceAmount = 0; // Free items are $0.00
+          priceAmount = 0;
         } else {
           priceAmount = Math.round(parseFloat(priceStr) * 100);
           if (!Number.isFinite(priceAmount) || priceAmount < 0) {
@@ -214,24 +223,37 @@ serve(async (req) => {
 
     // Build session options
     const sessionOptions: any = {
-      customer: customerId,
       line_items: lineItems,
       mode: "payment",
       success_url: `${origin}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/treats`,
-      allow_promotion_codes: !coupon_code, // Allow user to enter codes at checkout if none provided
+      allow_promotion_codes: !coupon_code,
       metadata: {
-        supabase_user_id: user.id,
+        supabase_user_id: user?.id || "guest",
         cart_items: JSON.stringify(items)
       },
     };
+
+    // Set customer or allow guest email entry
+    if (customerId) {
+      sessionOptions.customer = customerId;
+    } else {
+      // Guest checkout: Stripe will collect email
+      sessionOptions.customer_creation = "always";
+    }
+
+    // If physical products, collect shipping address (Latin America only)
+    if (hasPhysicalProduct) {
+      sessionOptions.shipping_address_collection = {
+        allowed_countries: LATIN_AMERICA_COUNTRIES,
+      };
+    }
 
     // If a coupon code was provided, try to find and apply it
     if (coupon_code) {
       logStep("Looking up coupon/promotion code", { couponCode: coupon_code });
       
       try {
-        // First try as a promotion code (user-facing code)
         const promotionCodes = await stripe.promotionCodes.list({
           code: coupon_code,
           active: true,
@@ -242,7 +264,6 @@ serve(async (req) => {
           sessionOptions.discounts = [{ promotion_code: promotionCodes.data[0].id }];
           logStep("Applied promotion code", { promoCodeId: promotionCodes.data[0].id });
         } else {
-          // Try as a direct coupon
           try {
             const coupon = await stripe.coupons.retrieve(coupon_code);
             if (coupon && coupon.valid) {

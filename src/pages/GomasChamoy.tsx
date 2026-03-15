@@ -44,10 +44,6 @@ const GomasChamoy = () => {
     cartItems.some((item) => item.product_id === productId);
 
   const handleAddToCart = (product: Product) => {
-    if (!user) {
-      toast({ title: "Login Required", description: "Please log in to add items to your cart.", variant: "destructive" });
-      return;
-    }
     if (isProductInCart(product.id)) {
       toast({ title: "Already in Cart", description: `${product.name} is already in your cart.`, variant: "destructive" });
       return;
@@ -83,21 +79,19 @@ const GomasChamoy = () => {
             Back to Treats
           </Link>
 
-          {user && (
-            <Button
-              onClick={() => setCartOpen(true)}
-              variant="outline"
-              className="border-pink-400/50 text-pink-400 hover:bg-pink-500/20 hover:border-pink-400 relative"
-            >
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              Cart
-              {getItemCount() > 0 && (
-                <Badge className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs px-1.5 py-0.5">
-                  {getItemCount()}
-                </Badge>
-              )}
-            </Button>
-          )}
+          <Button
+            onClick={() => setCartOpen(true)}
+            variant="outline"
+            className="border-pink-400/50 text-pink-400 hover:bg-pink-500/20 hover:border-pink-400 relative"
+          >
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            Cart
+            {getItemCount() > 0 && (
+              <Badge className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs px-1.5 py-0.5">
+                {getItemCount()}
+              </Badge>
+            )}
+          </Button>
         </div>
 
         {/* Hero */}
@@ -129,6 +123,14 @@ const GomasChamoy = () => {
             transition={{ duration: 0.6, delay: 0.3 }}
           >
             Handcrafted chamoy gummy candy with authentic Latin American flavors. Pick your favorites or request a custom order!
+          </motion.p>
+          <motion.p
+            className="text-sm text-pink-400/70 mt-3 max-w-xl mx-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          >
+            🌎 Currently shipping to Latin America only. More countries coming soon!
           </motion.p>
         </div>
 

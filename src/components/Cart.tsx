@@ -77,15 +77,6 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
   };
 
   const handleCheckout = async () => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in first.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (items.length === 0) {
       toast({
         title: "Cart is Empty",
