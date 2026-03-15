@@ -153,32 +153,32 @@ const GomasChamoy = () => {
                   transition={{ duration: 0.5, delay: i * 0.15 }}
                   className="group"
                 >
-                  <Card className="bg-gradient-to-br from-red-900/60 via-pink-900/40 to-orange-900/60 border-red-500/30 hover:border-orange-400/50 transition-all duration-300 hover:shadow-2xl hover:shadow-red-500/15 backdrop-blur-md overflow-hidden h-full flex flex-col">
+                  <Card className="bg-black/80 border-red-500/30 hover:border-pink-400/50 transition-all duration-300 hover:shadow-2xl hover:shadow-pink-500/15 backdrop-blur-md overflow-hidden h-full flex flex-col">
                     {/* Product Image */}
                     <div className="relative h-48 sm:h-56 overflow-hidden">
                       <motion.img
                         src={product.image}
                         alt={product.name}
-                        className="w-full h-full object-contain p-6 bg-black/20"
+                        className="w-full h-full object-contain p-6 bg-black/40"
                         whileHover={{ scale: 1.05 }}
                         transition={{ duration: 0.3 }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                      <Badge className="absolute top-3 right-3 bg-orange-600/90 text-white border-0 text-sm font-bold px-3">
+                      <Badge className="absolute top-3 right-3 bg-pink-600/90 text-white border-0 text-sm font-bold px-3">
                         {product.price}
                       </Badge>
                     </div>
 
                     <CardHeader className="pb-2">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500/30 to-red-500/30 flex items-center justify-center border border-orange-400/30">
-                          <Candy className="h-5 w-5 text-orange-400" />
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500/30 to-red-500/30 flex items-center justify-center border border-pink-400/30">
+                          <Candy className="h-5 w-5 text-pink-400" />
                         </div>
                         <div>
-                          <CardTitle className="text-white text-lg group-hover:text-orange-300 transition-colors duration-300">
+                          <CardTitle className="text-white text-lg group-hover:text-pink-300 transition-colors duration-300">
                             {product.name}
                           </CardTitle>
-                          <p className="text-xs text-orange-400/70 font-medium uppercase tracking-wider">
+                          <p className="text-xs text-pink-400/70 font-medium uppercase tracking-wider">
                             {product.type}
                           </p>
                         </div>
@@ -190,7 +190,7 @@ const GomasChamoy = () => {
                         {product.description}
                       </CardDescription>
                       {product.weight && (
-                        <Badge variant="outline" className="mt-3 border-orange-400/30 text-orange-300 text-xs">
+                        <Badge variant="outline" className="mt-3 border-pink-400/30 text-pink-300 text-xs">
                           {product.weight}
                         </Badge>
                       )}
@@ -200,7 +200,7 @@ const GomasChamoy = () => {
                       <Button
                         onClick={() => handleAddToCart(product)}
                         disabled={isProductInCart(product.id)}
-                        className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white border-0 disabled:opacity-50"
+                        className="w-full bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-500 hover:to-red-500 text-white border-0 disabled:opacity-50"
                       >
                         {isProductInCart(product.id) ? (
                           <>
@@ -227,11 +227,11 @@ const GomasChamoy = () => {
               transition={{ duration: 0.6, delay: 0.4 }}
             >
               <div className="text-center mb-8">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/10 border border-orange-400/20 mb-4">
-                  <Scroll className="h-4 w-4 text-orange-400" />
-                  <span className="text-orange-300 text-sm font-medium">Custom Orders</span>
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-pink-500/10 border border-pink-400/20 mb-4">
+                  <Scroll className="h-4 w-4 text-pink-400" />
+                  <span className="text-pink-300 text-sm font-medium">Custom Orders</span>
                 </div>
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent mb-2">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-red-400 bg-clip-text text-transparent mb-2">
                   Want Something Special?
                 </h2>
                 <p className="text-gray-400 max-w-lg mx-auto">
