@@ -16,7 +16,7 @@ const logStep = (step: string, details?: any) => {
 const LATIN_AMERICA_COUNTRIES = [
   "MX", "GT", "HN", "SV", "NI", "CR", "PA", // Central America
   "CO", "VE", "EC", "PE", "BO", "CL", "AR", "UY", "PY", "BR", // South America
-  "CU", "DO", "PR", "HT", "JM", "TT", "BB", "BS", "BZ", "GY", "SR", // Caribbean & others
+  "DO", "PR", "HT", "JM", "TT", "BB", "BS", "BZ", "GY", "SR", // Caribbean & others
 ];
 
 serve(async (req) => {
