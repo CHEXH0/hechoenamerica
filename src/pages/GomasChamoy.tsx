@@ -57,7 +57,7 @@ const GomasChamoy = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-red-950/40 to-pink-950/30 relative overflow-hidden">
+    <div className="min-h-screen bg-black relative overflow-hidden">
       {/* Animated background */}
       <motion.div
         className="absolute top-20 left-10 w-96 h-96 bg-red-500/10 rounded-full blur-3xl"
