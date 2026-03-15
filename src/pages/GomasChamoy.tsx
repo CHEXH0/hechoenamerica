@@ -227,11 +227,11 @@ const GomasChamoy = () => {
               transition={{ duration: 0.6, delay: 0.4 }}
             >
               <div className="text-center mb-8">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/10 border border-orange-400/20 mb-4">
-                  <Scroll className="h-4 w-4 text-orange-400" />
-                  <span className="text-orange-300 text-sm font-medium">Custom Orders</span>
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-pink-500/10 border border-pink-400/20 mb-4">
+                  <Scroll className="h-4 w-4 text-pink-400" />
+                  <span className="text-pink-300 text-sm font-medium">Custom Orders</span>
                 </div>
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent mb-2">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-red-400 bg-clip-text text-transparent mb-2">
                   Want Something Special?
                 </h2>
                 <p className="text-gray-400 max-w-lg mx-auto">
