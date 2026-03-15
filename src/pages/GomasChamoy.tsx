@@ -213,15 +213,11 @@ const GomasChamoy = () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => {
-                                const newQty = getCartQuantity(product.id) - 1;
-                                if (newQty <= 0) {
-                                  const { removeItem: remove } = useCart();
-                                  // Use updateQuantity from hook instead
-                                }
-                                // Use cart's updateQuantity
-                                const cartItem = cartItems.find(i => i.product_id === product.id);
-                                if (cartItem && cartItem.quantity > 1) {
-                                  addItem(product, -1);
+                                const qty = getCartQuantity(product.id);
+                                if (qty <= 1) {
+                                  removeItem(product.id);
+                                } else {
+                                  updateQuantity(product.id, qty - 1);
                                 }
                               }}
                               className="h-8 w-8 p-0 text-pink-400 hover:text-pink-300 hover:bg-pink-500/20"

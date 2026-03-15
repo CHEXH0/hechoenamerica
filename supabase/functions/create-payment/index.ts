@@ -101,6 +101,13 @@ serve(async (req) => {
         throw new Error(`Product ${item.product_id} not found or inactive`);
       }
 
+      // Validate stock for physical products
+      const stock = product.stock ?? 100;
+      const requestedQty = item.quantity || 1;
+      if (product.category === "candies" && requestedQty > stock) {
+        throw new Error(`Insufficient stock for ${product.name}. Only ${stock} available.`);
+      }
+
       // Check if this is a physical product (candies category needs shipping)
       if (product.category === "candies") {
         hasPhysicalProduct = true;
