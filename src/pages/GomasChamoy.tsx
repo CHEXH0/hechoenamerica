@@ -124,6 +124,14 @@ const GomasChamoy = () => {
           >
             Handcrafted chamoy gummy candy with authentic Latin American flavors. Pick your favorites or request a custom order!
           </motion.p>
+          <motion.p
+            className="text-sm text-pink-400/70 mt-3 max-w-xl mx-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          >
+            🌎 Currently shipping to Latin America only. More countries coming soon!
+          </motion.p>
         </div>
 
         {/* Products Grid or Custom Order Fallback */}
