@@ -40,12 +40,19 @@ const GomasChamoy = () => {
     }
   }, [searchParams]);
 
-  const isProductInCart = (productId: string) =>
-    cartItems.some((item) => item.product_id === productId);
+  const getCartQuantity = (productId: string) =>
+    cartItems.find((item) => item.product_id === productId)?.quantity || 0;
+
+  const getAvailableStock = (product: Product) => {
+    const stock = product.stock ?? 100;
+    const inCart = getCartQuantity(product.id);
+    return Math.max(0, stock - inCart);
+  };
 
   const handleAddToCart = (product: Product) => {
-    if (isProductInCart(product.id)) {
-      toast({ title: "Already in Cart", description: `${product.name} is already in your cart.`, variant: "destructive" });
+    const available = getAvailableStock(product);
+    if (available <= 0) {
+      toast({ title: "Out of Stock", description: `${product.name} is out of stock.`, variant: "destructive" });
       return;
     }
     addItem(product);
