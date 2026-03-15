@@ -44,10 +44,6 @@ const GomasChamoy = () => {
     cartItems.some((item) => item.product_id === productId);
 
   const handleAddToCart = (product: Product) => {
-    if (!user) {
-      toast({ title: "Login Required", description: "Please log in to add items to your cart.", variant: "destructive" });
-      return;
-    }
     if (isProductInCart(product.id)) {
       toast({ title: "Already in Cart", description: `${product.name} is already in your cart.`, variant: "destructive" });
       return;
