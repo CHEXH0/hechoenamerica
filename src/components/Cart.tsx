@@ -236,7 +236,8 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                                   disabled={(item.product.stock ?? 100) <= item.quantity}
                                   className="h-6 w-6 p-0 text-gray-400 hover:text-white disabled:opacity-30"
                                 >
-                                
+                                  <Plus className="h-3 w-3" />
+                                </Button>
                                 <Button
                                   variant="ghost"
                                   size="sm"
