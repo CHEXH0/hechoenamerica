@@ -35,6 +35,7 @@ const ProducerProfile = lazy(() => import("./pages/ProducerProfile"));
 const SignContract = lazy(() => import("./pages/SignContract"));
 const Producers = lazy(() => import("./pages/Producers"));
 const HEAProjects = lazy(() => import("./pages/HEAProjects"));
+const GomasChamoy = lazy(() => import("./pages/GomasChamoy"));
 
 // Loading fallback for lazy-loaded routes
 const PageLoader = () => (
@@ -99,6 +100,7 @@ const App = () => {
                   <Route path="/producer-profile" element={<ProducerProfile />} />
                   <Route path="/hea-projects" element={<HEAProjects />} />
                   <Route path="/sign-contract" element={<SignContract />} />
+                  <Route path="/gomas-chamoy" element={<GomasChamoy />} />
                 </Routes>
               </Suspense>
               <CookieConsent />
