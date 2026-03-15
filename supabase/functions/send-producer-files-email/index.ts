@@ -6,7 +6,8 @@ const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 interface SendFilesEmailRequest {
@@ -16,19 +17,19 @@ interface SendFilesEmailRequest {
   producerName?: string;
 }
 
-const APP_URL = 'https://hechoenamericastudio.com';
+const APP_URL = "https://hechoenamericastudio.com";
 
 // Genre display names
 const genreDisplayNames: Record<string, string> = {
-  'hip-hop': 'Hip Hop / Trap / Rap',
-  'rnb': 'R&B / Soul',
-  'reggae': 'Reggae / Dancehall',
-  'latin': 'Latin / Reggaeton',
-  'electronic': 'Electronic / EDM',
-  'pop': 'Pop / Alternative',
-  'rock': 'Rock / Indie',
-  'world': 'World / Indigenous / Medicina',
-  'other': 'Other / Mixed'
+  "hip-hop": "Hip Hop / Trap / Rap",
+  rnb: "R&B / Soul",
+  reggae: "Reggae / Dancehall",
+  latin: "Latin / Reggaeton",
+  electronic: "Electronic / EDM",
+  pop: "Pop / Alternative",
+  rock: "Rock / Indie",
+  world: "World / Indigenous / Medicina",
+  other: "Other / Mixed",
 };
 
 serve(async (req) => {
@@ -38,78 +39,79 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const body: SendFilesEmailRequest = await req.json();
     const { requestId, producerId } = body;
     let { producerEmail, producerName } = body;
-    
-    console.log('Sending producer files email:', { requestId, producerId, producerEmail, producerName });
+
+    console.log("Sending producer files email:", { requestId, producerId, producerEmail, producerName });
 
     // If producerId is provided but not email/name, look up the producer
     if (producerId && (!producerEmail || !producerName)) {
       const { data: producer, error: producerError } = await supabase
-        .from('producers')
-        .select('email, name')
-        .eq('id', producerId)
+        .from("producers")
+        .select("email, name")
+        .eq("id", producerId)
         .single();
 
       if (producerError) {
-        console.error('Error fetching producer:', producerError);
+        console.error("Error fetching producer:", producerError);
       } else if (producer) {
         producerEmail = producer.email || producerEmail;
         producerName = producer.name || producerName;
-        console.log('Looked up producer:', { producerEmail, producerName });
+        console.log("Looked up producer:", { producerEmail, producerName });
       }
     }
 
     if (!producerEmail) {
-      console.log('Producer has no email configured, skipping');
-      return new Response(
-        JSON.stringify({ success: false, message: 'Producer email not configured' }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.log("Producer has no email configured, skipping");
+      return new Response(JSON.stringify({ success: false, message: "Producer email not configured" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Fetch song request details
     const { data: songRequest, error: requestError } = await supabase
-      .from('song_requests')
-      .select('*')
-      .eq('id', requestId)
+      .from("song_requests")
+      .select("*")
+      .eq("id", requestId)
       .single();
 
     if (requestError || !songRequest) {
-      console.error('Error fetching song request:', requestError);
-      throw new Error('Song request not found');
+      console.error("Error fetching song request:", requestError);
+      throw new Error("Song request not found");
     }
 
     // Check if there are files to send
     if (!songRequest.file_urls || songRequest.file_urls.length === 0) {
-      console.log('No files attached to this request');
-      return new Response(
-        JSON.stringify({ success: false, message: 'No files attached to this request' }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.log("No files attached to this request");
+      return new Response(JSON.stringify({ success: false, message: "No files attached to this request" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    const genreDisplay = genreDisplayNames[songRequest.genre_category] || songRequest.genre_category || 'Not specified';
-    const formattedDate = new Date(songRequest.created_at).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    const genreDisplay = genreDisplayNames[songRequest.genre_category] || songRequest.genre_category || "Not specified";
+    const formattedDate = new Date(songRequest.created_at).toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
 
     // Build file links HTML
-    const fileLinksHtml = songRequest.file_urls.map((url: string, index: number) => {
-      // Extract filename from URL
-      const urlParts = url.split('/');
-      const fileName = urlParts[urlParts.length - 1].split('?')[0];
-      const displayName = decodeURIComponent(fileName) || `File ${index + 1}`;
-      
-      return `
+    const fileLinksHtml = songRequest.file_urls
+      .map((url: string, index: number) => {
+        // Extract filename from URL
+        const urlParts = url.split("/");
+        const fileName = urlParts[urlParts.length - 1].split("?")[0];
+        const displayName = decodeURIComponent(fileName) || `File ${index + 1}`;
+
+        return `
         <tr>
           <td style="padding: 12px 16px; border-bottom: 1px solid #f0f0f0;">
             <div style="display: flex; align-items: center; gap: 12px;">
@@ -124,15 +126,22 @@ serve(async (req) => {
           </td>
         </tr>
       `;
-    }).join('');
+      })
+      .join("");
 
     // Build add-ons list
     const addOns = [];
-    if (songRequest.wants_mixing) addOns.push('Mixing');
-    if (songRequest.wants_mastering) addOns.push('Mastering');
-    if (songRequest.wants_analog) addOns.push('Analog');
-    if (songRequest.wants_recorded_stems) addOns.push('Stems');
+    if (songRequest.wants_mixing) addOns.push("Mixing");
+    if (songRequest.wants_mastering) addOns.push("Mastering");
+    if (songRequest.wants_analog) addOns.push("Analog");
+    if (songRequest.wants_recorded_stems) addOns.push("Stems");
     if (songRequest.number_of_revisions > 0) addOns.push(`${songRequest.number_of_revisions} Revision(s)`);
+
+    // Audio quality
+    const bitDepth = songRequest.bit_depth || "24";
+    const sampleRate = songRequest.sample_rate || "44.1";
+    const bitDepthLabels: Record<string, string> = { "16": "16-bit", "24": "24-bit", "32": "32-bit float" };
+    const qualityDisplay = `${bitDepthLabels[bitDepth] || bitDepth + "-bit"} / ${sampleRate} kHz`;
 
     // Send email with file download links
     const emailResponse = await resend.emails.send({
@@ -175,12 +184,20 @@ serve(async (req) => {
                   <td style="padding: 6px 0; color: #666;">Submitted:</td>
                   <td style="padding: 6px 0;">${formattedDate}</td>
                 </tr>
-                ${addOns.length > 0 ? `
+                ${
+                  addOns.length > 0
+                    ? `
                 <tr>
                   <td style="padding: 6px 0; color: #666;">Add-ons:</td>
-                  <td style="padding: 6px 0;">${addOns.join(', ')}</td>
+                  <td style="padding: 6px 0;">${addOns.join(", ")}</td>
                 </tr>
-                ` : ''}
+                 `
+                    : ""
+                }
+                <tr>
+                  <td style="padding: 6px 0; color: #666;">Quality:</td>
+                  <td style="padding: 6px 0; font-weight: 600;">${qualityDisplay}</td>
+                </tr>
               </table>
             </div>
 
@@ -214,7 +231,7 @@ serve(async (req) => {
 
           <!-- Footer -->
           <div style="text-align: center; padding: 24px; color: #999; font-size: 13px;">
-            <p style="margin: 0;">HechoEnAmerica • LA MUSIC ES MEDICINA</p>
+            <p style="margin: 0;">HechoEnAmerica • LA MUSIC ES MEDICINE</p>
           </div>
 
         </body>
@@ -224,21 +241,15 @@ serve(async (req) => {
 
     console.log("Producer files email sent successfully:", emailResponse);
 
-    return new Response(
-      JSON.stringify({ success: true, message: 'Files email sent to producer' }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ success: true, message: "Files email sent to producer" }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (error: any) {
     console.error("Error in send-producer-files-email:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });

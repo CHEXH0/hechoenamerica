@@ -12,8 +12,8 @@ const logStep = (step: string, details?: any) => {
   console.log(`[PROCESS-PRODUCER-PAYOUT] ${step}${detailsStr}`);
 };
 
-// Platform fee percentage (15%)
-const PLATFORM_FEE_PERCENT = 15;
+// Platform fee percentage (10%)
+const PLATFORM_FEE_PERCENT = 10;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {

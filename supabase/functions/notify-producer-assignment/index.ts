@@ -14,26 +14,26 @@ interface AssignmentNotificationRequest {
   producerId: string;
 }
 
-const APP_URL = 'https://hechoenamericastudio.com';
+const APP_URL = "https://hechoenamericastudio.com";
 
 // Genre display names
 const genreDisplayNames: Record<string, string> = {
-  'hip-hop': 'Hip Hop / Trap / Rap',
-  'rnb': 'R&B / Soul',
-  'reggae': 'Reggae / Dancehall',
-  'latin': 'Latin / Reggaeton',
-  'electronic': 'Electronic / EDM',
-  'pop': 'Pop / Alternative',
-  'rock': 'Rock / Indie',
-  'world': 'World / Indigenous / Medicina',
-  'other': 'Other / Mixed'
+  "hip-hop": "Hip Hop / Trap / Rap",
+  rnb: "R&B / Soul",
+  reggae: "Reggae / Dancehall",
+  latin: "Latin / Reggaeton",
+  electronic: "Electronic / EDM",
+  pop: "Pop / Alternative",
+  rock: "Rock / Indie",
+  world: "World / Indigenous / Medicina",
+  other: "Other / Mixed",
 };
 
 // Tier descriptions
 const tierDescriptions: Record<string, string> = {
-  '$25': 'Demo Project - 30 seconds',
-  '$125': 'Artist-grade quality - 180 seconds',
-  '$250': 'Industry standard - 300 seconds'
+  $25: "Demo Project - 30 seconds",
+  $125: "Artist-grade quality - 180 seconds",
+  $250: "Industry standard - 300 seconds",
 };
 
 serve(async (req) => {
@@ -43,64 +43,61 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const { requestId, producerId }: AssignmentNotificationRequest = await req.json();
-    
-    console.log('Sending producer assignment notification:', { requestId, producerId });
+
+    console.log("Sending producer assignment notification:", { requestId, producerId });
 
     // Fetch producer details
     const { data: producer, error: producerError } = await supabase
-      .from('producers')
-      .select('*')
-      .eq('id', producerId)
+      .from("producers")
+      .select("*")
+      .eq("id", producerId)
       .single();
 
     if (producerError || !producer) {
-      console.error('Error fetching producer:', producerError);
-      throw new Error('Producer not found');
+      console.error("Error fetching producer:", producerError);
+      throw new Error("Producer not found");
     }
 
     if (!producer.email) {
-      console.log('Producer has no email configured, skipping notification');
-      return new Response(
-        JSON.stringify({ success: false, message: 'Producer has no email configured' }),
-        { 
-          status: 200, 
-          headers: { ...corsHeaders, "Content-Type": "application/json" } 
-        }
-      );
+      console.log("Producer has no email configured, skipping notification");
+      return new Response(JSON.stringify({ success: false, message: "Producer has no email configured" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Fetch song request details
     const { data: songRequest, error: requestError } = await supabase
-      .from('song_requests')
-      .select('*')
-      .eq('id', requestId)
+      .from("song_requests")
+      .select("*")
+      .eq("id", requestId)
       .single();
 
     if (requestError || !songRequest) {
-      console.error('Error fetching song request:', requestError);
-      throw new Error('Song request not found');
+      console.error("Error fetching song request:", requestError);
+      throw new Error("Song request not found");
     }
 
     // Build add-ons list
     const addOns = [];
-    if (songRequest.wants_mixing) addOns.push('Mixing Service');
-    if (songRequest.wants_mastering) addOns.push('Mastering Service');
-    if (songRequest.wants_analog) addOns.push('Analog Equipment');
-    if (songRequest.wants_recorded_stems) addOns.push('Recorded Stems');
+    if (songRequest.wants_mixing) addOns.push("Mixing Service");
+    if (songRequest.wants_mastering) addOns.push("Mastering Service");
+    if (songRequest.wants_analog) addOns.push("Analog Equipment");
+    if (songRequest.wants_recorded_stems) addOns.push("Recorded Stems");
     if (songRequest.number_of_revisions > 0) addOns.push(`${songRequest.number_of_revisions} Revision(s)`);
 
-    const genreDisplay = genreDisplayNames[songRequest.genre_category] || songRequest.genre_category || 'Not specified';
+    const genreDisplay = genreDisplayNames[songRequest.genre_category] || songRequest.genre_category || "Not specified";
     const tierDescription = tierDescriptions[songRequest.tier] || songRequest.tier;
-    const formattedDate = new Date(songRequest.created_at).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    const formattedDate = new Date(songRequest.created_at).toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
 
     // Send email notification - Basic, clean format for producer
@@ -155,23 +152,31 @@ serve(async (req) => {
               </div>
             </div>
 
-            ${addOns.length > 0 ? `
+            ${
+              addOns.length > 0
+                ? `
             <!-- Add-ons -->
             <div style="padding: 24px; border-bottom: 1px solid #eee;">
               <h3 style="margin: 0 0 12px 0; color: #7C3AED; font-size: 16px;">✨ Included Add-ons</h3>
               <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                ${addOns.map(addon => `<span style="background: #7C3AED; color: white; padding: 6px 14px; border-radius: 20px; font-size: 14px;">✓ ${addon}</span>`).join('')}
+                ${addOns.map((addon) => `<span style="background: #7C3AED; color: white; padding: 6px 14px; border-radius: 20px; font-size: 14px;">✓ ${addon}</span>`).join("")}
               </div>
             </div>
-            ` : ''}
+            `
+                : ""
+            }
 
-            ${songRequest.file_urls && songRequest.file_urls.length > 0 ? `
+            ${
+              songRequest.file_urls && songRequest.file_urls.length > 0
+                ? `
             <!-- Files -->
             <div style="padding: 24px; border-bottom: 1px solid #eee;">
               <h3 style="margin: 0 0 12px 0; color: #7C3AED; font-size: 16px;">📎 Customer Files</h3>
               <p style="margin: 0; color: #666;">${songRequest.file_urls.length} file(s) attached — view in dashboard</p>
             </div>
-            ` : ''}
+            `
+                : ""
+            }
 
             <!-- CTA -->
             <div style="padding: 32px; text-align: center;">
@@ -184,7 +189,7 @@ serve(async (req) => {
 
           <!-- Footer -->
           <div style="text-align: center; padding: 24px; color: #999; font-size: 13px;">
-            <p style="margin: 0;">HechoEnAmerica • LA MUSIC ES MEDICINA</p>
+            <p style="margin: 0;">HechoEnAmerica • LA MUSIC ES MEDICINE</p>
           </div>
 
         </body>
@@ -196,25 +201,27 @@ serve(async (req) => {
 
     // Also send Discord notification
     try {
-      const webhookUrl = Deno.env.get('DISCORD_WEBHOOK_URL');
+      const webhookUrl = Deno.env.get("DISCORD_WEBHOOK_URL");
       if (webhookUrl) {
         await fetch(webhookUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             content: `🎧 **${producer.name}** has been assigned to a ${songRequest.tier.toUpperCase()} project!`,
-            embeds: [{
-              title: "🎧 Producer Assigned",
-              color: 0x2ECC71,
-              fields: [
-                { name: "Producer", value: producer.name, inline: true },
-                { name: "Tier", value: songRequest.tier.toUpperCase(), inline: true },
-                { name: "Genre", value: songRequest.genre_category || 'Not specified', inline: true },
-                { name: "🔗 Quick Actions", value: `[View in Admin Dashboard](${APP_URL}/admin)`, inline: false }
-              ],
-              timestamp: new Date().toISOString()
-            }]
-          })
+            embeds: [
+              {
+                title: "🎧 Producer Assigned",
+                color: 0x2ecc71,
+                fields: [
+                  { name: "Producer", value: producer.name, inline: true },
+                  { name: "Tier", value: songRequest.tier.toUpperCase(), inline: true },
+                  { name: "Genre", value: songRequest.genre_category || "Not specified", inline: true },
+                  { name: "🔗 Quick Actions", value: `[View in Admin Dashboard](${APP_URL}/admin)`, inline: false },
+                ],
+                timestamp: new Date().toISOString(),
+              },
+            ],
+          }),
         });
         console.log("Discord notification sent for producer assignment");
       }
@@ -223,21 +230,15 @@ serve(async (req) => {
       // Don't fail the whole operation
     }
 
-    return new Response(
-      JSON.stringify({ success: true, message: 'Producer notification sent' }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ success: true, message: "Producer notification sent" }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (error: any) {
     console.error("Error in notify-producer-assignment:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });

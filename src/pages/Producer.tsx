@@ -56,7 +56,7 @@ const Producer = () => {
         <ProducerHeader />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <ProducerImage image={producer.image} name={producer.name} />
+          <ProducerImage image={producer.image} name={producer.name} emoji={(producer as any).emoji} />
 
           <div className="space-y-8">
             <ProducerInfo 
@@ -77,6 +77,27 @@ const Producer = () => {
             />
           </div>
         </div>
+
+        {/* Showcase Videos */}
+        {(() => {
+          const videos = [
+            (producer as any).showcase_video_1,
+            (producer as any).showcase_video_2,
+            (producer as any).showcase_video_3,
+          ].filter(Boolean);
+          if (videos.length === 0) return null;
+          return (
+            <div className="mt-16">
+              <div className={`grid gap-6 ${videos.length === 1 ? 'max-w-2xl mx-auto' : videos.length === 2 ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto' : 'grid-cols-1 md:grid-cols-3'}`}>
+                {videos.map((url: string, i: number) => (
+                  <div key={i} className="rounded-xl overflow-hidden border border-purple-900/30 bg-black/30 backdrop-blur-sm">
+                    <video src={url} controls className="w-full aspect-video object-contain" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

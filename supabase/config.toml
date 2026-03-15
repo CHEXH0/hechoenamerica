@@ -4,7 +4,7 @@ project_id = "eapbuoqkhckqaswfjexv"
 verify_jwt = true
 
 [functions.create-payment]
-verify_jwt = true
+verify_jwt = false
 
 [functions.verify-payment]
 verify_jwt = false
@@ -106,4 +106,19 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.validate-coupon]
+verify_jwt = false
+
+[functions.process-cancellation-request]
+verify_jwt = true
+
+[functions.notify-cancellation-request]
+verify_jwt = true
+
+[functions.change-producer]
+verify_jwt = true
+
+[functions.send-hea-contract]
+verify_jwt = true
+
+[functions.sign-hea-contract]
 verify_jwt = false

@@ -46,7 +46,7 @@ export const ProducerApplicationEmail = ({
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
-          <Heading style={h1}>HECHO EN AMÉRICA</Heading>
+          <Heading style={h1}>HECHO EN AMERICA</Heading>
           <Text style={tagline}>NEW PRODUCER APPLICATION</Text>
         </Section>
         

@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
+      <div className="container mx-auto px-4 py-12 max-w-4xl overflow-hidden">
         <Link 
           to="/" 
           className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 mb-8"
@@ -14,78 +14,103 @@ const PrivacyPolicy = () => {
           Back to Home
         </Link>
         
-        <h1 className="text-4xl font-bold mb-8">Privacy Policy</h1>
-        <p className="text-gray-400 mb-8">Last updated: January 1, 2026</p>
+        <h1 className="text-4xl font-bold heading-gradient mb-8">Privacy Policy</h1>
+        <p className="text-gray-400 mb-8">Last updated: February 15, 2026</p>
         
         <div className="space-y-8 text-gray-300">
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">1. Introduction</h2>
             <p>
-              Welcome to Hecho En América ("we," "our," or "us"). We are committed to protecting your 
-              personal information and your right to privacy. This Privacy Policy explains how we collect, 
-              use, disclose, and safeguard your information when you visit our website and use our services.
+              We at Hecho En America are committed to protecting your privacy. This policy explains how we handle your data when you use our music services and website.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">2. Information We Collect</h2>
-            <p className="mb-4">We collect information that you provide directly to us, including:</p>
+            <h2 className="text-2xl font-semibold text-white mb-4">2. What We Collect</h2>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>Name and email address when you create an account</li>
-              <li>Payment information when you make a purchase</li>
-              <li>Communications you send to us</li>
-              <li>Content you upload or submit through our services</li>
-              <li>Information from third-party services (like Google) when you connect them</li>
+              <li>Name, email, and country from your account or contact form</li>
+              <li>Profile info (display name, avatar, bio)</li>
+              <li>Payment info (processed securely via Stripe)</li>
+              <li>Song ideas, genres, and production preferences</li>
+              <li>Revision feedback and chat messages</li>
+              <li>AI generation inputs</li>
+              <li>Producer application details</li>
+              <li>Files you upload</li>
+              <li>Google Drive data (only for file delivery)</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">3. How We Use Your Information</h2>
-            <p className="mb-4">We use the information we collect to:</p>
+            <h2 className="text-2xl font-semibold text-white mb-4">3. How We Use It</h2>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>Provide, maintain, and improve our services</li>
-              <li>Process transactions and send related information</li>
-              <li>Send you technical notices and support messages</li>
-              <li>Respond to your comments and questions</li>
-              <li>Deliver files and content you have purchased</li>
+              <li>Provide and improve our services</li>
+              <li>Match you with producers</li>
+              <li>Process payments and refunds</li>
+              <li>Generate AI music from your prompts</li>
+              <li>Send order updates and notifications</li>
+              <li>Respond to your messages</li>
+              <li>Deliver files via Google Drive or download</li>
             </ul>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">4. Third-Party Services</h2>
-            <p>
-              We may use third-party services such as Google Drive to deliver purchased content. 
-              When you connect your account to these services, we only access the permissions 
-              necessary to provide our services (such as uploading files to your Google Drive). 
-              We do not access, read, or modify any other data in your connected accounts.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">5. Data Security</h2>
-            <p>
-              We implement appropriate technical and organizational measures to protect your 
-              personal information against unauthorized access, alteration, disclosure, or destruction.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">6. Your Rights</h2>
-            <p className="mb-4">You have the right to:</p>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>Access and receive a copy of your personal data</li>
-              <li>Request correction of inaccurate data</li>
-              <li>Request deletion of your data</li>
-              <li>Withdraw consent at any time</li>
-              <li>Disconnect third-party services from your account</li>
+              <li><strong>Stripe:</strong> Secure payments. We don't store card details.</li>
+              <li><strong>Google Drive:</strong> File delivery only.</li>
+              <li><strong>Supabase:</strong> Authentication and data storage.</li>
+              <li><strong>Resend:</strong> Sending emails (confirmations, etc.).</li>
+              <li><strong>Discord:</strong> Project notifications.</li>
+            </ul>
+            <p className="mt-4">
+              We only access what's needed to provide our services.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">5. Account Security</h2>
+            <p>
+              We use email-based login with verification. Passwords are checked against known breaches. Sessions are managed securely.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">6. Data Security</h2>
+            <p>
+              We use appropriate measures to protect your data, including secure storage and access controls.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">7. Translation</h2>
+            <p>
+              Translation is handled by your browser. No data is sent to us for this.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">8. Your Rights</h2>
+            <ul className="list-disc list-inside space-y-2 ml-4">
+              <li>Access or copy your data</li>
+              <li>Request corrections</li>
+              <li>Delete your account and all data</li>
+              <li>Withdraw consent</li>
+              <li>Disconnect third-party services</li>
+              <li>Request project cancellation</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">7. Contact Us</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">9. Account Deletion</h2>
             <p>
-              If you have any questions about this Privacy Policy, please contact us through 
-              our website's contact form.
+              You can delete your account from profile settings. This permanently removes all your data. This action cannot be undone.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">10. Contact Us</h2>
+            <p>
+              Questions? Use our contact form on the home page.
             </p>
           </section>
         </div>

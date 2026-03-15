@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, User, Mail, Lock, Trash2, Save } from "lucide-react";
+import { ArrowLeft, User, Mail, Lock, Trash2, Save, Camera } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile, useUpdateProfile, useDeleteAccount } from "@/hooks/useProfile";
@@ -10,9 +10,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import AvatarCropper from "@/components/AvatarCropper";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -27,6 +29,14 @@ const Profile = () => {
   const [sendingResetEmail, setSendingResetEmail] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletionEmailSent, setDeletionEmailSent] = useState(false);
+  const [deletionCode, setDeletionCode] = useState("");
+  const [generatedCode, setGeneratedCode] = useState("");
+  const [sendingDeletionEmail, setSendingDeletionEmail] = useState(false);
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Update form when profile loads
   useEffect(() => {
@@ -48,6 +58,49 @@ const Profile = () => {
     navigate('/auth');
     return null;
   }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.match(/^image\/(jpeg|png)$/)) {
+      toast({ title: "Invalid file", description: "Please select a .jpg or .png image.", variant: "destructive" });
+      return;
+    }
+    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB Supabase free tier limit
+    if (file.size > MAX_FILE_SIZE) {
+      toast({ title: "File too large", description: "Maximum file size is 50MB.", variant: "destructive" });
+      return;
+    }
+    setSelectedFile(file);
+    setCropperOpen(true);
+    e.target.value = "";
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    if (!user?.id) return;
+    setCropperOpen(false);
+    setUploadingAvatar(true);
+    try {
+      const fileName = `avatars/${user.id}-${Date.now()}.png`;
+      const { error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(fileName, croppedBlob, { upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(fileName);
+
+      updateProfile.mutate({
+        userId: user.id,
+        updates: { avatar_url: urlData.publicUrl }
+      });
+    } catch (error) {
+      console.error("Avatar upload error:", error);
+      toast({ title: "Upload failed", description: "Could not upload your photo. Please try again.", variant: "destructive" });
+    } finally {
+      setUploadingAvatar(false);
+      setSelectedFile(null);
+    }
+  };
 
   const handleUpdateProfile = () => {
     if (!user?.id) return;
@@ -85,6 +138,41 @@ const Profile = () => {
     }
   };
 
+
+  const handleSendDeletionVerification = async () => {
+    if (!user?.email) return;
+    setSendingDeletionEmail(true);
+    try {
+      // Generate a 6-digit code
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      setGeneratedCode(code);
+
+      await supabase.functions.invoke("send-contact-email", {
+        body: {
+          name: user.email,
+          email: user.email,
+          subject: "Account Deletion Verification",
+          message: `Your account deletion verification code is: ${code}\n\nIf you did not request this, please ignore this email.`,
+        },
+      });
+
+      setDeletionEmailSent(true);
+      toast({
+        title: "Verification email sent",
+        description: "Please check your email for the 6-digit verification code.",
+      });
+    } catch (error) {
+      console.error("Error sending deletion verification:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send verification email. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingDeletionEmail(false);
+    }
+  };
+
   const handleDeleteAccount = () => {
     if (deleteConfirmation !== "DELETE") {
       toast({
@@ -94,9 +182,19 @@ const Profile = () => {
       });
       return;
     }
+    if (!deletionEmailSent || deletionCode !== generatedCode) {
+      toast({
+        title: "Verification required",
+        description: "Please enter the correct verification code from your email.",
+        variant: "destructive",
+      });
+      return;
+    }
     deleteAccount.mutate();
     setDeleteDialogOpen(false);
     setDeleteConfirmation("");
+    setDeletionCode("");
+    setDeletionEmailSent(false);
   };
 
   return (
@@ -127,7 +225,7 @@ const Profile = () => {
             Profile Settings
           </h1>
           <p className="text-muted-foreground">
-            Manage your account settings and preferences
+            Manage your account
           </p>
         </motion.div>
 
@@ -146,6 +244,41 @@ const Profile = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Avatar Upload */}
+                <div className="flex flex-col items-center gap-3">
+                  <div className="relative group">
+                    <Avatar className="h-24 w-24">
+                      {profile?.avatar_url && (
+                        <AvatarImage src={profile.avatar_url} alt="Profile" />
+                      )}
+                      <AvatarFallback className="bg-muted text-muted-foreground text-2xl">
+                        <User className="h-10 w-10" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingAvatar}
+                      className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                    >
+                      <Camera className="h-6 w-6 text-white" />
+                    </button>
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".jpg,.jpeg,.png"
+                    className="hidden"
+                    onChange={handleFileSelect}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingAvatar}
+                  >
+                    {uploadingAvatar ? "Uploading..." : "Change Photo"}
+                  </Button>
+                </div>
                 <div>
                   <Label htmlFor="email">Email Address</Label>
                   <Input
@@ -156,7 +289,7 @@ const Profile = () => {
                     className="bg-muted/50 cursor-not-allowed"
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Email address cannot be changed after account activation.
+                    Email cannot be changed.
                   </p>
                 </div>
                 <div>
@@ -204,10 +337,9 @@ const Profile = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  For security reasons, password changes require email verification. 
-                  Click below to receive a password reset link.
-                </p>
+                 <p className="text-sm text-muted-foreground">
+                   Click below to receive a password reset link via email.
+                 </p>
                 <Button 
                   onClick={handleSendPasswordResetEmail}
                   disabled={sendingResetEmail}
@@ -237,9 +369,9 @@ const Profile = () => {
                 <div className="space-y-4">
                   <div>
                     <h3 className="font-semibold text-red-600 dark:text-red-400">Delete Account</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Permanently delete your account and all associated data. This action cannot be undone.
-                    </p>
+                     <p className="text-sm text-muted-foreground">
+                       Permanently delete your account and all data. This cannot be undone.
+                     </p>
                   </div>
                   <AlertDialog open={deleteDialogOpen} onOpenChange={(open) => {
                     setDeleteDialogOpen(open);
@@ -255,28 +387,57 @@ const Profile = () => {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription className="space-y-4">
-                          <p>
-                            This action cannot be undone. This will permanently delete your account
-                            and remove all your data from our servers, including:
-                          </p>
+                           <p>
+                             This will permanently delete your account and all data, including:
+                           </p>
                           <ul className="list-disc pl-5 text-sm space-y-1">
                             <li>Your profile information</li>
                             <li>All purchases and order history</li>
                             <li>Song requests and project files</li>
                             <li>Any uploaded files in storage</li>
                           </ul>
-                          <div className="pt-4">
-                            <Label htmlFor="deleteConfirm" className="text-foreground font-medium">
-                              Type <span className="font-bold text-red-600">DELETE</span> to confirm:
-                            </Label>
-                            <Input
-                              id="deleteConfirm"
-                              value={deleteConfirmation}
-                              onChange={(e) => setDeleteConfirmation(e.target.value)}
-                              placeholder="Type DELETE here"
-                              className="mt-2"
-                              autoComplete="off"
-                            />
+                          <div className="pt-4 space-y-4">
+                            {!deletionEmailSent ? (
+                              <Button
+                                onClick={handleSendDeletionVerification}
+                                disabled={sendingDeletionEmail}
+                                variant="outline"
+                                className="w-full"
+                              >
+                                <Mail className="mr-2 h-4 w-4" />
+                                {sendingDeletionEmail ? "Sending..." : "Send Verification Code to Email"}
+                              </Button>
+                            ) : (
+                              <>
+                                <div>
+                                  <Label htmlFor="deletionCode" className="text-foreground font-medium">
+                                    Enter the 6-digit code sent to your email:
+                                  </Label>
+                                  <Input
+                                    id="deletionCode"
+                                    value={deletionCode}
+                                    onChange={(e) => setDeletionCode(e.target.value)}
+                                    placeholder="Enter 6-digit code"
+                                    className="mt-2"
+                                    maxLength={6}
+                                    autoComplete="off"
+                                  />
+                                </div>
+                                <div>
+                                  <Label htmlFor="deleteConfirm" className="text-foreground font-medium">
+                                    Type <span className="font-bold text-red-600">DELETE</span> to confirm:
+                                  </Label>
+                                  <Input
+                                    id="deleteConfirm"
+                                    value={deleteConfirmation}
+                                    onChange={(e) => setDeleteConfirmation(e.target.value)}
+                                    placeholder="Type DELETE here"
+                                    className="mt-2"
+                                    autoComplete="off"
+                                  />
+                                </div>
+                              </>
+                            )}
                           </div>
                         </AlertDialogDescription>
                       </AlertDialogHeader>
@@ -284,7 +445,7 @@ const Profile = () => {
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <Button
                           onClick={handleDeleteAccount}
-                          disabled={deleteConfirmation !== "DELETE" || deleteAccount.isPending}
+                          disabled={!deletionEmailSent || deleteConfirmation !== "DELETE" || deletionCode !== generatedCode || deleteAccount.isPending}
                           variant="destructive"
                         >
                           {deleteAccount.isPending ? "Deleting..." : "Delete Account"}
@@ -298,6 +459,12 @@ const Profile = () => {
           </motion.div>
         </div>
       </div>
+      <AvatarCropper
+        open={cropperOpen}
+        onClose={() => { setCropperOpen(false); setSelectedFile(null); }}
+        imageFile={selectedFile}
+        onCropComplete={handleCropComplete}
+      />
     </div>
   );
 };

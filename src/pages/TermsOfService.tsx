@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 const TermsOfService = () => {
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
+      <div className="container mx-auto px-4 py-12 max-w-4xl overflow-hidden">
         <Link 
           to="/" 
           className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 mb-8"
@@ -14,102 +14,158 @@ const TermsOfService = () => {
           Back to Home
         </Link>
         
-        <h1 className="text-4xl font-bold mb-8">Terms of Service</h1>
-        <p className="text-gray-400 mb-8">Last updated: January 1, 2026</p>
+        <h1 className="text-4xl font-bold heading-gradient mb-8">Terms of Service</h1>
+        <p className="text-gray-400 mb-8">Last updated: March 6, 2026</p>
         
         <div className="space-y-8 text-gray-300">
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">1. Acceptance of Terms</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">1. Acceptance</h2>
             <p>
-              By accessing and using Hecho En América's website and services, you accept and agree 
-              to be bound by these Terms of Service. If you do not agree to these terms, please 
-              do not use our services.
+              By using our website and services, you agree to these Terms. If you do not agree, please do not use our services.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">2. Services Description</h2>
-            <p>
-              Hecho En América provides music production services including custom song creation, 
-              mixing, mastering, and digital product sales. We connect artists with professional 
-              producers to create high-quality music content.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">3. User Accounts</h2>
-            <p className="mb-4">When you create an account with us, you agree to:</p>
+            <h2 className="text-2xl font-semibold text-white mb-4">2. Services</h2>
+            <p className="mb-4">Hecho En America offers:</p>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>Provide accurate and complete information</li>
-              <li>Maintain the security of your account credentials</li>
-              <li>Accept responsibility for all activities under your account</li>
-              <li>Notify us immediately of any unauthorized use</li>
+              <li>Custom songs connecting artists with producers</li>
+              <li>Recording, mixing, and mastering</li>
+              <li>A digital shop ("Treats") for samples, presets, and tools</li>
+              <li>AI song generation</li>
+              <li>Revision and collaboration tools</li>
+              <li>File delivery via Google Drive or direct download</li>
+              <li>Custom chamoy gummy candy orders with shipping and delivery tracking</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">4. Purchases and Payments</h2>
-            <p className="mb-4">By making a purchase, you agree that:</p>
+            <h2 className="text-2xl font-semibold text-white mb-4">3. Accounts</h2>
+            <p className="mb-4">When creating an account, you agree to:</p>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>All payment information provided is accurate</li>
-              <li>You are authorized to use the payment method</li>
-              <li>Prices are subject to change without notice</li>
-              <li>Custom song requests are non-refundable once work has begun</li>
+              <li>Provide accurate info and a valid email</li>
+              <li>Verify your email before accessing features</li>
+              <li>Use a strong password</li>
+              <li>Keep your credentials secure</li>
+              <li>Accept responsibility for all account activity</li>
+              <li>Report unauthorized use immediately</li>
+            </ul>
+            <p className="mt-4">
+              Your email cannot be changed once verified. You may delete your account at any time.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">4. Custom Songs</h2>
+            <p className="mb-4">When ordering a custom song:</p>
+            <ul className="list-disc list-inside space-y-2 ml-4">
+              <li>Provide a clear idea, genre, and production needs</li>
+              <li>A producer will be assigned based on genre and availability</li>
+              <li>Unaccepted projects will be reassigned</li>
+              <li>Revisions are included based on your tier</li>
+              <li>Feedback is given through our revision chat</li>
+              <li>Delivery times are estimates</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">5. Intellectual Property</h2>
-            <p>
-              Upon full payment, you receive a license to use purchased content for personal or 
-              commercial purposes as specified at the time of purchase. We retain ownership of 
-              our branding, website content, and proprietary production techniques.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">6. Content Delivery</h2>
-            <p>
-              Digital products and custom songs will be delivered through your account dashboard 
-              or via third-party services such as Google Drive. Delivery times for custom songs 
-              vary based on complexity and are provided as estimates only.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">7. Prohibited Uses</h2>
-            <p className="mb-4">You may not use our services to:</p>
+            <h2 className="text-2xl font-semibold text-white mb-4">5. Chamoy Candy Orders</h2>
+            <p className="mb-4">When ordering custom chamoy gummy candy:</p>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>Violate any applicable laws or regulations</li>
-              <li>Infringe on intellectual property rights of others</li>
-              <li>Upload malicious content or attempt to harm our systems</li>
-              <li>Resell or redistribute purchased content without authorization</li>
+              <li>You must provide a valid name, email, phone number, and shipping address</li>
+              <li>All orders require admin approval and custom pricing (typically 2-4 business days)</li>
+              <li>You will receive a quoted price which you may accept or decline</li>
+              <li>Payment is processed via Stripe after you accept the quoted price</li>
+              <li>Order status and shipping updates are available on your dashboard</li>
+              <li>Tracking numbers are provided once orders are shipped</li>
+              <li>Shipping times are estimates and may vary</li>
+              <li>Candy orders are non-refundable once shipped</li>
+              <li>Your shipping information is stored securely and used only for order fulfillment</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">8. Limitation of Liability</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">6. Cancellations & Refunds</h2>
+            <ul className="list-disc list-inside space-y-2 ml-4">
+              <li><strong>Before production:</strong> Full refund available</li>
+              <li><strong>During production:</strong> Requires admin review</li>
+              <li>Refund amount depends on production progress</li>
+              <li>Refunds go to the original payment method via Stripe</li>
+              <li>Digital shop purchases are non-refundable once downloaded</li>
+              <li>Chamoy candy orders are non-refundable once shipped</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">7. Payments</h2>
+            <ul className="list-disc list-inside space-y-2 ml-4">
+              <li>Payment info must be accurate and authorized</li>
+              <li>Payments are processed securely via Stripe</li>
+              <li>Prices may change without notice</li>
+              <li>Coupon codes may be applied at checkout</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">8. AI Songs</h2>
             <p>
-              To the maximum extent permitted by law, Hecho En América shall not be liable for 
-              any indirect, incidental, special, consequential, or punitive damages arising from 
-              your use of our services.
+              AI-generated music is based on your text and genre input. Quality may vary. Usage is subject to fair use limits.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">9. Changes to Terms</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">9. Intellectual Property</h2>
             <p>
-              We reserve the right to modify these terms at any time. We will notify users of 
-              significant changes through our website or email. Continued use of our services 
-              after changes constitutes acceptance of the new terms.
+              After full payment, you receive a license to use purchased content. We retain ownership of our branding and platform. Producer content rights transfer to you upon payment.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">10. Contact</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">10. Delivery</h2>
             <p>
-              For questions about these Terms of Service, please contact us through our 
-              website's contact form.
+              Digital products are delivered via your dashboard, download links, or Google Drive. We only access what's needed for delivery. Physical products (chamoy candy) are shipped to the address provided at order time.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">11. Producer Applications</h2>
+            <p>
+              Producers may apply to join our platform. Acceptance is at our discretion. Approved producers are paid via Stripe Connect.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">12. Prohibited Uses</h2>
+            <ul className="list-disc list-inside space-y-2 ml-4">
+              <li>Breaking any laws</li>
+              <li>Infringing on others' rights</li>
+              <li>Uploading harmful content</li>
+              <li>Reselling content without permission</li>
+              <li>Misusing AI generation</li>
+              <li>Creating fake accounts</li>
+              <li>Bypassing payment controls</li>
+              <li>Providing false shipping or contact information</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">13. Liability</h2>
+            <p>
+              We are not liable for indirect damages from using our services, including delays, AI quality issues, or shipping delays for physical products.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">14. Changes</h2>
+            <p>
+              We may update these terms at any time. Continued use means you accept the changes.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">15. Contact</h2>
+            <p>
+              Questions? Use our contact form on the home page.
             </p>
           </section>
         </div>

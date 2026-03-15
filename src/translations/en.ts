@@ -2,7 +2,7 @@ import { Translations } from '@/types/translations';
 
 export const en: Translations = {
   hero: {
-    title: "HECHO EN AMÉRICA",
+    title: "HECHO EN AMERICA",
     subtitle: "LA MUSIC ES MEDICINE"
   },
   featuredProducers: {

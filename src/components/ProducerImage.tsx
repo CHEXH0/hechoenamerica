@@ -1,22 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 
 interface ProducerImageProps {
   image: string;
   name: string;
+  emoji?: string;
 }
 
-const ProducerImage = ({ image, name }: ProducerImageProps) => {
-  const [showAngel, setShowAngel] = useState(true);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setShowAngel(prev => !prev);
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, []);
-
+const ProducerImage = ({ image, name, emoji }: ProducerImageProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.8 }}
@@ -31,32 +22,28 @@ const ProducerImage = ({ image, name }: ProducerImageProps) => {
           alt={name}
           className="relative w-full max-w-md mx-auto rounded-3xl shadow-2xl transform group-hover:scale-105 transition-transform duration-500 border border-purple-900/30"
         />
-        <motion.div 
-          className="absolute -bottom-4 -right-4 bg-black/60 backdrop-blur-sm p-4 rounded-full border border-purple-500/30"
-          animate={{ 
-            scale: [1, 1.1, 1],
-            rotate: showAngel ? 0 : 180
-          }}
-          transition={{ 
-            scale: { duration: 1, repeat: Infinity },
-            rotate: { duration: 0.5 }
-          }}
-        >
-          <motion.div
-            key={showAngel ? 'angel' : 'devil'}
-            initial={{ opacity: 0, rotateY: -180 }}
-            animate={{ opacity: 1, rotateY: 0 }}
-            exit={{ opacity: 0, rotateY: 180 }}
-            transition={{ duration: 0.5 }}
-            className="text-3xl"
-            style={{
-              filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.3))',
-              transform: 'perspective(100px) rotateX(15deg)'
+        {emoji && (
+          <motion.div 
+            className="absolute -bottom-4 -right-4 bg-black/60 backdrop-blur-sm p-4 rounded-full border border-purple-500/30"
+            animate={{ 
+              scale: [1, 1.15, 1],
+            }}
+            transition={{ 
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut",
             }}
           >
-            {showAngel ? '😇' : '😈'}
+            <span
+              className="text-3xl block"
+              style={{
+                filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.3))',
+              }}
+            >
+              {emoji}
+            </span>
           </motion.div>
-        </motion.div>
+        )}
       </div>
     </motion.div>
   );

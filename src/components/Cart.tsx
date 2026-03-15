@@ -77,19 +77,10 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
   };
 
   const handleCheckout = async () => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to complete your purchase.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (items.length === 0) {
       toast({
         title: "Cart is Empty",
-        description: "Add some items to your cart first.",
+        description: "Add items to your cart first.",
         variant: "destructive",
       });
       return;
@@ -128,7 +119,7 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
       console.error('Checkout error:', error);
       toast({
         title: "Checkout Failed",
-        description: error instanceof Error ? error.message : "Please try again or sync products first.",
+        description: error instanceof Error ? error.message : "Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -236,12 +227,17 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => updateQuantity(item.product_id, item.quantity + 1)}
-                                  className="h-6 w-6 p-0 text-gray-400 hover:text-white"
+                                  onClick={() => {
+                                    const maxStock = item.product.stock ?? 100;
+                                    if (item.quantity < maxStock) {
+                                      updateQuantity(item.product_id, item.quantity + 1);
+                                    }
+                                  }}
+                                  disabled={(item.product.stock ?? 100) <= item.quantity}
+                                  className="h-6 w-6 p-0 text-gray-400 hover:text-white disabled:opacity-30"
                                 >
                                   <Plus className="h-3 w-3" />
                                 </Button>
-                                
                                 <Button
                                   variant="ghost"
                                   size="sm"

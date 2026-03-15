@@ -99,12 +99,12 @@ serve(async (req: Request): Promise<Response> => {
         <body>
           <div class="container">
             <div class="header">
-              <h1>🎵 Hecho en América</h1>
+              <h1>🎵 Hecho en America</h1>
               <p>Producer Interview Invitation</p>
             </div>
             <div class="content">
               <h2>Hello ${applicantName}! 👋</h2>
-              <p>Thank you for your interest in joining our producer team at Hecho en América. We've reviewed your application and would love to schedule an interview with you!</p>
+              <p>Thank you for your interest in joining our producer team at Hecho en America. We've reviewed your application and would love to schedule an interview with you!</p>
               
               <div class="highlight">
                 <p style="margin: 0;"><strong>Next Step:</strong> Please select a time that works for you using the button below. The meeting will be conducted via Google Meet.</p>
@@ -120,11 +120,11 @@ serve(async (req: Request): Promise<Response> => {
               
               <p style="margin-top: 30px;">
                 Best regards,<br>
-                <strong>The Hecho en América Team</strong>
+                <strong>The Hecho en America Team</strong>
               </p>
             </div>
             <div class="footer">
-              <p>© ${new Date().getFullYear()} Hecho en América. All rights reserved.</p>
+              <p>© ${new Date().getFullYear()} Hecho en America. All rights reserved.</p>
               <p style="margin-top: 10px;">This email was sent regarding your producer application.</p>
             </div>
           </div>
@@ -133,9 +133,9 @@ serve(async (req: Request): Promise<Response> => {
     `;
 
     const emailResponse = await resend.emails.send({
-      from: 'Hecho en América <team@hechoenamericastudio.com>',
+      from: 'Hecho en America <team@hechoenamericastudio.com>',
       to: [applicantEmail],
-      subject: '🎤 Interview Invitation - Hecho en América Producer Application',
+      subject: '🎤 Interview Invitation - Hecho en America Producer Application',
       html: emailHtml,
     });
 

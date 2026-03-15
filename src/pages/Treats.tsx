@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { ArrowLeft, FileAudio, Disc3, Candy, Play, Download, ShoppingCart, Bell, BellRing, RefreshCw, Plus, Users } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, FileAudio, Disc3, Candy, Play, Download, ShoppingCart, Bell, BellRing, RefreshCw, Plus, Users, Info, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,14 +16,28 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { useAuth } from "@/contexts/AuthContext";
 import { Cart } from "@/components/Cart";
 import { useCart } from "@/hooks/useCart";
+import { usePurchases } from "@/hooks/usePurchases";
 import { Badge } from "@/components/ui/badge";
+import { useSearchParams } from "react-router-dom";
 
 
 const Treats = () => {
   const { data: allProducts, isLoading, error } = useProducts();
   const { user } = useAuth();
   const isAdmin = user?.email === 'hechoenamerica369@gmail.com';
-  const { addItem, getItemCount } = useCart();
+  const { addItem, getItemCount, items: cartItems } = useCart();
+  const { data: purchases } = usePurchases();
+  const navigate = useNavigate();
+
+  // Check if a product is already purchased
+  const isProductPurchased = (productId: string) => {
+    return purchases?.some(p => p.product_id === productId && p.status === 'completed') ?? false;
+  };
+
+  // Check if a product is already in cart
+  const isProductInCart = (productId: string) => {
+    return cartItems.some(item => item.product_id === productId);
+  };
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [playingWaveform, setPlayingWaveform] = useState<string | null>(null);
   const [audioElements, setAudioElements] = useState<{
@@ -39,6 +53,8 @@ const Treats = () => {
   const vstItemsPerPage = 6;
   const [syncingProducts, setSyncingProducts] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+
 
   // Organize products by category
   const products = React.useMemo(() => {
@@ -247,6 +263,26 @@ const Treats = () => {
       return;
     }
 
+    // Prevent adding already purchased products
+    if (isProductPurchased(product.id)) {
+      toast({
+        title: "Already Purchased",
+        description: "You already own this product. Check your Purchases page.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Prevent adding duplicates to cart
+    if (isProductInCart(product.id)) {
+      toast({
+        title: "Already in Cart",
+        description: `${product.name} is already in your cart.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     addItem(product);
     toast({
       title: "Added to Cart! 🛒",
@@ -269,6 +305,16 @@ const Treats = () => {
       toast({
         title: "Coming Soon",
         description: "This treat will be available soon. Use 'Notify Me' to get updates!",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Prevent repurchasing
+    if (isProductPurchased(product.id)) {
+      toast({
+        title: "Already Purchased",
+        description: "You already own this product. Check your Purchases page.",
         variant: "destructive",
       });
       return;
@@ -373,7 +419,7 @@ const Treats = () => {
             alt={product.name} 
             className="w-full h-full object-cover" 
             whileHover={{
-              scale: 1.1
+              scale: 1.03
             }} 
             transition={{
               duration: 0.3
@@ -385,8 +431,8 @@ const Treats = () => {
           <motion.div 
             className="absolute top-4 right-4 w-16 h-16 rounded-lg overflow-hidden border-2 border-pink-400/50" 
             animate={{
-              scale: hoveredCard === product.id ? 1.2 : 1,
-              rotate: hoveredCard === product.id ? 5 : 0
+              scale: hoveredCard === product.id ? 1.05 : 1,
+              rotate: hoveredCard === product.id ? 2 : 0
             }} 
             transition={{
               duration: 0.3
@@ -401,11 +447,11 @@ const Treats = () => {
               onClick={() => handlePlayWaveform(product.id)} 
               className={`absolute bottom-4 left-4 ${playingWaveform === product.id ? 'bg-red-500 hover:bg-red-400' : 'bg-pink-500 hover:bg-pink-400'} text-white p-3 rounded-full transition-colors duration-200 shadow-lg`} 
               whileHover={{
-                scale: 1.1
+                scale: 1.05
               }} 
               whileTap={{
-                scale: 0.95
-              }} 
+                scale: 0.97
+              }}
               title={playingWaveform === product.id ? 'Stop audio' : 'Play preview'}
             >
               {playingWaveform === product.id ? 
@@ -463,8 +509,8 @@ const Treats = () => {
                 <motion.div 
                   className="inline-block p-4 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full mb-3" 
                   whileHover={{
-                    scale: 1.1,
-                    rotate: 5
+                    scale: 1.05,
+                    rotate: 2
                   }} 
                   transition={{
                     duration: 0.3
@@ -483,7 +529,7 @@ const Treats = () => {
             <motion.span 
               className="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-sm border border-purple-400/30" 
               whileHover={{
-                scale: 1.05
+                scale: 1.02
               }}
             >
               {product.type}
@@ -492,7 +538,7 @@ const Treats = () => {
               <motion.span 
                 className="bg-pink-500/20 text-pink-300 px-3 py-1 rounded-full text-sm border border-pink-400/30" 
                 whileHover={{
-                  scale: 1.05
+                  scale: 1.02
                 }}
               >
                 {product.duration}
@@ -502,7 +548,7 @@ const Treats = () => {
               <motion.span 
                 className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm border border-blue-400/30" 
                 whileHover={{
-                  scale: 1.05
+                  scale: 1.02
                 }}
               >
                 {product.size}
@@ -512,7 +558,7 @@ const Treats = () => {
               <motion.span 
                 className="bg-green-500/20 text-green-300 px-3 py-1 rounded-full text-sm border border-green-400/30" 
                 whileHover={{
-                  scale: 1.05
+                  scale: 1.02
                 }}
               >
                 {product.weight}
@@ -527,7 +573,7 @@ const Treats = () => {
             <motion.div 
               className="text-center"
               whileHover={{
-                scale: 1.05
+                scale: 1.02
               }}
             >
               <span className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
@@ -535,7 +581,27 @@ const Treats = () => {
               </span>
             </motion.div>
             
-            {category !== 'candies' && 
+            {category !== 'candies' && isProductPurchased(product.id) && (
+              <motion.div 
+                className="flex flex-col gap-2 w-full items-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <div className="flex items-center gap-2 text-green-400 mb-1">
+                  <CheckCircle className="h-5 w-5" />
+                  <span className="font-semibold text-sm">Already Purchased</span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => navigate('/purchases')}
+                  className="border-green-400/50 text-green-400 hover:bg-green-500/20 hover:border-green-400 w-full"
+                >
+                  Go to My Purchases
+                </Button>
+              </motion.div>
+            )}
+            {category !== 'candies' && !isProductPurchased(product.id) && 
               <motion.div 
                 className="flex flex-col gap-2 w-full" 
                 whileHover={{
@@ -554,10 +620,11 @@ const Treats = () => {
                 <Button 
                   size="sm" 
                   onClick={() => handleAddToCart(product)}
-                  className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white border-0 w-full"
+                  disabled={isProductInCart(product.id)}
+                  className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white border-0 w-full disabled:opacity-50"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Add to Cart
+                  {isProductInCart(product.id) ? 'Already in Cart' : 'Add to Cart'}
                 </Button>
               </motion.div>
             }
@@ -617,12 +684,12 @@ const Treats = () => {
       <motion.div 
         className="absolute top-20 left-10 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl"
         animate={{
-          x: [0, 100, 0],
-          y: [0, -50, 0],
-          scale: [1, 1.2, 1]
+          x: [0, 40, 0],
+          y: [0, -20, 0],
+          scale: [1, 1.08, 1]
         }}
         transition={{
-          duration: 20,
+          duration: 30,
           repeat: Infinity,
           ease: "easeInOut"
         }}
@@ -630,12 +697,12 @@ const Treats = () => {
       <motion.div 
         className="absolute bottom-20 right-10 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"
         animate={{
-          x: [0, -80, 0],
-          y: [0, 60, 0],
-          scale: [1.2, 1, 1.2]
+          x: [0, -30, 0],
+          y: [0, 25, 0],
+          scale: [1.05, 1, 1.05]
         }}
         transition={{
-          duration: 25,
+          duration: 35,
           repeat: Infinity,
           ease: "easeInOut"
         }}
@@ -644,10 +711,10 @@ const Treats = () => {
         className="absolute top-1/2 left-1/2 w-64 h-64 bg-red-500/5 rounded-full blur-2xl"
         animate={{
           rotate: [0, 360],
-          scale: [0.8, 1.3, 0.8]
+          scale: [0.9, 1.1, 0.9]
         }}
         transition={{
-          duration: 30,
+          duration: 45,
           repeat: Infinity,
           ease: "linear"
         }}
@@ -723,9 +790,9 @@ const Treats = () => {
         <div className="text-center mb-16">
           <motion.h1 
             className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-red-400 bg-clip-text text-transparent mb-6"
-            initial={{ opacity: 0, scale: 0.5 }}
+            initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
           >
             TREATS
           </motion.h1>
@@ -746,31 +813,31 @@ const Treats = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
         >
-          <Tabs defaultValue="samples" className="space-y-12">
+           <Tabs defaultValue="candies" className="space-y-12">
             <TabsList className="grid w-full h-full grid-cols-3 bg-black/30 backdrop-blur-md border border-purple-500/20 text-xs sm:text-sm">
               <TabsTrigger 
-                value="samples" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-pink-400 text-gray-400 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
+                value="candies" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-red-700 text-gray-300 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
               >
-                <FileAudio className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="hidden sm:inline">Audio Samples</span>
-                <span className="sm:hidden">Samples</span>
+                <Candy className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="hidden sm:inline">Sweet Treats</span>
+                <span className="sm:hidden">Treats</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="vsts" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-red-500/20 data-[state=active]:text-purple-400 text-gray-400 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-red-500/20 data-[state=active]:text-purple-700 text-gray-300 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
               >
                 <Disc3 className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="hidden sm:inline">VST Plugins</span>
                 <span className="sm:hidden">VSTs</span>
               </TabsTrigger>
               <TabsTrigger 
-                value="candies" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-red-400 text-gray-400 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
+                value="samples" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-pink-700 text-gray-300 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
               >
-                <Candy className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="hidden sm:inline">Sweet Treats</span>
-                <span className="sm:hidden">Treats</span>
+                <FileAudio className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="hidden sm:inline">Audio Samples</span>
+                <span className="sm:hidden">Samples</span>
               </TabsTrigger>
             </TabsList>
 
@@ -793,6 +860,10 @@ const Treats = () => {
                   Audio Samples
                 </h2>
                 <p className="text-gray-300 text-lg">High-quality samples for your next hit production</p>
+                <div className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-400/20">
+                  <Info className="h-4 w-4 text-purple-400 flex-shrink-0" />
+                  <span className="text-purple-300 text-sm">All audio samples are original HechoEnAmerica creations</span>
+                </div>
               </motion.div>
               <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 md:gap-8 px-4 sm:px-0">
                 {products.samples.map(product => renderProductCard(product, <FileAudio className="h-6 w-6" />, 'samples'))}
@@ -818,6 +889,10 @@ const Treats = () => {
                   VST Plugins
                 </h2>
                 <p className="text-gray-300 text-lg">Professional VST3 and VST instruments for your DAW</p>
+                <div className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-400/20">
+                  <Info className="h-4 w-4 text-purple-400 flex-shrink-0" />
+                  <span className="text-purple-300 text-sm">All VST plugins are original HechoEnAmerica creations</span>
+                </div>
                 {products.vsts.length > vstItemsPerPage && (
                   <p className="text-gray-400 text-sm mt-2">
                     Showing {((vstCurrentPage - 1) * vstItemsPerPage) + 1}-{Math.min(vstCurrentPage * vstItemsPerPage, products.vsts.length)} of {products.vsts.length} plugins
@@ -898,80 +973,30 @@ const Treats = () => {
                 <p className="text-gray-300 text-lg">Artisanal candies inspired by Latin American flavors</p>
               </motion.div>
               
-              {/* Coming Soon Section */}
-              <motion.div 
-                className="flex flex-col items-center justify-center py-20"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
+              <div className="max-w-2xl mx-auto text-center">
                 <motion.div
-                  className="relative mb-8"
-                  animate={{ 
-                    rotate: [0, 5, -5, 0],
-                    scale: [1, 1.05, 1]
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="space-y-6"
                 >
-                  <div className="w-32 h-32 bg-gradient-to-br from-red-500/20 to-pink-500/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-red-400/30">
-                    <Candy className="h-16 w-16 text-red-400" />
+                  <div className="flex justify-center mb-4">
+                    <img src="/laptop-uploads/Gomas_Chamoy.png" alt="Gomas Chamoy" className="h-40 w-40 object-contain drop-shadow-2xl" />
                   </div>
-                  <motion.div
-                    className="absolute -inset-4 bg-gradient-to-r from-red-500/10 to-pink-500/10 rounded-full blur-xl"
-                    animate={{
-                      opacity: [0.3, 0.6, 0.3],
-                      scale: [0.8, 1.2, 0.8]
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                  />
+                  <p className="text-gray-300 text-lg max-w-lg mx-auto">
+                    Custom chamoy gummy candy made to order! Place your request and we'll craft it for you.
+                  </p>
+                  <Link to="/gomas-chamoy">
+                    <Button
+                      size="lg"
+                      className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white border-0 px-8 mt-4"
+                    >
+                      <Candy className="h-5 w-5 mr-2" />
+                      Order Gomas Chamoy
+                    </Button>
+                  </Link>
                 </motion.div>
-                
-                <motion.h3 
-                  className="text-5xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent mb-4"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                >
-                  Coming Soon!
-                </motion.h3>
-                
-                <motion.p 
-                  className="text-xl text-gray-300 text-center max-w-2xl leading-relaxed mb-8"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.6 }}
-                >
-                  We're crafting something sweet and special! Our artisanal candy collection will feature 
-                  exotic Latin American flavors that will tantalize your taste buds. Stay tuned for an 
-                  unforgettable culinary experience.
-                </motion.p>
-                
-                <motion.div
-                  className="flex items-center gap-4 text-gray-400"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.8 }}
-                >
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "linear"
-                    }}
-                    className="w-6 h-6 border-2 border-red-400/30 border-t-red-400 rounded-full"
-                  />
-                  <span className="text-lg">Something delicious is brewing...</span>
-                </motion.div>
-              </motion.div>
+              </div>
             </TabsContent>
           </Tabs>
         </motion.div>
@@ -995,7 +1020,7 @@ const Treats = () => {
               </CardTitle>
               <CardDescription className="text-gray-900 text-lg leading-relaxed">
                 Join our network of talented music producers. Work with artists from around the world 
-                and be part of the Hecho En América family.
+                and be part of the Hecho En America family.
               </CardDescription>
             </CardHeader>
             <CardFooter className="justify-center pb-8">

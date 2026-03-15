@@ -32,6 +32,8 @@ interface SongRequest {
   wants_mastering: boolean | null;
   wants_analog: boolean | null;
   wants_recorded_stems: boolean | null;
+  bit_depth: string | null;
+  sample_rate: string | null;
   // Payment tracking fields
   payment_intent_id: string | null;
   acceptance_deadline: string | null;
@@ -590,6 +592,16 @@ export const ProducerProjects = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                               <div>
+                                <Label className="text-muted-foreground">Bit Depth</Label>
+                                <p className="font-medium">{project.bit_depth || '24'}-bit</p>
+                              </div>
+                              <div>
+                                <Label className="text-muted-foreground">Sample Rate</Label>
+                                <p className="font-medium">{project.sample_rate || '44.1'} kHz</p>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
                                 <Label className="text-muted-foreground">Revisions</Label>
                                 <p className="font-medium">{project.number_of_revisions || 0}</p>
                               </div>
@@ -647,7 +659,7 @@ export const ProducerProjects = () => {
                                 </div>
                                 {project.producer_payout_cents && (
                                   <div className="bg-emerald-500/10 p-3 rounded-lg">
-                                    <p className="text-xs text-muted-foreground">Your Payout (85%)</p>
+                                    <p className="text-xs text-muted-foreground">Your Payout (90%)</p>
                                     <p className="font-medium text-emerald-600">
                                       ${(project.producer_payout_cents / 100).toFixed(2)}
                                     </p>

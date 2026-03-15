@@ -170,7 +170,7 @@ const Purchases = () => {
       console.error('Download error:', error);
       toast({
         title: "Download Failed",
-        description: error instanceof Error ? error.message : "Unable to download this item. Please try again or contact support.",
+        description: error instanceof Error ? error.message : "Download failed. Please try again.",
         variant: "destructive",
       });
     }
@@ -203,9 +203,9 @@ const Purchases = () => {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent mb-2">
             My Treats
           </h1>
-          <p className="text-muted-foreground">
-            Track your treats from the marketplace
-          </p>
+           <p className="text-muted-foreground">
+             Your purchased items
+           </p>
         </motion.div>
 
         {/* Stats Cards */}
@@ -268,9 +268,9 @@ const Purchases = () => {
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>Clear all purchase history?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will permanently delete all your purchase records. Your downloaded files will not be affected, but you won't be able to re-download them from this page.
-                      </AlertDialogDescription>
+                       <AlertDialogDescription>
+                         This removes all purchase records. Downloaded files are not affected, but you cannot re-download from here.
+                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -300,9 +300,9 @@ const Purchases = () => {
                 <div className="text-center py-12">
                   <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">No purchases yet</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Start exploring the treats marketplace to make your first purchase!
-                  </p>
+                   <p className="text-muted-foreground mb-4">
+                     Browse the marketplace to get started.
+                   </p>
                   <Button onClick={() => navigate('/treats')}>
                     Browse Treats
                   </Button>
@@ -380,7 +380,7 @@ const Purchases = () => {
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Delete this purchase?</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    This will remove "{purchase.product_name}" from your purchase history. You won't be able to re-download it from this page.
+                                    This removes "{purchase.product_name}" from your history. You cannot re-download it after.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>

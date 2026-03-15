@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Music, Clock, CheckCircle, Loader2, Calendar, User, Wifi, AlertTriangle, RefreshCcw, Headphones, Users, Mail, XCircle, MessageSquare } from "lucide-react";
+import { ArrowLeft, Music, Clock, CheckCircle, Loader2, Calendar, User, Wifi, AlertTriangle, RefreshCcw, Headphones, Users, Mail, XCircle, MessageSquare, UserMinus } from "lucide-react";
+import { ProducerChecklist } from "@/components/ProducerChecklist";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -39,11 +40,22 @@ interface SongRequest {
   number_of_revisions: number | null;
   wants_mixing: boolean | null;
   wants_mastering: boolean | null;
+  wants_recorded_stems: boolean | null;
+  wants_analog: boolean | null;
   user_email: string;
   acceptance_deadline: string | null;
   refunded_at: string | null;
   file_urls: string[] | null;
+  producer_checklist: Record<string, boolean> | null;
+  bit_depth: string | null;
+  sample_rate: string | null;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const castChecklist = (val: any): Record<string, boolean> | null => {
+  if (val && typeof val === 'object' && !Array.isArray(val)) return val as Record<string, boolean>;
+  return null;
+};
 
 interface Purchase {
   id: string;
@@ -150,7 +162,7 @@ const CountdownTimer = ({ deadline }: { deadline: string }) => {
           <span className="font-semibold">Deadline Expired</span>
         </div>
         <p className="text-sm text-muted-foreground">
-          Processing refund if no producer accepted...
+          Processing refund...
         </p>
       </div>
     );
@@ -207,7 +219,7 @@ const CountdownTimer = ({ deadline }: { deadline: string }) => {
       </div>
       
       <p className="text-xs text-muted-foreground mt-2 text-center">
-        A producer will accept your project within this window
+        Waiting for a producer to accept
       </p>
     </div>
   );
@@ -242,6 +254,7 @@ const MyProjects = () => {
   const [resendingFilesId, setResendingFilesId] = useState<string | null>(null);
   const [cancellingProjectId, setCancellingProjectId] = useState<string | null>(null);
   const [requestingCancellationId, setRequestingCancellationId] = useState<string | null>(null);
+  const [changingProducerId, setChangingProducerId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const isProducer = userRole?.isProducer || false;
@@ -339,12 +352,22 @@ const MyProjects = () => {
 
       if (error) throw error;
 
+      try {
+        await supabase.functions.invoke('notify-cancellation-request', {
+          body: {
+            requestId: projectId,
+            reason: "Customer requested cancellation via My Projects page"
+          }
+        });
+      } catch (notifyError) {
+        console.error("Failed to send cancellation notifications:", notifyError);
+      }
+
       toast({
         title: "Cancellation Requested",
-        description: "Your cancellation request has been submitted for review. We'll get back to you soon.",
+        description: "Request submitted. We'll review it shortly.",
       });
 
-      // Update local state
       setMyRequests((prev) =>
         prev.map((p) =>
           p.id === projectId ? { ...p, status: "cancellation_requested" } : p
@@ -359,6 +382,36 @@ const MyProjects = () => {
       });
     } finally {
       setRequestingCancellationId(null);
+    }
+  };
+
+  const handleClientChangeProducer = async (projectId: string) => {
+    setChangingProducerId(projectId);
+    try {
+      const { data, error } = await supabase.functions.invoke("change-producer", {
+        body: {
+          requestId: projectId,
+          reason: "Client requested producer change",
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Producer Change Requested",
+        description: data.message || "Your project will be reassigned. A $25 fee applies.",
+      });
+
+      fetchProjects();
+    } catch (error) {
+      console.error("Error changing producer:", error);
+      toast({
+        title: "Error",
+        description: "Failed to change producer. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setChangingProducerId(null);
     }
   };
 
@@ -502,7 +555,7 @@ const MyProjects = () => {
         .order("created_at", { ascending: false });
 
       if (requestsError) throw requestsError;
-      setMyRequests(requestsData || []);
+      setMyRequests((requestsData || []).map(r => ({ ...r, producer_checklist: castChecklist(r.producer_checklist) })) as SongRequest[]);
 
       // If user is a producer, fetch their assigned projects
       if (isProducer) {
@@ -521,7 +574,7 @@ const MyProjects = () => {
             .order("created_at", { ascending: false });
 
           if (producerError) throw producerError;
-          setProducerProjects(producerProjectsData || []);
+          setProducerProjects((producerProjectsData || []).map(r => ({ ...r, producer_checklist: castChecklist(r.producer_checklist) })) as SongRequest[]);
         }
       }
 
@@ -660,23 +713,49 @@ const MyProjects = () => {
             </div>
           )}
 
+          {/* Audio Quality */}
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline">{project.bit_depth || '24'}-bit</Badge>
+            <Badge variant="outline">{project.sample_rate || '44.1'} kHz</Badge>
+          </div>
+
           {/* Options */}
           <div className="flex flex-wrap gap-2">
+            {project.wants_recorded_stems && (
+              <Badge variant="secondary">Stems</Badge>
+            )}
+            {project.wants_analog && (
+              <Badge variant="secondary">Analog</Badge>
+            )}
             {project.wants_mixing && (
               <Badge variant="secondary">Mixing</Badge>
             )}
             {project.wants_mastering && (
               <Badge variant="secondary">Mastering</Badge>
             )}
-            {project.number_of_revisions && project.number_of_revisions > 0 && (
+            {(project.number_of_revisions ?? 0) > 0 && (
               <Badge variant="secondary">
                 {project.number_of_revisions} Revisions
               </Badge>
             )}
           </div>
 
+          {/* Producer Checklist - shows for producer view on active projects */}
+          {isProducerView && ["in_progress", "review", "completed"].includes(project.status) && (
+            <ProducerChecklist
+              projectId={project.id}
+              wantsRecordedStems={!!project.wants_recorded_stems}
+              wantsAnalog={!!project.wants_analog}
+              wantsMixing={!!project.wants_mixing}
+              wantsMastering={!!project.wants_mastering}
+              numberOfRevisions={project.number_of_revisions || 0}
+              currentChecklist={project.producer_checklist || {}}
+              onChecklistUpdate={fetchProjects}
+            />
+          )}
+
           {/* Revision Tracker for Client View */}
-          {!isProducerView && project.number_of_revisions && project.number_of_revisions > 0 && 
+          {!isProducerView && (project.number_of_revisions ?? 0) > 0 && 
            ["in_progress", "review", "completed"].includes(project.status) && (
             <RevisionTracker
               projectId={project.id}
@@ -718,7 +797,7 @@ const MyProjects = () => {
               )}
               
               {/* Revision Tracker for Producer View - show status and feedback */}
-              {project.number_of_revisions && project.number_of_revisions > 0 && 
+              {(project.number_of_revisions ?? 0) > 0 && 
                ["in_progress", "review", "completed"].includes(project.status) && (
                 <RevisionTracker
                   projectId={project.id}
@@ -761,9 +840,9 @@ const MyProjects = () => {
                     <Mail className="h-6 w-6" />
                     <span className="font-semibold text-lg">Check Your Email!</span>
                   </div>
-                  <p className="text-sm text-muted-foreground text-center px-4">
-                    We've sent you an email with your download link. Check your inbox (and spam folder).
-                  </p>
+                   <p className="text-sm text-muted-foreground text-center px-4">
+                     Download link sent to your email. Check inbox and spam.
+                   </p>
                   <p className="text-xs text-muted-foreground">
                     Download link expires in 7 days
                   </p>
@@ -775,7 +854,7 @@ const MyProjects = () => {
                     <span className="font-medium">Payment Refunded</span>
                   </div>
                   <p className="text-sm text-muted-foreground text-center">
-                    No producer was available within 48 hours. Your payment has been fully refunded.
+                    No producer available. Your payment has been refunded.
                   </p>
                   <Button 
                     variant="outline" 
@@ -849,8 +928,8 @@ const MyProjects = () => {
                           <AlertDialogTitle>Cancel this project?</AlertDialogTitle>
                           <AlertDialogDescription>
                             {project.status === "paid" 
-                              ? "You will receive a full refund. This action cannot be undone."
-                              : "Are you sure you want to cancel this project? This action cannot be undone."}
+                               ? "You will receive a full refund. This cannot be undone."
+                               : "This will cancel your project permanently."}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -868,40 +947,81 @@ const MyProjects = () => {
 
                   {/* Request cancellation for post-acceptance projects (needs review) */}
                   {["accepted", "in_progress", "review"].includes(project.status) && (
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="mt-2 text-amber-600 hover:text-amber-600 hover:bg-amber-500/10 border-amber-500/30"
-                          disabled={requestingCancellationId === project.id}
-                        >
-                          {requestingCancellationId === project.id ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          ) : (
-                            <MessageSquare className="mr-2 h-4 w-4" />
-                          )}
-                          Request Cancellation
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Request Cancellation</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Since a producer has already started working on your project, your cancellation request will be reviewed by our team. Refunds are determined on a case-by-case basis depending on the work completed.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Keep Project</AlertDialogCancel>
-                          <AlertDialogAction 
-                            onClick={() => handleRequestCancellation(project.id)}
-                            className="bg-amber-600 text-white hover:bg-amber-700"
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {/* Change Producer */}
+                      {project.assigned_producer_id && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="text-blue-600 hover:text-blue-600 hover:bg-blue-500/10 border-blue-500/30"
+                              disabled={changingProducerId === project.id}
+                            >
+                              {changingProducerId === project.id ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <UserMinus className="mr-2 h-4 w-4" />
+                              )}
+                              Change Producer
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Change Producer?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Your project will be reassigned. A <strong>$25 fee</strong> applies.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Keep Current Producer</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => handleClientChangeProducer(project.id)}
+                                className="bg-blue-600 text-white hover:bg-blue-700"
+                              >
+                                Change Producer ($25 fee)
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+
+                      {/* Request Cancellation */}
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="text-amber-600 hover:text-amber-600 hover:bg-amber-500/10 border-amber-500/30"
+                            disabled={requestingCancellationId === project.id}
                           >
-                            Submit Request
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                            {requestingCancellationId === project.id ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <MessageSquare className="mr-2 h-4 w-4" />
+                            )}
+                            Request Cancellation
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Request Cancellation</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Work has already started. Our team will review your request and determine any refund.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Keep Project</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => handleRequestCancellation(project.id)}
+                              className="bg-amber-600 text-white hover:bg-amber-700"
+                            >
+                              Submit Request
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   )}
 
                   {/* Cancellation requested status message */}
@@ -955,7 +1075,7 @@ const MyProjects = () => {
                 My Projects
               </h1>
               <p className="text-muted-foreground">
-                {isProducer ? "Manage your requests and producer assignments" : "Track the progress of your song requests"}
+                {isProducer ? "Manage requests and assignments" : "Track your song requests"}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -993,9 +1113,9 @@ const MyProjects = () => {
                     <CardContent className="py-12 text-center">
                       <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                       <h3 className="text-lg font-semibold mb-2">No Requests Yet</h3>
-                      <p className="text-muted-foreground mb-4">
-                        You haven't submitted any song requests as a customer.
-                      </p>
+                       <p className="text-muted-foreground mb-4">
+                         No song requests yet.
+                       </p>
                       <Button onClick={() => navigate("/generate-song")}>
                         Create Your First Song
                       </Button>
@@ -1027,12 +1147,12 @@ const MyProjects = () => {
                     <CardContent className="py-12 text-center">
                       <Headphones className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                       <h3 className="text-lg font-semibold mb-2">No Producer Projects Yet</h3>
-                      <p className="text-muted-foreground mb-4">
-                        You haven't accepted any projects as a producer yet.
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Check Discord for new project notifications to accept!
-                      </p>
+                       <p className="text-muted-foreground mb-4">
+                         No assigned projects yet.
+                       </p>
+                       <p className="text-sm text-muted-foreground">
+                         Check Discord for new projects.
+                       </p>
                     </CardContent>
                   </Card>
                 ) : (
@@ -1063,9 +1183,9 @@ const MyProjects = () => {
                 <CardContent className="py-12 text-center">
                   <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">No Projects Yet</h3>
-                  <p className="text-muted-foreground mb-4">
-                    You haven't submitted any song requests yet.
-                  </p>
+                   <p className="text-muted-foreground mb-4">
+                     No song requests yet.
+                   </p>
                   <Button onClick={() => navigate("/generate-song")}>
                     Create Your First Song
                   </Button>

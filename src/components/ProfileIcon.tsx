@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, LogIn, Settings, Music, ShoppingBag, Mic2 } from 'lucide-react';
+import { User, LogIn, Settings, Music, ShoppingBag, Mic2, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -8,13 +8,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useProfile } from '@/hooks/useProfile';
 import { Link, useNavigate } from 'react-router-dom';
 
 const ProfileIcon = () => {
   const { user, signOut, loading } = useAuth();
   const { data: roleData } = useUserRole();
+  const { data: profile } = useProfile(user?.id);
   const navigate = useNavigate();
 
   if (loading) {
@@ -44,16 +47,21 @@ const ProfileIcon = () => {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="p-2 rounded-full hover:bg-white/10 transition-colors"
+          className="p-1 rounded-full hover:bg-white/10 transition-colors"
         >
-          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-            <User className="h-3 w-3 text-white" />
-          </div>
+          <Avatar className="h-7 w-7">
+            {profile?.avatar_url && (
+              <AvatarImage src={profile.avatar_url} alt="Profile" />
+            )}
+            <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white text-xs">
+              <User className="h-3.5 w-3.5" />
+            </AvatarFallback>
+          </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48 bg-black/90 backdrop-blur-md border-gray-700">
         <DropdownMenuItem disabled className="text-gray-300 text-sm">
-          {user.email}
+          {profile?.display_name || user.email}
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-gray-700" />
         <DropdownMenuItem 
@@ -84,6 +92,15 @@ const ProfileIcon = () => {
           >
             <Mic2 className="h-4 w-4 mr-2" />
             Producer Profile
+          </DropdownMenuItem>
+        )}
+        {roleData?.isAdmin && (
+          <DropdownMenuItem 
+            onClick={() => navigate('/hea-projects')}
+            className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            HEA Projects
           </DropdownMenuItem>
         )}
         {roleData?.isAdmin && (

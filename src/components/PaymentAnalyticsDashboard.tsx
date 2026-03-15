@@ -186,7 +186,7 @@ export const PaymentAnalyticsDashboard = () => {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-green-600">${analytics.overview.totalPlatformFees.toFixed(2)}</p>
-            <p className="text-xs text-muted-foreground mt-1">15% commission</p>
+            <p className="text-xs text-muted-foreground mt-1">10% commission</p>
           </CardContent>
         </Card>
 

@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
@@ -62,6 +62,84 @@ export type Database = {
         }
         Relationships: []
       }
+      chamoy_requests: {
+        Row: {
+          admin_description: string | null
+          admin_notes: string | null
+          admin_price: string | null
+          admin_reviewed_at: string | null
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          delivered_at: string | null
+          description: string
+          id: string
+          paid_at: string | null
+          shipped_at: string | null
+          shipping_address: string | null
+          shipping_status: string
+          status: string
+          stripe_session_id: string | null
+          tracking_number: string | null
+          updated_at: string
+          user_accepted: boolean | null
+          user_email: string
+          user_id: string
+          user_responded_at: string | null
+        }
+        Insert: {
+          admin_description?: string | null
+          admin_notes?: string | null
+          admin_price?: string | null
+          admin_reviewed_at?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          delivered_at?: string | null
+          description: string
+          id?: string
+          paid_at?: string | null
+          shipped_at?: string | null
+          shipping_address?: string | null
+          shipping_status?: string
+          status?: string
+          stripe_session_id?: string | null
+          tracking_number?: string | null
+          updated_at?: string
+          user_accepted?: boolean | null
+          user_email: string
+          user_id: string
+          user_responded_at?: string | null
+        }
+        Update: {
+          admin_description?: string | null
+          admin_notes?: string | null
+          admin_price?: string | null
+          admin_reviewed_at?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          delivered_at?: string | null
+          description?: string
+          id?: string
+          paid_at?: string | null
+          shipped_at?: string | null
+          shipping_address?: string | null
+          shipping_status?: string
+          status?: string
+          stripe_session_id?: string | null
+          tracking_number?: string | null
+          updated_at?: string
+          user_accepted?: boolean | null
+          user_email?: string
+          user_id?: string
+          user_responded_at?: string | null
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           application_status: string | null
@@ -100,6 +178,81 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      hea_projects: {
+        Row: {
+          address: string | null
+          assigned_producer_id: string | null
+          contract_signature_name: string | null
+          contract_signed: boolean
+          contract_signed_at: string | null
+          contract_token: string | null
+          created_at: string
+          details: string | null
+          email: string
+          full_name: string
+          id: string
+          number_of_revisions: number
+          price: string
+          receipt_sent: boolean
+          status: string
+          terms: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          assigned_producer_id?: string | null
+          contract_signature_name?: string | null
+          contract_signed?: boolean
+          contract_signed_at?: string | null
+          contract_token?: string | null
+          created_at?: string
+          details?: string | null
+          email: string
+          full_name: string
+          id?: string
+          number_of_revisions?: number
+          price?: string
+          receipt_sent?: boolean
+          status?: string
+          terms?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          assigned_producer_id?: string | null
+          contract_signature_name?: string | null
+          contract_signed?: boolean
+          contract_signed_at?: string | null
+          contract_token?: string | null
+          created_at?: string
+          details?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          number_of_revisions?: number
+          price?: string
+          receipt_sent?: boolean
+          status?: string
+          terms?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hea_projects_assigned_producer_id_fkey"
+            columns: ["assigned_producer_id"]
+            isOneToOne: false
+            referencedRelation: "producer_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hea_projects_assigned_producer_id_fkey"
+            columns: ["assigned_producer_id"]
+            isOneToOne: false
+            referencedRelation: "producers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       platforms: {
         Row: {
@@ -169,11 +322,15 @@ export type Database = {
           created_at: string
           discord_user_id: string | null
           email: string | null
+          emoji: string | null
           genre: string
           id: string
           image: string
           instagram_url: string | null
           name: string
+          showcase_video_1: string | null
+          showcase_video_2: string | null
+          showcase_video_3: string | null
           slug: string
           spotify_url: string | null
           stripe_connect_account_id: string | null
@@ -190,11 +347,15 @@ export type Database = {
           created_at?: string
           discord_user_id?: string | null
           email?: string | null
+          emoji?: string | null
           genre: string
           id?: string
           image: string
           instagram_url?: string | null
           name: string
+          showcase_video_1?: string | null
+          showcase_video_2?: string | null
+          showcase_video_3?: string | null
           slug: string
           spotify_url?: string | null
           stripe_connect_account_id?: string | null
@@ -211,11 +372,15 @@ export type Database = {
           created_at?: string
           discord_user_id?: string | null
           email?: string | null
+          emoji?: string | null
           genre?: string
           id?: string
           image?: string
           instagram_url?: string | null
           name?: string
+          showcase_video_1?: string | null
+          showcase_video_2?: string | null
+          showcase_video_3?: string | null
           slug?: string
           spotify_url?: string | null
           stripe_connect_account_id?: string | null
@@ -271,6 +436,7 @@ export type Database = {
           showcase: string
           size: string | null
           sort_order: number | null
+          stock: number | null
           type: string
           updated_at: string
           weight: string | null
@@ -294,6 +460,7 @@ export type Database = {
           showcase: string
           size?: string | null
           sort_order?: number | null
+          stock?: number | null
           type: string
           updated_at?: string
           weight?: string | null
@@ -317,6 +484,7 @@ export type Database = {
           showcase?: string
           size?: string | null
           sort_order?: number | null
+          stock?: number | null
           type?: string
           updated_at?: string
           weight?: string | null
@@ -364,6 +532,7 @@ export type Database = {
           purchase_date: string
           song_idea: string | null
           status: string
+          stripe_session_id: string | null
           updated_at: string
           user_id: string
         }
@@ -380,6 +549,7 @@ export type Database = {
           purchase_date?: string
           song_idea?: string | null
           status?: string
+          stripe_session_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -396,10 +566,46 @@ export type Database = {
           purchase_date?: string
           song_idea?: string | null
           status?: string
+          stripe_session_id?: string | null
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      revision_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          revision_id: string
+          sender_id: string
+          sender_role: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          revision_id: string
+          sender_id: string
+          sender_role: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          revision_id?: string
+          sender_id?: string
+          sender_role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revision_messages_revision_id_fkey"
+            columns: ["revision_id"]
+            isOneToOne: false
+            referencedRelation: "song_revisions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       services: {
         Row: {
@@ -438,6 +644,8 @@ export type Database = {
         Row: {
           acceptance_deadline: string | null
           assigned_producer_id: string | null
+          bit_depth: string | null
+          blocked_producer_ids: string[] | null
           complexity_level: string | null
           created_at: string
           file_urls: string[] | null
@@ -447,9 +655,11 @@ export type Database = {
           payment_intent_id: string | null
           platform_fee_cents: number | null
           price: string
+          producer_checklist: Json | null
           producer_paid_at: string | null
           producer_payout_cents: number | null
           refunded_at: string | null
+          sample_rate: string | null
           song_idea: string
           status: string
           stripe_session_id: string | null
@@ -465,6 +675,8 @@ export type Database = {
         Insert: {
           acceptance_deadline?: string | null
           assigned_producer_id?: string | null
+          bit_depth?: string | null
+          blocked_producer_ids?: string[] | null
           complexity_level?: string | null
           created_at?: string
           file_urls?: string[] | null
@@ -474,9 +686,11 @@ export type Database = {
           payment_intent_id?: string | null
           platform_fee_cents?: number | null
           price: string
+          producer_checklist?: Json | null
           producer_paid_at?: string | null
           producer_payout_cents?: number | null
           refunded_at?: string | null
+          sample_rate?: string | null
           song_idea: string
           status?: string
           stripe_session_id?: string | null
@@ -492,6 +706,8 @@ export type Database = {
         Update: {
           acceptance_deadline?: string | null
           assigned_producer_id?: string | null
+          bit_depth?: string | null
+          blocked_producer_ids?: string[] | null
           complexity_level?: string | null
           created_at?: string
           file_urls?: string[] | null
@@ -501,9 +717,11 @@ export type Database = {
           payment_intent_id?: string | null
           platform_fee_cents?: number | null
           price?: string
+          producer_checklist?: Json | null
           producer_paid_at?: string | null
           producer_payout_cents?: number | null
           refunded_at?: string | null
+          sample_rate?: string | null
           song_idea?: string
           status?: string
           stripe_session_id?: string | null
@@ -517,6 +735,13 @@ export type Database = {
           wants_recorded_stems?: boolean | null
         }
         Relationships: [
+          {
+            foreignKeyName: "song_requests_assigned_producer_id_fkey"
+            columns: ["assigned_producer_id"]
+            isOneToOne: false
+            referencedRelation: "producer_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "song_requests_assigned_producer_id_fkey"
             columns: ["assigned_producer_id"]
@@ -542,11 +767,13 @@ export type Database = {
           drive_folder_id: string | null
           drive_link: string | null
           id: string
+          meeting_link: string | null
           requested_at: string | null
           revision_number: number
           song_request_id: string
           status: string
           updated_at: string
+          wants_meeting: boolean | null
         }
         Insert: {
           client_feedback?: string | null
@@ -556,11 +783,13 @@ export type Database = {
           drive_folder_id?: string | null
           drive_link?: string | null
           id?: string
+          meeting_link?: string | null
           requested_at?: string | null
           revision_number: number
           song_request_id: string
           status?: string
           updated_at?: string
+          wants_meeting?: boolean | null
         }
         Update: {
           client_feedback?: string | null
@@ -570,11 +799,13 @@ export type Database = {
           drive_folder_id?: string | null
           drive_link?: string | null
           id?: string
+          meeting_link?: string | null
           requested_at?: string | null
           revision_number?: number
           song_request_id?: string
           status?: string
           updated_at?: string
+          wants_meeting?: boolean | null
         }
         Relationships: [
           {
@@ -609,9 +840,72 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      producer_profiles: {
+        Row: {
+          apple_music_url: string | null
+          bio: string | null
+          country: string | null
+          created_at: string | null
+          emoji: string | null
+          genre: string | null
+          id: string | null
+          image: string | null
+          instagram_url: string | null
+          name: string | null
+          showcase_video_1: string | null
+          showcase_video_2: string | null
+          showcase_video_3: string | null
+          slug: string | null
+          spotify_url: string | null
+          website_url: string | null
+          youtube_channel_url: string | null
+          youtube_url: string | null
+        }
+        Insert: {
+          apple_music_url?: string | null
+          bio?: string | null
+          country?: string | null
+          created_at?: string | null
+          emoji?: string | null
+          genre?: string | null
+          id?: string | null
+          image?: string | null
+          instagram_url?: string | null
+          name?: string | null
+          showcase_video_1?: string | null
+          showcase_video_2?: string | null
+          showcase_video_3?: string | null
+          slug?: string | null
+          spotify_url?: string | null
+          website_url?: string | null
+          youtube_channel_url?: string | null
+          youtube_url?: string | null
+        }
+        Update: {
+          apple_music_url?: string | null
+          bio?: string | null
+          country?: string | null
+          created_at?: string | null
+          emoji?: string | null
+          genre?: string | null
+          id?: string | null
+          image?: string | null
+          instagram_url?: string | null
+          name?: string | null
+          showcase_video_1?: string | null
+          showcase_video_2?: string | null
+          showcase_video_3?: string | null
+          slug?: string | null
+          spotify_url?: string | null
+          website_url?: string | null
+          youtube_channel_url?: string | null
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      get_admin_producer_ids: { Args: never; Returns: string[] }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

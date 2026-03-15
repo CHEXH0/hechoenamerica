@@ -1,0 +1,220 @@
+import { useState, useEffect, useRef } from "react";
+import { Globe, X, Chrome, Monitor } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+const translateWords = [
+  "Translate?", "¿Traducir?", "翻译？", "Перевести?", "Traduire?",
+  "Übersetzen?", "翻訳？", "번역?", "Traduzir?", "Dịch?",
+  "Traduci?", "Çevir?", "ترجمه؟", "अनुवाद?", "Tłumaczyć?",
+];
+
+const translatedIntros: { lang: string; text: string }[] = [
+  { lang: "ES", text: "Usa la función de traducción de tu navegador para ver esta página en tu idioma." },
+  { lang: "PT", text: "Use o recurso de tradução do seu navegador para ver esta página no seu idioma." },
+  { lang: "ZH", text: "使用浏览器的翻译功能，将此页面翻译成您的语言。" },
+  { lang: "RU", text: "Используйте функцию перевода вашего браузера, чтобы просмотреть эту страницу на вашем языке." },
+  { lang: "FR", text: "Utilisez la fonction de traduction de votre navigateur pour afficher cette page dans votre langue." },
+  { lang: "DE", text: "Verwenden Sie die Übersetzungsfunktion Ihres Browsers, um diese Seite in Ihrer Sprache anzuzeigen." },
+  { lang: "JA", text: "ブラウザの翻訳機能を使って、このページをあなたの言語で表示してください。" },
+  { lang: "KO", text: "브라우저의 번역 기능을 사용하여 이 페이지를 귀하의 언어로 보세요." },
+  { lang: "AR", text: "استخدم ميزة الترجمة في متصفحك لعرض هذه الصفحة بلغتك." },
+  { lang: "HI", text: "इस पृष्ठ को अपनी भाषा में देखने के लिए अपने ब्राउज़र की अनुवाद सुविधा का उपयोग करें।" },
+  { lang: "IT", text: "Usa la funzione di traduzione del tuo browser per visualizzare questa pagina nella tua lingua." },
+];
+
+const TranslateHelper = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+  const [wordIndex, setWordIndex] = useState(0);
+  const isMobile = useIsMobile();
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (isHovering) {
+      setWordIndex(0);
+      intervalRef.current = setInterval(() => {
+        setWordIndex(prev => (prev + 1) % translateWords.length);
+      }, 700);
+    } else {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      setWordIndex(0);
+    }
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [isHovering]);
+
+  return (
+    <>
+      {/* Floating Globe Button - bottom right */}
+      <div
+        className="fixed bottom-6 right-6 z-[9999] flex items-center gap-2 group"
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+      >
+        <AnimatePresence>
+          {isHovering && (
+            <motion.span
+              initial={{ opacity: 0, scale: 0.9, x: 8 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.9, x: 8 }}
+              transition={{ duration: 0.2 }}
+              className="pointer-events-none text-sm font-medium bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-lg whitespace-nowrap overflow-hidden"
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={wordIndex}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  className="inline-block text-white/90"
+                >
+                  {translateWords[wordIndex]}
+                </motion.span>
+              </AnimatePresence>
+            </motion.span>
+          )}
+        </AnimatePresence>
+        <button
+          onClick={() => setIsOpen(true)}
+          className="p-3 rounded-full bg-black/60 backdrop-blur-xl border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.5)] hover:bg-black/80 transition-all duration-200"
+          aria-label="Translate this page"
+        >
+          <Globe className="h-5 w-5 text-white/80 group-hover:text-white transition-colors" />
+        </button>
+      </div>
+
+      {/* Modal */}
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-sm"
+              onClick={() => setIsOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: isMobile ? 100 : 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: isMobile ? 100 : 20 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className={
+                isMobile
+                  ? "fixed bottom-0 left-0 right-0 z-[10001] max-h-[85vh] overflow-y-auto rounded-t-2xl bg-card border-t border-border shadow-2xl"
+                  : "fixed bottom-20 right-6 z-[10001] w-[360px] max-h-[75vh] overflow-y-auto rounded-xl bg-card border border-border shadow-2xl"
+              }
+            >
+              <div className="p-5">
+                {/* Drag handle for mobile */}
+                {isMobile && (
+                  <div className="flex justify-center mb-3">
+                    <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+                  </div>
+                )}
+
+                {/* Header */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-5 w-5 text-primary" />
+                    <h3 className="font-display font-semibold text-foreground">Translate Page</h3>
+                  </div>
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="p-1 rounded-md hover:bg-muted transition-colors"
+                  >
+                    <X className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                </div>
+
+                <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
+                  This website is in English. Use your browser's built-in translate feature to view it in your language.
+                </p>
+
+                {/* Translated intros */}
+                <div className="mb-5 p-3 rounded-lg bg-muted/30 border border-border/30 space-y-1.5 max-h-[140px] overflow-y-auto">
+                  {translatedIntros.map(({ lang, text }) => (
+                    <p key={lang} className="text-[11px] text-muted-foreground/80 leading-relaxed">
+                      <span className="font-semibold text-foreground/60 mr-1.5">{lang}</span>
+                      {text}
+                    </p>
+                  ))}
+                </div>
+
+                {/* Browser instructions */}
+                <div className="space-y-3">
+                  <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Chrome className="h-4 w-4 text-foreground/80" />
+                      <h4 className="font-medium text-sm text-foreground">Chrome</h4>
+                    </div>
+                    <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
+                      <li>Right-click anywhere on the page</li>
+                      <li>Select <span className="font-medium text-foreground/80">"Translate to..."</span></li>
+                      <li>Choose your language</li>
+                    </ol>
+                  </div>
+
+                  <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Monitor className="h-4 w-4 text-foreground/80" />
+                      <h4 className="font-medium text-sm text-foreground">Safari</h4>
+                    </div>
+                    <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
+                      <li>Tap the <span className="font-medium text-foreground/80">aA</span> button in the address bar</li>
+                      <li>Select <span className="font-medium text-foreground/80">"Translate to..."</span></li>
+                      <li>Pick your preferred language</li>
+                    </ol>
+                  </div>
+
+                  <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Monitor className="h-4 w-4 text-foreground/80" />
+                      <h4 className="font-medium text-sm text-foreground">Edge</h4>
+                    </div>
+                    <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
+                      <li>Click the translate icon in the address bar</li>
+                      <li>Or right-click → <span className="font-medium text-foreground/80">"Translate to..."</span></li>
+                      <li>Select your language</li>
+                    </ol>
+                  </div>
+
+                  <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Monitor className="h-4 w-4 text-foreground/80" />
+                      <h4 className="font-medium text-sm text-foreground">Firefox</h4>
+                    </div>
+                    <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
+                      <li>Click the translate icon in the address bar</li>
+                      <li>Select your target language</li>
+                      <li>Click <span className="font-medium text-foreground/80">"Translate"</span></li>
+                    </ol>
+                  </div>
+
+                  <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Globe className="h-4 w-4 text-foreground/80" />
+                      <h4 className="font-medium text-sm text-foreground">Mobile (iOS / Android)</h4>
+                    </div>
+                    <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
+                      <li>A translate banner usually appears automatically</li>
+                      <li>If not, tap the <span className="font-medium text-foreground/80">⋮ menu</span> → <span className="font-medium text-foreground/80">"Translate"</span></li>
+                      <li>On Safari: tap <span className="font-medium text-foreground/80">aA</span> → <span className="font-medium text-foreground/80">"Translate"</span></li>
+                    </ol>
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-muted-foreground/60 mt-4 text-center pb-2">
+                  Translation is handled by your browser — no data is sent to us.
+                </p>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
+
+export default TranslateHelper;

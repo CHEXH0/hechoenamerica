@@ -30,19 +30,19 @@ const Services = () => {
   const services = [
     {
       title: "Audios",
-      description: "Enhancing your audios and submissions for quality production",
+      description: "Quality audio production and enhancement",
       image: "/laptop-uploads/Star.png",
       icon: Mic,
     },
     {
       title: "Mixing",
-      description: "Expert mixing to bring your tracks to life",
+      description: "Balanced and polished mixes",
       image: "/laptop-uploads/Donut.png",
       icon: Headphones,
     },
     {
       title: "Mastering",
-      description: "Final polish to make your music shine",
+      description: "Final polish for your music",
       image: "/laptop-uploads/Pill.png",
       icon: Music,
     },
@@ -87,7 +87,7 @@ const Services = () => {
     {
       name: "Reaper",
       logo: "/laptop-uploads/reaper.png",
-      tagline: "Rapid Environment for Audio Production, Engineering, and Recording",
+      tagline: "Audio production and recording",
     },
   ];
 
@@ -146,7 +146,7 @@ const Services = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-3xl md:text-4xl font-bold text-center text-white mb-12"
+          className="text-3xl md:text-4xl font-bold text-center heading-gradient mb-12"
         >
           Our Services
         </motion.h2>

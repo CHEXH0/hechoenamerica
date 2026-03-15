@@ -11,7 +11,10 @@ import {
   Instagram,
   MessageCircle,
   Loader2,
-  CreditCard
+  CreditCard,
+  Video,
+  X,
+  Plus
 } from "lucide-react";
 import { StripeConnectOnboarding } from "@/components/StripeConnectOnboarding";
 import { motion } from "framer-motion";
@@ -20,7 +23,8 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { 
   useProducerProfile, 
   useUpdateProducerProfile,
-  useUploadProducerImage
+  useUploadProducerImage,
+  useUploadProducerVideo
 } from "@/hooks/useProducerProfile";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -54,7 +58,9 @@ const ProducerProfile = () => {
   const { data: producerProfile, isLoading: profileLoading } = useProducerProfile();
   const updateProfile = useUpdateProducerProfile();
   const uploadImage = useUploadProducerImage();
+  const uploadVideo = useUploadProducerVideo();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRefs = useRef<(HTMLInputElement | null)[]>([null, null, null]);
 
   // Form state
   const [name, setName] = useState("");
@@ -70,6 +76,9 @@ const ProducerProfile = () => {
   const [youtubeChannelUrl, setYoutubeChannelUrl] = useState("");
   const [instagramUrl, setInstagramUrl] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
+  const [showcaseVideos, setShowcaseVideos] = useState<(string | null)[]>([null, null, null]);
+  const [uploadingVideoIndex, setUploadingVideoIndex] = useState<number | null>(null);
+  const [emoji, setEmoji] = useState("");
 
   // Populate form when profile loads
   useEffect(() => {
@@ -89,6 +98,12 @@ const ProducerProfile = () => {
       setYoutubeChannelUrl(producerProfile.youtube_channel_url || "");
       setInstagramUrl(producerProfile.instagram_url || "");
       setWebsiteUrl(producerProfile.website_url || "");
+      setShowcaseVideos([
+        (producerProfile as any).showcase_video_1 || null,
+        (producerProfile as any).showcase_video_2 || null,
+        (producerProfile as any).showcase_video_3 || null,
+      ]);
+      setEmoji((producerProfile as any).emoji || "");
     }
   }, [producerProfile]);
 
@@ -195,7 +210,7 @@ const ProducerProfile = () => {
     updateProfile.mutate({
       name,
       country,
-      genre: genres.join(", "), // Store as comma-separated string
+      genre: genres.join(", "),
       bio,
       image,
       discord_user_id: discordUserId || null,
@@ -205,6 +220,32 @@ const ProducerProfile = () => {
       youtube_channel_url: youtubeChannelUrl || null,
       instagram_url: instagramUrl || null,
       website_url: websiteUrl || null,
+      showcase_video_1: showcaseVideos[0] || null,
+      showcase_video_2: showcaseVideos[1] || null,
+      showcase_video_3: showcaseVideos[2] || null,
+      emoji: emoji || null,
+    });
+  };
+
+  const handleVideoUpload = async (index: number, file: File) => {
+    setUploadingVideoIndex(index);
+    try {
+      const videoUrl = await uploadVideo.mutateAsync(file);
+      setShowcaseVideos(prev => {
+        const updated = [...prev];
+        updated[index] = videoUrl;
+        return updated;
+      });
+    } finally {
+      setUploadingVideoIndex(null);
+    }
+  };
+
+  const handleRemoveVideo = (index: number) => {
+    setShowcaseVideos(prev => {
+      const updated = [...prev];
+      updated[index] = null;
+      return updated;
     });
   };
 
@@ -351,6 +392,37 @@ const ProducerProfile = () => {
                     placeholder="Tell listeners about yourself, your style, and your experience..."
                     rows={4}
                   />
+                </div>
+
+                {/* Profile Emoji */}
+                <div>
+                  <Label htmlFor="emoji">Profile Emoji</Label>
+                  <div className="flex items-center gap-3 mt-1">
+                    <Input
+                      id="emoji"
+                      value={emoji}
+                      onChange={(e) => {
+                        // Only allow a single emoji (take last character if pasting multiple)
+                        const val = e.target.value;
+                        if (val.length <= 2) {
+                          setEmoji(val);
+                        } else {
+                          // Take the last entered segment (handles multi-codepoint emoji)
+                          const segments = [...val];
+                          setEmoji(segments[segments.length - 1]);
+                        }
+                      }}
+                      placeholder="🎵"
+                      className="w-20 text-center text-2xl"
+                      maxLength={2}
+                    />
+                    {emoji && (
+                      <span className="text-3xl">{emoji}</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Optional — choose one emoji to display on your producer card
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -522,7 +594,75 @@ const ProducerProfile = () => {
             </Card>
           </motion.div>
 
-          {/* Save Button */}
+          {/* Showcase Videos */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Video className="h-5 w-5" />
+                  Showcase Videos
+                </CardTitle>
+                <CardDescription>
+                  Upload up to 3 videos showcasing your craft (max 50MB each, MP4/MOV/WebM)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {[0, 1, 2].map((index) => (
+                  <div key={index} className="space-y-2">
+                    <Label className="text-sm font-medium">Video {index + 1}</Label>
+                    {showcaseVideos[index] ? (
+                      <div className="relative rounded-lg overflow-hidden border border-border bg-muted/30">
+                        <video
+                          src={showcaseVideos[index]!}
+                          controls
+                          className="w-full max-h-48 object-contain"
+                        />
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2 h-8 w-8"
+                          onClick={() => handleRemoveVideo(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div>
+                        <input
+                          ref={(el) => { videoInputRefs.current[index] = el; }}
+                          type="file"
+                          accept="video/mp4,video/quicktime,video/webm"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleVideoUpload(index, file);
+                          }}
+                          className="hidden"
+                        />
+                        <Button
+                          variant="outline"
+                          className="w-full border-dashed h-20"
+                          onClick={() => videoInputRefs.current[index]?.click()}
+                          disabled={uploadingVideoIndex !== null}
+                        >
+                          {uploadingVideoIndex === index ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Plus className="mr-2 h-4 w-4" />
+                          )}
+                          {uploadingVideoIndex === index ? "Uploading..." : "Add Video"}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </motion.div>
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

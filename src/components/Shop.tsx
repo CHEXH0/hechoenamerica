@@ -12,7 +12,7 @@ const defaultProducts = [
   {
     id: "1",
     title: "Studio Time",
-    description: "Book studio time for your next project.",
+    description: "Book studio time.",
     handle: "default-product-1",
     priceRange: {
       minVariantPrice: {
@@ -34,7 +34,7 @@ const defaultProducts = [
   {
     id: "2",
     title: "Mixing & Mastering",
-    description: "Professional mixing and mastering services.",
+    description: "Mixing and mastering services.",
     handle: "default-product-2",
     priceRange: {
       minVariantPrice: {
@@ -56,7 +56,7 @@ const defaultProducts = [
   {
     id: "3",
     title: "VSTs & Audio Software",
-    description: "Inlcudes a selection of VSTs and tools.",
+    description: "VSTs and audio tools.",
     handle: "default-product-3",
     priceRange: {
       minVariantPrice: {

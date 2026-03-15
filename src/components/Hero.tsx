@@ -2,13 +2,15 @@ import React from "react";
 import { Link } from "react-router-dom";
 import Waveform from "./Waveform";
 import ProfileIcon from "./ProfileIcon";
+import CustomerServicePanel from "./CustomerServicePanel";
 import { motion } from "framer-motion";
 
-const Hero = () => {
+const Hero = React.memo(() => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black text-white">
       {/* Header Controls */}
-      <div className="absolute top-4 right-4 z-20">
+      <div className="absolute top-4 right-14 z-20 flex items-center gap-1">
+        <CustomerServicePanel />
         <ProfileIcon />
       </div>
       
@@ -25,9 +27,9 @@ const Hero = () => {
         >
           <motion.div 
             className="w-32 h-32 mx-auto mb-8"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            initial={{ opacity: 0.7 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
           >
             <img
               src="/lovable-uploads/d5eed490-6d34-4af5-8428-15981ab0f9c3.png"
@@ -37,14 +39,21 @@ const Hero = () => {
               fetchPriority="high"
             />
           </motion.div>
-          <h1 className="text-4xl md:text-6xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white via-white/80 to-white/40 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] tracking-wider" style={{ textShadow: '0 4px 30px rgba(255, 255, 255, 0.1), inset 0 0 20px rgba(255, 255, 255, 0.05)' }}>
-            HECHO EN AMÉRICA
+          <h1 className="text-4xl md:text-6xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-b from-white via-white/80 to-white/40 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] tracking-wider" style={{ textShadow: '0 4px 30px rgba(255, 255, 255, 0.1), inset 0 0 20px rgba(255, 255, 255, 0.05)' }}>
+            HECHO EN AMERICA
           </h1>
+          <div className="animate-color-shift mb-8 inline-block">
+            <p className="text-lg md:text-xl font-medium text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-200 to-purple-300">
+              La Music Es Medicine
+            </p>
+          </div>
           <Waveform />
         </motion.div>
       </div>
     </section>
   );
-};
+});
+
+Hero.displayName = 'Hero';
 
 export default Hero;

@@ -1,31 +1,31 @@
-import { Translations } from '@/types/translations';
+import { Translations } from "@/types/translations";
 
 export const pt: Translations = {
   hero: {
-    title: "FEITO NA AMÉRICA",
-    subtitle: "A MÚSICA É MEDICINA"
+    title: "FEITO NA AMERICA",
+    subtitle: "A MÚSICA É MEDICINE",
   },
   featuredProducers: {
-    title: "Produtores em Destaque"
+    title: "Produtores em Destaque",
   },
   audioPlatforms: {
     title: "Comunidade",
-    treats: "Doces"
+    treats: "Doces",
   },
   services: {
     title: "Nossos Serviços",
     recording: {
       title: "Gravação",
-      description: "Sessões de gravação profissional em nosso estúdio de última geração"
+      description: "Sessões de gravação profissional em nosso estúdio de última geração",
     },
     mixing: {
       title: "Mixagem",
-      description: "Mixagem especializada para equilibrar e aprimorar suas faixas"
+      description: "Mixagem especializada para equilibrar e aprimorar suas faixas",
     },
     mastering: {
       title: "Masterização",
-      description: "Masterização profissional para o polimento final e som pronto para a indústria"
-    }
+      description: "Masterização profissional para o polimento final e som pronto para a indústria",
+    },
   },
   contact: {
     title: "Entre em Contato",
@@ -41,12 +41,12 @@ export const pt: Translations = {
     messageSentTitle: "Mensagem enviada",
     messageSentDesc: "Obrigado pela sua mensagem. Entraremos em contato em breve!",
     errorTitle: "Erro",
-    errorDesc: "Houve um problema ao enviar sua mensagem. Tente novamente."
+    errorDesc: "Houve um problema ao enviar sua mensagem. Tente novamente.",
   },
   producer: {
     backToProducers: "Voltar aos Produtores",
     about: "Sobre",
     notFound: "Produtor não encontrado",
-    returnToHome: "Voltar ao início"
-  }
+    returnToHome: "Voltar ao início",
+  },
 };
