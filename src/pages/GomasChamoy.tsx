@@ -18,7 +18,7 @@ const GomasChamoy = () => {
   const [searchParams] = useSearchParams();
   const { data: allProducts, isLoading } = useProducts();
   const { user } = useAuth();
-  const { addItem, getItemCount, items: cartItems } = useCart();
+  const { addItem, removeItem, updateQuantity, getItemCount, items: cartItems } = useCart();
   const [cartOpen, setCartOpen] = useState(false);
 
   const candyProducts = React.useMemo(
@@ -40,12 +40,19 @@ const GomasChamoy = () => {
     }
   }, [searchParams]);
 
-  const isProductInCart = (productId: string) =>
-    cartItems.some((item) => item.product_id === productId);
+  const getCartQuantity = (productId: string) =>
+    cartItems.find((item) => item.product_id === productId)?.quantity || 0;
+
+  const getAvailableStock = (product: Product) => {
+    const stock = product.stock ?? 100;
+    const inCart = getCartQuantity(product.id);
+    return Math.max(0, stock - inCart);
+  };
 
   const handleAddToCart = (product: Product) => {
-    if (isProductInCart(product.id)) {
-      toast({ title: "Already in Cart", description: `${product.name} is already in your cart.`, variant: "destructive" });
+    const available = getAvailableStock(product);
+    if (available <= 0) {
+      toast({ title: "Out of Stock", description: `${product.name} is out of stock.`, variant: "destructive" });
       return;
     }
     addItem(product);
@@ -199,23 +206,51 @@ const GomasChamoy = () => {
                     </CardContent>
 
                     <CardFooter className="pt-2">
-                      <Button
-                        onClick={() => handleAddToCart(product)}
-                        disabled={isProductInCart(product.id)}
-                        className="w-full bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-500 hover:to-red-500 text-white border-0 disabled:opacity-50"
-                      >
-                        {isProductInCart(product.id) ? (
-                          <>
-                            <ShoppingCart className="h-4 w-4 mr-2" />
-                            In Cart
-                          </>
+                      <div className="w-full space-y-2">
+                        {getCartQuantity(product.id) > 0 ? (
+                          <div className="flex items-center justify-between bg-pink-500/10 border border-pink-400/30 rounded-lg px-3 py-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const qty = getCartQuantity(product.id);
+                                if (qty <= 1) {
+                                  removeItem(product.id);
+                                } else {
+                                  updateQuantity(product.id, qty - 1);
+                                }
+                              }}
+                              className="h-8 w-8 p-0 text-pink-400 hover:text-pink-300 hover:bg-pink-500/20"
+                            >
+                              <Minus className="h-4 w-4" />
+                            </Button>
+                            <span className="text-white font-bold text-lg">{getCartQuantity(product.id)}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleAddToCart(product)}
+                              disabled={getAvailableStock(product) <= 0}
+                              className="h-8 w-8 p-0 text-pink-400 hover:text-pink-300 hover:bg-pink-500/20 disabled:opacity-50"
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </div>
                         ) : (
-                          <>
+                          <Button
+                            onClick={() => handleAddToCart(product)}
+                            disabled={(product.stock ?? 100) <= 0}
+                            className="w-full bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-500 hover:to-red-500 text-white border-0 disabled:opacity-50"
+                          >
                             <Plus className="h-4 w-4 mr-2" />
                             Add to Cart
-                          </>
+                          </Button>
                         )}
-                      </Button>
+                        {product.stock !== null && product.stock !== undefined && (
+                          <p className={`text-xs text-center ${(product.stock ?? 100) <= 10 ? 'text-red-400' : 'text-gray-500'}`}>
+                            {(product.stock ?? 100) <= 0 ? 'Out of Stock' : `${product.stock} left in stock`}
+                          </p>
+                        )}
+                      </div>
                     </CardFooter>
                   </Card>
                 </motion.div>

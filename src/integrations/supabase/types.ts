@@ -436,6 +436,7 @@ export type Database = {
           showcase: string
           size: string | null
           sort_order: number | null
+          stock: number | null
           type: string
           updated_at: string
           weight: string | null
@@ -459,6 +460,7 @@ export type Database = {
           showcase: string
           size?: string | null
           sort_order?: number | null
+          stock?: number | null
           type: string
           updated_at?: string
           weight?: string | null
@@ -482,6 +484,7 @@ export type Database = {
           showcase?: string
           size?: string | null
           sort_order?: number | null
+          stock?: number | null
           type?: string
           updated_at?: string
           weight?: string | null
