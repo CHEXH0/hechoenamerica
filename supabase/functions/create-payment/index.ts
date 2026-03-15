@@ -242,11 +242,15 @@ serve(async (req) => {
       sessionOptions.customer_creation = "always";
     }
 
-    // If physical products, collect shipping address (Latin America only)
+    // If physical products, collect full shipping info (Latin America only)
     if (hasPhysicalProduct) {
       sessionOptions.shipping_address_collection = {
         allowed_countries: LATIN_AMERICA_COUNTRIES,
       };
+      // Collect phone number for delivery coordination
+      sessionOptions.phone_number_collection = { enabled: true };
+      // Always collect billing address for physical goods
+      sessionOptions.billing_address_collection = "required";
     }
 
     // If a coupon code was provided, try to find and apply it

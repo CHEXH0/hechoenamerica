@@ -13,6 +13,7 @@ export type Product = {
   duration?: string | null;
   size?: string | null;
   weight?: string | null;
+  stock?: number | null;
   has_comparison: boolean;
   is_instrument: boolean;
   audio_preview_url?: string | null;
