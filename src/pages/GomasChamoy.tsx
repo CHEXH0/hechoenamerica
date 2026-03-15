@@ -1,26 +1,60 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Plus, Minus, Candy, Scroll } from "lucide-react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useProducts, type Product } from "@/hooks/useProducts";
+import { useCart } from "@/hooks/useCart";
+import { useAuth } from "@/contexts/AuthContext";
+import { Cart } from "@/components/Cart";
 import ChamoyRequestCard from "@/components/ChamoyRequestCard";
+import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import Footer from "@/components/Footer";
 
 const GomasChamoy = () => {
   const [searchParams] = useSearchParams();
+  const { data: allProducts, isLoading } = useProducts();
+  const { user } = useAuth();
+  const { addItem, getItemCount, items: cartItems } = useCart();
+  const [cartOpen, setCartOpen] = useState(false);
+
+  const candyProducts = React.useMemo(
+    () => allProducts?.filter((p) => p.category === "candies") || [],
+    [allProducts]
+  );
 
   // Verify chamoy payment if redirected back from Stripe
   React.useEffect(() => {
     const chamoyPaidId = searchParams.get("chamoy_paid");
     if (chamoyPaidId) {
-      supabase.functions.invoke("verify-chamoy-payment", { body: { request_id: chamoyPaidId } }).then(({ data }) => {
-        if (data?.success) {
-          toast({ title: "Payment confirmed!", description: "Your chamoy gummy order has been placed." });
-        }
-      });
+      supabase.functions
+        .invoke("verify-chamoy-payment", { body: { request_id: chamoyPaidId } })
+        .then(({ data }) => {
+          if (data?.success) {
+            toast({ title: "Payment confirmed!", description: "Your chamoy gummy order has been placed." });
+          }
+        });
     }
   }, [searchParams]);
+
+  const isProductInCart = (productId: string) =>
+    cartItems.some((item) => item.product_id === productId);
+
+  const handleAddToCart = (product: Product) => {
+    if (!user) {
+      toast({ title: "Login Required", description: "Please log in to add items to your cart.", variant: "destructive" });
+      return;
+    }
+    if (isProductInCart(product.id)) {
+      toast({ title: "Already in Cart", description: `${product.name} is already in your cart.`, variant: "destructive" });
+      return;
+    }
+    addItem(product);
+    toast({ title: "Added to Cart! 🛒", description: `${product.name} has been added to your cart.` });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-red-950/40 to-pink-950/30 relative overflow-hidden">
@@ -36,18 +70,50 @@ const GomasChamoy = () => {
         transition={{ duration: 35, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      <div className="relative z-10 p-8">
-        <Link
-          to="/treats"
-          className="inline-flex items-center text-pink-400 hover:text-pink-300 transition-colors duration-200 mb-8 group"
-        >
-          <motion.div whileHover={{ x: -5 }} transition={{ duration: 0.2 }}>
-            <ArrowLeft className="h-5 w-5 mr-2" />
-          </motion.div>
-          Back to Treats
-        </Link>
+      <div className="relative z-10 p-6 sm:p-8">
+        {/* Top bar */}
+        <div className="flex items-center justify-between mb-8">
+          <Link
+            to="/treats"
+            className="inline-flex items-center text-pink-400 hover:text-pink-300 transition-colors duration-200 group"
+          >
+            <motion.div whileHover={{ x: -5 }} transition={{ duration: 0.2 }}>
+              <ArrowLeft className="h-5 w-5 mr-2" />
+            </motion.div>
+            Back to Treats
+          </Link>
 
+          {user && (
+            <Button
+              onClick={() => setCartOpen(true)}
+              variant="outline"
+              className="border-pink-400/50 text-pink-400 hover:bg-pink-500/20 hover:border-pink-400 relative"
+            >
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Cart
+              {getItemCount() > 0 && (
+                <Badge className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs px-1.5 py-0.5">
+                  {getItemCount()}
+                </Badge>
+              )}
+            </Button>
+          )}
+        </div>
+
+        {/* Hero */}
         <div className="text-center mb-12">
+          <motion.div
+            className="flex justify-center mb-6"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <img
+              src="/laptop-uploads/Gomas_Chamoy.png"
+              alt="Gomas Chamoy"
+              className="h-32 w-32 sm:h-40 sm:w-40 object-contain drop-shadow-2xl"
+            />
+          </motion.div>
           <motion.h1
             className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent mb-4"
             initial={{ opacity: 0, scale: 0.9 }}
@@ -62,18 +128,135 @@ const GomasChamoy = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            Handcrafted chamoy gummy candy, made to order with authentic Latin American flavors.
+            Handcrafted chamoy gummy candy with authentic Latin American flavors. Pick your favorites or request a custom order!
           </motion.p>
         </div>
 
-        <div className="max-w-2xl mx-auto">
-          <ChamoyRequestCard />
-        </div>
+        {/* Products Grid or Custom Order Fallback */}
+        {isLoading ? (
+          <div className="flex justify-center py-20">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              className="w-12 h-12 border-4 border-pink-500/30 border-t-pink-400 rounded-full"
+            />
+          </div>
+        ) : candyProducts.length > 0 ? (
+          <div className="max-w-5xl mx-auto space-y-16">
+            {/* Product Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 sm:gap-8">
+              {candyProducts.map((product, i) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: i * 0.15 }}
+                  className="group"
+                >
+                  <Card className="bg-gradient-to-br from-red-900/60 via-pink-900/40 to-orange-900/60 border-red-500/30 hover:border-orange-400/50 transition-all duration-300 hover:shadow-2xl hover:shadow-red-500/15 backdrop-blur-md overflow-hidden h-full flex flex-col">
+                    {/* Product Image */}
+                    <div className="relative h-48 sm:h-56 overflow-hidden">
+                      <motion.img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-contain p-6 bg-black/20"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.3 }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                      <Badge className="absolute top-3 right-3 bg-orange-600/90 text-white border-0 text-sm font-bold px-3">
+                        {product.price}
+                      </Badge>
+                    </div>
+
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500/30 to-red-500/30 flex items-center justify-center border border-orange-400/30">
+                          <Candy className="h-5 w-5 text-orange-400" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-white text-lg group-hover:text-orange-300 transition-colors duration-300">
+                            {product.name}
+                          </CardTitle>
+                          <p className="text-xs text-orange-400/70 font-medium uppercase tracking-wider">
+                            {product.type}
+                          </p>
+                        </div>
+                      </div>
+                    </CardHeader>
+
+                    <CardContent className="flex-1">
+                      <CardDescription className="text-gray-300 leading-relaxed text-sm">
+                        {product.description}
+                      </CardDescription>
+                      {product.weight && (
+                        <Badge variant="outline" className="mt-3 border-orange-400/30 text-orange-300 text-xs">
+                          {product.weight}
+                        </Badge>
+                      )}
+                    </CardContent>
+
+                    <CardFooter className="pt-2">
+                      <Button
+                        onClick={() => handleAddToCart(product)}
+                        disabled={isProductInCart(product.id)}
+                        className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white border-0 disabled:opacity-50"
+                      >
+                        {isProductInCart(product.id) ? (
+                          <>
+                            <ShoppingCart className="h-4 w-4 mr-2" />
+                            In Cart
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add to Cart
+                          </>
+                        )}
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Custom Order Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <div className="text-center mb-8">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/10 border border-orange-400/20 mb-4">
+                  <Scroll className="h-4 w-4 text-orange-400" />
+                  <span className="text-orange-300 text-sm font-medium">Custom Orders</span>
+                </div>
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent mb-2">
+                  Want Something Special?
+                </h2>
+                <p className="text-gray-400 max-w-lg mx-auto">
+                  Request a custom chamoy gummy order tailored to your taste. We'll quote you a price and craft it just for you.
+                </p>
+              </div>
+              <div className="max-w-2xl mx-auto">
+                <ChamoyRequestCard />
+              </div>
+            </motion.div>
+          </div>
+        ) : (
+          /* Fallback: No products — show custom order as primary */
+          <div className="max-w-2xl mx-auto">
+            <ChamoyRequestCard />
+          </div>
+        )}
       </div>
 
       <div className="relative z-10 mt-20">
         <Footer />
       </div>
+
+      {/* Cart Panel */}
+      <Cart isOpen={cartOpen} onClose={() => setCartOpen(false)} />
     </div>
   );
 };
