@@ -973,8 +973,29 @@ const Treats = () => {
                 <p className="text-gray-300 text-lg">Artisanal candies inspired by Latin American flavors</p>
               </motion.div>
               
-              <div className="max-w-2xl mx-auto">
-                <ChamoyRequestCard />
+              <div className="max-w-2xl mx-auto text-center">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="space-y-6"
+                >
+                  <div className="flex justify-center mb-4">
+                    <img src="/laptop-uploads/Gomas_Chamoy.png" alt="Gomas Chamoy" className="h-40 w-40 object-contain drop-shadow-2xl" />
+                  </div>
+                  <p className="text-gray-300 text-lg max-w-lg mx-auto">
+                    Custom chamoy gummy candy made to order! Place your request and we'll craft it for you.
+                  </p>
+                  <Link to="/gomas-chamoy">
+                    <Button
+                      size="lg"
+                      className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white border-0 px-8 mt-4"
+                    >
+                      <Candy className="h-5 w-5 mr-2" />
+                      Order Gomas Chamoy
+                    </Button>
+                  </Link>
+                </motion.div>
               </div>
             </TabsContent>
           </Tabs>

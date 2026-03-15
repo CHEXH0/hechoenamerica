@@ -100,6 +100,7 @@ const App = () => {
                   <Route path="/producer-profile" element={<ProducerProfile />} />
                   <Route path="/hea-projects" element={<HEAProjects />} />
                   <Route path="/sign-contract" element={<SignContract />} />
+                  <Route path="/gomas-chamoy" element={<GomasChamoy />} />
                 </Routes>
               </Suspense>
               <CookieConsent />
