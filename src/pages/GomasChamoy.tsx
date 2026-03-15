@@ -79,21 +79,19 @@ const GomasChamoy = () => {
             Back to Treats
           </Link>
 
-          {user && (
-            <Button
-              onClick={() => setCartOpen(true)}
-              variant="outline"
-              className="border-pink-400/50 text-pink-400 hover:bg-pink-500/20 hover:border-pink-400 relative"
-            >
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              Cart
-              {getItemCount() > 0 && (
-                <Badge className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs px-1.5 py-0.5">
-                  {getItemCount()}
-                </Badge>
-              )}
-            </Button>
-          )}
+          <Button
+            onClick={() => setCartOpen(true)}
+            variant="outline"
+            className="border-pink-400/50 text-pink-400 hover:bg-pink-500/20 hover:border-pink-400 relative"
+          >
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            Cart
+            {getItemCount() > 0 && (
+              <Badge className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs px-1.5 py-0.5">
+                {getItemCount()}
+              </Badge>
+            )}
+          </Button>
         </div>
 
         {/* Hero */}
