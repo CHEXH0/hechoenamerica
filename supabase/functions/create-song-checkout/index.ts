@@ -50,8 +50,11 @@ serve(async (req) => {
       basePrice,
       addOns,
       bitDepth,
-      sampleRate
+      sampleRate,
+      platformFeePercent
     } = await req.json();
+    
+    const PLATFORM_FEE_PERCENT = typeof platformFeePercent === 'number' ? platformFeePercent : 10;
     
     logStep("Request body received", { 
       tier, 
