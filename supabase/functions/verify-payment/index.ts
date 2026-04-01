@@ -128,6 +128,70 @@ serve(async (req) => {
 
     logStep("Created purchase records", { recordCount: purchaseRecords.length });
 
+    // Send admin notification email for candy purchases
+    const candyPurchases = purchaseRecords.filter((p: any) => p.product_category === 'candies');
+    if (candyPurchases.length > 0) {
+      try {
+        const resendApiKey = Deno.env.get("RESEND_API_KEY");
+        const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
+        
+        if (resendApiKey && lovableApiKey) {
+          const customerEmail = session.customer_details?.email || session.metadata?.user_email || 'Unknown';
+          const customerName = session.customer_details?.name || 'Unknown';
+          const shippingAddress = session.customer_details?.address 
+            ? `${session.customer_details.address.line1 || ''}, ${session.customer_details.address.city || ''}, ${session.customer_details.address.state || ''} ${session.customer_details.address.postal_code || ''}, ${session.customer_details.address.country || ''}`
+            : session.shipping_details?.address
+              ? `${session.shipping_details.address.line1 || ''}, ${session.shipping_details.address.city || ''}, ${session.shipping_details.address.state || ''} ${session.shipping_details.address.postal_code || ''}, ${session.shipping_details.address.country || ''}`
+              : 'Not provided';
+          const customerPhone = session.customer_details?.phone || 'Not provided';
+
+          const candyItemsList = candyPurchases.map((p: any) => 
+            `• ${p.product_name} - ${p.price}`
+          ).join('\n');
+
+          const emailHtml = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h1 style="color: #e91e8c; border-bottom: 2px solid #e91e8c; padding-bottom: 10px;">🍬 New Candy Order!</h1>
+              <div style="background: #f9f0f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="margin-top: 0;">Customer Details</h3>
+                <p><strong>Name:</strong> ${customerName}</p>
+                <p><strong>Email:</strong> ${customerEmail}</p>
+                <p><strong>Phone:</strong> ${customerPhone}</p>
+                <p><strong>Shipping Address:</strong> ${shippingAddress}</p>
+              </div>
+              <div style="background: #fff3f8; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="margin-top: 0;">Order Items</h3>
+                <pre style="white-space: pre-wrap; font-family: Arial, sans-serif;">${candyItemsList}</pre>
+              </div>
+              <p style="color: #666; font-size: 12px;">Stripe Session ID: ${session_id}</p>
+            </div>
+          `;
+
+          const GATEWAY_URL = 'https://connector-gateway.lovable.dev/resend';
+          await fetch(`${GATEWAY_URL}/emails`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${lovableApiKey}`,
+              'X-Connection-Api-Key': resendApiKey,
+            },
+            body: JSON.stringify({
+              from: 'HEA Studio <team@hechoenamericastudio.com>',
+              to: ['team@hechoenamericastudio.com'],
+              subject: `🍬 New Candy Order from ${customerName}`,
+              html: emailHtml,
+              reply_to: customerEmail,
+            }),
+          });
+
+          logStep("Admin notification email sent for candy purchase");
+        }
+      } catch (emailError) {
+        logStep("Failed to send admin notification email", { error: String(emailError) });
+        // Don't fail the payment verification if email fails
+      }
+    }
+
     return new Response(JSON.stringify({ 
       success: true, 
       message: 'Payment verified and purchase records created',
