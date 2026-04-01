@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, ShoppingCart, Plus, Minus, Candy } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { useProducts, type Product } from "@/hooks/useProducts";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/contexts/AuthContext";
 import { Cart } from "@/components/Cart";
+import { useGomasChamoyVisible } from "@/hooks/useStoreVisibility";
 
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
