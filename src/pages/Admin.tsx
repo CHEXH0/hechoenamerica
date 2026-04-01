@@ -454,6 +454,9 @@ const Admin = () => {
               {/* Chamoy Gummy Requests */}
               <ChamoyRequestsAdmin />
 
+              {/* Candy Orders Management */}
+              <CandyOrdersAdmin />
+
               {/* Hiring Status Control */}
               <HiringStatusControl />
 
