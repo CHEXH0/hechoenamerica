@@ -87,6 +87,22 @@ const addOnPricing = {
   }
 };
 
+// Audio quality options
+const bitDepthOptions = [
+  { value: "16", label: "16-bit", surcharge: [0, 0, 0, 0] },
+  { value: "24", label: "24-bit", surcharge: [0, 0, 0, 0] },
+  { value: "32", label: "32-bit float", surcharge: [0, 5, 10, 15] },
+];
+
+const sampleRateOptions = [
+  { value: "44.1", label: "44.1 kHz", surcharge: [0, 0, 0, 0] },
+  { value: "48", label: "48 kHz", surcharge: [0, 0, 0, 0] },
+  { value: "88.2", label: "88.2 kHz", surcharge: [0, 5, 10, 15] },
+  { value: "96", label: "96 kHz", surcharge: [0, 5, 10, 15] },
+  { value: "176.4", label: "176.4 kHz", surcharge: [0, 10, 20, 30] },
+  { value: "192", label: "192 kHz", surcharge: [0, 10, 20, 30] },
+];
+
 const MAX_FREE_AI_SONGS = 3;
 const RESET_HOURS = 5;
 
