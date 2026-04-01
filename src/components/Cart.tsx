@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, X, Plus, Minus, Trash2, CreditCard, Tag, Check, Loader2 } from 'lucide-react';
+import { ShoppingCart, X, Plus, Minus, Trash2, CreditCard } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
