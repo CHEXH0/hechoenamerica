@@ -17,10 +17,23 @@ import { toast } from "@/hooks/use-toast";
 
 const GomasChamoy = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { data: allProducts, isLoading } = useProducts();
   const { user } = useAuth();
   const { addItem, removeItem, updateQuantity, getItemCount, items: cartItems } = useCart();
   const [cartOpen, setCartOpen] = useState(false);
+  const { data: isVisible, isLoading: visibilityLoading } = useGomasChamoyVisible();
+
+  if (!visibilityLoading && isVisible === false) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white gap-4">
+        <Candy className="h-16 w-16 text-pink-400" />
+        <h1 className="text-2xl font-bold">This page is currently unavailable</h1>
+        <p className="text-gray-400">Check back soon!</p>
+        <Button variant="outline" onClick={() => navigate("/")}>Go Home</Button>
+      </div>
+    );
+  }
 
   const candyProducts = React.useMemo(
     () => allProducts?.filter((p) => p.category === "candies") || [],
