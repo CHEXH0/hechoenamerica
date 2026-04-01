@@ -151,6 +151,12 @@ const GenerateSong = () => {
     if (wantsMastering) total += addOnPricing.mastering.prices[tierIndex];
     total += numberOfRevisions * addOnPricing.revision.prices[tierIndex];
 
+    // Audio quality surcharges
+    const bdOption = bitDepthOptions.find(o => o.value === bitDepth);
+    if (bdOption) total += bdOption.surcharge[tierIndex];
+    const srOption = sampleRateOptions.find(o => o.value === sampleRate);
+    if (srOption) total += srOption.surcharge[tierIndex];
+
     return total;
   };
 
