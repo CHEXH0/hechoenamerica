@@ -816,16 +816,18 @@ const Treats = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
         >
-           <Tabs defaultValue="candies" className="space-y-12">
-            <TabsList className="grid w-full h-full grid-cols-3 bg-black/30 backdrop-blur-md border border-purple-500/20 text-xs sm:text-sm">
-              <TabsTrigger 
-                value="candies" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-red-700 text-gray-300 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
-              >
-                <Candy className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="hidden sm:inline">Sweet Treats</span>
-                <span className="sm:hidden">Treats</span>
-              </TabsTrigger>
+           <Tabs defaultValue={showTreatsTab ? "candies" : "vsts"} className="space-y-12">
+            <TabsList className={`grid w-full h-full ${showTreatsTab ? 'grid-cols-3' : 'grid-cols-2'} bg-black/30 backdrop-blur-md border border-purple-500/20 text-xs sm:text-sm`}>
+              {showTreatsTab && (
+                <TabsTrigger 
+                  value="candies" 
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-red-700 text-gray-300 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
+                >
+                  <Candy className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="hidden sm:inline">Sweet Treats</span>
+                  <span className="sm:hidden">Treats</span>
+                </TabsTrigger>
+              )}
               <TabsTrigger 
                 value="vsts" 
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-red-500/20 data-[state=active]:text-purple-700 text-gray-300 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
