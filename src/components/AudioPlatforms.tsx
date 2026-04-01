@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Candy } from "lucide-react";
+import { Candy, Briefcase } from "lucide-react";
 
 const AudioPlatforms = React.memo(() => {
   const platforms = [
@@ -20,11 +20,11 @@ const AudioPlatforms = React.memo(() => {
       emojis: ["📺", "🎬", "👀", "🔴", "🎵"],
     },
     {
-      name: "WhatsApp",
-      image: "/laptop-uploads/whatsapp.svg",
-      url: "https://chat.whatsapp.com/GfhMoPNoJs49pp4nti7uwU",
+      name: "Careers",
+      isIcon: true,
+      url: "https://hechoenamericastudio.com/producer-application",
       isExternal: true,
-      emojis: ["💬", "📱", "👥", "💚", "📞"],
+      emojis: ["💼", "🎤", "🚀", "⭐", "🎯"],
     },
     {
       name: "Treats",
@@ -69,7 +69,13 @@ const AudioPlatforms = React.memo(() => {
                   <div className="absolute bottom-5 right-2 text-sm opacity-20 blur-sm pointer-events-none z-10">{platform.emojis[3]}</div>
                   <div className="absolute top-6 left-8 text-xs opacity-10 blur-sm pointer-events-none z-10">{platform.emojis[4]}</div>
                   
-                  <img src={platform.image} alt={platform.name} className="w-16 h-16 mb-4 relative z-20" loading="lazy" />
+                  {platform.isIcon ? (
+                    <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center mb-4 relative z-20">
+                      <Briefcase className="h-8 w-8 text-white" />
+                    </div>
+                  ) : (
+                    <img src={platform.image} alt={platform.name} className="w-16 h-16 mb-4 relative z-20" loading="lazy" />
+                  )}
                   <span className="text-white font-medium relative z-20">{platform.name}</span>
                 </motion.a>
               );
