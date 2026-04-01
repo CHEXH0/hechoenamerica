@@ -31,7 +31,6 @@ const Treats = () => {
   const navigate = useNavigate();
   const { data: treatsTabVisible } = useSweetTreatsTabVisible();
   const showTreatsTab = treatsTabVisible ?? true;
-  const navigate = useNavigate();
 
   // Check if a product is already purchased
   const isProductPurchased = (productId: string) => {
