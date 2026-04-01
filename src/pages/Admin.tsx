@@ -461,6 +461,9 @@ const Admin = () => {
               
               {/* Payment Analytics Dashboard */}
               <PaymentAnalyticsDashboard />
+
+              {/* Song Pricing Management */}
+              <PricingAdmin />
               
               {/* Storage Management */}
               <StorageManagement />
