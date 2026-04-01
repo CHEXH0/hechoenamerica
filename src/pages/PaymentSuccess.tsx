@@ -231,9 +231,16 @@ const PaymentSuccess = () => {
             className="mt-12 p-6 bg-black/30 rounded-lg border border-purple-500/20"
           >
             <h3 className="text-lg font-semibold text-white mb-2">What's Next?</h3>
-             <p className="text-gray-400 text-sm">
-               Access your purchases anytime from the downloads page. Need help? Contact support.
-             </p>
+            {hasCandies ? (
+              <p className="text-gray-400 text-sm">
+                We'll send you a confirmation email with shipping updates. Physical orders are typically shipped within 2-3 business days.
+                {hasDigital && ' Your digital purchases are available for download right away.'}
+              </p>
+            ) : (
+              <p className="text-gray-400 text-sm">
+                Access your purchases anytime from the downloads page. Need help? Contact support.
+              </p>
+            )}
           </motion.div>
         </motion.div>
       </div>

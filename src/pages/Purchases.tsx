@@ -351,7 +351,9 @@ const Purchases = () => {
                             {new Date(purchase.purchase_date).toLocaleDateString()}
                           </TableCell>
                           <TableCell>
-                            {purchase.status === 'pending' ? (
+                            {purchase.product_category === 'candies' ? (
+                              <span className="text-sm text-muted-foreground">Physical item — check email for shipping</span>
+                            ) : purchase.status === 'pending' ? (
                               <span className="text-sm text-muted-foreground">Processing...</span>
                             ) : (
                               <Button
