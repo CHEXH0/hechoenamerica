@@ -15,6 +15,8 @@ const PaymentSuccess = () => {
   const [isVerifying, setIsVerifying] = useState(true);
   const [verificationComplete, setVerificationComplete] = useState(false);
   const [purchases, setPurchases] = useState<any[]>([]);
+  const hasCandies = purchases.some(p => p.product_category === 'candies');
+  const hasDigital = purchases.some(p => p.product_category !== 'candies');
 
   const sessionId = searchParams.get('session_id');
 
@@ -125,9 +127,24 @@ const PaymentSuccess = () => {
             <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent mb-6">
               Payment Successful!
             </h1>
-             <p className="text-xl text-gray-300 leading-relaxed">
-               Your treats are now available in your account.
-             </p>
+            {hasCandies && !hasDigital ? (
+              <p className="text-xl text-gray-300 leading-relaxed">
+                Your order has been placed! You'll receive a confirmation email with shipping details shortly.
+              </p>
+            ) : hasCandies && hasDigital ? (
+              <div className="space-y-2">
+                <p className="text-xl text-gray-300 leading-relaxed">
+                  Your digital treats are now available in your account.
+                </p>
+                <p className="text-lg text-gray-400 leading-relaxed">
+                  🍬 Your candy order has been placed — check your email for shipping details.
+                </p>
+              </div>
+            ) : (
+              <p className="text-xl text-gray-300 leading-relaxed">
+                Your treats are now available in your account.
+              </p>
+            )}
           </motion.div>
 
           {/* Purchase Summary */}
@@ -171,15 +188,17 @@ const PaymentSuccess = () => {
             transition={{ duration: 0.6, delay: 0.8 }}
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
-            <Button
-              asChild
-              className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white border-0 px-8 py-6"
-            >
-              <Link to="/purchases">
-                <Download className="h-5 w-5 mr-2" />
-                View My Downloads
-              </Link>
-            </Button>
+            {hasDigital && (
+              <Button
+                asChild
+                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white border-0 px-8 py-6"
+              >
+                <Link to="/purchases">
+                  <Download className="h-5 w-5 mr-2" />
+                  View My Downloads
+                </Link>
+              </Button>
+            )}
 
             <Button
               asChild
@@ -212,9 +231,16 @@ const PaymentSuccess = () => {
             className="mt-12 p-6 bg-black/30 rounded-lg border border-purple-500/20"
           >
             <h3 className="text-lg font-semibold text-white mb-2">What's Next?</h3>
-             <p className="text-gray-400 text-sm">
-               Access your purchases anytime from the downloads page. Need help? Contact support.
-             </p>
+            {hasCandies ? (
+              <p className="text-gray-400 text-sm">
+                We'll send you a confirmation email with shipping updates. Physical orders are typically shipped within 2-3 business days.
+                {hasDigital && ' Your digital purchases are available for download right away.'}
+              </p>
+            ) : (
+              <p className="text-gray-400 text-sm">
+                Access your purchases anytime from the downloads page. Need help? Contact support.
+              </p>
+            )}
           </motion.div>
         </motion.div>
       </div>
