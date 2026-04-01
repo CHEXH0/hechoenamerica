@@ -146,6 +146,8 @@ serve(async (req) => {
         total_price: totalPrice.toString(),
         base_price: basePrice?.toString() || "",
         add_ons: JSON.stringify(addOns || {}),
+        bit_depth: bitDepth || "24",
+        sample_rate: sampleRate || "44.1",
         platform_fee_cents: platformFeeCents.toString(),
         producer_payout_cents: producerPayoutCents.toString(),
         acceptance_deadline: acceptanceDeadline.toISOString(),
