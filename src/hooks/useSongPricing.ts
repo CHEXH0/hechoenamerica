@@ -99,7 +99,8 @@ export const useUpdateSongPricing = () => {
 
   return useMutation({
     mutationFn: async (config: SongPricingConfig) => {
-      // Upsert: try update first, then insert
+      const jsonValue = JSON.parse(JSON.stringify(config));
+      
       const { data: existing } = await supabase
         .from("app_settings")
         .select("id")
@@ -109,13 +110,13 @@ export const useUpdateSongPricing = () => {
       if (existing) {
         const { error } = await supabase
           .from("app_settings")
-          .update({ value: config as unknown as Record<string, unknown> })
+          .update({ value: jsonValue })
           .eq("key", "song_pricing");
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from("app_settings")
-          .insert({ key: "song_pricing", value: config as unknown as Record<string, unknown> });
+          .insert([{ key: "song_pricing", value: jsonValue }]);
         if (error) throw error;
       }
     },
