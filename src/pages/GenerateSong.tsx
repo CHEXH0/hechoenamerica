@@ -543,7 +543,9 @@ const GenerateSong = () => {
             mixing: wantsMixing,
             mastering: wantsMastering,
             revisions: numberOfRevisions
-          }
+          },
+          bitDepth,
+          sampleRate
         }
       });
 
