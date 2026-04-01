@@ -95,7 +95,7 @@ serve(async (req) => {
         throw new Error(`Product ${item.product_id} not found`);
       }
 
-      return {
+      const purchaseRecord: any = {
         user_id: userId,
         product_id: product.id,
         product_name: product.name,
@@ -105,6 +105,17 @@ serve(async (req) => {
         purchase_date: new Date().toISOString(),
         stripe_session_id: session_id,
       };
+
+      // Add shipping info for candy purchases
+      if (product.category === 'candies') {
+        purchaseRecord.shipping_status = 'pending';
+        const addr = session.shipping_details?.address || session.customer_details?.address;
+        if (addr) {
+          purchaseRecord.shipping_address = [addr.line1, addr.line2, addr.city, addr.state, addr.postal_code, addr.country].filter(Boolean).join(', ');
+        }
+      }
+
+      return purchaseRecord;
     });
 
     const { error: insertError } = await supabaseClient
