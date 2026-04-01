@@ -1146,6 +1146,93 @@ const GenerateSong = () => {
                       </div>
                       <p className="text-white/40 text-xs mt-1">Note: You will receive a raw file. No mixing, mastering, or recorded stems included. Additional post-production may be needed for release.</p>
                     </div>
+
+                    <div className="border-t border-white/10 my-2" />
+
+                    {/* Audio Quality Section */}
+                    <div className="space-y-4">
+                      <Label className="text-white text-sm font-semibold">Audio Quality</Label>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Label className="text-white text-sm font-medium">Bit Depth</Label>
+                          <HoverCard>
+                            <HoverCardTrigger asChild>
+                              <button type="button">
+                                <Info className="w-3.5 h-3.5 text-white/50 hover:text-white" />
+                              </button>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-64 text-sm">
+                              <p className="text-muted-foreground">Higher bit depth means more dynamic range and detail. 24-bit is standard; 32-bit float provides extra headroom for processing.</p>
+                            </HoverCardContent>
+                          </HoverCard>
+                        </div>
+                        {(() => {
+                          const bd = bitDepthOptions.find(o => o.value === bitDepth);
+                          const surcharge = bd ? bd.surcharge[tierIndex] : 0;
+                          return surcharge > 0 ? (
+                            <span className="text-white/80 text-sm font-medium">+${surcharge}</span>
+                          ) : null;
+                        })()}
+                      </div>
+                      <div className="flex gap-2">
+                        {bitDepthOptions.map((option) => (
+                          <Button
+                            key={option.value}
+                            type="button"
+                            variant="ghost"
+                            onClick={() => setBitDepth(option.value)}
+                            className={`flex-1 text-sm border ${
+                              bitDepth === option.value
+                                ? 'bg-white/30 border-white/60 text-white'
+                                : 'bg-white/5 border-white/20 text-white/60 hover:bg-white/10 hover:text-white'
+                            }`}
+                          >
+                            {option.label}
+                          </Button>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Label className="text-white text-sm font-medium">Sample Rate</Label>
+                          <HoverCard>
+                            <HoverCardTrigger asChild>
+                              <button type="button">
+                                <Info className="w-3.5 h-3.5 text-white/50 hover:text-white" />
+                              </button>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-64 text-sm">
+                              <p className="text-muted-foreground">Higher sample rates capture more audio detail. 44.1 kHz is CD quality; higher rates are used for professional mastering and archival.</p>
+                            </HoverCardContent>
+                          </HoverCard>
+                        </div>
+                        {(() => {
+                          const sr = sampleRateOptions.find(o => o.value === sampleRate);
+                          const surcharge = sr ? sr.surcharge[tierIndex] : 0;
+                          return surcharge > 0 ? (
+                            <span className="text-white/80 text-sm font-medium">+${surcharge}</span>
+                          ) : null;
+                        })()}
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        {sampleRateOptions.map((option) => (
+                          <Button
+                            key={option.value}
+                            type="button"
+                            variant="ghost"
+                            onClick={() => setSampleRate(option.value)}
+                            className={`text-sm border ${
+                              sampleRate === option.value
+                                ? 'bg-white/30 border-white/60 text-white'
+                                : 'bg-white/5 border-white/20 text-white/60 hover:bg-white/10 hover:text-white'
+                            }`}
+                          >
+                            {option.label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </CollapsibleContent>
               </Collapsible>
