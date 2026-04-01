@@ -458,6 +458,9 @@ const Admin = () => {
               {/* Candy Orders Management */}
               <CandyOrdersAdmin />
 
+              {/* Store Visibility Controls */}
+              <StoreVisibilityControl />
+
               {/* Hiring Status Control */}
               <HiringStatusControl />
 
