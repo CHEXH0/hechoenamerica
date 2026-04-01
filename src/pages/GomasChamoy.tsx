@@ -26,19 +26,6 @@ const GomasChamoy = () => {
     [allProducts]
   );
 
-  // Verify chamoy payment if redirected back from Stripe
-  React.useEffect(() => {
-    const chamoyPaidId = searchParams.get("chamoy_paid");
-    if (chamoyPaidId) {
-      supabase.functions
-        .invoke("verify-chamoy-payment", { body: { request_id: chamoyPaidId } })
-        .then(({ data }) => {
-          if (data?.success) {
-            toast({ title: "Payment confirmed!", description: "Your chamoy gummy order has been placed." });
-          }
-        });
-    }
-  }, [searchParams]);
 
   const getCartQuantity = (productId: string) =>
     cartItems.find((item) => item.product_id === productId)?.quantity || 0;
