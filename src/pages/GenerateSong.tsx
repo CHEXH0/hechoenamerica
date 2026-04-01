@@ -123,6 +123,8 @@ const GenerateSong = () => {
   const [wantsNoneOfAbove, setWantsNoneOfAbove] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState("");
+  const [bitDepth, setBitDepth] = useState("24");
+  const [sampleRate, setSampleRate] = useState("44.1");
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [aiProgress, setAiProgress] = useState("");
   const [aiProgressPercent, setAiProgressPercent] = useState(0);
