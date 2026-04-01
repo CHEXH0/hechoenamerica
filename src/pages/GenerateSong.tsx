@@ -489,7 +489,8 @@ const GenerateSong = () => {
             revisions: numberOfRevisions
           },
           bitDepth,
-          sampleRate
+          sampleRate,
+          platformFeePercent: pricingConfig?.platformFeePercent ?? 10
         }
       });
 

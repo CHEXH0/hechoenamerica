@@ -12,8 +12,6 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CREATE-SONG-CHECKOUT] ${step}${detailsStr}`);
 };
 
-// Platform fee percentage (10%)
-const PLATFORM_FEE_PERCENT = 10;
 // Acceptance deadline in hours
 const ACCEPTANCE_DEADLINE_HOURS = 48;
 
@@ -52,8 +50,11 @@ serve(async (req) => {
       basePrice,
       addOns,
       bitDepth,
-      sampleRate
+      sampleRate,
+      platformFeePercent
     } = await req.json();
+    
+    const PLATFORM_FEE_PERCENT = typeof platformFeePercent === 'number' ? platformFeePercent : 10;
     
     logStep("Request body received", { 
       tier, 

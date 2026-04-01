@@ -12,8 +12,8 @@ const logStep = (step: string, details?: any) => {
   console.log(`[PROCESS-PRODUCER-PAYOUT] ${step}${detailsStr}`);
 };
 
-// Platform fee percentage (10%)
-const PLATFORM_FEE_PERCENT = 10;
+// Default platform fee percentage (overridden by app_settings if available)
+let PLATFORM_FEE_PERCENT = 10;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -103,6 +103,18 @@ serve(async (req) => {
     if (paymentIntent.status !== "succeeded") {
       throw new Error("Payment has not been completed");
     }
+
+    // Fetch dynamic platform fee from app_settings
+    const { data: feeSettings } = await supabaseAdmin
+      .from("app_settings")
+      .select("value")
+      .eq("key", "song_pricing")
+      .maybeSingle();
+    
+    if (feeSettings?.value && typeof (feeSettings.value as any).platformFeePercent === 'number') {
+      PLATFORM_FEE_PERCENT = (feeSettings.value as any).platformFeePercent;
+    }
+    logStep("Platform fee loaded", { PLATFORM_FEE_PERCENT });
 
     // Calculate amounts
     const totalAmountCents = paymentIntent.amount;
