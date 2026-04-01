@@ -20,11 +20,11 @@ const AudioPlatforms = React.memo(() => {
       emojis: ["📺", "🎬", "👀", "🔴", "🎵"],
     },
     {
-      name: "WhatsApp",
-      image: "/laptop-uploads/whatsapp.svg",
-      url: "https://chat.whatsapp.com/GfhMoPNoJs49pp4nti7uwU",
+      name: "Careers",
+      isIcon: true,
+      url: "https://hechoenamericastudio.com/producer-application",
       isExternal: true,
-      emojis: ["💬", "📱", "👥", "💚", "📞"],
+      emojis: ["💼", "🎤", "🚀", "⭐", "🎯"],
     },
     {
       name: "Treats",
