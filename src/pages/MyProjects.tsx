@@ -713,32 +713,55 @@ const MyProjects = () => {
             </div>
           )}
 
-          {/* Audio Quality */}
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="outline">{project.bit_depth || '24'}-bit</Badge>
-            <Badge variant="outline">{project.sample_rate || '44.1'} kHz</Badge>
+          {/* Technical Specifications */}
+          <div className="bg-muted/30 border border-border/50 p-3 rounded-lg space-y-2">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Technical Specs</p>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Bit Depth:</span>
+                <Badge variant="outline" className="text-xs">
+                  {project.bit_depth === '32' ? '32-bit float' : `${project.bit_depth || '24'}-bit`}
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Sample Rate:</span>
+                <Badge variant="outline" className="text-xs">
+                  {project.sample_rate || '44.1'} kHz
+                </Badge>
+              </div>
+            </div>
           </div>
 
-          {/* Options */}
-          <div className="flex flex-wrap gap-2">
-            {project.wants_recorded_stems && (
-              <Badge variant="secondary">Stems</Badge>
-            )}
-            {project.wants_analog && (
-              <Badge variant="secondary">Analog</Badge>
-            )}
-            {project.wants_mixing && (
-              <Badge variant="secondary">Mixing</Badge>
-            )}
-            {project.wants_mastering && (
-              <Badge variant="secondary">Mastering</Badge>
-            )}
-            {(project.number_of_revisions ?? 0) > 0 && (
-              <Badge variant="secondary">
-                {project.number_of_revisions} Revisions
-              </Badge>
-            )}
-          </div>
+          {/* Production Add-ons */}
+          {(project.wants_recorded_stems || project.wants_analog || project.wants_mixing || project.wants_mastering || (project.number_of_revisions ?? 0) > 0) ? (
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Production Add-ons</p>
+              <div className="flex flex-wrap gap-2">
+                {project.wants_recorded_stems && (
+                  <Badge variant="secondary">🎹 Stems</Badge>
+                )}
+                {project.wants_analog && (
+                  <Badge variant="secondary">📻 Analog</Badge>
+                )}
+                {project.wants_mixing && (
+                  <Badge variant="secondary">🎚️ Mixing</Badge>
+                )}
+                {project.wants_mastering && (
+                  <Badge variant="secondary">🔊 Mastering</Badge>
+                )}
+                {(project.number_of_revisions ?? 0) > 0 && (
+                  <Badge variant="secondary">
+                    🔄 {project.number_of_revisions} Revisions
+                  </Badge>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Production Add-ons</p>
+              <p className="text-sm text-muted-foreground">Raw production only</p>
+            </div>
+          )}
 
           {/* Producer Checklist - shows for producer view on active projects */}
           {isProducerView && ["in_progress", "review", "completed"].includes(project.status) && (

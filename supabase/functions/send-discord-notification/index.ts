@@ -283,32 +283,43 @@ function createNewRequestEmbed(songRequest: any, requestId: string) {
   const bitDepth = songRequest.bit_depth || "24";
   const sampleRate = songRequest.sample_rate || "44.1";
   const bitDepthLabels: Record<string, string> = { "16": "16-bit", "24": "24-bit", "32": "32-bit float" };
-  const qualityText = `${bitDepthLabels[bitDepth] || bitDepth + "-bit"} / ${sampleRate} kHz`;
+  const sampleRateLabels: Record<string, string> = { "44.1": "44.1 kHz", "48": "48 kHz", "88.2": "88.2 kHz", "96": "96 kHz", "176.4": "176.4 kHz", "192": "192 kHz" };
+  const bitDepthLabel = bitDepthLabels[bitDepth] || `${bitDepth}-bit`;
+  const sampleRateLabel = sampleRateLabels[sampleRate] || `${sampleRate} kHz`;
 
   const totalPrice = basePrice + addOnTotal;
 
-  const embed = {
+  // Build production settings summary
+  const productionSettings: string[] = [];
+  if (songRequest.wants_recorded_stems) productionSettings.push("🎹 Stems");
+  if (songRequest.wants_analog) productionSettings.push("📻 Analog");
+  if (songRequest.wants_mixing) productionSettings.push("🎚️ Mixing");
+  if (songRequest.wants_mastering) productionSettings.push("🔊 Mastering");
+  if (songRequest.number_of_revisions > 0) productionSettings.push(`🔄 ${songRequest.number_of_revisions}x Revisions`);
+
+  // Build price breakdown text
+  let priceBreakdownText = `**Base:** $${basePrice}`;
+  if (addOnBreakdown.length > 0) {
+    priceBreakdownText += "\n" + addOnBreakdown.join("\n");
+    priceBreakdownText += `\n──────────\n**TOTAL: $${totalPrice}**`;
+  } else {
+    priceBreakdownText += `\n**TOTAL: $${totalPrice}**`;
+  }
+
+  const embed: any = {
     title: "🎵 New Song Request",
     color: 0x7c3aed,
+    description: `**${complexityLevel}** tier project • ${songRequest.genre_category || "No genre specified"}`,
     fields: [
+      // ─── Project Overview ───
       {
         name: "📋 Request ID",
         value: `\`${requestId.substring(0, 8)}...\``,
         inline: true,
       },
       {
-        name: "🎯 Tier",
-        value: `${songRequest.tier} (${complexityLevel})`,
-        inline: true,
-      },
-      {
         name: "📧 Customer",
         value: songRequest.user_email,
-        inline: true,
-      },
-      {
-        name: "🎸 Genre",
-        value: songRequest.genre_category || "Not specified",
         inline: true,
       },
       {
@@ -322,15 +333,40 @@ function createNewRequestEmbed(songRequest: any, requestId: string) {
         }),
         inline: true,
       },
+      // ─── Song Details ───
+      {
+        name: "💡 Song Idea",
+        value:
+          songRequest.song_idea.length > 400 ? songRequest.song_idea.substring(0, 400) + "..." : songRequest.song_idea,
+        inline: false,
+      },
+      // ─── Technical Specifications ───
+      {
+        name: "🎛️ Bit Depth",
+        value: bitDepthLabel,
+        inline: true,
+      },
+      {
+        name: "📊 Sample Rate",
+        value: sampleRateLabel,
+        inline: true,
+      },
       {
         name: "📊 Status",
         value: songRequest.status.replace("_", " ").toUpperCase(),
         inline: true,
       },
+      // ─── Production Add-ons ───
       {
-        name: "💡 Song Idea",
-        value:
-          songRequest.song_idea.length > 400 ? songRequest.song_idea.substring(0, 400) + "..." : songRequest.song_idea,
+        name: "⚙️ Production Settings",
+        value: productionSettings.length > 0 ? productionSettings.join(" • ") : "Raw production only",
+        inline: false,
+      },
+      // ─── Pricing ───
+      {
+        name: "💰 Price Breakdown",
+        value: priceBreakdownText,
+        inline: false,
       },
     ],
     timestamp: new Date().toISOString(),
@@ -338,50 +374,6 @@ function createNewRequestEmbed(songRequest: any, requestId: string) {
       text: "HechoEnAmerica • LA MUSIC ES MEDICINE",
     },
   };
-
-  // Add price breakdown section
-  let priceBreakdownText = `**Base:** $${basePrice}`;
-  if (addOnBreakdown.length > 0) {
-    priceBreakdownText += "\n" + addOnBreakdown.join("\n");
-    priceBreakdownText += `\n──────────\n**TOTAL: $${totalPrice}**`;
-  } else {
-    priceBreakdownText += `\n**TOTAL: $${totalPrice}**`;
-  }
-
-  embed.fields.push({
-    name: "💰 Price Breakdown",
-    value: priceBreakdownText,
-    inline: false,
-  });
-
-  // Audio quality field
-  embed.fields.push({
-    name: "🎛️ Audio Quality",
-    value: qualityText,
-    inline: true,
-  });
-
-  // Production settings summary
-  const productionSettings: string[] = [];
-  if (songRequest.wants_recorded_stems) productionSettings.push("🎹 Stems");
-  if (songRequest.wants_analog) productionSettings.push("📻 Analog");
-  if (songRequest.wants_mixing) productionSettings.push("🎚️ Mixing");
-  if (songRequest.wants_mastering) productionSettings.push("🔊 Mastering");
-  if (songRequest.number_of_revisions > 0) productionSettings.push(`🔄 ${songRequest.number_of_revisions}x Revisions`);
-  
-  if (productionSettings.length > 0) {
-    embed.fields.push({
-      name: "⚙️ Production Settings",
-      value: productionSettings.join(" · "),
-      inline: true,
-    });
-  } else {
-    embed.fields.push({
-      name: "⚙️ Production Settings",
-      value: "Raw production only",
-      inline: true,
-    });
-  }
 
   // Files section
   if (songRequest.file_urls && songRequest.file_urls.length > 0) {
@@ -392,7 +384,22 @@ function createNewRequestEmbed(songRequest: any, requestId: string) {
     });
   }
 
-  // Add admin dashboard link
+  // Acceptance deadline
+  if (songRequest.acceptance_deadline) {
+    const deadline = new Date(songRequest.acceptance_deadline);
+    embed.fields.push({
+      name: "⏰ Acceptance Deadline",
+      value: deadline.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      inline: true,
+    });
+  }
+
+  // Admin link
   embed.fields.push({
     name: "🔗 Quick Actions",
     value: `[View in Admin Dashboard](${APP_URL}/admin)`,
