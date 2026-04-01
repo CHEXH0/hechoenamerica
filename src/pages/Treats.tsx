@@ -19,6 +19,7 @@ import { useCart } from "@/hooks/useCart";
 import { usePurchases } from "@/hooks/usePurchases";
 import { Badge } from "@/components/ui/badge";
 import { useSearchParams } from "react-router-dom";
+import { useSweetTreatsTabVisible } from "@/hooks/useStoreVisibility";
 
 
 const Treats = () => {
