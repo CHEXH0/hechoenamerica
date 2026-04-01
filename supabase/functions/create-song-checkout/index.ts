@@ -50,7 +50,9 @@ serve(async (req) => {
       requestId,
       totalPrice,
       basePrice,
-      addOns 
+      addOns,
+      bitDepth,
+      sampleRate
     } = await req.json();
     
     logStep("Request body received", { 
