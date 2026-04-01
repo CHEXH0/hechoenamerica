@@ -29,6 +29,9 @@ const Treats = () => {
   const { addItem, getItemCount, items: cartItems } = useCart();
   const { data: purchases } = usePurchases();
   const navigate = useNavigate();
+  const { data: treatsTabVisible } = useSweetTreatsTabVisible();
+  const showTreatsTab = treatsTabVisible ?? true;
+  const navigate = useNavigate();
 
   // Check if a product is already purchased
   const isProductPurchased = (productId: string) => {
