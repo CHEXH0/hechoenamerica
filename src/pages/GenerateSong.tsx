@@ -510,7 +510,9 @@ const GenerateSong = () => {
         wants_analog: wantsAnalog,
         wants_mixing: wantsMixing,
         wants_mastering: wantsMastering,
-        genre_category: selectedGenre || null
+        genre_category: selectedGenre || null,
+        bit_depth: bitDepth,
+        sample_rate: sampleRate
       }).
       select().
       single();
