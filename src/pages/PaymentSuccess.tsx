@@ -127,9 +127,24 @@ const PaymentSuccess = () => {
             <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent mb-6">
               Payment Successful!
             </h1>
-             <p className="text-xl text-gray-300 leading-relaxed">
-               Your treats are now available in your account.
-             </p>
+            {hasCandies && !hasDigital ? (
+              <p className="text-xl text-gray-300 leading-relaxed">
+                Your order has been placed! You'll receive a confirmation email with shipping details shortly.
+              </p>
+            ) : hasCandies && hasDigital ? (
+              <div className="space-y-2">
+                <p className="text-xl text-gray-300 leading-relaxed">
+                  Your digital treats are now available in your account.
+                </p>
+                <p className="text-lg text-gray-400 leading-relaxed">
+                  🍬 Your candy order has been placed — check your email for shipping details.
+                </p>
+              </div>
+            ) : (
+              <p className="text-xl text-gray-300 leading-relaxed">
+                Your treats are now available in your account.
+              </p>
+            )}
           </motion.div>
 
           {/* Purchase Summary */}
