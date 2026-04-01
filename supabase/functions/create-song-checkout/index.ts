@@ -62,7 +62,9 @@ serve(async (req) => {
       requestId,
       totalPrice,
       basePrice,
-      addOns
+      addOns,
+      bitDepth,
+      sampleRate
     });
 
     if (!tier || totalPrice === undefined) {
