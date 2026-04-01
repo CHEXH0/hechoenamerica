@@ -104,6 +104,18 @@ serve(async (req) => {
       throw new Error("Payment has not been completed");
     }
 
+    // Fetch dynamic platform fee from app_settings
+    const { data: feeSettings } = await supabaseAdmin
+      .from("app_settings")
+      .select("value")
+      .eq("key", "song_pricing")
+      .maybeSingle();
+    
+    if (feeSettings?.value && typeof (feeSettings.value as any).platformFeePercent === 'number') {
+      PLATFORM_FEE_PERCENT = (feeSettings.value as any).platformFeePercent;
+    }
+    logStep("Platform fee loaded", { PLATFORM_FEE_PERCENT });
+
     // Calculate amounts
     const totalAmountCents = paymentIntent.amount;
     const platformFeeCents = Math.round(totalAmountCents * (PLATFORM_FEE_PERCENT / 100));
