@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
@@ -14,6 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Plus, ChevronDown, HardDrive, Link, X, Loader2, Info, Check, Circle } from "lucide-react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Progress } from "@/components/ui/progress";
+import { useSongPricing, DEFAULT_PRICING } from "@/hooks/useSongPricing";
 
 // Google Drive link type
 interface DriveLink {
@@ -32,81 +33,24 @@ const genreCategories = [
 { value: "world", label: "World / Indigenous / Medicina" },
 { value: "other", label: "Other / Mixed" }];
 
-const tiers = [
-{
-  label: "$0",
-  price: 0,
-  description: "Free AI Generated - for comparison",
-  priceId: null,
-  info: "Get a quick AI-generated demo using Google Lyria 2. Great for testing ideas before committing. Limited to 3 per 5 hours."
-},
-{
-  label: "$25",
-  price: 25,
-  description: "Demo Project - for ideas (≈30sec)",
-  priceId: "price_1SHdNFQchHjxRXODM3DJdjEE",
-  info: "A human-produced demo track by one of our producers. Perfect for pitch decks, social media teasers, or validating a concept before full production."
-},
-{
-  label: "$125",
-  price: 125,
-  description: "Artist-grade quality - for production (≈180sec)",
-  priceId: "price_1SHdNVQchHjxRXODn3lW4vDj",
-  info: "A full production-ready track. Includes professional arrangement, sound design, and high-quality mix. Ideal for singles, EPs, or album tracks."
-},
-{
-  label: "$250",
-  price: 250,
-  description: "Industry standard - for masterpiece (≈300sec)",
-  priceId: "price_1SHdNmQchHjxRXODgqWhW9TO",
-  info: "A premium track with top-tier production, detailed arrangement, and radio-ready quality. Includes priority producer matching and faster turnaround."
-}];
-
-
-// Add-on pricing per tier (tier index: 0=free, 1=$25, 2=$125, 3=$250)
-const addOnPricing = {
-  stems: {
-    prices: [0, 10, 25, 40],
-    info: "We record individual instrument/vocal tracks (stems) so we can provide the best quality for your sound. Either as stems you can use later or for use of the producer's time."
-  },
-  analog: {
-    prices: [0, 15, 35, 50],
-    info: "Your track will be processed through real analog hardware (compressors, EQs, tape machines) for warmer, richer sound character."
-  },
-  mixing: {
-    prices: [0, 20, 50, 75],
-    info: "Professional mixing by our engineer: balancing levels, EQ, compression, effects, and spatial positioning for a polished sound."
-  },
-  mastering: {
-    prices: [0, 15, 40, 60],
-    info: "Final mastering to optimize loudness, clarity, and consistency across all playback systems. Industry-standard LUFS targeting."
-  },
-  revision: {
-    prices: [0, 5, 15, 25],
-    info: "Each revision allows you to request specific changes to your track. The producer will adjust based on your feedback notes."
-  }
-};
-
-// Audio quality options
-const bitDepthOptions = [
-  { value: "16", label: "16-bit", surcharge: [0, 0, 0, 0] },
-  { value: "24", label: "24-bit", surcharge: [0, 0, 0, 0] },
-  { value: "32", label: "32-bit float", surcharge: [0, 5, 10, 15] },
-];
-
-const sampleRateOptions = [
-  { value: "44.1", label: "44.1 kHz", surcharge: [0, 0, 0, 0] },
-  { value: "48", label: "48 kHz", surcharge: [0, 0, 0, 0] },
-  { value: "88.2", label: "88.2 kHz", surcharge: [0, 5, 10, 15] },
-  { value: "96", label: "96 kHz", surcharge: [0, 5, 10, 15] },
-  { value: "176.4", label: "176.4 kHz", surcharge: [0, 10, 20, 30] },
-  { value: "192", label: "192 kHz", surcharge: [0, 10, 20, 30] },
-];
+// Fallback constants (used if DB pricing not loaded yet)
+const FALLBACK_TIERS = DEFAULT_PRICING.tiers;
+const FALLBACK_ADD_ONS = DEFAULT_PRICING.addOns;
+const FALLBACK_BIT_DEPTH = DEFAULT_PRICING.bitDepthOptions;
+const FALLBACK_SAMPLE_RATE = DEFAULT_PRICING.sampleRateOptions;
 
 const MAX_FREE_AI_SONGS = 3;
 const RESET_HOURS = 5;
 
 const GenerateSong = () => {
+  const { data: pricingConfig } = useSongPricing();
+  
+  // Derive pricing from DB config (or fallback)
+  const tiers = pricingConfig?.tiers ?? FALLBACK_TIERS;
+  const addOnPricing = pricingConfig?.addOns ?? FALLBACK_ADD_ONS;
+  const bitDepthOptions = pricingConfig?.bitDepthOptions ?? FALLBACK_BIT_DEPTH;
+  const sampleRateOptions = pricingConfig?.sampleRateOptions ?? FALLBACK_SAMPLE_RATE;
+
   const [sliderValue, setSliderValue] = useState([2]);
   const [idea, setIdea] = useState("");
 
