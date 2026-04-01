@@ -9,7 +9,7 @@ import { useProducts, type Product } from "@/hooks/useProducts";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/contexts/AuthContext";
 import { Cart } from "@/components/Cart";
-import ChamoyRequestCard from "@/components/ChamoyRequestCard";
+
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
