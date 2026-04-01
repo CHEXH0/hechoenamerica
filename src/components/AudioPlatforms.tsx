@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Candy } from "lucide-react";
+import { Candy, Briefcase } from "lucide-react";
 
 const AudioPlatforms = React.memo(() => {
   const platforms = [
