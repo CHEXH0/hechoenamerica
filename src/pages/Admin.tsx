@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload, Users, User, Database, TrendingUp, DollarSign, FileText, HardDrive, UserPlus } from "lucide-react";
+import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload, Users, User, Database, TrendingUp, DollarSign, FileText, HardDrive, UserPlus, Candy } from "lucide-react";
 import PricingAdmin from "@/components/PricingAdmin";
 import { GoogleDriveConnect } from "@/components/GoogleDriveConnect";
 import { ProducerProjects } from "@/components/ProducerProjects";
