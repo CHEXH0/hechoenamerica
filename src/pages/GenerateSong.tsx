@@ -43,6 +43,14 @@ const MAX_FREE_AI_SONGS = 3;
 const RESET_HOURS = 5;
 
 const GenerateSong = () => {
+  const { data: pricingConfig } = useSongPricing();
+  
+  // Derive pricing from DB config (or fallback)
+  const tiers = pricingConfig?.tiers ?? FALLBACK_TIERS;
+  const addOnPricing = pricingConfig?.addOns ?? FALLBACK_ADD_ONS;
+  const bitDepthOptions = pricingConfig?.bitDepthOptions ?? FALLBACK_BIT_DEPTH;
+  const sampleRateOptions = pricingConfig?.sampleRateOptions ?? FALLBACK_SAMPLE_RATE;
+
   const [sliderValue, setSliderValue] = useState([2]);
   const [idea, setIdea] = useState("");
 
