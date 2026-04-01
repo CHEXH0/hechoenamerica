@@ -957,7 +957,7 @@ const Treats = () => {
               )}
             </TabsContent>
 
-            <TabsContent value="candies" className="space-y-8">
+            {showTreatsTab && <TabsContent value="candies" className="space-y-8">
               <motion.div 
                 className="text-center mb-10" 
                 initial={{
