@@ -95,7 +95,7 @@ serve(async (req) => {
         throw new Error(`Product ${item.product_id} not found`);
       }
 
-      return {
+      const purchaseRecord: any = {
         user_id: userId,
         product_id: product.id,
         product_name: product.name,
@@ -105,6 +105,17 @@ serve(async (req) => {
         purchase_date: new Date().toISOString(),
         stripe_session_id: session_id,
       };
+
+      // Add shipping info for candy purchases
+      if (product.category === 'candies') {
+        purchaseRecord.shipping_status = 'pending';
+        const addr = session.shipping_details?.address || session.customer_details?.address;
+        if (addr) {
+          purchaseRecord.shipping_address = [addr.line1, addr.line2, addr.city, addr.state, addr.postal_code, addr.country].filter(Boolean).join(', ');
+        }
+      }
+
+      return purchaseRecord;
     });
 
     const { error: insertError } = await supabaseClient
@@ -185,9 +196,66 @@ serve(async (req) => {
           });
 
           logStep("Admin notification email sent for candy purchase");
+
+          // Send customer confirmation email
+          const customerConfirmHtml = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #ffffff;">
+              <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #e91e8c; margin: 0;">🍬 Order Confirmed!</h1>
+                <p style="color: #666; font-size: 16px;">Thank you for your purchase, ${customerName}!</p>
+              </div>
+              
+              <div style="background: #fdf2f8; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #f9a8d4;">
+                <h3 style="margin-top: 0; color: #9d174d;">Order Summary</h3>
+                <pre style="white-space: pre-wrap; font-family: Arial, sans-serif; color: #374151; margin: 0;">${candyItemsList}</pre>
+              </div>
+
+              <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #86efac;">
+                <h3 style="margin-top: 0; color: #166534;">📦 Shipping Timeline</h3>
+                <ul style="color: #374151; padding-left: 20px; margin: 10px 0;">
+                  <li style="margin-bottom: 8px;"><strong>Processing:</strong> 1-2 business days</li>
+                  <li style="margin-bottom: 8px;"><strong>Shipping:</strong> 3-7 business days (depending on location)</li>
+                  <li style="margin-bottom: 8px;"><strong>Tracking:</strong> You'll receive a tracking number once shipped</li>
+                </ul>
+              </div>
+
+              ${shippingAddress !== 'Not provided' ? `
+              <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #e2e8f0;">
+                <p style="margin: 0; color: #64748b; font-size: 14px;"><strong>Shipping to:</strong> ${shippingAddress}</p>
+              </div>
+              ` : ''}
+
+              <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                <p style="color: #9ca3af; font-size: 13px;">
+                  Questions about your order? Reply to this email or contact us at team@hechoenamericastudio.com
+                </p>
+                <p style="color: #d1d5db; font-size: 12px;">Hecho en America Studio</p>
+              </div>
+            </div>
+          `;
+
+          if (customerEmail && customerEmail !== 'Unknown') {
+            await fetch(`${GATEWAY_URL}/emails`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${lovableApiKey}`,
+                'X-Connection-Api-Key': resendApiKey,
+              },
+              body: JSON.stringify({
+                from: 'HEA Studio <team@hechoenamericastudio.com>',
+                to: [customerEmail],
+                subject: '🍬 Your Candy Order is Confirmed!',
+                html: customerConfirmHtml,
+                reply_to: 'team@hechoenamericastudio.com',
+              }),
+            });
+
+            logStep("Customer confirmation email sent", { email: customerEmail });
+          }
         }
       } catch (emailError) {
-        logStep("Failed to send admin notification email", { error: String(emailError) });
+        logStep("Failed to send notification emails", { error: String(emailError) });
         // Don't fail the payment verification if email fails
       }
     }

@@ -44,7 +44,7 @@ serve(async (req) => {
       );
     }
 
-    const { purchaseId, downloadUrl, status } = await req.json();
+    const { purchaseId, downloadUrl, status, trackingNumber, shippingStatus } = await req.json();
 
     if (!purchaseId) {
       return new Response(
@@ -60,6 +60,14 @@ serve(async (req) => {
 
     if (downloadUrl) {
       updateData.download_url = downloadUrl;
+    }
+
+    if (trackingNumber !== undefined) {
+      updateData.tracking_number = trackingNumber;
+    }
+
+    if (shippingStatus !== undefined) {
+      updateData.shipping_status = shippingStatus;
     }
 
     const { data, error } = await supabaseAdmin

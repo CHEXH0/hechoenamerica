@@ -11,6 +11,7 @@ import { StorageManagement } from "@/components/StorageManagement";
 import { ProducerApplicationsAdmin } from "@/components/ProducerApplicationsAdmin";
 import { CancellationRequestsAdmin } from "@/components/CancellationRequestsAdmin";
 import ChamoyRequestsAdmin from "@/components/ChamoyRequestsAdmin";
+import CandyOrdersAdmin from "@/components/CandyOrdersAdmin";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -452,6 +453,9 @@ const Admin = () => {
 
               {/* Chamoy Gummy Requests */}
               <ChamoyRequestsAdmin />
+
+              {/* Candy Orders Management */}
+              <CandyOrdersAdmin />
 
               {/* Hiring Status Control */}
               <HiringStatusControl />
