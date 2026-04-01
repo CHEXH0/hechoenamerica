@@ -1002,7 +1002,7 @@ const Treats = () => {
                   </Link>
                 </motion.div>
               </div>
-            </TabsContent>
+            </TabsContent>}
           </Tabs>
         </motion.div>
         
