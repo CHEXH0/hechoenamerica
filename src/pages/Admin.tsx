@@ -323,6 +323,76 @@ const Admin = () => {
     }
   };
 
+  // Store Visibility Control Component
+  const StoreVisibilityControl = () => {
+    const { data: gomasVisible, isLoading: gomasLoading } = useGomasChamoyVisible();
+    const { data: treatsVisible, isLoading: treatsLoading } = useSweetTreatsTabVisible();
+    const updateVisibility = useUpdateStoreVisibility();
+
+    const handleToggle = async (key: string, checked: boolean, label: string) => {
+      try {
+        await updateVisibility.mutateAsync({ key, enabled: checked });
+        toast({
+          title: checked ? `${label} Enabled` : `${label} Disabled`,
+          description: checked ? `${label} is now visible to users.` : `${label} is now hidden from users.`,
+        });
+      } catch (error) {
+        console.error("Error updating visibility:", error);
+        toast({ title: "Error", description: "Failed to update visibility.", variant: "destructive" });
+      }
+    };
+
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Candy className="h-5 w-5" />
+            Store Visibility
+          </CardTitle>
+          <CardDescription>Control which candy/treats pages are visible to users</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label className="text-base">Gomas Chamoy Page</Label>
+              <p className="text-sm text-muted-foreground">
+                {gomasVisible ? "The /gomas-chamoy page is live." : "The /gomas-chamoy page is hidden."}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Badge variant={gomasVisible ? "default" : "secondary"} className={gomasVisible ? "bg-green-500" : ""}>
+                {gomasVisible ? "Visible" : "Hidden"}
+              </Badge>
+              <Switch
+                checked={gomasVisible ?? true}
+                onCheckedChange={(c) => handleToggle("gomas_chamoy_visible", c, "Gomas Chamoy Page")}
+                disabled={gomasLoading || updateVisibility.isPending}
+              />
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label className="text-base">Sweet Treats Tab</Label>
+              <p className="text-sm text-muted-foreground">
+                {treatsVisible ? "The Sweet Treats tab is shown on /treats." : "The Sweet Treats tab is hidden on /treats."}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Badge variant={treatsVisible ? "default" : "secondary"} className={treatsVisible ? "bg-green-500" : ""}>
+                {treatsVisible ? "Visible" : "Hidden"}
+              </Badge>
+              <Switch
+                checked={treatsVisible ?? true}
+                onCheckedChange={(c) => handleToggle("sweet_treats_tab_visible", c, "Sweet Treats Tab")}
+                disabled={treatsLoading || updateVisibility.isPending}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   // Hiring Status Control Component
   const HiringStatusControl = () => {
     const { data: hiringStatus, isLoading: hiringLoading } = useHiringStatus();
