@@ -24,6 +24,11 @@ const GomasChamoy = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const { data: isVisible, isLoading: visibilityLoading } = useGomasChamoyVisible();
 
+  const candyProducts = React.useMemo(
+    () => allProducts?.filter((p) => p.category === "candies") || [],
+    [allProducts]
+  );
+
   if (!visibilityLoading && isVisible === false) {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white gap-4">
@@ -34,11 +39,6 @@ const GomasChamoy = () => {
       </div>
     );
   }
-
-  const candyProducts = React.useMemo(
-    () => allProducts?.filter((p) => p.category === "candies") || [],
-    [allProducts]
-  );
 
 
   const getCartQuantity = (productId: string) =>
