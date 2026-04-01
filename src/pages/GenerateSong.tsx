@@ -1258,7 +1258,7 @@ const GenerateSong = () => {
                     }
                     </div>
                   </div>
-                  {(wantsRecordedStems || wantsAnalog || wantsMixing || wantsMastering || numberOfRevisions > 0) &&
+                  {(wantsRecordedStems || wantsAnalog || wantsMixing || wantsMastering || numberOfRevisions > 0 || (bitDepthOptions.find(o => o.value === bitDepth)?.surcharge[tierIndex] ?? 0) > 0 || (sampleRateOptions.find(o => o.value === sampleRate)?.surcharge[tierIndex] ?? 0) > 0) &&
                 <div className="text-right text-white/70 text-xs space-y-0.5">
                       {wantsRecordedStems && <p>Stems +${addOnPricing.stems.prices[tierIndex]}</p>}
                       {wantsAnalog && <p>Analog +${addOnPricing.analog.prices[tierIndex]}</p>}
@@ -1269,6 +1269,14 @@ const GenerateSong = () => {
                           {numberOfRevisions}x Revisions +${numberOfRevisions * addOnPricing.revision.prices[tierIndex]}
                         </p>
                   }
+                      {(() => {
+                        const bdSurcharge = bitDepthOptions.find(o => o.value === bitDepth)?.surcharge[tierIndex] ?? 0;
+                        return bdSurcharge > 0 ? <p>{bitDepth}-bit +${bdSurcharge}</p> : null;
+                      })()}
+                      {(() => {
+                        const srSurcharge = sampleRateOptions.find(o => o.value === sampleRate)?.surcharge[tierIndex] ?? 0;
+                        return srSurcharge > 0 ? <p>{sampleRate} kHz +${srSurcharge}</p> : null;
+                      })()}
                     </div>
                 }
                 </div>
