@@ -87,6 +87,22 @@ const addOnPricing = {
   }
 };
 
+// Audio quality options
+const bitDepthOptions = [
+  { value: "16", label: "16-bit", surcharge: [0, 0, 0, 0] },
+  { value: "24", label: "24-bit", surcharge: [0, 0, 0, 0] },
+  { value: "32", label: "32-bit float", surcharge: [0, 5, 10, 15] },
+];
+
+const sampleRateOptions = [
+  { value: "44.1", label: "44.1 kHz", surcharge: [0, 0, 0, 0] },
+  { value: "48", label: "48 kHz", surcharge: [0, 0, 0, 0] },
+  { value: "88.2", label: "88.2 kHz", surcharge: [0, 5, 10, 15] },
+  { value: "96", label: "96 kHz", surcharge: [0, 5, 10, 15] },
+  { value: "176.4", label: "176.4 kHz", surcharge: [0, 10, 20, 30] },
+  { value: "192", label: "192 kHz", surcharge: [0, 10, 20, 30] },
+];
+
 const MAX_FREE_AI_SONGS = 3;
 const RESET_HOURS = 5;
 
@@ -107,6 +123,8 @@ const GenerateSong = () => {
   const [wantsNoneOfAbove, setWantsNoneOfAbove] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState("");
+  const [bitDepth, setBitDepth] = useState("24");
+  const [sampleRate, setSampleRate] = useState("44.1");
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [aiProgress, setAiProgress] = useState("");
   const [aiProgressPercent, setAiProgressPercent] = useState(0);
@@ -132,6 +150,12 @@ const GenerateSong = () => {
     if (wantsMixing) total += addOnPricing.mixing.prices[tierIndex];
     if (wantsMastering) total += addOnPricing.mastering.prices[tierIndex];
     total += numberOfRevisions * addOnPricing.revision.prices[tierIndex];
+
+    // Audio quality surcharges
+    const bdOption = bitDepthOptions.find(o => o.value === bitDepth);
+    if (bdOption) total += bdOption.surcharge[tierIndex];
+    const srOption = sampleRateOptions.find(o => o.value === sampleRate);
+    if (srOption) total += srOption.surcharge[tierIndex];
 
     return total;
   };
@@ -486,7 +510,9 @@ const GenerateSong = () => {
         wants_analog: wantsAnalog,
         wants_mixing: wantsMixing,
         wants_mastering: wantsMastering,
-        genre_category: selectedGenre || null
+        genre_category: selectedGenre || null,
+        bit_depth: bitDepth,
+        sample_rate: sampleRate
       }).
       select().
       single();
@@ -517,7 +543,9 @@ const GenerateSong = () => {
             mixing: wantsMixing,
             mastering: wantsMastering,
             revisions: numberOfRevisions
-          }
+          },
+          bitDepth,
+          sampleRate
         }
       });
 
@@ -1118,6 +1146,93 @@ const GenerateSong = () => {
                       </div>
                       <p className="text-white/40 text-xs mt-1">Note: You will receive a raw file. No mixing, mastering, or recorded stems included. Additional post-production may be needed for release.</p>
                     </div>
+
+                    <div className="border-t border-white/10 my-2" />
+
+                    {/* Audio Quality Section */}
+                    <div className="space-y-4">
+                      <Label className="text-white text-sm font-semibold">Audio Quality</Label>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Label className="text-white text-sm font-medium">Bit Depth</Label>
+                          <HoverCard>
+                            <HoverCardTrigger asChild>
+                              <button type="button">
+                                <Info className="w-3.5 h-3.5 text-white/50 hover:text-white" />
+                              </button>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-64 text-sm">
+                              <p className="text-muted-foreground">Higher bit depth means more dynamic range and detail. 24-bit is standard; 32-bit float provides extra headroom for processing.</p>
+                            </HoverCardContent>
+                          </HoverCard>
+                        </div>
+                        {(() => {
+                          const bd = bitDepthOptions.find(o => o.value === bitDepth);
+                          const surcharge = bd ? bd.surcharge[tierIndex] : 0;
+                          return surcharge > 0 ? (
+                            <span className="text-white/80 text-sm font-medium">+${surcharge}</span>
+                          ) : null;
+                        })()}
+                      </div>
+                      <div className="flex gap-2">
+                        {bitDepthOptions.map((option) => (
+                          <Button
+                            key={option.value}
+                            type="button"
+                            variant="ghost"
+                            onClick={() => setBitDepth(option.value)}
+                            className={`flex-1 text-sm border ${
+                              bitDepth === option.value
+                                ? 'bg-white/30 border-white/60 text-white'
+                                : 'bg-white/5 border-white/20 text-white/60 hover:bg-white/10 hover:text-white'
+                            }`}
+                          >
+                            {option.label}
+                          </Button>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Label className="text-white text-sm font-medium">Sample Rate</Label>
+                          <HoverCard>
+                            <HoverCardTrigger asChild>
+                              <button type="button">
+                                <Info className="w-3.5 h-3.5 text-white/50 hover:text-white" />
+                              </button>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-64 text-sm">
+                              <p className="text-muted-foreground">Higher sample rates capture more audio detail. 44.1 kHz is CD quality; higher rates are used for professional mastering and archival.</p>
+                            </HoverCardContent>
+                          </HoverCard>
+                        </div>
+                        {(() => {
+                          const sr = sampleRateOptions.find(o => o.value === sampleRate);
+                          const surcharge = sr ? sr.surcharge[tierIndex] : 0;
+                          return surcharge > 0 ? (
+                            <span className="text-white/80 text-sm font-medium">+${surcharge}</span>
+                          ) : null;
+                        })()}
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        {sampleRateOptions.map((option) => (
+                          <Button
+                            key={option.value}
+                            type="button"
+                            variant="ghost"
+                            onClick={() => setSampleRate(option.value)}
+                            className={`text-sm border ${
+                              sampleRate === option.value
+                                ? 'bg-white/30 border-white/60 text-white'
+                                : 'bg-white/5 border-white/20 text-white/60 hover:bg-white/10 hover:text-white'
+                            }`}
+                          >
+                            {option.label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -1143,7 +1258,7 @@ const GenerateSong = () => {
                     }
                     </div>
                   </div>
-                  {(wantsRecordedStems || wantsAnalog || wantsMixing || wantsMastering || numberOfRevisions > 0) &&
+                  {(wantsRecordedStems || wantsAnalog || wantsMixing || wantsMastering || numberOfRevisions > 0 || (bitDepthOptions.find(o => o.value === bitDepth)?.surcharge[tierIndex] ?? 0) > 0 || (sampleRateOptions.find(o => o.value === sampleRate)?.surcharge[tierIndex] ?? 0) > 0) &&
                 <div className="text-right text-white/70 text-xs space-y-0.5">
                       {wantsRecordedStems && <p>Stems +${addOnPricing.stems.prices[tierIndex]}</p>}
                       {wantsAnalog && <p>Analog +${addOnPricing.analog.prices[tierIndex]}</p>}
@@ -1154,6 +1269,14 @@ const GenerateSong = () => {
                           {numberOfRevisions}x Revisions +${numberOfRevisions * addOnPricing.revision.prices[tierIndex]}
                         </p>
                   }
+                      {(() => {
+                        const bdSurcharge = bitDepthOptions.find(o => o.value === bitDepth)?.surcharge[tierIndex] ?? 0;
+                        return bdSurcharge > 0 ? <p>{bitDepth}-bit +${bdSurcharge}</p> : null;
+                      })()}
+                      {(() => {
+                        const srSurcharge = sampleRateOptions.find(o => o.value === sampleRate)?.surcharge[tierIndex] ?? 0;
+                        return srSurcharge > 0 ? <p>{sampleRate} kHz +${srSurcharge}</p> : null;
+                      })()}
                     </div>
                 }
                 </div>
