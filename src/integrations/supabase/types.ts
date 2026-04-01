@@ -530,9 +530,12 @@ export type Database = {
           product_name: string
           product_type: string
           purchase_date: string
+          shipping_address: string | null
+          shipping_status: string | null
           song_idea: string | null
           status: string
           stripe_session_id: string | null
+          tracking_number: string | null
           updated_at: string
           user_id: string
         }
@@ -547,9 +550,12 @@ export type Database = {
           product_name: string
           product_type: string
           purchase_date?: string
+          shipping_address?: string | null
+          shipping_status?: string | null
           song_idea?: string | null
           status?: string
           stripe_session_id?: string | null
+          tracking_number?: string | null
           updated_at?: string
           user_id: string
         }
@@ -564,9 +570,12 @@ export type Database = {
           product_name?: string
           product_type?: string
           purchase_date?: string
+          shipping_address?: string | null
+          shipping_status?: string | null
           song_idea?: string | null
           status?: string
           stripe_session_id?: string | null
+          tracking_number?: string | null
           updated_at?: string
           user_id?: string
         }
