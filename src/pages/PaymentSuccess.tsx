@@ -15,6 +15,8 @@ const PaymentSuccess = () => {
   const [isVerifying, setIsVerifying] = useState(true);
   const [verificationComplete, setVerificationComplete] = useState(false);
   const [purchases, setPurchases] = useState<any[]>([]);
+  const hasCandies = purchases.some(p => p.product_category === 'candies');
+  const hasDigital = purchases.some(p => p.product_category !== 'candies');
 
   const sessionId = searchParams.get('session_id');
 
