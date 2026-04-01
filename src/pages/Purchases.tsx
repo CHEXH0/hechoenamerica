@@ -131,13 +131,21 @@ const Purchases = () => {
       }
 
       // Find the main download file (prioritize .zip, then audio files)
+      // Find main download file - check common formats, then fall back to first non-folder file
       const downloadFile = files.find(file => 
         file.name.endsWith('.zip') || 
         file.name.endsWith('.wav') || 
         file.name.endsWith('.mp3') || 
         file.name.endsWith('.flac') || 
-        file.name.endsWith('.aiff')
-      );
+        file.name.endsWith('.aiff') ||
+        file.name.endsWith('.exe') ||
+        file.name.endsWith('.dmg') ||
+        file.name.endsWith('.pkg') ||
+        file.name.endsWith('.msi') ||
+        file.name.endsWith('.vst3') ||
+        file.name.endsWith('.dll') ||
+        file.name.endsWith('.component')
+      ) || files.find(file => file.name !== '.emptyFolderPlaceholder');
 
       if (!downloadFile) {
         throw new Error('No compatible download files found');
