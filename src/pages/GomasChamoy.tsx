@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowLeft, ShoppingCart, Plus, Minus, Candy, Scroll } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Plus, Minus, Candy } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { useProducts, type Product } from "@/hooks/useProducts";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/contexts/AuthContext";
 import { Cart } from "@/components/Cart";
-import ChamoyRequestCard from "@/components/ChamoyRequestCard";
+
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -26,19 +26,6 @@ const GomasChamoy = () => {
     [allProducts]
   );
 
-  // Verify chamoy payment if redirected back from Stripe
-  React.useEffect(() => {
-    const chamoyPaidId = searchParams.get("chamoy_paid");
-    if (chamoyPaidId) {
-      supabase.functions
-        .invoke("verify-chamoy-payment", { body: { request_id: chamoyPaidId } })
-        .then(({ data }) => {
-          if (data?.success) {
-            toast({ title: "Payment confirmed!", description: "Your chamoy gummy order has been placed." });
-          }
-        });
-    }
-  }, [searchParams]);
 
   const getCartQuantity = (productId: string) =>
     cartItems.find((item) => item.product_id === productId)?.quantity || 0;
@@ -129,7 +116,7 @@ const GomasChamoy = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            Handcrafted chamoy gummy candy with authentic Latin American flavors. Pick your favorites or request a custom order!
+            Handcrafted chamoy gummy candy with authentic Latin American flavors. Pick your favorites!
           </motion.p>
           <motion.p
             className="text-sm text-pink-400/70 mt-3 max-w-xl mx-auto"
@@ -256,34 +243,11 @@ const GomasChamoy = () => {
                 </motion.div>
               ))}
             </div>
-
-            {/* Custom Order Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-pink-500/10 border border-pink-400/20 mb-4">
-                  <Scroll className="h-4 w-4 text-pink-400" />
-                  <span className="text-pink-300 text-sm font-medium">Custom Orders</span>
-                </div>
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-red-400 bg-clip-text text-transparent mb-2">
-                  Want Something Special?
-                </h2>
-                <p className="text-gray-400 max-w-lg mx-auto">
-                  Request a custom chamoy gummy order tailored to your taste. We'll quote you a price and craft it just for you.
-                </p>
-              </div>
-              <div className="max-w-2xl mx-auto">
-                <ChamoyRequestCard />
-              </div>
-            </motion.div>
           </div>
         ) : (
-          /* Fallback: No products — show custom order as primary */
-          <div className="max-w-2xl mx-auto">
-            <ChamoyRequestCard />
+          <div className="text-center py-20 text-gray-400">
+            <Candy className="h-12 w-12 mx-auto mb-4 text-pink-400/50" />
+            <p className="text-lg">No products available yet. Check back soon!</p>
           </div>
         )}
       </div>
