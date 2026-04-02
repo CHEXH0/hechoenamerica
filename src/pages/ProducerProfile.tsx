@@ -469,7 +469,7 @@ const ProducerProfile = () => {
                       ✓ Your Discord is linked! Join our producer channel to receive project notifications:
                     </p>
                     <a
-                      href="https://discord.gg/Pm69BVBc"
+                      href="https://discord.gg/wQbKNQR6"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 text-sm font-medium text-[#5865F2] hover:underline"
