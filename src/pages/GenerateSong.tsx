@@ -710,13 +710,13 @@ const GenerateSong = () => {
                     { label: "At least 20 characters describing your idea", met: idea.trim().length >= 20 },
                     {
                       label: "Mention mood or energy (e.g. chill, energetic, dark)",
-                      met: /\b(chill|energetic|dark|happy|sad|upbeat|mellow|aggressive|dreamy|epic|calm|relaxed|intense|groovy|funky|smooth|powerful|soft|hard|bright|warm|cold|melancholic|euphoric|nostalgic|ambient|lively|moody)\b/i.test(
+                      met: /\b(chill|energetic|dark|happy|sad|upbeat|mellow|aggressive|dreamy|epic|calm|relaxed|intense|groovy|funky|smooth|powerful|soft|hard|bright|warm|cold|melancholic|euphoric|nostalgic|ambient|lively|moody|hyped|vibrant|peaceful|mysterious|haunting|playful|dramatic|gentle|fierce|raw|gritty|ethereal|atmospheric|tropical|bouncy|heavy|light|deep|airy|crisp|punchy|dirty|clean)\b/i.test(
                         idea
                       )
                     },
                     {
                       label: "Mention at least one instrument or sound",
-                      met: /\b(guitar|bass|drum|piano|synth|808|hi-hat|kick|snare|organ|flute|violin|trumpet|sax|percussion|keys|pad|arp|strings|brass|vocal|beat|melody|chord|loop|sample|clap|cymbal|bell|harp|cello|horn|timbale|conga|bongo|melodica|marimba|ukulele|banjo)\b/i.test(
+                      met: /\b(guitars?|bass|drums?|pianos?|synths?|synthesizers?|808s?|hi-?hats?|kicks?|snares?|organs?|flutes?|violins?|trumpets?|saxs?|saxophone|percussions?|keys|pads?|arps?|strings|brass|vocals?|beats?|melod(y|ies)|chords?|loops?|samples?|claps?|cymbals?|bells?|harps?|cellos?|horns?|timbales?|congas?|bongos?|melodica|marimbas?|ukuleles?|banjos?|whistles?|risers?|drops?|sub-?bass|plucks?|stabs?|fx|effects?|noise|distortion|reverb|delay|echo|filter)\b/i.test(
                         idea
                       )
                     }].

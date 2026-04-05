@@ -217,7 +217,7 @@ serve(async (req) => {
         // Check for common error types
         if (errorMessage.includes("recitation") || errorMessage.includes("blocked") || errorMessage.includes("Music generation failed")) {
           return new Response(JSON.stringify({ 
-            error: "⚠️ Cannot reference specific songs or artists. Describe your music using mood, tempo, genre, and instruments instead. Example: 'energetic reggaeton with tropical synths and punchy drums at 95 BPM'",
+            error: "⚠️ Your prompt was blocked by the AI's content filter. This usually happens when the description is too similar to existing copyrighted music. Try these tips:\n\n• Use unique combinations of instruments and moods\n• Avoid common genre clichés (e.g. instead of 'EDM song', try 'pulsing synth arpeggios with sidechain compression and airy pads')\n• Add specific details like tempo, time signature, or unusual instrument pairings\n• Describe the feeling rather than a genre name",
             errorType: "CONTENT_FILTER"
           }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
