@@ -208,6 +208,18 @@ const FeaturedProducers = () => {
                 />
               ))}
             </div>
+            
+            {/* Promo Video */}
+            <div className="flex justify-center mt-8 px-4">
+              <div className="w-full max-w-2xl rounded-xl overflow-hidden border border-purple-900/30 bg-black/30 backdrop-blur-sm">
+                <video
+                  src="https://eapbuoqkhckqaswfjexv.supabase.co/storage/v1/object/public/product-images/producers/videos/producer-video-1771697674364.mp4"
+                  controls
+                  className="w-full aspect-video object-contain"
+                  preload="metadata"
+                />
+              </div>
+            </div>
           </>
         )}
       </div>
