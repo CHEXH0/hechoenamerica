@@ -90,7 +90,7 @@ const GomasChamoy = () => {
           <Button
             onClick={() => setCartOpen(true)}
             variant="outline"
-            className="border-pink-400/50 text-pink-400 hover:bg-pink-500/20 hover:border-pink-400 relative"
+            className="bg-pink-500/50 border-pink-20 text-gray-200 relative border-pink-400/50 hover:border-pink-400/50 hover:text-pink-700"
           >
             <ShoppingCart className="h-4 w-4 mr-2" />
             Cart

@@ -115,8 +115,8 @@ const ProducerApplication = () => {
                   </div>
                 </motion.div>
                 
-                <h2 className="text-3xl font-bold text-white mb-4">
-                  Not Currently Hiring
+                <h2 className="text-3xl font-bold text-gray-800 mb-4">
+                  Not Currently 
                 </h2>
                 <p className="text-gray-300 text-lg max-w-md mx-auto mb-8">
                   We're not accepting producer applications at the moment. Please check back later or follow us on social media for updates!
