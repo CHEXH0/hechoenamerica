@@ -110,15 +110,15 @@ const ProducerApplication = () => {
                   transition={{ type: "spring", stiffness: 200, damping: 10 }}
                   className="mb-6"
                 >
-                  <div className="w-24 h-24 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center mx-auto border border-purple-500/30">
-                    <UserX className="h-12 w-12 text-purple-400" />
+                  <div className="w-24 h-24 bg-gradient-to-br from-purple-800/20 to-pink-800/20 rounded-full flex items-center justify-center mx-auto border border-purple-500/30">
+                    <UserX className="h-12 w-12 text-purple-600" />
                   </div>
                 </motion.div>
                 
                 <h2 className="text-3xl font-bold text-gray-800 mb-4">
-                  Not Currently 
+                  Not Currently Hiring
                 </h2>
-                <p className="text-gray-300 text-lg max-w-md mx-auto mb-8">
+                <p className="text-gray-700 text-lg max-w-md mx-auto mb-8">
                   We're not accepting producer applications at the moment. Please check back later or follow us on social media for updates!
                 </p>
                 

@@ -26,7 +26,7 @@ const ProducerPlatforms = ({ spotifyUrl, youtubeUrl, appleMusicUrl, youtubeChann
             href={spotifyUrl}
             target="_blank"
             rel="noopener noreferrer"
-            whileHover={{ scale: 1.05, x: 10 }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center gap-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 p-5 rounded-2xl transition-all duration-100 shadow-lg hover:shadow-xl"
           >
@@ -43,7 +43,7 @@ const ProducerPlatforms = ({ spotifyUrl, youtubeUrl, appleMusicUrl, youtubeChann
             href={youtubeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            whileHover={{ scale: 1.05, x: 10 }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center gap-4 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 p-5 rounded-2xl transition-all duration-100 shadow-lg hover:shadow-xl"
           >
@@ -60,7 +60,7 @@ const ProducerPlatforms = ({ spotifyUrl, youtubeUrl, appleMusicUrl, youtubeChann
             href={appleMusicUrl}
             target="_blank"
             rel="noopener noreferrer"
-            whileHover={{ scale: 1.05, x: 10 }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center gap-4 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 p-5 rounded-2xl transition-all duration-100 shadow-lg hover:shadow-xl"
           >
@@ -77,7 +77,7 @@ const ProducerPlatforms = ({ spotifyUrl, youtubeUrl, appleMusicUrl, youtubeChann
             href={youtubeChannelUrl}
             target="_blank"
             rel="noopener noreferrer"
-            whileHover={{ scale: 1.05, x: 10 }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center gap-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 p-5 rounded-2xl transition-all duration-100 shadow-lg hover:shadow-xl"
           >
@@ -94,7 +94,7 @@ const ProducerPlatforms = ({ spotifyUrl, youtubeUrl, appleMusicUrl, youtubeChann
             href={instagramUrl}
             target="_blank"
             rel="noopener noreferrer"
-            whileHover={{ scale: 1.05, x: 10 }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center gap-4 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 p-5 rounded-2xl transition-all duration-100 shadow-lg hover:shadow-xl"
           >
@@ -111,7 +111,7 @@ const ProducerPlatforms = ({ spotifyUrl, youtubeUrl, appleMusicUrl, youtubeChann
             href={websiteUrl}
             target="_blank"
             rel="noopener noreferrer"
-            whileHover={{ scale: 1.05, x: 10 }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center gap-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 p-5 rounded-2xl transition-all duration-100 shadow-lg hover:shadow-xl"
           >

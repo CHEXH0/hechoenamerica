@@ -168,7 +168,7 @@ const PaymentSuccess = () => {
                       <div key={index} className="flex justify-between items-center py-2 border-b border-purple-500/20 last:border-b-0">
                         <div className="text-left">
                           <div className="font-semibold text-white">{purchase.product_name}</div>
-                          <div className="text-sm text-gray-400 capitalize">
+                          <div className="text-sm text-green-400 capitalize">
                             {purchase.product_category} • {purchase.product_type}
                           </div>
                         </div>

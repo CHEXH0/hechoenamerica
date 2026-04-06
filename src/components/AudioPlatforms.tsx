@@ -22,7 +22,7 @@ const AudioPlatforms = React.memo(() => {
     {
       name: "Careers",
       isIcon: true,
-      url: "https://hechoenamericastudio.com/producer-application",
+      url: "/producer-application",
       isExternal: true,
       emojis: ["💼", "🎤", "🚀", "⭐", "🎯"],
     },

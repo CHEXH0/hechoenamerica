@@ -35,7 +35,10 @@ const GomasChamoy = () => {
         <Candy className="h-16 w-16 text-pink-400" />
         <h1 className="text-2xl font-bold">This page is currently unavailable</h1>
         <p className="text-gray-400">Check back soon!</p>
-        <Button variant="outline" onClick={() => navigate("/")}>Go Home</Button>
+        <Button 
+        variant="outline" 
+        className="text-black"
+        onClick={() => navigate("/")}>Go Home</Button>
       </div>
     );
   }

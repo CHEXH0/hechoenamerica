@@ -615,7 +615,7 @@ const Treats = () => {
                   variant="outline" 
                   size="sm" 
                   onClick={() => handleBuyNow(product)}
-                  className="border-purple-400/50 text-purple-400 hover:bg-purple-500/20 hover:border-purple-400 w-full"
+                  className="border-purple-400/50 text-purple-700 hover:bg-purple-700/20 hover:border-purple-400 hover:text-gray-300 w-full"
                 >
                   <Download className="h-4 w-4 mr-2" />
                   Buy Now
