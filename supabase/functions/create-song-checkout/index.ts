@@ -112,6 +112,7 @@ serve(async (req) => {
     acceptanceDeadline.setHours(acceptanceDeadline.getHours() + ACCEPTANCE_DEADLINE_HOURS);
 
     const session = await stripe.checkout.sessions.create({
+      allow_promotion_codes: true,
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [
