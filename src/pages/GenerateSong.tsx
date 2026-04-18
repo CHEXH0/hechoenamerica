@@ -644,7 +644,7 @@ const GenerateSong = () => {
                   exit={{ opacity: 0, y: 10 }}
                   className="text-white/90 text-sm mt-2 flex items-center gap-2">
 
-                    <span>{currentTier.description}</span>
+                    <span>{tg.tierDescriptions[tierIndex] ?? currentTier.description}</span>
                     <HoverCard>
                       <HoverCardTrigger asChild>
                         <button type="button" className="inline-flex">
@@ -653,9 +653,9 @@ const GenerateSong = () => {
                       </HoverCardTrigger>
                       <HoverCardContent className="w-72 text-sm">
                         <p className="font-semibold mb-1">
-                          {currentTier.label} — {currentTier.description}
+                          {currentTier.label} — {tg.tierDescriptions[tierIndex] ?? currentTier.description}
                         </p>
-                        <p className="text-muted-foreground">{currentTier.info}</p>
+                        <p className="text-muted-foreground">{tg.tierInfos[tierIndex] ?? currentTier.info}</p>
                       </HoverCardContent>
                     </HoverCard>
                   </motion.div>
@@ -897,7 +897,7 @@ const GenerateSong = () => {
                             </button>
                           </HoverCardTrigger>
                           <HoverCardContent className="w-64 text-sm">
-                            <p className="text-muted-foreground">{addOnPricing.stems.info}</p>
+                            <p className="text-muted-foreground">{tg.addOnsInfo.stems}</p>
                           </HoverCardContent>
                         </HoverCard>
                       </div>
@@ -927,7 +927,7 @@ const GenerateSong = () => {
                             </button>
                           </HoverCardTrigger>
                           <HoverCardContent className="w-64 text-sm">
-                            <p className="text-muted-foreground">{addOnPricing.analog.info}</p>
+                            <p className="text-muted-foreground">{tg.addOnsInfo.analog}</p>
                           </HoverCardContent>
                         </HoverCard>
                       </div>
@@ -959,7 +959,7 @@ const GenerateSong = () => {
                             </button>
                           </HoverCardTrigger>
                           <HoverCardContent className="w-64 text-sm">
-                            <p className="text-muted-foreground">{addOnPricing.mixing.info}</p>
+                            <p className="text-muted-foreground">{tg.addOnsInfo.mixing}</p>
                           </HoverCardContent>
                         </HoverCard>
                       </div>
@@ -989,7 +989,7 @@ const GenerateSong = () => {
                             </button>
                           </HoverCardTrigger>
                           <HoverCardContent className="w-64 text-sm">
-                            <p className="text-muted-foreground">{addOnPricing.mastering.info}</p>
+                            <p className="text-muted-foreground">{tg.addOnsInfo.mastering}</p>
                           </HoverCardContent>
                         </HoverCard>
                       </div>
@@ -1063,7 +1063,7 @@ const GenerateSong = () => {
                               </button>
                             </HoverCardTrigger>
                             <HoverCardContent className="w-64 text-sm">
-                              <p className="text-muted-foreground">{addOnPricing.revision.info}</p>
+                              <p className="text-muted-foreground">{tg.addOnsInfo.revision}</p>
                             </HoverCardContent>
                           </HoverCard>
                         </div>

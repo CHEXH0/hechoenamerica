@@ -126,6 +126,15 @@ export interface Translations {
     pageTitle: string;
     pageSubtitle: string;
     selectPrice: string;
+    tierDescriptions: [string, string, string, string];
+    tierInfos: [string, string, string, string];
+    addOnsInfo: {
+      stems: string;
+      analog: string;
+      mixing: string;
+      mastering: string;
+      revision: string;
+    };
     genreLabel: string;
     genrePlaceholder: string;
     genreHelpAi: string;
