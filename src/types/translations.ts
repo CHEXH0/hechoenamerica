@@ -410,4 +410,43 @@ export interface Translations {
     emailRequiredDesc: string;
     resetFailedDesc: string;
   };
+  privacyPolicy: {
+    backToHome: string;
+    title: string;
+    lastUpdated: string;
+    sections: {
+      introduction: { title: string; body: string };
+      whatWeCollect: { title: string; items: string[] };
+      howWeUse: { title: string; items: string[] };
+      thirdParty: { title: string; items: string[]; footer: string };
+      accountSecurity: { title: string; body: string };
+      dataSecurity: { title: string; body: string };
+      translation: { title: string; body: string };
+      yourRights: { title: string; items: string[] };
+      accountDeletion: { title: string; body: string };
+      contact: { title: string; body: string };
+    };
+  };
+  termsOfService: {
+    backToHome: string;
+    title: string;
+    lastUpdated: string;
+    sections: {
+      acceptance: { title: string; body: string };
+      services: { title: string; intro: string; items: string[] };
+      accounts: { title: string; intro: string; items: string[]; footer: string };
+      customSongs: { title: string; intro: string; items: string[] };
+      chamoy: { title: string; intro: string; items: string[] };
+      cancellations: { title: string; items: string[] };
+      payments: { title: string; items: string[] };
+      aiSongs: { title: string; body: string };
+      ip: { title: string; body: string };
+      delivery: { title: string; body: string };
+      producerApps: { title: string; body: string };
+      prohibited: { title: string; items: string[] };
+      liability: { title: string; body: string };
+      changes: { title: string; body: string };
+      contact: { title: string; body: string };
+    };
+  };
 }

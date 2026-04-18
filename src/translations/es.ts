@@ -420,4 +420,208 @@ export const es: Translations = {
     emailRequiredDesc: "Por favor ingresa tu correo para restablecer tu contraseña.",
     resetFailedDesc: "No se pudo enviar el correo de restablecimiento.",
   },
+  privacyPolicy: {
+    backToHome: "Volver al Inicio",
+    title: "Política de Privacidad",
+    lastUpdated: "Última actualización: 15 de febrero de 2026",
+    sections: {
+      introduction: {
+        title: "1. Introducción",
+        body: "En Hecho En America estamos comprometidos a proteger tu privacidad. Esta política explica cómo manejamos tus datos cuando usas nuestros servicios musicales y nuestro sitio web.",
+      },
+      whatWeCollect: {
+        title: "2. Qué Recopilamos",
+        items: [
+          "Nombre, correo y país de tu cuenta o formulario de contacto",
+          "Información de perfil (nombre, avatar, biografía)",
+          "Información de pago (procesada de forma segura mediante Stripe)",
+          "Ideas de canciones, géneros y preferencias de producción",
+          "Comentarios de revisión y mensajes de chat",
+          "Datos de generación con IA",
+          "Detalles de la solicitud de productor",
+          "Archivos que subes",
+          "Datos de Google Drive (solo para entrega de archivos)",
+        ],
+      },
+      howWeUse: {
+        title: "3. Cómo lo Usamos",
+        items: [
+          "Proveer y mejorar nuestros servicios",
+          "Asignarte productores",
+          "Procesar pagos y reembolsos",
+          "Generar música con IA a partir de tus instrucciones",
+          "Enviar actualizaciones y notificaciones de pedidos",
+          "Responder a tus mensajes",
+          "Entregar archivos vía Google Drive o descarga",
+        ],
+      },
+      thirdParty: {
+        title: "4. Servicios de Terceros",
+        items: [
+          "**Stripe:** Pagos seguros. No guardamos datos de tarjetas.",
+          "**Google Drive:** Solo para entrega de archivos.",
+          "**Supabase:** Autenticación y almacenamiento de datos.",
+          "**Resend:** Envío de correos (confirmaciones, etc.).",
+          "**Discord:** Notificaciones de proyectos.",
+        ],
+        footer: "Solo accedemos a lo necesario para brindar nuestros servicios.",
+      },
+      accountSecurity: {
+        title: "5. Seguridad de la Cuenta",
+        body: "Usamos inicio de sesión por correo con verificación. Las contraseñas se verifican contra filtraciones conocidas. Las sesiones se gestionan de forma segura.",
+      },
+      dataSecurity: {
+        title: "6. Seguridad de los Datos",
+        body: "Aplicamos medidas adecuadas para proteger tus datos, incluyendo almacenamiento seguro y controles de acceso.",
+      },
+      translation: {
+        title: "7. Traducción",
+        body: "La traducción la realiza tu navegador. No se nos envía ningún dato para esto.",
+      },
+      yourRights: {
+        title: "8. Tus Derechos",
+        items: [
+          "Acceder o copiar tus datos",
+          "Solicitar correcciones",
+          "Eliminar tu cuenta y todos los datos",
+          "Retirar tu consentimiento",
+          "Desconectar servicios de terceros",
+          "Solicitar la cancelación de proyectos",
+        ],
+      },
+      accountDeletion: {
+        title: "9. Eliminación de Cuenta",
+        body: "Puedes eliminar tu cuenta desde la configuración del perfil. Esto borra permanentemente todos tus datos. Esta acción no se puede deshacer.",
+      },
+      contact: {
+        title: "10. Contáctanos",
+        body: "¿Preguntas? Usa nuestro formulario de contacto en la página de inicio.",
+      },
+    },
+  },
+  termsOfService: {
+    backToHome: "Volver al Inicio",
+    title: "Términos de Servicio",
+    lastUpdated: "Última actualización: 6 de marzo de 2026",
+    sections: {
+      acceptance: {
+        title: "1. Aceptación",
+        body: "Al usar nuestro sitio web y servicios, aceptas estos Términos. Si no estás de acuerdo, por favor no uses nuestros servicios.",
+      },
+      services: {
+        title: "2. Servicios",
+        intro: "Hecho En America ofrece:",
+        items: [
+          "Canciones personalizadas conectando artistas con productores",
+          "Grabación, mezcla y masterización",
+          "Una tienda digital (\"Treats\") con samples, presets y herramientas",
+          "Generación de canciones con IA",
+          "Herramientas de revisión y colaboración",
+          "Entrega de archivos vía Google Drive o descarga directa",
+          "Pedidos personalizados de gomitas chamoy con seguimiento de envío",
+        ],
+      },
+      accounts: {
+        title: "3. Cuentas",
+        intro: "Al crear una cuenta, aceptas:",
+        items: [
+          "Proporcionar información precisa y un correo válido",
+          "Verificar tu correo antes de acceder a las funciones",
+          "Usar una contraseña segura",
+          "Mantener tus credenciales seguras",
+          "Aceptar la responsabilidad por toda la actividad de la cuenta",
+          "Reportar cualquier uso no autorizado de inmediato",
+        ],
+        footer: "Tu correo no se puede cambiar una vez verificado. Puedes eliminar tu cuenta en cualquier momento.",
+      },
+      customSongs: {
+        title: "4. Canciones Personalizadas",
+        intro: "Al pedir una canción personalizada:",
+        items: [
+          "Proporciona una idea clara, género y necesidades de producción",
+          "Se asignará un productor según el género y disponibilidad",
+          "Los proyectos no aceptados se reasignarán",
+          "Las revisiones se incluyen según tu nivel",
+          "Los comentarios se dan a través de nuestro chat de revisión",
+          "Los tiempos de entrega son estimados",
+        ],
+      },
+      chamoy: {
+        title: "5. Pedidos de Gomitas Chamoy",
+        intro: "Al pedir gomitas chamoy personalizadas:",
+        items: [
+          "Debes proporcionar un nombre, correo, teléfono y dirección de envío válidos",
+          "Todos los pedidos requieren aprobación del administrador y precio personalizado (generalmente 2-4 días hábiles)",
+          "Recibirás un precio cotizado que puedes aceptar o rechazar",
+          "El pago se procesa vía Stripe después de aceptar el precio cotizado",
+          "El estado del pedido y las actualizaciones de envío están disponibles en tu panel",
+          "Los números de seguimiento se proporcionan una vez enviados",
+          "Los tiempos de envío son estimados y pueden variar",
+          "Los pedidos de gomitas no son reembolsables una vez enviados",
+          "Tu información de envío se guarda de forma segura y se usa solo para el envío del pedido",
+        ],
+      },
+      cancellations: {
+        title: "6. Cancelaciones y Reembolsos",
+        items: [
+          "**Antes de la producción:** Reembolso completo disponible",
+          "**Durante la producción:** Requiere revisión del administrador",
+          "El monto del reembolso depende del progreso de la producción",
+          "Los reembolsos se devuelven al método de pago original vía Stripe",
+          "Las compras de la tienda digital no son reembolsables una vez descargadas",
+          "Los pedidos de gomitas no son reembolsables una vez enviados",
+        ],
+      },
+      payments: {
+        title: "7. Pagos",
+        items: [
+          "La información de pago debe ser precisa y autorizada",
+          "Los pagos se procesan de forma segura vía Stripe",
+          "Los precios pueden cambiar sin previo aviso",
+          "Los códigos de cupón pueden aplicarse al finalizar la compra",
+        ],
+      },
+      aiSongs: {
+        title: "8. Canciones con IA",
+        body: "La música generada por IA se basa en tu texto y género ingresados. La calidad puede variar. El uso está sujeto a límites de uso justo.",
+      },
+      ip: {
+        title: "9. Propiedad Intelectual",
+        body: "Después del pago completo, recibes una licencia para usar el contenido comprado. Conservamos la propiedad de nuestra marca y plataforma. Los derechos del contenido del productor se transfieren a ti al pagar.",
+      },
+      delivery: {
+        title: "10. Entrega",
+        body: "Los productos digitales se entregan vía tu panel, enlaces de descarga o Google Drive. Solo accedemos a lo necesario para la entrega. Los productos físicos (gomitas chamoy) se envían a la dirección proporcionada al hacer el pedido.",
+      },
+      producerApps: {
+        title: "11. Solicitudes de Productores",
+        body: "Los productores pueden solicitar unirse a nuestra plataforma. La aceptación es a nuestra discreción. Los productores aprobados reciben pagos vía Stripe Connect.",
+      },
+      prohibited: {
+        title: "12. Usos Prohibidos",
+        items: [
+          "Infringir cualquier ley",
+          "Vulnerar los derechos de otros",
+          "Subir contenido dañino",
+          "Revender contenido sin permiso",
+          "Hacer mal uso de la generación con IA",
+          "Crear cuentas falsas",
+          "Eludir los controles de pago",
+          "Proporcionar información de envío o contacto falsa",
+        ],
+      },
+      liability: {
+        title: "13. Responsabilidad",
+        body: "No somos responsables de daños indirectos derivados del uso de nuestros servicios, incluyendo retrasos, problemas de calidad de la IA o demoras de envío de productos físicos.",
+      },
+      changes: {
+        title: "14. Cambios",
+        body: "Podemos actualizar estos términos en cualquier momento. El uso continuado significa que aceptas los cambios.",
+      },
+      contact: {
+        title: "15. Contacto",
+        body: "¿Preguntas? Usa nuestro formulario de contacto en la página de inicio.",
+      },
+    },
+  },
 };

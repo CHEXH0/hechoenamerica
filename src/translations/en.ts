@@ -420,4 +420,208 @@ export const en: Translations = {
     emailRequiredDesc: "Please enter your email address to reset your password.",
     resetFailedDesc: "Failed to send reset email.",
   },
+  privacyPolicy: {
+    backToHome: "Back to Home",
+    title: "Privacy Policy",
+    lastUpdated: "Last updated: February 15, 2026",
+    sections: {
+      introduction: {
+        title: "1. Introduction",
+        body: "We at Hecho En America are committed to protecting your privacy. This policy explains how we handle your data when you use our music services and website.",
+      },
+      whatWeCollect: {
+        title: "2. What We Collect",
+        items: [
+          "Name, email, and country from your account or contact form",
+          "Profile info (display name, avatar, bio)",
+          "Payment info (processed securely via Stripe)",
+          "Song ideas, genres, and production preferences",
+          "Revision feedback and chat messages",
+          "AI generation inputs",
+          "Producer application details",
+          "Files you upload",
+          "Google Drive data (only for file delivery)",
+        ],
+      },
+      howWeUse: {
+        title: "3. How We Use It",
+        items: [
+          "Provide and improve our services",
+          "Match you with producers",
+          "Process payments and refunds",
+          "Generate AI music from your prompts",
+          "Send order updates and notifications",
+          "Respond to your messages",
+          "Deliver files via Google Drive or download",
+        ],
+      },
+      thirdParty: {
+        title: "4. Third-Party Services",
+        items: [
+          "**Stripe:** Secure payments. We don't store card details.",
+          "**Google Drive:** File delivery only.",
+          "**Supabase:** Authentication and data storage.",
+          "**Resend:** Sending emails (confirmations, etc.).",
+          "**Discord:** Project notifications.",
+        ],
+        footer: "We only access what's needed to provide our services.",
+      },
+      accountSecurity: {
+        title: "5. Account Security",
+        body: "We use email-based login with verification. Passwords are checked against known breaches. Sessions are managed securely.",
+      },
+      dataSecurity: {
+        title: "6. Data Security",
+        body: "We use appropriate measures to protect your data, including secure storage and access controls.",
+      },
+      translation: {
+        title: "7. Translation",
+        body: "Translation is handled by your browser. No data is sent to us for this.",
+      },
+      yourRights: {
+        title: "8. Your Rights",
+        items: [
+          "Access or copy your data",
+          "Request corrections",
+          "Delete your account and all data",
+          "Withdraw consent",
+          "Disconnect third-party services",
+          "Request project cancellation",
+        ],
+      },
+      accountDeletion: {
+        title: "9. Account Deletion",
+        body: "You can delete your account from profile settings. This permanently removes all your data. This action cannot be undone.",
+      },
+      contact: {
+        title: "10. Contact Us",
+        body: "Questions? Use our contact form on the home page.",
+      },
+    },
+  },
+  termsOfService: {
+    backToHome: "Back to Home",
+    title: "Terms of Service",
+    lastUpdated: "Last updated: March 6, 2026",
+    sections: {
+      acceptance: {
+        title: "1. Acceptance",
+        body: "By using our website and services, you agree to these Terms. If you do not agree, please do not use our services.",
+      },
+      services: {
+        title: "2. Services",
+        intro: "Hecho En America offers:",
+        items: [
+          "Custom songs connecting artists with producers",
+          "Recording, mixing, and mastering",
+          "A digital shop (\"Treats\") for samples, presets, and tools",
+          "AI song generation",
+          "Revision and collaboration tools",
+          "File delivery via Google Drive or direct download",
+          "Custom chamoy gummy candy orders with shipping and delivery tracking",
+        ],
+      },
+      accounts: {
+        title: "3. Accounts",
+        intro: "When creating an account, you agree to:",
+        items: [
+          "Provide accurate info and a valid email",
+          "Verify your email before accessing features",
+          "Use a strong password",
+          "Keep your credentials secure",
+          "Accept responsibility for all account activity",
+          "Report unauthorized use immediately",
+        ],
+        footer: "Your email cannot be changed once verified. You may delete your account at any time.",
+      },
+      customSongs: {
+        title: "4. Custom Songs",
+        intro: "When ordering a custom song:",
+        items: [
+          "Provide a clear idea, genre, and production needs",
+          "A producer will be assigned based on genre and availability",
+          "Unaccepted projects will be reassigned",
+          "Revisions are included based on your tier",
+          "Feedback is given through our revision chat",
+          "Delivery times are estimates",
+        ],
+      },
+      chamoy: {
+        title: "5. Chamoy Candy Orders",
+        intro: "When ordering custom chamoy gummy candy:",
+        items: [
+          "You must provide a valid name, email, phone number, and shipping address",
+          "All orders require admin approval and custom pricing (typically 2-4 business days)",
+          "You will receive a quoted price which you may accept or decline",
+          "Payment is processed via Stripe after you accept the quoted price",
+          "Order status and shipping updates are available on your dashboard",
+          "Tracking numbers are provided once orders are shipped",
+          "Shipping times are estimates and may vary",
+          "Candy orders are non-refundable once shipped",
+          "Your shipping information is stored securely and used only for order fulfillment",
+        ],
+      },
+      cancellations: {
+        title: "6. Cancellations & Refunds",
+        items: [
+          "**Before production:** Full refund available",
+          "**During production:** Requires admin review",
+          "Refund amount depends on production progress",
+          "Refunds go to the original payment method via Stripe",
+          "Digital shop purchases are non-refundable once downloaded",
+          "Chamoy candy orders are non-refundable once shipped",
+        ],
+      },
+      payments: {
+        title: "7. Payments",
+        items: [
+          "Payment info must be accurate and authorized",
+          "Payments are processed securely via Stripe",
+          "Prices may change without notice",
+          "Coupon codes may be applied at checkout",
+        ],
+      },
+      aiSongs: {
+        title: "8. AI Songs",
+        body: "AI-generated music is based on your text and genre input. Quality may vary. Usage is subject to fair use limits.",
+      },
+      ip: {
+        title: "9. Intellectual Property",
+        body: "After full payment, you receive a license to use purchased content. We retain ownership of our branding and platform. Producer content rights transfer to you upon payment.",
+      },
+      delivery: {
+        title: "10. Delivery",
+        body: "Digital products are delivered via your dashboard, download links, or Google Drive. We only access what's needed for delivery. Physical products (chamoy candy) are shipped to the address provided at order time.",
+      },
+      producerApps: {
+        title: "11. Producer Applications",
+        body: "Producers may apply to join our platform. Acceptance is at our discretion. Approved producers are paid via Stripe Connect.",
+      },
+      prohibited: {
+        title: "12. Prohibited Uses",
+        items: [
+          "Breaking any laws",
+          "Infringing on others' rights",
+          "Uploading harmful content",
+          "Reselling content without permission",
+          "Misusing AI generation",
+          "Creating fake accounts",
+          "Bypassing payment controls",
+          "Providing false shipping or contact information",
+        ],
+      },
+      liability: {
+        title: "13. Liability",
+        body: "We are not liable for indirect damages from using our services, including delays, AI quality issues, or shipping delays for physical products.",
+      },
+      changes: {
+        title: "14. Changes",
+        body: "We may update these terms at any time. Continued use means you accept the changes.",
+      },
+      contact: {
+        title: "15. Contact",
+        body: "Questions? Use our contact form on the home page.",
+      },
+    },
+  },
 };
