@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTranslation } from "@/contexts/TranslationContext";
 import {
   Form,
   FormControl,
@@ -62,11 +63,18 @@ type FormData = z.infer<typeof formSchema>;
 
 const ProducerApplicationForm = () => {
   const { user, loading: authLoading } = useAuth();
+  const { t } = useTranslation();
+  const tp = t.producerApplication;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
+
+  const GENRE_KEYS: (keyof typeof tp.genres)[] = [
+    "hipHop", "rnb", "pop", "electronic", "latin", "rock",
+    "country", "jazz", "classical", "afrobeats", "dancehall", "gospel",
+  ];
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
