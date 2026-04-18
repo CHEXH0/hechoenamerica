@@ -4,8 +4,10 @@ import { Headphones, Mic, Music, ChevronLeft, ChevronRight } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSwipeScroll } from "@/hooks/useSwipeScroll";
 import abletonLogo from "@/assets/ableton-logo.png";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 const Services = () => {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -29,20 +31,20 @@ const Services = () => {
 
   const services = [
     {
-      title: "Audios",
-      description: "Quality audio production and enhancement",
+      title: t.services.audios.title,
+      description: t.services.audios.description,
       image: "/laptop-uploads/Star.png",
       icon: Mic,
     },
     {
-      title: "Mixing",
-      description: "Balanced and polished mixes",
+      title: t.services.mixing.title,
+      description: t.services.mixing.description,
       image: "/laptop-uploads/Donut.png",
       icon: Headphones,
     },
     {
-      title: "Mastering",
-      description: "Final polish for your music",
+      title: t.services.mastering.title,
+      description: t.services.mastering.description,
       image: "/laptop-uploads/Pill.png",
       icon: Music,
     },
@@ -148,7 +150,7 @@ const Services = () => {
           transition={{ duration: 0.6 }}
           className="text-3xl md:text-4xl font-bold text-center heading-gradient mb-12"
         >
-          Our Services
+          {t.services.title}
         </motion.h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -190,7 +192,7 @@ const Services = () => {
           className="mt-16"
         >
           <h3 className="text-xl md:text-2xl font-semibold text-center text-white/80 mb-8">
-            We work with industry-standard DAWs
+            {t.services.workWithDaws}
           </h3>
         </motion.div>
       </div>

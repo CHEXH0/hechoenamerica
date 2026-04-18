@@ -6,9 +6,11 @@ import AudioPlatforms from "@/components/AudioPlatforms";
 import Services from "@/components/Services";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-black">
@@ -19,14 +21,14 @@ const Index = () => {
       <section className="py-20 bg-gradient-to-b from-black to-purple-900/20">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold heading-gradient mb-8">
-            Ready to Create Your Next Hit?
+            {t.cta.readyTitle}
           </h2>
           <Button 
             onClick={() => navigate('/generate-song')}
             size="lg"
             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-6 text-lg rounded-full"
           >
-            Get Started
+            {t.cta.getStarted}
           </Button>
         </div>
       </section>
