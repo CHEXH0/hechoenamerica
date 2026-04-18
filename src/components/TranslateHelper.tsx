@@ -1,7 +1,16 @@
 import { useState, useEffect, useRef } from "react";
-import { Globe, X, Chrome, Monitor } from "lucide-react";
+import { Globe, X, Chrome, Monitor, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTranslation, Language } from "@/contexts/TranslationContext";
+
+const APP_LANGUAGES: { code: Language; name: string; flag: string }[] = [
+  { code: "en", name: "English", flag: "🇺🇸" },
+  { code: "es", name: "Español", flag: "🇪🇸" },
+  { code: "pt", name: "Português", flag: "🇵🇹" },
+  { code: "zh", name: "中文", flag: "🇨🇳" },
+  { code: "ru", name: "Русский", flag: "🇷🇺" },
+];
 
 const translateWords = [
   "Translate?", "¿Traducir?", "翻译？", "Перевести?", "Traduire?",
@@ -29,6 +38,7 @@ const TranslateHelper = () => {
   const [wordIndex, setWordIndex] = useState(0);
   const isMobile = useIsMobile();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { language, setLanguage } = useTranslation();
 
   useEffect(() => {
     if (isHovering) {
@@ -129,9 +139,41 @@ const TranslateHelper = () => {
                 </div>
 
                 <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
-                  This website is in English. Use your browser's built-in translate feature to view it in your language.
+                  Choose your language below. For pages still in English, use your browser's built-in translate feature.
                 </p>
 
+                {/* App language picker — applies instantly to translated sections */}
+                <div className="mb-5">
+                  <p className="text-[11px] font-medium text-foreground/70 uppercase tracking-wider mb-2">
+                    App Language
+                  </p>
+                  <div className="grid grid-cols-1 gap-1.5">
+                    {APP_LANGUAGES.map((lang) => {
+                      const active = language === lang.code;
+                      return (
+                        <button
+                          key={lang.code}
+                          onClick={() => setLanguage(lang.code)}
+                          className={`flex items-center justify-between w-full px-3 py-2 rounded-lg border transition-all ${
+                            active
+                              ? "bg-primary/15 border-primary/40 text-foreground"
+                              : "bg-muted/30 border-border/40 text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                          }`}
+                        >
+                          <span className="flex items-center gap-2 text-sm">
+                            <span className="text-base leading-none">{lang.flag}</span>
+                            <span>{lang.name}</span>
+                          </span>
+                          {active && <Check className="h-4 w-4 text-primary" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <p className="text-[11px] font-medium text-foreground/70 uppercase tracking-wider mb-2">
+                  Browser Translation
+                </p>
                 {/* Translated intros */}
                 <div className="mb-5 p-3 rounded-lg bg-muted/30 border border-border/30 space-y-1.5 max-h-[140px] overflow-y-auto">
                   {translatedIntros.map(({ lang, text }) => (
