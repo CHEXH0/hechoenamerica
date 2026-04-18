@@ -20,6 +20,7 @@ import { usePurchases } from "@/hooks/usePurchases";
 import { Badge } from "@/components/ui/badge";
 import { useSearchParams } from "react-router-dom";
 import { useSweetTreatsTabVisible } from "@/hooks/useStoreVisibility";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 
 const Treats = () => {
