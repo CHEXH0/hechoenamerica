@@ -9,6 +9,7 @@ import { useHiringStatus } from "@/hooks/useHiringStatus";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProducerProfile } from "@/hooks/useProducerProfile";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 const ProducerApplication = () => {
   useEffect(() => {
@@ -18,6 +19,8 @@ const ProducerApplication = () => {
   const { user } = useAuth();
   const { data: roleData } = useUserRole();
   const { data: producerProfile } = useProducerProfile();
+  const { t } = useTranslation();
+  const tp = t.producerApplication;
   
   const isHiring = hiringStatus?.enabled ?? false;
   const isProducer = roleData?.isProducer ?? false;
@@ -36,7 +39,7 @@ const ProducerApplication = () => {
             className="mb-8 text-white hover:text-pink-300 hover:bg-white/10"
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
-            Back to Treats
+            {tp.backToTreats}
           </Button>
         </Link>
 
@@ -48,12 +51,12 @@ const ProducerApplication = () => {
           className="text-center mb-12"
         >
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-pink-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
-            {isProducer ? `Welcome, ${producerProfile?.name || "Producer"}!` : "Join Our Producer Network"}
+            {isProducer
+              ? tp.welcomeProducer.replace("{name}", producerProfile?.name || "Producer")
+              : tp.joinNetwork}
           </h1>
           <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-            {isProducer
-              ? "You're already part of the team"
-              : "Become part of Hecho En America's talented team of music producers"}
+            {isProducer ? tp.alreadyOnTeam : tp.becomePartOf}
           </p>
         </motion.div>
 
@@ -77,10 +80,10 @@ const ProducerApplication = () => {
                 </motion.div>
                 
                 <h2 className="text-3xl font-bold text-gray-800 mb-4">
-                  Thank You for Being Part of The Team!
+                  {tp.thankYouTitle}
                 </h2>
                 <p className="text-gray-700 text-lg max-w-md mx-auto mb-8">
-                  We appreciate everything you do as a Hecho En America producer. Head to your dashboard to manage your projects.
+                  {tp.thankYouDesc}
                 </p>
                 
                 <Link to="/producer-profile">
@@ -88,7 +91,7 @@ const ProducerApplication = () => {
                     size="lg"
                     className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white"
                   >
-                    Go to Dashboard
+                    {tp.goToDashboard}
                   </Button>
                 </Link>
               </CardContent>
@@ -116,10 +119,10 @@ const ProducerApplication = () => {
                 </motion.div>
                 
                 <h2 className="text-3xl font-bold text-gray-800 mb-4">
-                  Not Currently Hiring
+                  {tp.notHiringTitle}
                 </h2>
                 <p className="text-gray-700 text-lg max-w-md mx-auto mb-8">
-                  We're not accepting producer applications at the moment. Please check back later or follow us on social media for updates!
+                  {tp.notHiringDesc}
                 </p>
                 
                 <Link to="/">
@@ -127,7 +130,7 @@ const ProducerApplication = () => {
                     size="lg"
                     className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white"
                   >
-                    Return Home
+                    {tp.returnHome}
                   </Button>
                 </Link>
               </CardContent>
