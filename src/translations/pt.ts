@@ -420,4 +420,208 @@ export const pt: Translations = {
     emailRequiredDesc: "Por favor, digite seu e-mail para redefinir sua senha.",
     resetFailedDesc: "Falha ao enviar e-mail de redefinição.",
   },
+  privacyPolicy: {
+    backToHome: "Voltar ao Início",
+    title: "Política de Privacidade",
+    lastUpdated: "Última atualização: 15 de fevereiro de 2026",
+    sections: {
+      introduction: {
+        title: "1. Introdução",
+        body: "Nós da Hecho En America estamos comprometidos em proteger sua privacidade. Esta política explica como tratamos seus dados quando você usa nossos serviços musicais e o site.",
+      },
+      whatWeCollect: {
+        title: "2. O Que Coletamos",
+        items: [
+          "Nome, e-mail e país da sua conta ou formulário de contato",
+          "Informações de perfil (nome, avatar, biografia)",
+          "Informações de pagamento (processadas com segurança via Stripe)",
+          "Ideias de músicas, gêneros e preferências de produção",
+          "Feedback de revisão e mensagens de chat",
+          "Entradas de geração de IA",
+          "Detalhes da candidatura de produtor",
+          "Arquivos que você envia",
+          "Dados do Google Drive (apenas para entrega de arquivos)",
+        ],
+      },
+      howWeUse: {
+        title: "3. Como Usamos",
+        items: [
+          "Fornecer e melhorar nossos serviços",
+          "Conectar você com produtores",
+          "Processar pagamentos e reembolsos",
+          "Gerar música com IA a partir de seus prompts",
+          "Enviar atualizações e notificações de pedidos",
+          "Responder às suas mensagens",
+          "Entregar arquivos via Google Drive ou download",
+        ],
+      },
+      thirdParty: {
+        title: "4. Serviços de Terceiros",
+        items: [
+          "**Stripe:** Pagamentos seguros. Não guardamos dados de cartão.",
+          "**Google Drive:** Apenas para entrega de arquivos.",
+          "**Supabase:** Autenticação e armazenamento de dados.",
+          "**Resend:** Envio de e-mails (confirmações, etc.).",
+          "**Discord:** Notificações de projetos.",
+        ],
+        footer: "Acessamos apenas o necessário para fornecer nossos serviços.",
+      },
+      accountSecurity: {
+        title: "5. Segurança da Conta",
+        body: "Usamos login por e-mail com verificação. As senhas são verificadas contra vazamentos conhecidos. As sessões são gerenciadas com segurança.",
+      },
+      dataSecurity: {
+        title: "6. Segurança dos Dados",
+        body: "Usamos medidas adequadas para proteger seus dados, incluindo armazenamento seguro e controles de acesso.",
+      },
+      translation: {
+        title: "7. Tradução",
+        body: "A tradução é feita pelo seu navegador. Nenhum dado é enviado para nós.",
+      },
+      yourRights: {
+        title: "8. Seus Direitos",
+        items: [
+          "Acessar ou copiar seus dados",
+          "Solicitar correções",
+          "Excluir sua conta e todos os dados",
+          "Retirar consentimento",
+          "Desconectar serviços de terceiros",
+          "Solicitar cancelamento de projeto",
+        ],
+      },
+      accountDeletion: {
+        title: "9. Exclusão de Conta",
+        body: "Você pode excluir sua conta nas configurações do perfil. Isso remove permanentemente todos os seus dados. Esta ação não pode ser desfeita.",
+      },
+      contact: {
+        title: "10. Fale Conosco",
+        body: "Dúvidas? Use nosso formulário de contato na página inicial.",
+      },
+    },
+  },
+  termsOfService: {
+    backToHome: "Voltar ao Início",
+    title: "Termos de Serviço",
+    lastUpdated: "Última atualização: 6 de março de 2026",
+    sections: {
+      acceptance: {
+        title: "1. Aceitação",
+        body: "Ao usar nosso site e serviços, você concorda com estes Termos. Se não concordar, por favor, não use nossos serviços.",
+      },
+      services: {
+        title: "2. Serviços",
+        intro: "A Hecho En America oferece:",
+        items: [
+          "Músicas personalizadas conectando artistas com produtores",
+          "Gravação, mixagem e masterização",
+          "Uma loja digital (\"Treats\") com samples, presets e ferramentas",
+          "Geração de música com IA",
+          "Ferramentas de revisão e colaboração",
+          "Entrega de arquivos via Google Drive ou download direto",
+          "Pedidos personalizados de balas chamoy com rastreamento de envio",
+        ],
+      },
+      accounts: {
+        title: "3. Contas",
+        intro: "Ao criar uma conta, você concorda em:",
+        items: [
+          "Fornecer informações precisas e um e-mail válido",
+          "Verificar seu e-mail antes de acessar os recursos",
+          "Usar uma senha forte",
+          "Manter suas credenciais seguras",
+          "Assumir a responsabilidade por toda a atividade da conta",
+          "Reportar uso não autorizado imediatamente",
+        ],
+        footer: "Seu e-mail não pode ser alterado depois de verificado. Você pode excluir sua conta a qualquer momento.",
+      },
+      customSongs: {
+        title: "4. Músicas Personalizadas",
+        intro: "Ao encomendar uma música personalizada:",
+        items: [
+          "Forneça uma ideia clara, gênero e necessidades de produção",
+          "Um produtor será atribuído com base no gênero e disponibilidade",
+          "Projetos não aceitos serão reatribuídos",
+          "As revisões são incluídas conforme seu plano",
+          "O feedback é dado através do nosso chat de revisão",
+          "Os prazos de entrega são estimativas",
+        ],
+      },
+      chamoy: {
+        title: "5. Pedidos de Balas Chamoy",
+        intro: "Ao encomendar balas chamoy personalizadas:",
+        items: [
+          "Você deve fornecer um nome, e-mail, telefone e endereço de envio válidos",
+          "Todos os pedidos exigem aprovação do administrador e preço personalizado (geralmente 2-4 dias úteis)",
+          "Você receberá um preço cotado que pode aceitar ou recusar",
+          "O pagamento é processado via Stripe após você aceitar o preço cotado",
+          "Status do pedido e atualizações de envio estão disponíveis no seu painel",
+          "Códigos de rastreamento são fornecidos quando os pedidos são enviados",
+          "Os prazos de envio são estimativas e podem variar",
+          "Pedidos de balas não são reembolsáveis após o envio",
+          "Suas informações de envio são armazenadas com segurança e usadas apenas para o envio",
+        ],
+      },
+      cancellations: {
+        title: "6. Cancelamentos e Reembolsos",
+        items: [
+          "**Antes da produção:** Reembolso integral disponível",
+          "**Durante a produção:** Requer análise do administrador",
+          "O valor do reembolso depende do progresso da produção",
+          "Os reembolsos vão para o método de pagamento original via Stripe",
+          "Compras da loja digital não são reembolsáveis após o download",
+          "Pedidos de balas chamoy não são reembolsáveis após o envio",
+        ],
+      },
+      payments: {
+        title: "7. Pagamentos",
+        items: [
+          "As informações de pagamento devem ser precisas e autorizadas",
+          "Os pagamentos são processados com segurança via Stripe",
+          "Os preços podem mudar sem aviso",
+          "Códigos de cupom podem ser aplicados no checkout",
+        ],
+      },
+      aiSongs: {
+        title: "8. Músicas com IA",
+        body: "A música gerada por IA é baseada na sua entrada de texto e gênero. A qualidade pode variar. O uso está sujeito a limites de uso justo.",
+      },
+      ip: {
+        title: "9. Propriedade Intelectual",
+        body: "Após o pagamento integral, você recebe uma licença para usar o conteúdo comprado. Mantemos a propriedade da nossa marca e plataforma. Os direitos sobre o conteúdo do produtor são transferidos para você após o pagamento.",
+      },
+      delivery: {
+        title: "10. Entrega",
+        body: "Os produtos digitais são entregues via seu painel, links de download ou Google Drive. Acessamos apenas o necessário para a entrega. Os produtos físicos (balas chamoy) são enviados para o endereço fornecido no momento do pedido.",
+      },
+      producerApps: {
+        title: "11. Candidaturas de Produtores",
+        body: "Produtores podem se candidatar para entrar na nossa plataforma. A aceitação fica a nosso critério. Produtores aprovados recebem pagamentos via Stripe Connect.",
+      },
+      prohibited: {
+        title: "12. Usos Proibidos",
+        items: [
+          "Violar qualquer lei",
+          "Infringir os direitos de terceiros",
+          "Enviar conteúdo prejudicial",
+          "Revender conteúdo sem permissão",
+          "Usar indevidamente a geração de IA",
+          "Criar contas falsas",
+          "Burlar os controles de pagamento",
+          "Fornecer informações falsas de envio ou contato",
+        ],
+      },
+      liability: {
+        title: "13. Responsabilidade",
+        body: "Não somos responsáveis por danos indiretos decorrentes do uso dos nossos serviços, incluindo atrasos, problemas de qualidade da IA ou atrasos de envio de produtos físicos.",
+      },
+      changes: {
+        title: "14. Alterações",
+        body: "Podemos atualizar estes termos a qualquer momento. O uso continuado significa que você aceita as alterações.",
+      },
+      contact: {
+        title: "15. Contato",
+        body: "Dúvidas? Use nosso formulário de contato na página inicial.",
+      },
+    },
+  },
 };
