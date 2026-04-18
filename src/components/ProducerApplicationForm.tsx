@@ -387,45 +387,48 @@ const ProducerApplicationForm = () => {
                   <FormItem>
                     <FormLabel className="text-gray-1000">{tp.genresLabel}</FormLabel>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-2">
-                      {GENRE_OPTIONS.map((genre) => (
-                        <FormField
-                          key={genre}
-                          control={form.control}
-                          name="genres"
-                          render={({ field }) => {
-                            const isSelected = field.value?.includes(genre);
-                            const isDisabled = selectedGenres.length >= 3 && !isSelected;
-                            
-                            return (
-                              <FormItem
-                                key={genre}
-                                className="flex items-center space-x-2 space-y-0"
-                              >
-                                <FormControl>
-                                  <Checkbox
-                                    checked={isSelected}
-                                    disabled={isDisabled}
-                                    onCheckedChange={(checked) => {
-                                      const newValue = checked
-                                        ? [...field.value, genre]
-                                        : field.value?.filter((value) => value !== genre);
-                                      field.onChange(newValue);
-                                    }}
-                                    className="border-purple-500/100 data-[state=checked]:bg-pink-500 data-[state=checked]:border-pink-500"
-                                  />
-                                </FormControl>
-                                <Label
-                                  className={`text-sm cursor-pointer ${
-                                    isDisabled ? "text-gray-500" : "text-gray-800"
-                                  }`}
+                      {GENRE_OPTIONS.map((genre, idx) => {
+                        const genreLabel = tp.genres[GENRE_KEYS[idx]] ?? genre;
+                        return (
+                          <FormField
+                            key={genre}
+                            control={form.control}
+                            name="genres"
+                            render={({ field }) => {
+                              const isSelected = field.value?.includes(genre);
+                              const isDisabled = selectedGenres.length >= 3 && !isSelected;
+                              
+                              return (
+                                <FormItem
+                                  key={genre}
+                                  className="flex items-center space-x-2 space-y-0"
                                 >
-                                  {genre}
-                                </Label>
-                              </FormItem>
-                            );
-                          }}
-                        />
-                      ))}
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={isSelected}
+                                      disabled={isDisabled}
+                                      onCheckedChange={(checked) => {
+                                        const newValue = checked
+                                          ? [...field.value, genre]
+                                          : field.value?.filter((value) => value !== genre);
+                                        field.onChange(newValue);
+                                      }}
+                                      className="border-purple-500/100 data-[state=checked]:bg-pink-500 data-[state=checked]:border-pink-500"
+                                    />
+                                  </FormControl>
+                                  <Label
+                                    className={`text-sm cursor-pointer ${
+                                      isDisabled ? "text-gray-500" : "text-gray-800"
+                                    }`}
+                                  >
+                                    {genreLabel}
+                                  </Label>
+                                </FormItem>
+                              );
+                            }}
+                          />
+                        );
+                      })}
                     </div>
                     <FormMessage />
                   </FormItem>
@@ -438,16 +441,16 @@ const ProducerApplicationForm = () => {
                 name="bio"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-1000">Bio *</FormLabel>
+                    <FormLabel className="text-gray-1000">{tp.bioLabel}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Tell us about yourself, your experience, style, and what makes you unique as a producer..."
+                        placeholder={tp.bioPlaceholder}
                         className="bg-black/50 border-purple-500/80 text-white placeholder:text-gray-400 min-h-[120px]"
                         {...field}
                       />
                     </FormControl>
                     <FormDescription className="text-gray-800">
-                      {field.value?.length || 0}/1000 characters (minimum 50)
+                      {tp.bioCharCount.replace("{count}", String(field.value?.length || 0))}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
