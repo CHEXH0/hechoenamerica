@@ -39,7 +39,6 @@ const TranslateHelper = () => {
   const isMobile = useIsMobile();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { language, setLanguage } = useTranslation();
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (isHovering) {
