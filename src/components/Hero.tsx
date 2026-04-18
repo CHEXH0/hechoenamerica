@@ -4,8 +4,10 @@ import Waveform from "./Waveform";
 import ProfileIcon from "./ProfileIcon";
 import CustomerServicePanel from "./CustomerServicePanel";
 import { motion } from "framer-motion";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 const Hero = React.memo(() => {
+  const { t } = useTranslation();
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black text-white">
       {/* Header Controls */}
@@ -40,11 +42,11 @@ const Hero = React.memo(() => {
             />
           </motion.div>
           <h1 className="text-4xl md:text-6xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-b from-white via-white/80 to-white/40 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] tracking-wider" style={{ textShadow: '0 4px 30px rgba(255, 255, 255, 0.1), inset 0 0 20px rgba(255, 255, 255, 0.05)' }}>
-            HECHO EN AMERICA
+            {t.hero.title}
           </h1>
           <div className="animate-color-shift mb-8 inline-block">
             <p className="text-lg md:text-xl font-medium text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-200 to-purple-300">
-              La Music Es Medicine
+              {t.hero.subtitle}
             </p>
           </div>
           <Waveform />

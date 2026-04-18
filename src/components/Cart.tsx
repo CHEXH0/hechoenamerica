@@ -7,6 +7,7 @@ import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useTranslation } from '@/contexts/TranslationContext';
 
 interface CartProps {
   isOpen: boolean;
@@ -16,13 +17,14 @@ interface CartProps {
 export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
   const { items, updateQuantity, removeItem, clearCart, getItemCount, getTotalPrice } = useCart();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   const handleCheckout = async () => {
     if (items.length === 0) {
       toast({
-        title: "Cart is Empty",
-        description: "Add items to your cart first.",
+        title: t.cart.emptyToastTitle,
+        description: t.cart.emptyToastDesc,
         variant: "destructive",
       });
       return;
@@ -48,8 +50,8 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
         onClose();
         
         toast({
-          title: "Redirecting to Checkout",
-          description: "Opening checkout in a new tab...",
+          title: t.cart.redirectingTitle,
+          description: t.cart.redirectingDesc,
         });
       } else {
         throw new Error('No checkout URL received');
@@ -57,8 +59,8 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
     } catch (error) {
       console.error('Checkout error:', error);
       toast({
-        title: "Checkout Failed",
-        description: error instanceof Error ? error.message : "Please try again.",
+        title: t.cart.failedTitle,
+        description: error instanceof Error ? error.message : t.cart.failedDesc,
         variant: "destructive",
       });
     } finally {
@@ -93,7 +95,7 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <ShoppingCart className="h-6 w-6 text-pink-400" />
-                    <h2 className="text-xl font-bold text-white">Shopping Cart</h2>
+                    <h2 className="text-xl font-bold text-white">{t.cart.title}</h2>
                     {getItemCount() > 0 && (
                       <Badge className="bg-pink-500 text-white">
                         {getItemCount()}
@@ -116,8 +118,8 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                 {items.length === 0 ? (
                   <div className="text-center py-12">
                     <ShoppingCart className="h-16 w-16 text-gray-500 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-300 mb-2">Your cart is empty</h3>
-                    <p className="text-gray-400">Add some treats to get started!</p>
+                    <h3 className="text-lg font-semibold text-gray-300 mb-2">{t.cart.empty}</h3>
+                    <p className="text-gray-400">{t.cart.emptyDesc}</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -200,7 +202,7 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                 <div className="p-6 border-t border-purple-500/30 bg-black/20">
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-lg font-semibold text-gray-300">Total:</span>
+                      <span className="text-lg font-semibold text-gray-300">{t.cart.total}</span>
                       <span className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
                         ${getTotalPrice().toFixed(2)}
                       </span>
@@ -222,7 +224,7 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                       ) : (
                         <CreditCard className="h-5 w-5 mr-2" />
                       )}
-                      {isCheckingOut ? 'Processing...' : 'Checkout'}
+                      {isCheckingOut ? t.cart.processing : t.cart.checkout}
                     </Button>
                     
                     <Button
@@ -230,7 +232,7 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                       onClick={clearCart}
                       className="w-full text-gray-400 hover:text-white hover:bg-white/10"
                     >
-                      Clear Cart
+                      {t.cart.clearCart}
                     </Button>
                   </div>
                 </div>

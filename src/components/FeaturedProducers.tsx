@@ -7,12 +7,14 @@ import { useProducers } from "@/hooks/useProducers";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSwipeScroll } from "@/hooks/useSwipeScroll";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 const FeaturedProducers = () => {
   const navigate = useNavigate();
   const { data: producers = [], isLoading } = useProducers();
   const isMobile = useIsMobile();
   const { user } = useAuth();
+  const { t } = useTranslation();
   
   const [scrollDirection, setScrollDirection] = useState<'left' | 'right' | 'none'>('none');
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -110,7 +112,7 @@ const FeaturedProducers = () => {
             transition={{ duration: 0.6 }}
             className="text-3xl md:text-4xl font-bold text-center heading-gradient mb-12"
           >
-            Featured Producers
+            {t.featuredProducers.title}
           </motion.h2>
           <div className="grid grid-cols-2 gap-6">
             {[...Array(2)].map((_, index) => (
@@ -135,14 +137,14 @@ const FeaturedProducers = () => {
               transition={{ duration: 0.6 }}
               className="text-3xl md:text-4xl font-bold text-center heading-gradient"
             >
-              Featured Producers
+              {t.featuredProducers.title}
             </motion.h2>
             <div className="text-center mt-4">
               <Link
                 to="/producers"
                 className="text-sm text-purple-400 hover:text-purple-300 underline underline-offset-4 transition-colors"
               >
-                See All Producers →
+                {t.featuredProducers.seeAll}
               </Link>
             </div>
           </>
@@ -155,10 +157,10 @@ const FeaturedProducers = () => {
               className="text-center max-w-3xl mx-auto"
             >
               <h2 className="text-3xl md:text-4xl font-bold heading-gradient mb-4">
-                Your Music, Global Producers
+                {t.featuredProducers.yourMusicTitle}
               </h2>
               <p className="text-base md:text-lg text-gray-400 leading-relaxed">
-                Connect with top producers worldwide who bring your vision to life.
+                {t.featuredProducers.yourMusicSubtitle}
               </p>
             </motion.div>
             <div className="flex justify-center items-center gap-3 md:gap-4 mt-6 flex-wrap px-4">

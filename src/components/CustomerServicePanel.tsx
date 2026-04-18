@@ -9,10 +9,12 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 const CustomerServicePanel = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [sending, setSending] = useState(false);
   const [name, setName] = useState("");
@@ -31,8 +33,8 @@ const CustomerServicePanel = () => {
     e.preventDefault();
     if (!name || !email || !subject || !message) {
       toast({
-        title: "Missing fields",
-        description: "Please fill in all fields before sending.",
+        title: t.customerService.missingTitle,
+        description: t.customerService.missingDesc,
         variant: "destructive",
       });
       return;
@@ -47,8 +49,8 @@ const CustomerServicePanel = () => {
       if (error) throw error;
 
       toast({
-        title: "Message sent!",
-        description: "We'll get back to you as soon as possible.",
+        title: t.customerService.sentTitle,
+        description: t.customerService.sentDesc,
       });
 
       setSubject("");
@@ -57,8 +59,8 @@ const CustomerServicePanel = () => {
     } catch (err) {
       console.error("Error sending support email:", err);
       toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
+        title: t.customerService.errorTitle,
+        description: t.customerService.errorDesc,
         variant: "destructive",
       });
     } finally {
@@ -73,7 +75,7 @@ const CustomerServicePanel = () => {
           variant="ghost"
           size="sm"
           className="p-2 rounded-full hover:bg-white/10 transition-colors"
-          title="Customer Support"
+          title={t.customerService.triggerTitle}
         >
           <Headphones className="h-5 w-5 text-gray-300 hover:text-white transition-colors" />
         </Button>
@@ -82,63 +84,63 @@ const CustomerServicePanel = () => {
         <SheetHeader className="text-left">
           <SheetTitle className="text-white flex items-center gap-2 text-xl">
             <Headphones className="h-5 w-5 text-purple-400" />
-            Customer Support
+            {t.customerService.panelTitle}
           </SheetTitle>
           <SheetDescription className="text-gray-400">
-            Have a question or need help? Send us a message and we'll respond shortly.
+            {t.customerService.panelDescription}
           </SheetDescription>
         </SheetHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 mt-6">
           <div className="space-y-2">
             <Label htmlFor="cs-name" className="text-gray-300">
-              Name
+              {t.customerService.nameLabel}
             </Label>
             <Input
               id="cs-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
+              placeholder={t.customerService.namePlaceholder}
               className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-purple-500"
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="cs-email" className="text-gray-300">
-              Email
+              {t.customerService.emailLabel}
             </Label>
             <Input
               id="cs-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
+              placeholder={t.customerService.emailPlaceholder}
               className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-purple-500"
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="cs-subject" className="text-gray-300">
-              Subject
+              {t.customerService.subjectLabel}
             </Label>
             <Input
               id="cs-subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              placeholder="What do you need help with?"
+              placeholder={t.customerService.subjectPlaceholder}
               className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-purple-500"
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="cs-message" className="text-gray-300">
-              Message
+              {t.customerService.messageLabel}
             </Label>
             <Textarea
               id="cs-message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Describe your issue or question in detail..."
+              placeholder={t.customerService.messagePlaceholder}
               rows={5}
               className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-purple-500 resize-none"
             />
@@ -150,7 +152,7 @@ const CustomerServicePanel = () => {
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
           >
             {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
-            Send Message
+            {t.customerService.sendButton}
           </Button>
         </form>
 
@@ -158,7 +160,7 @@ const CustomerServicePanel = () => {
 
         {/* Urgent Contact */}
         <div className="space-y-4 pb-6">
-          <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">Need urgent help?</h3>
+          <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">{t.customerService.urgentTitle}</h3>
 
           <a
             href="mailto:team@hechoenamericastudio.com"
@@ -169,7 +171,7 @@ const CustomerServicePanel = () => {
             </div>
             <div>
               <p className="text-sm font-medium text-white group-hover:text-purple-300 transition-colors">
-                Email Us Directly
+                {t.customerService.emailUsTitle}
               </p>
               <p className="text-xs text-gray-500">team@hechoenamericastudio.com</p>
             </div>
@@ -183,12 +185,12 @@ const CustomerServicePanel = () => {
               <Phone className="h-5 w-5 text-pink-400" />
             </div>
             <div>
-              <p className="text-sm font-medium text-white group-hover:text-pink-300 transition-colors">Call Us</p>
+              <p className="text-sm font-medium text-white group-hover:text-pink-300 transition-colors">{t.customerService.callUsTitle}</p>
               <p className="text-xs text-gray-500">+1 (951) 608-3989</p>
             </div>
           </a>
 
-          <p className="text-xs text-gray-600 text-center">Available Mon–Fri, 10 AM – 6 PM EST</p>
+          <p className="text-xs text-gray-600 text-center">{t.customerService.availability}</p>
         </div>
       </SheetContent>
     </Sheet>

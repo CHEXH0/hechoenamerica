@@ -2,32 +2,34 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Candy, Briefcase } from "lucide-react";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 const AudioPlatforms = React.memo(() => {
+  const { t } = useTranslation();
   const platforms = [
     {
-      name: "Instagram",
+      name: t.audioPlatforms.instagram,
       image: "/laptop-uploads/Instagram.png",
       url: "https://www.instagram.com/hecho.en.america/",
       isExternal: true,
       emojis: ["📸", "❤️", "👥", "✨", "🔥"],
     },
     {
-      name: "YouTube",
+      name: t.audioPlatforms.youtube,
       image: "/laptop-uploads/YouTube.png",
       url: "https://www.youtube.com/@HechoEnAmerica.",
       isExternal: true,
       emojis: ["📺", "🎬", "👀", "🔴", "🎵"],
     },
     {
-      name: "Careers",
+      name: t.audioPlatforms.careers,
       isIcon: true,
       url: "/producer-application",
       isExternal: true,
       emojis: ["💼", "🎤", "🚀", "⭐", "🎯"],
     },
     {
-      name: "Treats",
+      name: t.audioPlatforms.treats,
       isIcon: true,
       url: "/treats",
       isExternal: false,
@@ -44,7 +46,7 @@ const AudioPlatforms = React.memo(() => {
           transition={{ duration: 0.6 }}
           className="text-3xl md:text-4xl font-bold text-center heading-gradient mb-12"
         >
-          Community
+          {t.audioPlatforms.title}
         </motion.h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {platforms.map((platform, index) => {

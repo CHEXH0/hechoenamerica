@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Cookie, X } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 const CookieConsent = () => {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -37,7 +39,7 @@ const CookieConsent = () => {
           <button
             onClick={decline}
             className="absolute top-3 right-3 text-gray-500 hover:text-white transition-colors"
-            aria-label="Close"
+            aria-label={t.cookies.close}
           >
             <X className="w-4 h-4" />
           </button>
@@ -46,9 +48,9 @@ const CookieConsent = () => {
             <Cookie className="w-5 h-5 text-purple-400 mt-0.5 shrink-0" />
             <div className="space-y-3">
               <p className="text-sm text-gray-300 leading-relaxed pr-4">
-                We use essential cookies for login and site features. No tracking. See our{" "}
+                {t.cookies.text}{" "}
                 <Link to="/privacy-policy" className="text-purple-400 hover:text-purple-300 underline underline-offset-2">
-                  Privacy Policy
+                  {t.cookies.privacyLink}
                 </Link>.
               </p>
               <div className="flex gap-2">
@@ -56,13 +58,13 @@ const CookieConsent = () => {
                   onClick={accept}
                   className="px-4 py-1.5 text-sm font-medium rounded-lg bg-purple-600 hover:bg-purple-500 text-white transition-colors"
                 >
-                  Accept
+                  {t.cookies.accept}
                 </button>
                 <button
                   onClick={decline}
                   className="px-4 py-1.5 text-sm font-medium rounded-lg border border-white/10 text-gray-400 hover:text-white hover:border-white/20 transition-colors"
                 >
-                  Decline
+                  {t.cookies.decline}
                 </button>
               </div>
             </div>
