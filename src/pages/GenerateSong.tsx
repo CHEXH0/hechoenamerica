@@ -197,18 +197,18 @@ const GenerateSong = () => {
 
       localStorage.removeItem("pendingSongRequest");
       toast({
-        title: "Welcome back!",
-        description: "You can now submit your song request."
+        title: tg.welcomeBackTitle,
+        description: tg.welcomeBackDesc,
       });
     }
-  }, [user, toast]);
+  }, [user, toast, tg]);
 
   // Handle adding Google Drive links
   const handleAddDriveLink = () => {
     if (!newDriveLink.trim()) {
       toast({
-        title: "No link provided",
-        description: "Please enter a Google Drive, Dropbox, or other file sharing link",
+        title: tg.noLinkTitle,
+        description: tg.noLinkDesc,
         variant: "destructive"
       });
       return;
@@ -219,8 +219,8 @@ const GenerateSong = () => {
       new URL(newDriveLink);
     } catch {
       toast({
-        title: "Invalid URL",
-        description: "Please enter a valid URL",
+        title: tg.invalidUrlTitle,
+        description: tg.invalidUrlDesc,
         variant: "destructive"
       });
       return;
@@ -243,8 +243,8 @@ const GenerateSong = () => {
     setShowDriveLinkInput(false);
 
     toast({
-      title: "Link added",
-      description: "Your file link has been added to the submission"
+      title: tg.linkAddedTitle,
+      description: tg.linkAddedDesc
     });
   };
 
@@ -255,8 +255,8 @@ const GenerateSong = () => {
   const handleGenerateAI = async () => {
     if (!idea) {
       toast({
-        title: "Missing information",
-        description: "Please share your idea",
+        title: tg.missingInfoTitle,
+        description: tg.missingInfoDesc,
         variant: "destructive"
       });
       return;
@@ -272,8 +272,8 @@ const GenerateSong = () => {
         })
       );
       toast({
-        title: "Authentication required",
-        description: "Please sign in to generate AI songs."
+        title: tg.authRequiredTitle,
+        description: tg.authRequiredAiDesc
       });
       navigate("/auth");
       return;
@@ -285,8 +285,8 @@ const GenerateSong = () => {
       Math.ceil((nextResetTime.getTime() - Date.now()) / (1000 * 60 * 60)) :
       RESET_HOURS;
       toast({
-        title: "Daily limit reached",
-        description: `You've used all ${MAX_FREE_AI_SONGS} free AI generations. Try again in ${timeUntilReset} hours or choose a paid tier.`,
+        title: tg.dailyLimitTitle,
+        description: tg.dailyLimitDesc,
         variant: "destructive",
         duration: 8000
       });
@@ -295,7 +295,7 @@ const GenerateSong = () => {
 
     setIsGeneratingAI(true);
     setAiProgressPercent(0);
-    setAiProgress("Connecting to Google Lyria 2...");
+    setAiProgress(tg.connectingAi);
 
     // Simulate progress while waiting for the API
     const progressInterval = setInterval(() => {
@@ -311,7 +311,7 @@ const GenerateSong = () => {
       "";
       const fullPrompt = genreText ? `${genreText} style: ${idea}` : idea;
 
-      setAiProgress("Generating your AI music...");
+      setAiProgress(tg.generatingAi);
 
       const { data, error } = await supabase.functions.invoke("generate-music", {
         body: { prompt: fullPrompt }
@@ -325,7 +325,7 @@ const GenerateSong = () => {
       if (data?.error) {
         if (data.errorType === "CONTENT_FILTER") {
           toast({
-            title: "Prompt needs adjustment",
+            title: tg.promptAdjustTitle,
             description: data.error,
             variant: "destructive",
             duration: 8000
@@ -367,8 +367,8 @@ const GenerateSong = () => {
         setAiProgressPercent(100);
         setAiProgress("");
         toast({
-          title: "🎵 Music Generated!",
-          description: `Your AI-generated track is ready. ${aiGenerationsRemaining !== null ? `${aiGenerationsRemaining - 1} generations remaining today.` : ""}`
+          title: tg.musicGeneratedTitle,
+          description: `${tg.musicGeneratedDesc} ${aiGenerationsRemaining !== null ? `${aiGenerationsRemaining - 1} ${tg.generationsRemaining}` : ""}`
         });
       } else {
         throw new Error("No audio data received from AI");
@@ -377,11 +377,11 @@ const GenerateSong = () => {
       console.error("AI generation failed:", aiError);
       setAiProgress("");
       toast({
-        title: "AI Generation Failed",
+        title: tg.aiFailedTitle,
         description:
         aiError instanceof Error ?
         aiError.message :
-        "Please try again with a more abstract description of the music you want.",
+        tg.aiFailedDesc,
         variant: "destructive"
       });
     } finally {
@@ -400,8 +400,8 @@ const GenerateSong = () => {
 
     if (!idea) {
       toast({
-        title: "Missing information",
-        description: "Please share your idea",
+        title: tg.missingInfoTitle,
+        description: tg.missingInfoDesc,
         variant: "destructive"
       });
       return;
@@ -412,8 +412,8 @@ const GenerateSong = () => {
     if (!hasAnyAddOn && !wantsNoneOfAbove) {
       setIsOptionsOpen(true);
       toast({
-        title: "Production Settings required",
-        description: "Please select your production preferences or choose 'None of the above'.",
+        title: tg.productionRequiredTitle,
+        description: tg.productionRequiredDesc,
         variant: "destructive"
       });
       return;
@@ -430,9 +430,8 @@ const GenerateSong = () => {
         })
       );
       toast({
-        title: "Authentication required",
-        description:
-        "Please sign in to submit your song request. Note: You'll need to re-upload any files after signing in."
+        title: tg.authRequiredTitle,
+        description: tg.authRequiredPaidDesc
       });
       navigate("/auth");
       return;
@@ -513,8 +512,8 @@ const GenerateSong = () => {
     } catch (error) {
       console.error("Submission error:", error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to submit. Please try again.",
+        title: tg.errorTitle,
+        description: error instanceof Error ? error.message : tg.errorDesc,
         variant: "destructive"
       });
     } finally {
