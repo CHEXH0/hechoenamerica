@@ -182,7 +182,7 @@ const CustomerServicePanel = () => {
             className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group"
           >
             <div className="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center shrink-0">
-              <Mail className="h-5 w-5 text-pink-400" />
+              <Phone className="h-5 w-5 text-pink-400" />
             </div>
             <div>
               <p className="text-sm font-medium text-white group-hover:text-pink-300 transition-colors">{t.customerService.callUsTitle}</p>
