@@ -459,7 +459,7 @@ const ProducerApplicationForm = () => {
 
               {/* Image Upload Section */}
               <div className="space-y-2">
-                <Label className="text-gray-1000">Brand Image *</Label>
+                <Label className="text-gray-1000">{tp.brandImageLabel}</Label>
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="flex-1">
                     <div
@@ -476,8 +476,8 @@ const ProducerApplicationForm = () => {
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       />
                       <Upload className="h-10 w-10 text-gray-400 mx-auto mb-3" />
-                      <p className="text-gray-300 mb-1">Click or drag to upload</p>
-                      <p className="text-gray-400 text-sm">PNG, JPG up to 5MB</p>
+                      <p className="text-gray-300 mb-1">{tp.uploadClick}</p>
+                      <p className="text-gray-400 text-sm">{tp.uploadHint}</p>
                     </div>
                     {imageError && (
                       <p className="text-red-400 text-sm mt-2">{imageError}</p>
@@ -499,16 +499,16 @@ const ProducerApplicationForm = () => {
                   )}
                 </div>
                 <p className="text-gray-800 text-sm">
-                  Upload a logo, photo, or image that represents your brand
+                  {tp.uploadDesc}
                 </p>
               </div>
 
               {/* Social Links Section */}
               <div className="space-y-4">
                 <div>
-                  <Label className="text-gray-1000 text-lg">Platform Links *</Label>
+                  <Label className="text-gray-1000 text-lg">{tp.platformLinksLabel}</Label>
                   <p className="text-gray-800 text-sm mt-1">
-                    Provide at least one link to your music or social profile
+                    {tp.platformLinksDesc}
                   </p>
                 </div>
 
@@ -635,12 +635,12 @@ const ProducerApplicationForm = () => {
                     {isSubmitting ? (
                       <>
                         <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                        Submitting...
+                        {tp.submitting}
                       </>
                     ) : (
                       <>
                         <Send className="h-5 w-5 mr-2" />
-                        Submit Application
+                        {tp.submitApplication}
                       </>
                     )}
                   </Button>
