@@ -91,10 +91,10 @@ export const ru: Translations = {
   },
   footer: {
     studioName: "Hecho En America Studio",
-    tagline: "A secure production portal for producers to deliver high-quality media to artists.",
-    privacyPolicy: "Privacy Policy",
-    termsOfService: "Terms of Service",
-    rightsReserved: "All rights reserved.",
+    tagline: "Безопасный продюсерский портал для доставки качественного медиаконтента артистам.",
+    privacyPolicy: "Политика конфиденциальности",
+    termsOfService: "Условия использования",
+    rightsReserved: "Все права защищены.",
   },
   cart: {
     title: "Shopping Cart",
