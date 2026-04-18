@@ -15,6 +15,7 @@ import { Plus, ChevronDown, HardDrive, Link, X, Loader2, Info, Check, Circle } f
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Progress } from "@/components/ui/progress";
 import { useSongPricing, DEFAULT_PRICING } from "@/hooks/useSongPricing";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 // Google Drive link type
 interface DriveLink {
@@ -22,16 +23,18 @@ interface DriveLink {
   name: string;
 }
 
-const genreCategories = [
-{ value: "hip-hop", label: "Hip Hop / Trap / Rap" },
-{ value: "rnb", label: "R&B / Soul" },
-{ value: "reggae", label: "Reggae / Dancehall" },
-{ value: "latin", label: "Latin / Reggaeton" },
-{ value: "electronic", label: "Electronic / EDM" },
-{ value: "pop", label: "Pop / Alternative" },
-{ value: "rock", label: "Rock / Indie" },
-{ value: "world", label: "World / Indigenous / Medicina" },
-{ value: "other", label: "Other / Mixed" }];
+const GENRE_KEYS = [
+  "hipHop",
+  "rnb",
+  "reggae",
+  "latin",
+  "electronic",
+  "pop",
+  "rock",
+  "world",
+  "other",
+] as const;
+const GENRE_VALUES = ["hip-hop", "rnb", "reggae", "latin", "electronic", "pop", "rock", "world", "other"] as const;
 
 // Fallback constants (used if DB pricing not loaded yet)
 const FALLBACK_TIERS = DEFAULT_PRICING.tiers;
@@ -44,8 +47,12 @@ const RESET_HOURS = 5;
 
 const GenerateSong = () => {
   const { data: pricingConfig } = useSongPricing();
-  
-  // Derive pricing from DB config (or fallback)
+  const { t } = useTranslation();
+  const tg = t.generateSong;
+  const genreCategories = useMemo(
+    () => GENRE_VALUES.map((value, i) => ({ value, label: tg.genres[GENRE_KEYS[i]] })),
+    [tg]
+  );
   const tiers = pricingConfig?.tiers ?? FALLBACK_TIERS;
   const addOnPricing = pricingConfig?.addOns ?? FALLBACK_ADD_ONS;
   const bitDepthOptions = pricingConfig?.bitDepthOptions ?? FALLBACK_BIT_DEPTH;
