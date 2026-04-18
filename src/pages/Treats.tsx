@@ -23,6 +23,8 @@ import { useSweetTreatsTabVisible } from "@/hooks/useStoreVisibility";
 
 
 const Treats = () => {
+  const { t } = useTranslation();
+  const tt = t.treats;
   const { data: allProducts, isLoading, error } = useProducts();
   const { user } = useAuth();
   const isAdmin = user?.email === 'hechoenamerica369@gmail.com';
