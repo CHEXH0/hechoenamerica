@@ -104,13 +104,13 @@ const ProducerApplicationForm = () => {
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      setImageError("Please upload an image file");
+      setImageError(tp.imageInvalidType);
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      setImageError("Image must be less than 5MB");
+      setImageError(tp.imageTooLarge);
       return;
     }
 
@@ -125,7 +125,7 @@ const ProducerApplicationForm = () => {
   const onSubmit = async (data: FormData) => {
     console.log("ProducerApplicationForm: onSubmit called with data:", data);
     if (!imageFile) {
-      setImageError("Please upload a brand image");
+      setImageError(tp.imageRequired);
       console.log("ProducerApplicationForm: No image file uploaded");
       return;
     }
@@ -204,14 +204,14 @@ const ProducerApplicationForm = () => {
 
       setIsSubmitted(true);
       toast({
-        title: "Application Submitted! 🎉",
-        description: "Check your email for confirmation. We'll be in touch soon!",
+        title: tp.submittedTitle,
+        description: tp.submittedDesc,
       });
     } catch (error) {
       console.error("Error submitting application:", error);
       toast({
-        title: "Submission Failed",
-        description: "There was an error submitting your application. Please try again.",
+        title: tp.submitFailedTitle,
+        description: tp.submitFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -238,16 +238,14 @@ const ProducerApplicationForm = () => {
             >
               <CheckCircle className="h-20 w-20 text-green-400 mx-auto" />
             </motion.div>
-            <h3 className="text-3xl font-bold text-gray-1000 mb-4">Application Received!</h3>
+            <h3 className="text-3xl font-bold text-gray-1000 mb-4">{tp.receivedTitle}</h3>
             <p className="text-gray-800 text-lg max-w-md mx-auto mb-6">
-              Thanks for applying! Check your email for next steps.
+              {tp.receivedDesc}
             </p>
             <div className="bg-indigo-900/30 border border-indigo-500/40 rounded-lg p-4 max-w-md mx-auto">
               <p className="text-indigo-100 text-sm flex items-center justify-center gap-2">
                 <span className="text-xl">💬</span>
-                <span>
-                  <strong>Note:</strong> If approved, you'll use Discord to manage projects.
-                </span>
+                <span>{tp.discordNote}</span>
               </p>
             </div>
           </CardContent>
@@ -279,10 +277,10 @@ const ProducerApplicationForm = () => {
             </motion.div>
             
             <h2 className="text-3xl font-bold text-gray-800 mb-4">
-              Sign In Required
+              {tp.signInRequiredTitle}
             </h2>
             <p className="text-gray-900 text-lg max-w-md mx-auto mb-8">
-              Please sign in to submit your application.
+              {tp.signInRequiredDesc}
             </p>
             
             <Link to="/auth?redirect=/producer-application">
@@ -291,7 +289,7 @@ const ProducerApplicationForm = () => {
                 className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white"
               >
                 <LogIn className="h-5 w-5 mr-2" />
-                Sign In to Apply
+                {tp.signInToApply}
               </Button>
             </Link>
           </CardContent>
@@ -310,10 +308,10 @@ const ProducerApplicationForm = () => {
       <Card className="bg-gradient-to-br from-purple-900/50 via-pink-900/30 to-red-900/50 border-purple-500/40 backdrop-blur-md max-w-4xl mx-auto">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent mb-4">
-            Become a Producer
+            {tp.becomeProducer}
           </CardTitle>
           <CardDescription className="text-gray-800 text-lg leading-relaxed max-w-2xl mx-auto">
-            Apply to join our producer network. We'll review your submission.
+            {tp.becomeProducerDesc}
           </CardDescription>
         </CardHeader>
         
@@ -327,10 +325,10 @@ const ProducerApplicationForm = () => {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-1000">Producer/Artist Name *</FormLabel>
+                      <FormLabel className="text-gray-1000">{tp.nameLabel}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Your stage name or brand"
+                          placeholder={tp.namePlaceholder}
                           className="bg-black/50 border-purple-500/80 text-white placeholder:text-gray-400"
                           {...field}
                         />
@@ -345,11 +343,11 @@ const ProducerApplicationForm = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-1000">Email *</FormLabel>
+                      <FormLabel className="text-gray-1000">{tp.emailLabel}</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder="your@email.com"
+                          placeholder={tp.emailPlaceholder}
                           className="bg-black/50 border-purple-500/80 text-white placeholder:text-gray-400"
                           {...field}
                         />
@@ -365,16 +363,16 @@ const ProducerApplicationForm = () => {
                 name="country"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-1000">Location *</FormLabel>
+                    <FormLabel className="text-gray-1000">{tp.locationLabel}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="City, Country (e.g., Los Angeles, USA)"
+                        placeholder={tp.locationPlaceholder}
                         className="bg-black/50 border-purple-500/80 text-white placeholder:text-gray-400"
                         {...field}
                       />
                     </FormControl>
                     <FormDescription className="text-gray-800">
-                      Where you're primarily based
+                      {tp.locationDesc}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -387,7 +385,7 @@ const ProducerApplicationForm = () => {
                 name="genres"
                 render={() => (
                   <FormItem>
-                    <FormLabel className="text-gray-1000">Main Genres * (Select up to 3)</FormLabel>
+                    <FormLabel className="text-gray-1000">{tp.genresLabel}</FormLabel>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-2">
                       {GENRE_OPTIONS.map((genre) => (
                         <FormField
