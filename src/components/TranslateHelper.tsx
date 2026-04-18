@@ -1,7 +1,16 @@
 import { useState, useEffect, useRef } from "react";
-import { Globe, X, Chrome, Monitor } from "lucide-react";
+import { Globe, X, Chrome, Monitor, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTranslation, Language } from "@/contexts/TranslationContext";
+
+const APP_LANGUAGES: { code: Language; name: string; flag: string }[] = [
+  { code: "en", name: "English", flag: "🇺🇸" },
+  { code: "es", name: "Español", flag: "🇪🇸" },
+  { code: "pt", name: "Português", flag: "🇵🇹" },
+  { code: "zh", name: "中文", flag: "🇨🇳" },
+  { code: "ru", name: "Русский", flag: "🇷🇺" },
+];
 
 const translateWords = [
   "Translate?", "¿Traducir?", "翻译？", "Перевести?", "Traduire?",

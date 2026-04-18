@@ -1,21 +1,24 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { Language, Translations, translations } from '@/translations';
+import { useGeoLanguage } from '@/hooks/useGeoLanguage';
 
 interface TranslationContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: Translations;
+  isDetecting: boolean;
 }
 
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined);
 
 export const TranslationProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<Language>('en');
+  const { language, setLanguage, isDetecting } = useGeoLanguage();
 
   const value = {
     language,
     setLanguage,
-    t: translations[language]
+    t: translations[language],
+    isDetecting,
   };
 
   return (
