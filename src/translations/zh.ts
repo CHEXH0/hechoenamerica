@@ -7,9 +7,9 @@ export const zh: Translations = {
   },
   featuredProducers: {
     title: "特色制作人",
-    seeAll: "See All Producers →",
-    yourMusicTitle: "Your Music, Global Producers",
-    yourMusicSubtitle: "Connect with top producers worldwide who bring your vision to life.",
+    seeAll: "查看所有制作人 →",
+    yourMusicTitle: "您的音乐，全球制作人",
+    yourMusicSubtitle: "与世界顶级制作人合作，将您的愿景变为现实。",
   },
   audioPlatforms: {
     title: "社区",
@@ -20,10 +20,10 @@ export const zh: Translations = {
   },
   services: {
     title: "我们的服务",
-    workWithDaws: "We work with industry-standard DAWs",
+    workWithDaws: "我们使用行业标准的数字音频工作站",
     audios: {
-      title: "Audios",
-      description: "Quality audio production and enhancement",
+      title: "音频",
+      description: "高品质音频制作与增强",
     },
     recording: {
       title: "录音",
@@ -39,8 +39,8 @@ export const zh: Translations = {
     },
   },
   cta: {
-    readyTitle: "Ready to Create Your Next Hit?",
-    getStarted: "Get Started",
+    readyTitle: "准备好创作您的下一首热门歌曲了吗？",
+    getStarted: "开始",
   },
   contact: {
     title: "联系我们",

@@ -7,9 +7,9 @@ export const pt: Translations = {
   },
   featuredProducers: {
     title: "Produtores em Destaque",
-    seeAll: "See All Producers →",
-    yourMusicTitle: "Your Music, Global Producers",
-    yourMusicSubtitle: "Connect with top producers worldwide who bring your vision to life.",
+    seeAll: "Ver Todos os Produtores →",
+    yourMusicTitle: "Sua Música, Produtores Globais",
+    yourMusicSubtitle: "Conecte-se com os melhores produtores do mundo que dão vida à sua visão.",
   },
   audioPlatforms: {
     title: "Comunidade",
@@ -20,10 +20,10 @@ export const pt: Translations = {
   },
   services: {
     title: "Nossos Serviços",
-    workWithDaws: "We work with industry-standard DAWs",
+    workWithDaws: "Trabalhamos com DAWs padrão da indústria",
     audios: {
-      title: "Audios",
-      description: "Quality audio production and enhancement",
+      title: "Áudios",
+      description: "Produção e aprimoramento de áudio de qualidade",
     },
     recording: {
       title: "Gravação",
@@ -39,8 +39,8 @@ export const pt: Translations = {
     },
   },
   cta: {
-    readyTitle: "Ready to Create Your Next Hit?",
-    getStarted: "Get Started",
+    readyTitle: "Pronto para Criar Seu Próximo Sucesso?",
+    getStarted: "Começar",
   },
   contact: {
     title: "Entre em Contato",

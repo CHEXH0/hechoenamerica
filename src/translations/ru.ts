@@ -7,9 +7,9 @@ export const ru: Translations = {
   },
   featuredProducers: {
     title: "Рекомендуемые Продюсеры",
-    seeAll: "See All Producers →",
-    yourMusicTitle: "Your Music, Global Producers",
-    yourMusicSubtitle: "Connect with top producers worldwide who bring your vision to life.",
+    seeAll: "Посмотреть всех продюсеров →",
+    yourMusicTitle: "Ваша Музыка, Мировые Продюсеры",
+    yourMusicSubtitle: "Сотрудничайте с лучшими продюсерами со всего мира, которые воплотят ваше видение в жизнь.",
   },
   audioPlatforms: {
     title: "Сообщество",
@@ -20,10 +20,10 @@ export const ru: Translations = {
   },
   services: {
     title: "Наши Услуги",
-    workWithDaws: "We work with industry-standard DAWs",
+    workWithDaws: "Мы работаем с DAW индустриального стандарта",
     audios: {
-      title: "Audios",
-      description: "Quality audio production and enhancement",
+      title: "Аудио",
+      description: "Качественное аудиопроизводство и улучшение звука",
     },
     recording: {
       title: "Запись",
@@ -39,8 +39,8 @@ export const ru: Translations = {
     },
   },
   cta: {
-    readyTitle: "Ready to Create Your Next Hit?",
-    getStarted: "Get Started",
+    readyTitle: "Готовы создать свой следующий хит?",
+    getStarted: "Начать",
   },
   contact: {
     title: "Связаться с Нами",
