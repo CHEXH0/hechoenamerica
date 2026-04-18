@@ -10,8 +10,11 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from '@/contexts/TranslationContext';
 
 const Auth = () => {
+  const { t } = useTranslation();
+  const ta = t.auth;
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [sendingReset, setSendingReset] = useState(false);
@@ -52,20 +55,20 @@ const Auth = () => {
 
       if (error) {
         toast({
-          title: "Sign In Failed",
+          title: ta.signInFailedTitle,
           description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Welcome back!",
-          description: "You've been signed in successfully.",
+          title: ta.welcomeBackTitle,
+          description: ta.welcomeBackDesc,
         });
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "An unexpected error occurred.",
+        title: ta.errorTitle,
+        description: ta.errorDesc,
         variant: "destructive",
       });
     } finally {
@@ -93,21 +96,21 @@ const Auth = () => {
       if (error) {
         if (error.message.includes('already registered')) {
           toast({
-            title: "Account exists",
-            description: "This email is already registered. Try signing in instead.",
+            title: ta.accountExistsTitle,
+            description: ta.accountExistsDesc,
             variant: "destructive",
           });
         } else {
           toast({
-            title: "Sign Up Failed",
+            title: ta.signUpFailedTitle,
             description: error.message,
             variant: "destructive",
           });
         }
       } else {
         toast({
-          title: "Check your email!",
-          description: "We sent a verification link. Click it to activate your account.",
+          title: ta.checkEmailTitle,
+          description: ta.checkEmailSignUpDesc,
           duration: 10000,
         });
         setEmail('');
@@ -115,8 +118,8 @@ const Auth = () => {
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "An unexpected error occurred.",
+        title: ta.errorTitle,
+        description: ta.errorDesc,
         variant: "destructive",
       });
     } finally {
@@ -127,8 +130,8 @@ const Auth = () => {
   const handleForgotPassword = async () => {
     if (!email) {
       toast({
-        title: "Email required",
-        description: "Please enter your email address to reset your password.",
+        title: ta.emailRequiredTitle,
+        description: ta.emailRequiredDesc,
         variant: "destructive",
       });
       return;
@@ -143,15 +146,15 @@ const Auth = () => {
       if (error) throw error;
 
       toast({
-        title: "Check your email!",
-        description: "We've sent you a password reset link. Click it to set a new password.",
+        title: ta.checkEmailTitle,
+        description: ta.checkEmailResetDesc,
         duration: 10000,
       });
     } catch (error) {
       console.error('Password reset error:', error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to send reset email.",
+        title: ta.errorTitle,
+        description: error instanceof Error ? error.message : ta.resetFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -206,7 +209,7 @@ const Auth = () => {
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
           </motion.div>
-          Back to Home
+          {ta.backToHome}
         </Link>
       </motion.div>
 
@@ -221,10 +224,10 @@ const Auth = () => {
           <Card className="bg-gradient-to-br from-purple-900/50 via-pink-900/30 to-red-900/50 border-purple-500/40 backdrop-blur-md">
             <CardHeader className="text-center">
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
-                Welcome
+                {ta.welcomeTitle}
               </CardTitle>
               <CardDescription className="text-gray-900">
-                Sign in or create a new account
+                {ta.welcomeSubtitle}
               </CardDescription>
             </CardHeader>
 
@@ -235,26 +238,26 @@ const Auth = () => {
                     value="signin" 
                     className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-pink-500 text-gray-200"
                   >
-                    Sign In
+                    {ta.signInTab}
                   </TabsTrigger>
                   <TabsTrigger 
                     value="signup" 
                     className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-red-500/20 data-[state=active]:text-purple-500 text-gray-200"
                   >
-                    Sign Up
+                    {ta.signUpTab}
                   </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="signin">
                   <form onSubmit={handleSignIn} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signin-email" className="text-gray-900">Email</Label>
+                      <Label htmlFor="signin-email" className="text-gray-900">{ta.emailLabel}</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
                           id="signin-email"
                           type="email"
-                          placeholder="Enter your email"
+                          placeholder={ta.emailPlaceholder}
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className="pl-10 bg-black/50 border-purple-400/30 text-white placeholder:text-gray-400"
@@ -263,13 +266,13 @@ const Auth = () => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signin-password" className="text-gray-900">Password</Label>
+                      <Label htmlFor="signin-password" className="text-gray-900">{ta.passwordLabel}</Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
                           id="signin-password"
                           type={showPassword ? "text" : "password"}
-                          placeholder="Enter your password"
+                          placeholder={ta.signInPasswordPlaceholder}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           className="pl-10 pr-10 bg-black/50 border-purple-400/30 text-white placeholder:text-gray-400"
@@ -291,7 +294,7 @@ const Auth = () => {
                       disabled={loading}
                       className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white"
                     >
-                      {loading ? "Signing in..." : "Sign In"}
+                      {loading ? ta.signingInButton : ta.signInButton}
                     </Button>
                     <div className="text-center">
                       <button
@@ -300,7 +303,7 @@ const Auth = () => {
                         disabled={sendingReset}
                         className="text-sm text-pink-700 hover:text-pink-500 transition-colors underline underline-offset-2"
                       >
-                        {sendingReset ? "Sending..." : "Forgot your password?"}
+                        {sendingReset ? ta.sendingReset : ta.forgotPassword}
                       </button>
                     </div>
                   </form>
@@ -309,13 +312,13 @@ const Auth = () => {
                 <TabsContent value="signup">
                   <form onSubmit={handleSignUp} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signup-email" className="text-gray-900">Email</Label>
+                      <Label htmlFor="signup-email" className="text-gray-900">{ta.emailLabel}</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
                           id="signup-email"
                           type="email"
-                          placeholder="Enter your email"
+                          placeholder={ta.emailPlaceholder}
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className="pl-10 bg-black/50 border-purple-400/30 text-white placeholder:text-gray-400"
@@ -324,13 +327,13 @@ const Auth = () => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signup-password" className="text-gray-900">Password</Label>
+                      <Label htmlFor="signup-password" className="text-gray-900">{ta.passwordLabel}</Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
                           id="signup-password"
                           type={showPassword ? "text" : "password"}
-                          placeholder="Create a password"
+                          placeholder={ta.signUpPasswordPlaceholder}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           className="pl-10 pr-10 bg-black/50 border-purple-400/30 text-white placeholder:text-gray-400"
@@ -347,14 +350,14 @@ const Auth = () => {
                           {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </Button>
                       </div>
-                      <p className="text-xs text-gray-900">Min. 6 characters, must not be in known breaches</p>
+                      <p className="text-xs text-gray-900">{ta.passwordHint}</p>
                     </div>
                     <Button
                       type="submit"
                       disabled={loading}
                       className="w-full bg-gradient-to-r from-purple-500 to-red-500 hover:from-purple-400 hover:to-red-400 text-white"
                     >
-                      {loading ? "Creating account..." : "Sign Up"}
+                      {loading ? ta.creatingAccountButton : ta.signUpButton}
                     </Button>
                   </form>
                 </TabsContent>
