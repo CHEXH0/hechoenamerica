@@ -377,4 +377,37 @@ export interface Translations {
       gospel: string;
     };
   };
+  auth: {
+    backToHome: string;
+    welcomeTitle: string;
+    welcomeSubtitle: string;
+    signInTab: string;
+    signUpTab: string;
+    emailLabel: string;
+    emailPlaceholder: string;
+    passwordLabel: string;
+    signInPasswordPlaceholder: string;
+    signUpPasswordPlaceholder: string;
+    passwordHint: string;
+    signInButton: string;
+    signingInButton: string;
+    signUpButton: string;
+    creatingAccountButton: string;
+    forgotPassword: string;
+    sendingReset: string;
+    signInFailedTitle: string;
+    welcomeBackTitle: string;
+    welcomeBackDesc: string;
+    errorTitle: string;
+    errorDesc: string;
+    accountExistsTitle: string;
+    accountExistsDesc: string;
+    signUpFailedTitle: string;
+    checkEmailTitle: string;
+    checkEmailSignUpDesc: string;
+    checkEmailResetDesc: string;
+    emailRequiredTitle: string;
+    emailRequiredDesc: string;
+    resetFailedDesc: string;
+  };
 }
