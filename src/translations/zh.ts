@@ -3,29 +3,44 @@ import { Translations } from '@/types/translations';
 export const zh: Translations = {
   hero: {
     title: "美国制造",
-    subtitle: "音乐是良药"
+    subtitle: "音乐是良药",
   },
   featuredProducers: {
-    title: "特色制作人"
+    title: "特色制作人",
+    seeAll: "See All Producers →",
+    yourMusicTitle: "Your Music, Global Producers",
+    yourMusicSubtitle: "Connect with top producers worldwide who bring your vision to life.",
   },
   audioPlatforms: {
     title: "社区",
-    treats: "美食"
+    treats: "美食",
+    careers: "Careers",
+    instagram: "Instagram",
+    youtube: "YouTube",
   },
   services: {
     title: "我们的服务",
+    workWithDaws: "We work with industry-standard DAWs",
+    audios: {
+      title: "Audios",
+      description: "Quality audio production and enhancement",
+    },
     recording: {
       title: "录音",
-      description: "在我们最先进的录音室进行专业录音"
+      description: "在我们最先进的录音室进行专业录音",
     },
     mixing: {
       title: "混音",
-      description: "专业混音，平衡和增强您的音轨"
+      description: "专业混音，平衡和增强您的音轨",
     },
     mastering: {
       title: "母带处理",
-      description: "专业母带处理，为最终抛光和行业标准的声音"
-    }
+      description: "专业母带处理，为最终抛光和行业标准的声音",
+    },
+  },
+  cta: {
+    readyTitle: "Ready to Create Your Next Hit?",
+    getStarted: "Get Started",
   },
   contact: {
     title: "联系我们",
@@ -41,12 +56,70 @@ export const zh: Translations = {
     messageSentTitle: "消息已发送",
     messageSentDesc: "感谢您的消息。我们会尽快回复您！",
     errorTitle: "错误",
-    errorDesc: "发送消息时出现问题。请重试。"
+    errorDesc: "发送消息时出现问题。请重试。",
+  },
+  customerService: {
+    triggerTitle: "Customer Support",
+    panelTitle: "Customer Support",
+    panelDescription: "Have a question or need help? Send us a message and we'll respond shortly.",
+    nameLabel: "Name",
+    namePlaceholder: "Your name",
+    emailLabel: "Email",
+    emailPlaceholder: "your@email.com",
+    subjectLabel: "Subject",
+    subjectPlaceholder: "What do you need help with?",
+    messageLabel: "Message",
+    messagePlaceholder: "Describe your issue or question in detail...",
+    sendButton: "Send Message",
+    missingTitle: "Missing fields",
+    missingDesc: "Please fill in all fields before sending.",
+    sentTitle: "Message sent!",
+    sentDesc: "We'll get back to you as soon as possible.",
+    errorTitle: "Error",
+    errorDesc: "Failed to send message. Please try again.",
+    urgentTitle: "Need urgent help?",
+    emailUsTitle: "Email Us Directly",
+    callUsTitle: "Call Us",
+    availability: "Available Mon–Fri, 10 AM – 6 PM EST",
+  },
+  cookies: {
+    text: "We use essential cookies for login and site features. No tracking. See our",
+    privacyLink: "Privacy Policy",
+    accept: "Accept",
+    decline: "Decline",
+    close: "Close",
+  },
+  footer: {
+    studioName: "Hecho En America Studio",
+    tagline: "A secure production portal for producers to deliver high-quality media to artists.",
+    privacyPolicy: "Privacy Policy",
+    termsOfService: "Terms of Service",
+    rightsReserved: "All rights reserved.",
+  },
+  cart: {
+    title: "Shopping Cart",
+    empty: "Your cart is empty",
+    emptyDesc: "Add some treats to get started!",
+    total: "Total:",
+    checkout: "Checkout",
+    processing: "Processing...",
+    clearCart: "Clear Cart",
+    emptyToastTitle: "Cart is Empty",
+    emptyToastDesc: "Add items to your cart first.",
+    redirectingTitle: "Redirecting to Checkout",
+    redirectingDesc: "Opening checkout in a new tab...",
+    failedTitle: "Checkout Failed",
+    failedDesc: "Please try again.",
   },
   producer: {
     backToProducers: "返回制作人",
     about: "关于",
     notFound: "未找到制作人",
-    returnToHome: "返回首页"
-  }
+    returnToHome: "返回首页",
+  },
+  translateHelper: {
+    title: "Translate Page",
+    description: "Choose your language below. For pages still in English, use your browser's built-in translate feature.",
+    appLanguage: "App Language",
+  },
 };

@@ -3,29 +3,44 @@ import { Translations } from '@/types/translations';
 export const ru: Translations = {
   hero: {
     title: "СДЕЛАНО В АМЕРИКЕ",
-    subtitle: "МУЗЫКА - ЭТО ЛЕКАРСТВО"
+    subtitle: "Музыка - это Лекарство",
   },
   featuredProducers: {
-    title: "Рекомендуемые Продюсеры"
+    title: "Рекомендуемые Продюсеры",
+    seeAll: "See All Producers →",
+    yourMusicTitle: "Your Music, Global Producers",
+    yourMusicSubtitle: "Connect with top producers worldwide who bring your vision to life.",
   },
   audioPlatforms: {
     title: "Сообщество",
-    treats: "Лакомства"
+    treats: "Лакомства",
+    careers: "Careers",
+    instagram: "Instagram",
+    youtube: "YouTube",
   },
   services: {
     title: "Наши Услуги",
+    workWithDaws: "We work with industry-standard DAWs",
+    audios: {
+      title: "Audios",
+      description: "Quality audio production and enhancement",
+    },
     recording: {
       title: "Запись",
-      description: "Профессиональные сессии записи в нашей современной студии"
+      description: "Профессиональные сессии записи в нашей современной студии",
     },
     mixing: {
       title: "Сведение",
-      description: "Экспертное сведение для баланса и улучшения ваших треков"
+      description: "Экспертное сведение для баланса и улучшения ваших треков",
     },
     mastering: {
       title: "Мастеринг",
-      description: "Профессиональный мастеринг для финальной полировки и готового к индустрии звука"
-    }
+      description: "Профессиональный мастеринг для финальной полировки и готового к индустрии звука",
+    },
+  },
+  cta: {
+    readyTitle: "Ready to Create Your Next Hit?",
+    getStarted: "Get Started",
   },
   contact: {
     title: "Связаться с Нами",
@@ -41,12 +56,70 @@ export const ru: Translations = {
     messageSentTitle: "Сообщение отправлено",
     messageSentDesc: "Спасибо за ваше сообщение. Мы скоро с вами свяжемся!",
     errorTitle: "Ошибка",
-    errorDesc: "Возникла проблема при отправке вашего сообщения. Попробуйте снова."
+    errorDesc: "Возникла проблема при отправке вашего сообщения. Попробуйте снова.",
+  },
+  customerService: {
+    triggerTitle: "Customer Support",
+    panelTitle: "Customer Support",
+    panelDescription: "Have a question or need help? Send us a message and we'll respond shortly.",
+    nameLabel: "Name",
+    namePlaceholder: "Your name",
+    emailLabel: "Email",
+    emailPlaceholder: "your@email.com",
+    subjectLabel: "Subject",
+    subjectPlaceholder: "What do you need help with?",
+    messageLabel: "Message",
+    messagePlaceholder: "Describe your issue or question in detail...",
+    sendButton: "Send Message",
+    missingTitle: "Missing fields",
+    missingDesc: "Please fill in all fields before sending.",
+    sentTitle: "Message sent!",
+    sentDesc: "We'll get back to you as soon as possible.",
+    errorTitle: "Error",
+    errorDesc: "Failed to send message. Please try again.",
+    urgentTitle: "Need urgent help?",
+    emailUsTitle: "Email Us Directly",
+    callUsTitle: "Call Us",
+    availability: "Available Mon–Fri, 10 AM – 6 PM EST",
+  },
+  cookies: {
+    text: "We use essential cookies for login and site features. No tracking. See our",
+    privacyLink: "Privacy Policy",
+    accept: "Accept",
+    decline: "Decline",
+    close: "Close",
+  },
+  footer: {
+    studioName: "Hecho En America Studio",
+    tagline: "A secure production portal for producers to deliver high-quality media to artists.",
+    privacyPolicy: "Privacy Policy",
+    termsOfService: "Terms of Service",
+    rightsReserved: "All rights reserved.",
+  },
+  cart: {
+    title: "Shopping Cart",
+    empty: "Your cart is empty",
+    emptyDesc: "Add some treats to get started!",
+    total: "Total:",
+    checkout: "Checkout",
+    processing: "Processing...",
+    clearCart: "Clear Cart",
+    emptyToastTitle: "Cart is Empty",
+    emptyToastDesc: "Add items to your cart first.",
+    redirectingTitle: "Redirecting to Checkout",
+    redirectingDesc: "Opening checkout in a new tab...",
+    failedTitle: "Checkout Failed",
+    failedDesc: "Please try again.",
   },
   producer: {
     backToProducers: "Назад к Продюсерам",
     about: "О продюсере",
     notFound: "Продюсер не найден",
-    returnToHome: "Вернуться на главную"
-  }
+    returnToHome: "Вернуться на главную",
+  },
+  translateHelper: {
+    title: "Translate Page",
+    description: "Choose your language below. For pages still in English, use your browser's built-in translate feature.",
+    appLanguage: "App Language",
+  },
 };
