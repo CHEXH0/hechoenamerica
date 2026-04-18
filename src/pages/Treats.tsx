@@ -130,8 +130,8 @@ const Treats = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-pink-950 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-400 mb-4">Error Loading Products</h2>
-          <p className="text-gray-300">Please try again later</p>
+          <h2 className="text-2xl font-bold text-red-400 mb-4">{tt.errorLoading}</h2>
+          <p className="text-gray-300">{tt.errorLoadingDesc}</p>
         </div>
       </div>
     );
@@ -154,7 +154,7 @@ const Treats = () => {
 
       if (!currentAudio) {
         console.log('No audio found for product:', productId);
-        toast({ title: 'Audio Missing', description: 'No audio URL configured for this item.', variant: 'destructive' });
+        toast({ title: tt.audioMissingTitle, description: tt.audioMissingDesc, variant: 'destructive' });
         return;
       }
 
@@ -179,11 +179,11 @@ const Treats = () => {
         currentAudio.addEventListener('ended', () => setPlayingWaveform(null), { once: true });
       } catch (err) {
         console.error('Error playing audio:', err);
-        toast({ title: 'Audio Error', description: 'Could not play audio file.', variant: 'destructive' });
+        toast({ title: tt.audioErrorTitle, description: tt.audioErrorDesc, variant: 'destructive' });
       }
     } catch (error) {
       console.error('Unexpected audio error:', error);
-      toast({ title: 'Audio Error', description: 'Could not play audio file.', variant: 'destructive' });
+      toast({ title: tt.audioErrorTitle, description: tt.audioErrorDesc, variant: 'destructive' });
     }
   };
 
@@ -193,8 +193,8 @@ const Treats = () => {
     
     if (!email) {
       toast({
-        title: "Email Required",
-        description: "Please enter your email address.",
+        title: tt.emailRequiredTitle,
+        description: tt.emailRequiredDesc,
         variant: "destructive",
       });
       return;
@@ -202,8 +202,8 @@ const Treats = () => {
 
     if (!email.includes('@')) {
       toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address.",
+        title: tt.invalidEmailTitle,
+        description: tt.invalidEmailDesc,
         variant: "destructive",
       });
       return;
@@ -223,8 +223,8 @@ const Treats = () => {
       if (error) {
         if (error.code === '23505') { // Unique constraint violation
           toast({
-            title: "Already Subscribed",
-            description: "You're already subscribed to notifications for this product.",
+            title: tt.alreadySubscribedTitle,
+            description: tt.alreadySubscribedDesc,
             variant: "destructive",
           });
         } else {
@@ -232,16 +232,16 @@ const Treats = () => {
         }
       } else {
         toast({
-          title: "Subscribed! 🔔",
-          description: `You'll be notified about updates to ${productName}.`,
+          title: tt.subscribedTitle,
+          description: tt.subscribedDesc.replace("{product}", productName),
         });
         setNotificationEmails(prev => ({ ...prev, [productId]: '' }));
       }
     } catch (error) {
       console.error('Error subscribing to notifications:', error);
       toast({
-        title: "Error",
-        description: "Failed to subscribe. Please try again.",
+        title: tt.notifyErrorTitle,
+        description: tt.notifyErrorDesc,
         variant: "destructive",
       });
     } finally {
@@ -252,8 +252,8 @@ const Treats = () => {
   const handleAddToCart = (product: Product) => {
     if (!user) {
       toast({
-        title: "Login Required",
-        description: "Please log in to add items to your cart.",
+        title: tt.loginRequiredTitle,
+        description: tt.loginRequiredCartDesc,
         variant: "destructive",
       });
       return;
@@ -262,8 +262,8 @@ const Treats = () => {
     // Don't add candies to cart since they're notify-only
     if (product.category === 'candies') {
       toast({
-        title: "Coming Soon",
-        description: "This treat will be available soon. Use 'Notify Me' to get updates!",
+        title: tt.comingSoonTitle,
+        description: tt.comingSoonDesc,
         variant: "destructive",
       });
       return;
@@ -272,8 +272,8 @@ const Treats = () => {
     // Prevent adding already purchased products
     if (isProductPurchased(product.id)) {
       toast({
-        title: "Already Purchased",
-        description: "You already own this product. Check your Purchases page.",
+        title: tt.alreadyPurchasedTitle,
+        description: tt.alreadyPurchasedDesc,
         variant: "destructive",
       });
       return;
@@ -282,8 +282,8 @@ const Treats = () => {
     // Prevent adding duplicates to cart
     if (isProductInCart(product.id)) {
       toast({
-        title: "Already in Cart",
-        description: `${product.name} is already in your cart.`,
+        title: tt.alreadyInCartTitle,
+        description: tt.alreadyInCartDesc.replace("{product}", product.name),
         variant: "destructive",
       });
       return;
@@ -291,16 +291,16 @@ const Treats = () => {
 
     addItem(product);
     toast({
-      title: "Added to Cart! 🛒",
-      description: `${product.name} has been added to your cart.`,
+      title: tt.addedToCartTitle,
+      description: tt.addedToCartDesc.replace("{product}", product.name),
     });
   };
 
   const handleBuyNow = async (product: Product) => {
     if (!user) {
       toast({
-        title: "Login Required",
-        description: "Please log in to make a purchase.",
+        title: tt.loginRequiredTitle,
+        description: tt.loginRequiredBuyDesc,
         variant: "destructive",
       });
       return;
@@ -309,8 +309,8 @@ const Treats = () => {
     // Don't allow buying candies
     if (product.category === 'candies') {
       toast({
-        title: "Coming Soon",
-        description: "This treat will be available soon. Use 'Notify Me' to get updates!",
+        title: tt.comingSoonTitle,
+        description: tt.comingSoonDesc,
         variant: "destructive",
       });
       return;
@@ -319,8 +319,8 @@ const Treats = () => {
     // Prevent repurchasing
     if (isProductPurchased(product.id)) {
       toast({
-        title: "Already Purchased",
-        description: "You already own this product. Check your Purchases page.",
+        title: tt.alreadyPurchasedTitle,
+        description: tt.alreadyPurchasedDesc,
         variant: "destructive",
       });
       return;
@@ -343,8 +343,8 @@ const Treats = () => {
       if (data?.url) {
         window.open(data.url, '_blank');
         toast({
-          title: "Redirecting to Checkout",
-          description: "Opening checkout in a new tab...",
+          title: tt.redirectingTitle,
+          description: tt.redirectingDesc,
         });
       } else {
         throw new Error('No checkout URL received');
@@ -352,8 +352,8 @@ const Treats = () => {
     } catch (error) {
       console.error('Buy now error:', error);
       toast({
-        title: "Purchase Failed",
-        description: error instanceof Error ? error.message : "Please try again or sync products first.",
+        title: tt.purchaseFailedTitle,
+        description: error instanceof Error ? error.message : tt.purchaseFailedDesc,
         variant: "destructive",
       });
     }
@@ -362,8 +362,8 @@ const Treats = () => {
   const handleSyncToStripe = async () => {
     if (!user) {
       toast({
-        title: "Authentication Required",
-        description: "Please log in to sync products",
+        title: tt.authRequiredSyncTitle,
+        description: tt.authRequiredSyncDesc,
         variant: "destructive",
       });
       return;
@@ -383,14 +383,14 @@ const Treats = () => {
       const errors = results.filter((r: any) => r.status === 'error').length;
 
       toast({
-        title: "Sync Completed! ✅",
-        description: `${successful} products synced successfully${errors > 0 ? `, ${errors} errors` : ''}.`,
+        title: tt.syncCompletedTitle,
+        description: `${tt.syncCompletedDesc.replace("{count}", String(successful))}${errors > 0 ? `, ${tt.syncErrorsSuffix.replace("{count}", String(errors))}` : ''}.`,
       });
     } catch (error) {
       console.error('Error syncing products:', error);
       toast({
-        title: "Sync Failed",
-        description: "Failed to sync products. Please try again.",
+        title: tt.syncFailedTitle,
+        description: tt.syncFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -458,7 +458,7 @@ const Treats = () => {
               whileTap={{
                 scale: 0.97
               }}
-              title={playingWaveform === product.id ? 'Stop audio' : 'Play preview'}
+              title={playingWaveform === product.id ? tt.stopAudio : tt.playPreview}
             >
               {playingWaveform === product.id ? 
                 <motion.div 
@@ -524,8 +524,8 @@ const Treats = () => {
                 >
                   <Disc3 className="h-8 w-8 text-pink-400" />
                 </motion.div>
-                <p className="text-gray-300 text-sm">VST Instrument Plugin</p>
-                <p className="text-pink-400 text-xs mt-1">No audio preview - Full instrument suite</p>
+                <p className="text-gray-300 text-sm">{tt.vstInstrumentLabel}</p>
+                <p className="text-pink-400 text-xs mt-1">{tt.vstNoPreview}</p>
               </div>
             </motion.div>
           }
@@ -595,7 +595,7 @@ const Treats = () => {
               >
                 <div className="flex items-center gap-2 text-green-400 mb-1">
                   <CheckCircle className="h-5 w-5" />
-                  <span className="font-semibold text-sm">Already Purchased</span>
+                  <span className="font-semibold text-sm">{tt.alreadyPurchased}</span>
                 </div>
                 <Button 
                   variant="outline" 
@@ -603,7 +603,7 @@ const Treats = () => {
                   onClick={() => navigate('/purchases')}
                   className="border-green-400/50 text-green-400 hover:bg-green-500/20 hover:border-green-400 w-full"
                 >
-                  Go to My Purchases
+                  {tt.goToPurchases}
                 </Button>
               </motion.div>
             )}
@@ -621,7 +621,7 @@ const Treats = () => {
                   className="border-purple-400/50 text-purple-700 hover:bg-purple-700/20 hover:border-purple-400 hover:text-gray-300 w-full"
                 >
                   <Download className="h-4 w-4 mr-2" />
-                  Buy Now
+                  {tt.buyNow}
                 </Button>
                 <Button 
                   size="sm" 
@@ -630,7 +630,7 @@ const Treats = () => {
                   className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white border-0 w-full disabled:opacity-50"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  {isProductInCart(product.id) ? 'Already in Cart' : 'Add to Cart'}
+                  {isProductInCart(product.id) ? tt.alreadyInCart : tt.addToCart}
                 </Button>
               </motion.div>
             }
@@ -643,7 +643,7 @@ const Treats = () => {
               >
                 <div className="flex gap-2">
                   <Input 
-                    placeholder="Enter email for updates" 
+                    placeholder={tt.notifyEmailPlaceholder} 
                     value={notificationEmails[product.id] || ''} 
                     onChange={(e) => setNotificationEmails(prev => ({
                       ...prev,
@@ -671,7 +671,7 @@ const Treats = () => {
                       /> : 
                       <>
                         <Bell className="h-4 w-4 mr-1" />
-                        Notify Me
+                        {tt.notifyMe}
                       </>
                     }
                   </Button>
@@ -743,7 +743,7 @@ const Treats = () => {
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
           </motion.div>
-          Back to Home
+          {tt.backToHome}
         </Link>
 
         {/* Sync to Stripe button and Cart button for authenticated users */}
@@ -772,7 +772,7 @@ const Treats = () => {
                 ) : (
                   <RefreshCw className="h-4 w-4 mr-2" />
                 )}
-                {syncingProducts ? 'Syncing...' : 'Sync Products to Stripe'}
+                {syncingProducts ? tt.syncing : tt.syncProducts}
               </Button>
             )}
 
@@ -783,7 +783,7 @@ const Treats = () => {
               className=" bg-pink-500/50 border-pink-20 text-gray-200 relative border-pink-400/50 hover:border-pink-400/50 hover:text-pink-700"
             >
               <ShoppingCart className="h-4 w-4 mr-2" />
-              Cart
+              {tt.cart}
               {getItemCount() > 0 && (
                 <Badge className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs px-1.5 py-0.5">
                   {getItemCount()}
@@ -800,7 +800,7 @@ const Treats = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4, delay: 0.1 }}
           >
-            TREATS
+            {tt.pageTitle}
           </motion.h1>
           <motion.p 
             className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed"
@@ -808,8 +808,7 @@ const Treats = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            Discover our exclusive collection of audio samples, VST plugins, and more treats. 
-            Each item is crafted with passion and precision to fuel your creative journey.
+            {tt.pageSubtitle}
           </motion.p>
         </div>
 
@@ -827,8 +826,8 @@ const Treats = () => {
                   className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-red-700 text-gray-300 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
                 >
                   <Candy className="h-4 w-4 sm:h-5 sm:w-5" />
-                  <span className="hidden sm:inline">Sweet Treats</span>
-                  <span className="sm:hidden">Treats</span>
+                  <span className="hidden sm:inline">{tt.tabSweetTreatsLong}</span>
+                  <span className="sm:hidden">{tt.tabSweetTreatsShort}</span>
                 </TabsTrigger>
               )}
               <TabsTrigger 
@@ -836,16 +835,16 @@ const Treats = () => {
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-red-500/20 data-[state=active]:text-purple-700 text-gray-300 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
               >
                 <Disc3 className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="hidden sm:inline">VST Plugins</span>
-                <span className="sm:hidden">VSTs</span>
+                <span className="hidden sm:inline">{tt.tabVstsLong}</span>
+                <span className="sm:hidden">{tt.tabVstsShort}</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="samples" 
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-pink-700 text-gray-300 transition-all duration-300 flex-col sm:flex-row gap-1 sm:gap-2"
               >
                 <FileAudio className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="hidden sm:inline">Audio Samples</span>
-                <span className="sm:hidden">Samples</span>
+                <span className="hidden sm:inline">{tt.tabSamplesLong}</span>
+                <span className="sm:hidden">{tt.tabSamplesShort}</span>
               </TabsTrigger>
             </TabsList>
 
@@ -865,12 +864,12 @@ const Treats = () => {
                 }}
               >
                 <h2 className="text-4xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent mb-4">
-                  Audio Samples
+                  {tt.samplesTitle}
                 </h2>
-                <p className="text-gray-300 text-lg">High-quality samples for your next hit production</p>
+                <p className="text-gray-300 text-lg">{tt.samplesSubtitle}</p>
                 <div className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-400/20">
                   <Info className="h-4 w-4 text-purple-400 flex-shrink-0" />
-                  <span className="text-purple-300 text-sm">All audio samples are original HechoEnAmerica creations</span>
+                  <span className="text-purple-300 text-sm">{tt.samplesOriginalNote}</span>
                 </div>
               </motion.div>
               <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 md:gap-8 px-4 sm:px-0">
@@ -894,16 +893,16 @@ const Treats = () => {
                 }}
               >
                 <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-red-400 bg-clip-text text-transparent mb-4">
-                  VST Plugins
+                  {tt.vstsTitle}
                 </h2>
-                <p className="text-gray-300 text-lg">Professional VST3 and VST instruments for your DAW</p>
+                <p className="text-gray-300 text-lg">{tt.vstsSubtitle}</p>
                 <div className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-400/20">
                   <Info className="h-4 w-4 text-purple-400 flex-shrink-0" />
-                  <span className="text-purple-300 text-sm">All VST plugins are original HechoEnAmerica creations</span>
+                  <span className="text-purple-300 text-sm">{tt.vstsOriginalNote}</span>
                 </div>
                 {products.vsts.length > vstItemsPerPage && (
                   <p className="text-gray-400 text-sm mt-2">
-                    Showing {((vstCurrentPage - 1) * vstItemsPerPage) + 1}-{Math.min(vstCurrentPage * vstItemsPerPage, products.vsts.length)} of {products.vsts.length} plugins
+                    {tt.vstsShowing} {((vstCurrentPage - 1) * vstItemsPerPage) + 1}-{Math.min(vstCurrentPage * vstItemsPerPage, products.vsts.length)} {tt.vstsOf} {products.vsts.length} {tt.vstsPlugins}
                   </p>
                 )}
               </motion.div>
@@ -976,9 +975,9 @@ const Treats = () => {
                 }}
               >
                 <h2 className="text-4xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent mb-4">
-                  Sweet Treats
+                  {tt.sweetTreatsTitle}
                 </h2>
-                <p className="text-gray-300 text-lg">Artisanal candies inspired by Latin American flavors</p>
+                <p className="text-gray-300 text-lg">{tt.sweetTreatsSubtitle}</p>
               </motion.div>
               
               <div className="max-w-2xl mx-auto text-center">
@@ -992,7 +991,7 @@ const Treats = () => {
                     <img src="/laptop-uploads/Gomas_Chamoy.png" alt="Gomas Chamoy" className="h-40 w-40 object-contain drop-shadow-2xl" />
                   </div>
                   <p className="text-gray-300 text-lg max-w-lg mx-auto">
-                    Custom chamoy gummy candy made to order! Place your request and we'll craft it for you.
+                    {tt.sweetTreatsDesc}
                   </p>
                   <Link to="/gomas-chamoy">
                     <Button
@@ -1000,7 +999,7 @@ const Treats = () => {
                       className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white border-0 px-8 mt-4"
                     >
                       <Candy className="h-5 w-5 mr-2" />
-                      Order Gomas Chamoy
+                      {tt.orderGomas}
                     </Button>
                   </Link>
                 </motion.div>
@@ -1024,11 +1023,10 @@ const Treats = () => {
                 </div>
               </div>
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-800 to-purple-500 bg-clip-text text-transparent mb-4">
-                Are You a Producer?
+                {tt.areYouProducer}
               </CardTitle>
               <CardDescription className="text-gray-900 text-lg leading-relaxed">
-                Join our network of talented music producers. Work with artists from around the world 
-                and be part of the Hecho En America family.
+                {tt.producerNetworkDesc}
               </CardDescription>
             </CardHeader>
             <CardFooter className="justify-center pb-8">
@@ -1038,7 +1036,7 @@ const Treats = () => {
                     size="lg" 
                     className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white border-0 px-8"
                   >
-                    Apply to Join
+                    {tt.applyToJoin}
                   </Button>
                 </Link>
               </motion.div>
