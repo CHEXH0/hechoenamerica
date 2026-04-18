@@ -15,6 +15,7 @@ import { Plus, ChevronDown, HardDrive, Link, X, Loader2, Info, Check, Circle } f
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Progress } from "@/components/ui/progress";
 import { useSongPricing, DEFAULT_PRICING } from "@/hooks/useSongPricing";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 // Google Drive link type
 interface DriveLink {
@@ -22,16 +23,18 @@ interface DriveLink {
   name: string;
 }
 
-const genreCategories = [
-{ value: "hip-hop", label: "Hip Hop / Trap / Rap" },
-{ value: "rnb", label: "R&B / Soul" },
-{ value: "reggae", label: "Reggae / Dancehall" },
-{ value: "latin", label: "Latin / Reggaeton" },
-{ value: "electronic", label: "Electronic / EDM" },
-{ value: "pop", label: "Pop / Alternative" },
-{ value: "rock", label: "Rock / Indie" },
-{ value: "world", label: "World / Indigenous / Medicina" },
-{ value: "other", label: "Other / Mixed" }];
+const GENRE_KEYS = [
+  "hipHop",
+  "rnb",
+  "reggae",
+  "latin",
+  "electronic",
+  "pop",
+  "rock",
+  "world",
+  "other",
+] as const;
+const GENRE_VALUES = ["hip-hop", "rnb", "reggae", "latin", "electronic", "pop", "rock", "world", "other"] as const;
 
 // Fallback constants (used if DB pricing not loaded yet)
 const FALLBACK_TIERS = DEFAULT_PRICING.tiers;
@@ -44,8 +47,12 @@ const RESET_HOURS = 5;
 
 const GenerateSong = () => {
   const { data: pricingConfig } = useSongPricing();
-  
-  // Derive pricing from DB config (or fallback)
+  const { t } = useTranslation();
+  const tg = t.generateSong;
+  const genreCategories = useMemo(
+    () => GENRE_VALUES.map((value, i) => ({ value, label: tg.genres[GENRE_KEYS[i]] })),
+    [tg]
+  );
   const tiers = pricingConfig?.tiers ?? FALLBACK_TIERS;
   const addOnPricing = pricingConfig?.addOns ?? FALLBACK_ADD_ONS;
   const bitDepthOptions = pricingConfig?.bitDepthOptions ?? FALLBACK_BIT_DEPTH;
@@ -190,18 +197,18 @@ const GenerateSong = () => {
 
       localStorage.removeItem("pendingSongRequest");
       toast({
-        title: "Welcome back!",
-        description: "You can now submit your song request."
+        title: tg.welcomeBackTitle,
+        description: tg.welcomeBackDesc,
       });
     }
-  }, [user, toast]);
+  }, [user, toast, tg]);
 
   // Handle adding Google Drive links
   const handleAddDriveLink = () => {
     if (!newDriveLink.trim()) {
       toast({
-        title: "No link provided",
-        description: "Please enter a Google Drive, Dropbox, or other file sharing link",
+        title: tg.noLinkTitle,
+        description: tg.noLinkDesc,
         variant: "destructive"
       });
       return;
@@ -212,8 +219,8 @@ const GenerateSong = () => {
       new URL(newDriveLink);
     } catch {
       toast({
-        title: "Invalid URL",
-        description: "Please enter a valid URL",
+        title: tg.invalidUrlTitle,
+        description: tg.invalidUrlDesc,
         variant: "destructive"
       });
       return;
@@ -236,8 +243,8 @@ const GenerateSong = () => {
     setShowDriveLinkInput(false);
 
     toast({
-      title: "Link added",
-      description: "Your file link has been added to the submission"
+      title: tg.linkAddedTitle,
+      description: tg.linkAddedDesc
     });
   };
 
@@ -248,8 +255,8 @@ const GenerateSong = () => {
   const handleGenerateAI = async () => {
     if (!idea) {
       toast({
-        title: "Missing information",
-        description: "Please share your idea",
+        title: tg.missingInfoTitle,
+        description: tg.missingInfoDesc,
         variant: "destructive"
       });
       return;
@@ -265,8 +272,8 @@ const GenerateSong = () => {
         })
       );
       toast({
-        title: "Authentication required",
-        description: "Please sign in to generate AI songs."
+        title: tg.authRequiredTitle,
+        description: tg.authRequiredAiDesc
       });
       navigate("/auth");
       return;
@@ -278,8 +285,8 @@ const GenerateSong = () => {
       Math.ceil((nextResetTime.getTime() - Date.now()) / (1000 * 60 * 60)) :
       RESET_HOURS;
       toast({
-        title: "Daily limit reached",
-        description: `You've used all ${MAX_FREE_AI_SONGS} free AI generations. Try again in ${timeUntilReset} hours or choose a paid tier.`,
+        title: tg.dailyLimitTitle,
+        description: tg.dailyLimitDesc,
         variant: "destructive",
         duration: 8000
       });
@@ -288,7 +295,7 @@ const GenerateSong = () => {
 
     setIsGeneratingAI(true);
     setAiProgressPercent(0);
-    setAiProgress("Connecting to Google Lyria 2...");
+    setAiProgress(tg.connectingAi);
 
     // Simulate progress while waiting for the API
     const progressInterval = setInterval(() => {
@@ -304,7 +311,7 @@ const GenerateSong = () => {
       "";
       const fullPrompt = genreText ? `${genreText} style: ${idea}` : idea;
 
-      setAiProgress("Generating your AI music...");
+      setAiProgress(tg.generatingAi);
 
       const { data, error } = await supabase.functions.invoke("generate-music", {
         body: { prompt: fullPrompt }
@@ -318,7 +325,7 @@ const GenerateSong = () => {
       if (data?.error) {
         if (data.errorType === "CONTENT_FILTER") {
           toast({
-            title: "Prompt needs adjustment",
+            title: tg.promptAdjustTitle,
             description: data.error,
             variant: "destructive",
             duration: 8000
@@ -360,8 +367,8 @@ const GenerateSong = () => {
         setAiProgressPercent(100);
         setAiProgress("");
         toast({
-          title: "🎵 Music Generated!",
-          description: `Your AI-generated track is ready. ${aiGenerationsRemaining !== null ? `${aiGenerationsRemaining - 1} generations remaining today.` : ""}`
+          title: tg.musicGeneratedTitle,
+          description: `${tg.musicGeneratedDesc} ${aiGenerationsRemaining !== null ? `${aiGenerationsRemaining - 1} ${tg.generationsRemaining}` : ""}`
         });
       } else {
         throw new Error("No audio data received from AI");
@@ -370,11 +377,11 @@ const GenerateSong = () => {
       console.error("AI generation failed:", aiError);
       setAiProgress("");
       toast({
-        title: "AI Generation Failed",
+        title: tg.aiFailedTitle,
         description:
         aiError instanceof Error ?
         aiError.message :
-        "Please try again with a more abstract description of the music you want.",
+        tg.aiFailedDesc,
         variant: "destructive"
       });
     } finally {
@@ -393,8 +400,8 @@ const GenerateSong = () => {
 
     if (!idea) {
       toast({
-        title: "Missing information",
-        description: "Please share your idea",
+        title: tg.missingInfoTitle,
+        description: tg.missingInfoDesc,
         variant: "destructive"
       });
       return;
@@ -405,8 +412,8 @@ const GenerateSong = () => {
     if (!hasAnyAddOn && !wantsNoneOfAbove) {
       setIsOptionsOpen(true);
       toast({
-        title: "Production Settings required",
-        description: "Please select your production preferences or choose 'None of the above'.",
+        title: tg.productionRequiredTitle,
+        description: tg.productionRequiredDesc,
         variant: "destructive"
       });
       return;
@@ -423,9 +430,8 @@ const GenerateSong = () => {
         })
       );
       toast({
-        title: "Authentication required",
-        description:
-        "Please sign in to submit your song request. Note: You'll need to re-upload any files after signing in."
+        title: tg.authRequiredTitle,
+        description: tg.authRequiredPaidDesc
       });
       navigate("/auth");
       return;
@@ -506,8 +512,8 @@ const GenerateSong = () => {
     } catch (error) {
       console.error("Submission error:", error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to submit. Please try again.",
+        title: tg.errorTitle,
+        description: error instanceof Error ? error.message : tg.errorDesc,
         variant: "destructive"
       });
     } finally {
@@ -594,11 +600,11 @@ const GenerateSong = () => {
 
           </div>
 
-          <h1 className="text-5xl md:text-6xl font-bold heading-gradient mb-2">Create Your Sound</h1>
+          <h1 className="text-5xl md:text-6xl font-bold heading-gradient mb-2">{tg.pageTitle}</h1>
 
           <div className="animate-color-shift inline-block">
             <p className="text-2xl font-medium text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-200 to-purple-300">
-              LA MUSIC ES MEDICINE
+              {tg.pageSubtitle}
             </p>
           </div>
         </div>
@@ -606,7 +612,7 @@ const GenerateSong = () => {
         <motion.div layout className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl mb-0">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4 relative">
-              <Label className="text-white text-lg font-semibold">Select Price</Label>
+              <Label className="text-white text-lg font-semibold">{tg.selectPrice}</Label>
               <div className="relative">
                 <Slider
                   value={sliderValue}
@@ -658,10 +664,10 @@ const GenerateSong = () => {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-white text-lg font-semibold">Genre / Style</Label>
+              <Label className="text-white text-lg font-semibold">{tg.genreLabel}</Label>
               <Select value={selectedGenre} onValueChange={setSelectedGenre}>
                 <SelectTrigger className="bg-white/20 border-white/30 text-white">
-                  <SelectValue placeholder="Select your preferred genre" />
+                  <SelectValue placeholder={tg.genrePlaceholder} />
                 </SelectTrigger>
                 <SelectContent>
                   {genreCategories.map((genre) =>
@@ -673,14 +679,14 @@ const GenerateSong = () => {
               </Select>
               <p className="text-white/60 text-xs">
                 {currentTier.price === 0 ?
-                "This style will guide the AI music generation" :
-                "We'll match you with a producer who specializes in this style"}
+                tg.genreHelpAi :
+                tg.genreHelpPaid}
               </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="idea" className="text-white text-lg font-semibold">
-                Song Idea
+                {tg.songIdeaLabel}
               </Label>
               <Textarea
                 id="idea"
@@ -688,8 +694,8 @@ const GenerateSong = () => {
                 onChange={(e) => setIdea(e.target.value)}
                 placeholder={
                 currentTier.price > 0 ?
-                "Better than AI. Made by human hehe.." :
-                "Feel free to use AI audios for your liking"
+                tg.songIdeaPlaceholderPaid :
+                tg.songIdeaPlaceholderAi
                 }
                 className="bg-white/20 border-white/30 text-white placeholder:text-white/50 min-h-[120px]"
                 required />
@@ -697,25 +703,23 @@ const GenerateSong = () => {
               {currentTier.price === 0 &&
               <>
                   <p className="text-white/70 text-xs leading-relaxed">
-                    💡 <span className="font-medium">Tip:</span> Be descriptive! Instead of "reggae music", try "upbeat
-                    reggae with offbeat guitar skanks, deep dub bass, one-drop drums, and melodica at 90 BPM". Include
-                    mood, instruments, and tempo for best results.
+                    {tg.aiTip}
                   </p>
                   {/* Prompt requirements checklist for AI tier */}
                   <div className="bg-white/10 rounded-lg p-3 space-y-2 mt-2">
-                    <p className="text-white/80 text-xs font-semibold">Prompt Requirements:</p>
+                    <p className="text-white/80 text-xs font-semibold">{tg.promptRequirements}</p>
                     <div className="space-y-1.5">
                       {[
-                    { label: "Genre selected", met: !!selectedGenre },
-                    { label: "At least 20 characters describing your idea", met: idea.trim().length >= 20 },
+                    { label: tg.reqGenreSelected, met: !!selectedGenre },
+                    { label: tg.reqMinChars, met: idea.trim().length >= 20 },
                     {
-                      label: "Mention mood or energy (e.g. chill, energetic, dark)",
+                      label: tg.reqMood,
                       met: /\b(chill|energetic|dark|happy|sad|upbeat|mellow|aggressive|dreamy|epic|calm|relaxed|intense|groovy|funky|smooth|powerful|soft|hard|bright|warm|cold|melancholic|euphoric|nostalgic|ambient|lively|moody|hyped|vibrant|peaceful|mysterious|haunting|playful|dramatic|gentle|fierce|raw|gritty|ethereal|atmospheric|tropical|bouncy|heavy|light|deep|airy|crisp|punchy|dirty|clean)\b/i.test(
                         idea
                       )
                     },
                     {
-                      label: "Mention at least one instrument or sound",
+                      label: tg.reqInstrument,
                       met: /\b(guitars?|bass|drums?|pianos?|synths?|synthesizers?|808s?|hi-?hats?|kicks?|snares?|organs?|flutes?|violins?|trumpets?|saxs?|saxophone|percussions?|keys|pads?|arps?|strings|brass|vocals?|beats?|melod(y|ies)|chords?|loops?|samples?|claps?|cymbals?|bells?|harps?|cellos?|horns?|timbales?|congas?|bongos?|melodica|marimbas?|ukuleles?|banjos?|whistles?|risers?|drops?|sub-?bass|plucks?|stabs?|fx|effects?|noise|distortion|reverb|delay|echo|filter)\b/i.test(
                         idea
                       )
@@ -738,11 +742,11 @@ const GenerateSong = () => {
               <div className="space-y-4 mt-4">
                   {/* Paid tier requirements */}
                   <div className="bg-white/10 rounded-lg p-3 space-y-2">
-                    <p className="text-white/80 text-xs font-semibold">Submission Requirements:</p>
+                    <p className="text-white/80 text-xs font-semibold">{tg.submissionRequirements}</p>
                     <div className="space-y-1.5">
                       {[
-                    { label: "Genre selected", met: !!selectedGenre },
-                    { label: "Describe your song idea (at least 20 characters)", met: idea.trim().length >= 20 }].
+                    { label: tg.reqGenreSelected, met: !!selectedGenre },
+                    { label: tg.reqDescribeIdea, met: idea.trim().length >= 20 }].
                     map((req, i) =>
                     <div key={i} className="flex items-center gap-2">
                           {req.met ?
@@ -759,10 +763,10 @@ const GenerateSong = () => {
                   <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-white/20 rounded-xl p-4">
                     <div className="flex items-center gap-3 mb-2">
                       <HardDrive className="w-5 h-5 text-white" />
-                      <span className="text-white font-semibold">Share Your Files</span>
+                      <span className="text-white font-semibold">{tg.shareFilesTitle}</span>
                     </div>
                     <p className="text-white/70 text-sm">
-                      Share references, stems, or inspiration via Google Drive, Dropbox, or WeTransfer links.
+                      {tg.shareFilesDesc}
                     </p>
                   </div>
 
@@ -773,7 +777,7 @@ const GenerateSong = () => {
                   className="w-full bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white">
 
                     <HardDrive className="w-4 h-4 mr-2" />
-                    Add Drive / Cloud Link
+                    {tg.addDriveLink}
                   </Button>
 
                   {/* Drive link input */}
@@ -786,7 +790,7 @@ const GenerateSong = () => {
                     className="bg-white/10 rounded-lg p-4 space-y-3">
 
                         <Label className="text-white text-sm font-medium">
-                          Paste Google Drive, Dropbox, or WeTransfer link
+                          {tg.pasteDriveLink}
                         </Label>
                         <div className="flex gap-2">
                           <input
@@ -802,7 +806,7 @@ const GenerateSong = () => {
                         size="sm"
                         className="bg-green-500 hover:bg-green-600 text-white">
 
-                            Add
+                            {tg.add}
                           </Button>
                           <Button
                         type="button"
@@ -818,7 +822,7 @@ const GenerateSong = () => {
                           </Button>
                         </div>
                         <p className="text-white/50 text-xs">
-                          💡 Tip: Make sure your link is set to "Anyone with the link can view"
+                          {tg.driveTip}
                         </p>
                       </motion.div>
                   }
@@ -827,7 +831,7 @@ const GenerateSong = () => {
                   {/* Drive links list */}
                   {driveLinks.length > 0 &&
                 <div className="bg-white/10 rounded-lg p-4 space-y-3">
-                      <span className="text-white font-medium text-sm">Attached Links ({driveLinks.length})</span>
+                      <span className="text-white font-medium text-sm">{tg.attachedLinks} ({driveLinks.length})</span>
                       <div className="space-y-2">
                         {driveLinks.map((link, index) =>
                     <div
@@ -865,7 +869,7 @@ const GenerateSong = () => {
                   variant="ghost"
                   className="w-full justify-between bg-white/10 hover:bg-white/20 text-white p-4 rounded-lg">
 
-                    <span className="text-lg font-semibold"> Production Settings (Required)</span>
+                    <span className="text-lg font-semibold"> {tg.productionSettings}</span>
                     <ChevronDown className={`h-5 w-5 transition-transform ${isOptionsOpen ? "rotate-180" : ""}`} />
                   </Button>
                 </CollapsibleTrigger>
@@ -884,7 +888,7 @@ const GenerateSong = () => {
                         }}
                         className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary" />
                         <label htmlFor="stems" className="text-white text-sm font-medium leading-none cursor-pointer">
-                          Provide recorded stems
+                          {tg.provideStems}
                         </label>
                         <HoverCard>
                           <HoverCardTrigger asChild>
@@ -914,7 +918,7 @@ const GenerateSong = () => {
                         }}
                         className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary" />
                         <label htmlFor="analog" className="text-white text-sm font-medium leading-none cursor-pointer">
-                          Use analog equipment
+                          {tg.useAnalog}
                         </label>
                         <HoverCard>
                           <HoverCardTrigger asChild>
@@ -946,7 +950,7 @@ const GenerateSong = () => {
                         }}
                         className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary" />
                         <label htmlFor="mixing" className="text-white text-sm font-medium leading-none cursor-pointer">
-                          Include mixing service
+                          {tg.includeMixing}
                         </label>
                         <HoverCard>
                           <HoverCardTrigger asChild>
@@ -976,7 +980,7 @@ const GenerateSong = () => {
                         }}
                         className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary" />
                         <label htmlFor="mastering" className="text-white text-sm font-medium leading-none cursor-pointer">
-                          Include mastering service
+                          {tg.includeMastering}
                         </label>
                         <HoverCard>
                           <HoverCardTrigger asChild>
@@ -994,7 +998,7 @@ const GenerateSong = () => {
                       </span>
                     </div>
                     {!wantsMixing && !wantsNoneOfAbove && (
-                      <p className="text-white/40 text-xs ml-8">Mastering requires mixing service to be selected</p>
+                      <p className="text-white/40 text-xs ml-8">{tg.masteringRequiresMixing}</p>
                     )}
 
                     <div className="border-t border-white/10 my-2" />
@@ -1020,7 +1024,7 @@ const GenerateSong = () => {
                         htmlFor="noneOfAbove"
                         className="text-white text-sm font-medium leading-none cursor-pointer">
 
-                          None of the above
+                          {tg.noneOfAbove}
                         </label>
                         <HoverCard>
                           <HoverCardTrigger asChild>
@@ -1030,9 +1034,7 @@ const GenerateSong = () => {
                           </HoverCardTrigger>
                           <HoverCardContent className="w-72 text-sm">
                             <p className="text-muted-foreground">
-                              By selecting this, you agree to receive a raw production only. Your deliverable will be an
-                              unprocessed track without professional mixing, mastering, or individually recorded stems.
-                              The final result may sound rough or unpolished compared to a fully produced track.
+                              {tg.noneOfAboveInfo}
                             </p>
                           </HoverCardContent>
                         </HoverCard>
@@ -1042,10 +1044,7 @@ const GenerateSong = () => {
 
                     {wantsNoneOfAbove &&
                   <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-yellow-200 text-xs leading-relaxed">
-                        <strong>What to expect:</strong> You will receive a raw, unprocessed production file. No mixing
-                        (level balancing, EQ, effects), no mastering (loudness optimization, final polish), and no
-                        individually recorded stems will be included. The track may not be ready for commercial release
-                        without additional post-production.
+                        {tg.noneOfAboveWarning}
                       </div>
                   }
 
@@ -1055,7 +1054,7 @@ const GenerateSong = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Label htmlFor="revisions" className="text-white text-sm font-medium">
-                            Number of revisions
+                            {tg.numberOfRevisions}
                           </Label>
                           <HoverCard>
                             <HoverCardTrigger asChild>
@@ -1070,7 +1069,7 @@ const GenerateSong = () => {
                         </div>
                         <span className="text-white/80 text-sm font-medium">
                           +${numberOfRevisions * addOnPricing.revision.prices[tierIndex]} ($
-                          {addOnPricing.revision.prices[tierIndex]}/each)
+                          {addOnPricing.revision.prices[tierIndex]}/{tg.revisionsEach})
                         </span>
                       </div>
                       <Slider
@@ -1089,18 +1088,18 @@ const GenerateSong = () => {
                         <span>4</span>
                         <span>5</span>
                       </div>
-                      <p className="text-white/40 text-xs mt-1">Note: You will receive a raw file. No mixing, mastering, or recorded stems included. Additional post-production may be needed for release.</p>
+                      <p className="text-white/40 text-xs mt-1">{tg.revisionsNote}</p>
                     </div>
 
                     <div className="border-t border-white/10 my-2" />
 
                     {/* Audio Quality Section */}
                     <div className="space-y-4">
-                      <Label className="text-white text-sm font-semibold">Audio Quality</Label>
+                      <Label className="text-white text-sm font-semibold">{tg.audioQuality}</Label>
 
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Label className="text-white text-sm font-medium">Bit Depth</Label>
+                          <Label className="text-white text-sm font-medium">{tg.bitDepth}</Label>
                           <HoverCard>
                             <HoverCardTrigger asChild>
                               <button type="button">
@@ -1108,7 +1107,7 @@ const GenerateSong = () => {
                               </button>
                             </HoverCardTrigger>
                             <HoverCardContent className="w-64 text-sm">
-                              <p className="text-muted-foreground">Higher bit depth means more dynamic range and detail. 24-bit is standard; 32-bit float provides extra headroom for processing.</p>
+                              <p className="text-muted-foreground">{tg.bitDepthInfo}</p>
                             </HoverCardContent>
                           </HoverCard>
                         </div>
@@ -1140,7 +1139,7 @@ const GenerateSong = () => {
 
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Label className="text-white text-sm font-medium">Sample Rate</Label>
+                          <Label className="text-white text-sm font-medium">{tg.sampleRate}</Label>
                           <HoverCard>
                             <HoverCardTrigger asChild>
                               <button type="button">
@@ -1148,7 +1147,7 @@ const GenerateSong = () => {
                               </button>
                             </HoverCardTrigger>
                             <HoverCardContent className="w-64 text-sm">
-                              <p className="text-muted-foreground">Higher sample rates capture more audio detail. 44.1 kHz is CD quality; higher rates are used for professional mastering and archival.</p>
+                              <p className="text-muted-foreground">{tg.sampleRateInfo}</p>
                             </HoverCardContent>
                           </HoverCard>
                         </div>
@@ -1193,25 +1192,25 @@ const GenerateSong = () => {
 
                 <div className="flex items-center justify-between">
                   <div className="text-white">
-                    <p className="text-sm font-medium opacity-80">Total Price</p>
+                    <p className="text-sm font-medium opacity-80">{tg.totalPrice}</p>
                     <div className="flex items-baseline gap-2">
                       <span className="text-3xl font-bold">${totalPrice}</span>
                       {totalPrice > currentTier.price &&
                     <span className="text-sm opacity-70">
-                          (Base ${currentTier.price} + ${totalPrice - currentTier.price} add-ons)
+                          ({tg.baseLabel} ${currentTier.price} + ${totalPrice - currentTier.price} {tg.addOnsLabel})
                         </span>
                     }
                     </div>
                   </div>
                   {(wantsRecordedStems || wantsAnalog || wantsMixing || wantsMastering || numberOfRevisions > 0 || (bitDepthOptions.find(o => o.value === bitDepth)?.surcharge[tierIndex] ?? 0) > 0 || (sampleRateOptions.find(o => o.value === sampleRate)?.surcharge[tierIndex] ?? 0) > 0) &&
                 <div className="text-right text-white/70 text-xs space-y-0.5">
-                      {wantsRecordedStems && <p>Stems +${addOnPricing.stems.prices[tierIndex]}</p>}
-                      {wantsAnalog && <p>Analog +${addOnPricing.analog.prices[tierIndex]}</p>}
-                      {wantsMixing && <p>Mixing +${addOnPricing.mixing.prices[tierIndex]}</p>}
-                      {wantsMastering && <p>Mastering +${addOnPricing.mastering.prices[tierIndex]}</p>}
+                      {wantsRecordedStems && <p>{tg.stemsLine} +${addOnPricing.stems.prices[tierIndex]}</p>}
+                      {wantsAnalog && <p>{tg.analogLine} +${addOnPricing.analog.prices[tierIndex]}</p>}
+                      {wantsMixing && <p>{tg.mixingLine} +${addOnPricing.mixing.prices[tierIndex]}</p>}
+                      {wantsMastering && <p>{tg.masteringLine} +${addOnPricing.mastering.prices[tierIndex]}</p>}
                       {numberOfRevisions > 0 &&
                   <p>
-                          {numberOfRevisions}x Revisions +${numberOfRevisions * addOnPricing.revision.prices[tierIndex]}
+                          {numberOfRevisions}x {tg.revisionsLine} +${numberOfRevisions * addOnPricing.revision.prices[tierIndex]}
                         </p>
                   }
                       {(() => {
@@ -1250,13 +1249,13 @@ const GenerateSong = () => {
                     {generatedAudioUrl &&
                   <div className="space-y-3">
                         <div className="flex items-center gap-2">
-                          <span className="text-white font-semibold">🎵 Your AI-Generated Song</span>
+                          <span className="text-white font-semibold">{tg.yourGeneratedSong}</span>
                         </div>
                         <audio controls src={generatedAudioUrl} className="w-full" />
                         <div className="flex gap-2">
                           <a href={generatedAudioUrl} download="ai-generated-song.mp3" className="flex-1">
                             <Button variant="secondary" className="w-full">
-                              Download MP3
+                              {tg.downloadMp3}
                             </Button>
                           </a>
                           <Button
@@ -1267,11 +1266,11 @@ const GenerateSong = () => {
                         }}
                         className="bg-white/20 text-white border-white/50 hover:bg-white/30 font-medium">
 
-                            Generate New
+                            {tg.generateNew}
                           </Button>
                         </div>
                         <p className="text-white/70 text-xs text-center">
-                          Want a professional human-produced version? Select a paid tier above!
+                          {tg.upgradeHint}
                         </p>
                       </div>
                   }
@@ -1289,13 +1288,13 @@ const GenerateSong = () => {
                     <div className="flex items-center justify-center gap-2 text-white/90">
                       <span className="text-sm">
                         {aiGenerationsRemaining > 0 ?
-                    `🎵 ${aiGenerationsRemaining}/${MAX_FREE_AI_SONGS} generations left` :
-                    `⏳ Next generation available in:`}
+                    `🎵 ${aiGenerationsRemaining}/${MAX_FREE_AI_SONGS} ${tg.generationsLeft}` :
+                    tg.nextGenerationIn}
                       </span>
                     </div>
                     <div className="text-white font-mono font-bold text-lg mt-1">{countdownDisplay}</div>
                     {aiGenerationsRemaining > 0 &&
-                <p className="text-white/60 text-xs mt-1">+1 generation renews in {countdownDisplay}</p>
+                <p className="text-white/60 text-xs mt-1">{tg.renewsIn} {countdownDisplay}</p>
                 }
                   </div>
               }
@@ -1318,8 +1317,8 @@ const GenerateSong = () => {
                 size="lg">
 
                   {isGeneratingAI ?
-                "Generating..." :
-                `Generate Free AI Song${aiGenerationsRemaining !== null ? ` (${aiGenerationsRemaining}/${MAX_FREE_AI_SONGS} left)` : ""}`}
+                tg.generating :
+                `${tg.generateFreeAi}${aiGenerationsRemaining !== null ? ` (${aiGenerationsRemaining}/${MAX_FREE_AI_SONGS})` : ""}`}
                 </Button>
                 {(!selectedGenre ||
               idea.trim().length < 20 ||
@@ -1330,7 +1329,7 @@ const GenerateSong = () => {
                 idea
               )) &&
               <p className="text-white/50 text-xs text-center">
-                    Complete all prompt requirements above to enable generation
+                    {tg.completePromptReqs}
                   </p>
               }
               </div> :
@@ -1344,7 +1343,7 @@ const GenerateSong = () => {
 
                     <div className="flex items-center justify-center gap-2 text-white">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      <span className="text-sm font-medium">Processing... Redirecting to payment</span>
+                      <span className="text-sm font-medium">{tg.processingRedirect}</span>
                     </div>
                   </motion.div>
               }
@@ -1358,15 +1357,15 @@ const GenerateSong = () => {
                   {isSubmitting ?
                 <span className="flex items-center gap-2">
                       <Loader2 className="h-5 w-5 animate-spin" />
-                      Processing...
+                      {tg.processing}
                     </span> :
 
-                "Submit Your Song Idea"
+                tg.submitIdea
                 }
                 </Button>
                 {(!selectedGenre || idea.trim().length < 20) &&
               <p className="text-white/50 text-xs text-center">
-                    Complete all submission requirements above to continue
+                    {tg.completeSubmissionReqs}
                   </p>
               }
               </div>
@@ -1380,7 +1379,7 @@ const GenerateSong = () => {
             onClick={() => navigate("/")}
             className="text-white/80 hover:text-white hover:bg-transparent">
 
-            Back to Home
+            {tg.backToHome}
           </Button>
         </div>
       </motion.div>
