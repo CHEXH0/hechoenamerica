@@ -14,7 +14,7 @@ export const ru: Translations = {
   audioPlatforms: {
     title: "Сообщество",
     treats: "Лакомства",
-    careers: "Careers",
+    careers: "Карьера",
     instagram: "Instagram",
     youtube: "YouTube",
   },

@@ -14,7 +14,7 @@ export const zh: Translations = {
   audioPlatforms: {
     title: "社区",
     treats: "美食",
-    careers: "Careers",
+    careers: "招聘",
     instagram: "Instagram",
     youtube: "YouTube",
   },
