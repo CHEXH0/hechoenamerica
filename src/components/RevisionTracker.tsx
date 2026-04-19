@@ -4,11 +4,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { 
-  CheckCircle, 
-  Clock, 
-  Loader2, 
-  Send, 
+import {
+  CheckCircle,
+  Clock,
+  Loader2,
+  Send,
   ExternalLink,
   FileCheck,
   AlertCircle,
@@ -20,6 +20,7 @@ import { Switch } from "@/components/ui/switch";
 import { RevisionChat } from "@/components/RevisionChat";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 interface Revision {
   id: string;
@@ -50,13 +51,6 @@ const revisionStatusColors: Record<string, string> = {
   delivered: "bg-emerald-500",
 };
 
-const revisionStatusLabels: Record<string, string> = {
-  pending: "Awaiting Request",
-  requested: "Requested",
-  in_progress: "In Progress",
-  delivered: "Delivered",
-};
-
 export const RevisionTracker = ({
   projectId,
   numberOfRevisions,
@@ -72,6 +66,15 @@ export const RevisionTracker = ({
   const [feedbackText, setFeedbackText] = useState<Record<string, string>>({});
   const [submittingFeedback, setSubmittingFeedback] = useState<string | null>(null);
   const { toast } = useToast();
+  const { t } = useTranslation();
+  const tr = t.revisionTracker;
+
+  const revisionStatusLabels: Record<string, string> = {
+    pending: tr.revisionStatusLabels.pending,
+    requested: tr.revisionStatusLabels.requested,
+    in_progress: tr.revisionStatusLabels.in_progress,
+    delivered: tr.revisionStatusLabels.delivered,
+  };
 
   useEffect(() => {
     fetchRevisions();
@@ -115,7 +118,6 @@ export const RevisionTracker = ({
 
       if (error) throw error;
 
-      // Send notification email to producer
       try {
         await supabase.functions.invoke('send-revision-notification', {
           body: {
@@ -130,8 +132,8 @@ export const RevisionTracker = ({
       }
 
       toast({
-        title: "Revision Requested",
-        description: `Revision ${revisionNumber} has been requested. Your producer will be notified.`,
+        title: tr.toasts.revisionRequestedTitle,
+        description: `${tr.revision} ${revisionNumber} ${tr.toasts.revisionRequestedDesc}`,
       });
 
       fetchRevisions();
@@ -139,8 +141,8 @@ export const RevisionTracker = ({
     } catch (error) {
       console.error("Error requesting revision:", error);
       toast({
-        title: "Error",
-        description: "Failed to request revision. Please try again.",
+        title: tr.toasts.errorTitle,
+        description: tr.toasts.revisionRequestFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -152,8 +154,8 @@ export const RevisionTracker = ({
     const feedback = feedbackText[revisionId];
     if (!feedback?.trim()) {
       toast({
-        title: "Missing Feedback",
-        description: "Please enter your feedback before submitting.",
+        title: tr.toasts.missingFeedbackTitle,
+        description: tr.toasts.missingFeedbackDesc,
         variant: "destructive",
       });
       return;
@@ -168,7 +170,6 @@ export const RevisionTracker = ({
 
       if (error) throw error;
 
-      // Send notification email to producer
       try {
         await supabase.functions.invoke('send-revision-notification', {
           body: {
@@ -183,8 +184,8 @@ export const RevisionTracker = ({
       }
 
       toast({
-        title: "Feedback Submitted",
-        description: "Your feedback has been sent to the producer.",
+        title: tr.toasts.feedbackSubmittedTitle,
+        description: tr.toasts.feedbackSubmittedDesc,
       });
 
       setFeedbackText(prev => ({ ...prev, [revisionId]: "" }));
@@ -192,8 +193,8 @@ export const RevisionTracker = ({
     } catch (error) {
       console.error("Error submitting feedback:", error);
       toast({
-        title: "Error",
-        description: "Failed to submit feedback. Please try again.",
+        title: tr.toasts.errorTitle,
+        description: tr.toasts.feedbackFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -201,7 +202,7 @@ export const RevisionTracker = ({
     }
   };
 
-  const allRevisionsDelivered = revisions.length > 0 && 
+  const allRevisionsDelivered = revisions.length > 0 &&
     revisions.every(r => r.status === "delivered");
 
   const nextAvailableRevision = revisions.find(r => r.status === "pending");
@@ -211,7 +212,7 @@ export const RevisionTracker = ({
     return (
       <div className="flex items-center gap-2 p-4 text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
-        Loading revisions...
+        {tr.loading}
       </div>
     );
   }
@@ -222,7 +223,7 @@ export const RevisionTracker = ({
         <div className="flex items-center gap-2 text-muted-foreground">
           <Clock className="h-4 w-4" />
           <span className="text-sm">
-            {numberOfRevisions} revisions will be available once your producer starts working
+            {numberOfRevisions} {tr.revisionsWillBeAvailable}
           </span>
         </div>
       </div>
@@ -240,11 +241,11 @@ export const RevisionTracker = ({
         <div className="flex items-center justify-between">
           <h4 className="font-medium flex items-center gap-2">
             <FileCheck className="h-4 w-4" />
-            Revisions ({revisions.filter(r => r.status === "delivered").length}/{numberOfRevisions})
+            {tr.revisionsCount} ({revisions.filter(r => r.status === "delivered").length}/{numberOfRevisions})
           </h4>
           {allRevisionsDelivered && (
             <Badge variant="secondary" className="bg-emerald-500/20 text-emerald-600">
-              All Revisions Complete
+              {tr.allRevisionsComplete}
             </Badge>
           )}
         </div>
@@ -254,7 +255,7 @@ export const RevisionTracker = ({
             <Card key={revision.id} className="p-4">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium">Revision {revision.revision_number}</span>
+                  <span className="font-medium">{tr.revision} {revision.revision_number}</span>
                   <Badge className={`${revisionStatusColors[revision.status]} text-white text-xs`}>
                     {revisionStatusLabels[revision.status]}
                   </Badge>
@@ -266,7 +267,7 @@ export const RevisionTracker = ({
                     onClick={() => window.open(revision.drive_link!, "_blank")}
                   >
                     <ExternalLink className="mr-2 h-3 w-3" />
-                    Download
+                    {tr.download}
                   </Button>
                 )}
               </div>
@@ -276,9 +277,9 @@ export const RevisionTracker = ({
                   {!pendingRequest && nextAvailableRevision?.id === revision.id ? (
                     <>
                       <div className="space-y-2">
-                        <Label className="text-sm">Notes for Producer (optional)</Label>
+                        <Label className="text-sm">{tr.notesForProducer}</Label>
                         <Textarea
-                          placeholder="Describe what changes you'd like..."
+                          placeholder={tr.notesPlaceholder}
                           value={revisionNotes[revision.revision_number] || ""}
                           onChange={(e) => setRevisionNotes(prev => ({
                             ...prev,
@@ -291,8 +292,8 @@ export const RevisionTracker = ({
                       <div className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg">
                         <Video className="h-4 w-4 text-muted-foreground" />
                         <div className="flex-1">
-                          <Label className="text-sm">Request Google Meet</Label>
-                          <p className="text-xs text-muted-foreground">Ask your producer for a video call</p>
+                          <Label className="text-sm">{tr.requestGoogleMeet}</Label>
+                          <p className="text-xs text-muted-foreground">{tr.askProducerVideoCall}</p>
                         </div>
                         <Switch
                           checked={wantsMeeting[revision.revision_number] || false}
@@ -312,15 +313,15 @@ export const RevisionTracker = ({
                         ) : (
                           <Send className="mr-2 h-4 w-4" />
                         )}
-                        Request Revision
+                        {tr.requestRevision}
                       </Button>
                     </>
                   ) : (
                     <p className="text-xs text-muted-foreground flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
-                      {pendingRequest 
-                        ? "Complete or receive your current revision request first"
-                        : "Not yet available"}
+                      {pendingRequest
+                        ? tr.completeCurrentFirst
+                        : tr.notYetAvailable}
                     </p>
                   )}
                 </div>
@@ -330,23 +331,23 @@ export const RevisionTracker = ({
                 <div className="space-y-2">
                   <p className="text-sm text-yellow-600 flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    Waiting for producer...
+                    {tr.waitingForProducer}
                   </p>
                   {revision.client_notes && (
                     <p className="text-xs text-muted-foreground">
-                      Notes: "{revision.client_notes}"
+                      {tr.notes} "{revision.client_notes}"
                     </p>
                   )}
                   {revision.wants_meeting && (
                     <div className="flex items-center gap-2 text-xs p-2 bg-muted/30 rounded">
                       <Video className="h-3 w-3 text-primary" />
-                      <span>Google Meet requested</span>
+                      <span>{tr.googleMeetRequested}</span>
                       {revision.meeting_link ? (
                         <a href={revision.meeting_link} target="_blank" rel="noopener noreferrer" className="text-primary underline ml-auto">
-                          Join Meeting
+                          {tr.joinMeeting}
                         </a>
                       ) : (
-                        <span className="text-muted-foreground ml-auto">Pending link from producer</span>
+                        <span className="text-muted-foreground ml-auto">{tr.pendingMeetLink}</span>
                       )}
                     </div>
                   )}
@@ -356,7 +357,7 @@ export const RevisionTracker = ({
               {revision.status === "in_progress" && (
                 <p className="text-sm text-blue-600 flex items-center gap-1">
                   <Loader2 className="h-3 w-3 animate-spin" />
-                  Producer is working on this revision
+                  {tr.producerWorkingOnIt}
                 </p>
               )}
 
@@ -364,14 +365,14 @@ export const RevisionTracker = ({
                 <div className="space-y-3">
                   <p className="text-sm text-emerald-600 flex items-center gap-1">
                     <CheckCircle className="h-3 w-3" />
-                    Delivered {revision.delivered_at && new Date(revision.delivered_at).toLocaleDateString()}
+                    {tr.deliveredOn} {revision.delivered_at && new Date(revision.delivered_at).toLocaleDateString()}
                   </p>
 
                   {revision.meeting_link && (
                     <div className="flex items-center gap-2 text-xs p-2 bg-muted/30 rounded">
                       <Video className="h-3 w-3 text-primary" />
                       <a href={revision.meeting_link} target="_blank" rel="noopener noreferrer" className="text-primary underline">
-                        Google Meet Link
+                        {tr.googleMeetLink}
                       </a>
                     </div>
                   )}
@@ -381,7 +382,7 @@ export const RevisionTracker = ({
                     <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
                       <div className="flex items-center gap-2 text-blue-600 text-sm font-medium mb-1">
                         <MessageSquare className="h-3 w-3" />
-                        Your Feedback
+                        {tr.yourFeedback}
                       </div>
                       <p className="text-sm text-muted-foreground">{revision.client_feedback}</p>
                     </div>
@@ -389,10 +390,10 @@ export const RevisionTracker = ({
                     <div className="space-y-2">
                       <Label className="text-sm flex items-center gap-1">
                         <MessageSquare className="h-3 w-3" />
-                        Share Feedback (optional)
+                        {tr.shareFeedback}
                       </Label>
                       <Textarea
-                        placeholder="Let your producer know what you think..."
+                        placeholder={tr.feedbackPlaceholder}
                         value={feedbackText[revision.id] || ""}
                         onChange={(e) => setFeedbackText(prev => ({
                           ...prev,
@@ -412,7 +413,7 @@ export const RevisionTracker = ({
                         ) : (
                           <Send className="mr-2 h-4 w-4" />
                         )}
-                        Submit Feedback
+                        {tr.submitFeedback}
                       </Button>
                     </div>
                   )}
@@ -435,29 +436,29 @@ export const RevisionTracker = ({
     <div className="space-y-3">
       <h4 className="font-medium text-sm flex items-center gap-2">
         <FileCheck className="h-4 w-4" />
-        Revision Status ({revisions.filter(r => r.status === "delivered").length}/{numberOfRevisions})
+        {tr.revisionStatusTitle} ({revisions.filter(r => r.status === "delivered").length}/{numberOfRevisions})
       </h4>
       <div className="flex flex-wrap gap-2">
         {revisions.map((revision) => (
-          <Badge 
+          <Badge
             key={revision.id}
             variant="outline"
-            className={`${revision.status === "delivered" ? "border-emerald-500 text-emerald-600" : 
+            className={`${revision.status === "delivered" ? "border-emerald-500 text-emerald-600" :
               revision.status === "requested" ? "border-yellow-500 text-yellow-600 animate-pulse" :
               revision.status === "in_progress" ? "border-blue-500 text-blue-600" :
               "border-muted-foreground"}`}
           >
-            Rev {revision.revision_number}: {revisionStatusLabels[revision.status]}
+            {tr.revPrefix} {revision.revision_number}: {revisionStatusLabels[revision.status]}
           </Badge>
         ))}
       </div>
       {/* Show client feedback for producer */}
       {revisions.some(r => r.client_feedback) && (
         <div className="space-y-2 pt-2 border-t border-border">
-          <h5 className="text-xs font-medium text-muted-foreground">Client Feedback</h5>
+          <h5 className="text-xs font-medium text-muted-foreground">{tr.clientFeedbackTitle}</h5>
           {revisions.filter(r => r.client_feedback).map(revision => (
             <div key={revision.id} className="p-2 bg-blue-50 dark:bg-blue-950/20 rounded text-sm">
-              <span className="font-medium text-blue-600">Rev {revision.revision_number}:</span>{" "}
+              <span className="font-medium text-blue-600">{tr.revPrefix} {revision.revision_number}:</span>{" "}
               <span className="text-muted-foreground">{revision.client_feedback}</span>
             </div>
           ))}
@@ -465,7 +466,7 @@ export const RevisionTracker = ({
       )}
       {!allRevisionsDelivered && (
         <p className="text-xs text-muted-foreground">
-          Complete all revisions before sending the final project
+          {tr.completeBeforeFinal}
         </p>
       )}
     </div>

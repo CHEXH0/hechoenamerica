@@ -26,6 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useUserRole } from "@/hooks/useUserRole";
 import { DeliveryForm } from "@/components/DeliveryForm";
 import { RevisionTracker } from "@/components/RevisionTracker";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 interface SongRequest {
   id: string;
@@ -72,17 +73,7 @@ interface Producer {
   image: string;
 }
 
-const statusLabels: Record<string, string> = {
-  pending: "Pending",
-  pending_payment: "Awaiting Payment",
-  paid: "Paid",
-  accepted: "Accepted",
-  in_progress: "In Production",
-  review: "Under Review",
-  completed: "Completed",
-  refunded: "Refunded",
-  cancellation_requested: "Cancellation Requested",
-};
+// Status labels are now translated inside the component via useTranslation
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500",
@@ -138,8 +129,18 @@ const getTimeRemaining = (deadline: string | null): { text: string; hours: numbe
   };
 };
 
-// Countdown Timer Component
-const CountdownTimer = ({ deadline }: { deadline: string }) => {
+// Countdown Timer Component (accepts translated labels via props)
+interface CountdownLabels {
+  expired: string;
+  processingRefund: string;
+  windowTitle: string;
+  urgent: string;
+  hours: string;
+  mins: string;
+  secs: string;
+  waiting: string;
+}
+const CountdownTimer = ({ deadline, labels }: { deadline: string; labels: CountdownLabels }) => {
   const [timeRemaining, setTimeRemaining] = useState(getTimeRemaining(deadline));
 
   useEffect(() => {
@@ -159,10 +160,10 @@ const CountdownTimer = ({ deadline }: { deadline: string }) => {
       <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
         <div className="flex items-center gap-2 text-red-500 mb-2">
           <AlertTriangle className="h-5 w-5" />
-          <span className="font-semibold">Deadline Expired</span>
+          <span className="font-semibold">{labels.expired}</span>
         </div>
         <p className="text-sm text-muted-foreground">
-          Processing refund...
+          {labels.processingRefund}
         </p>
       </div>
     );
@@ -178,12 +179,12 @@ const CountdownTimer = ({ deadline }: { deadline: string }) => {
         <div className="flex items-center gap-2">
           <Clock className={`h-4 w-4 ${isUrgent ? 'text-amber-500' : 'text-primary'}`} />
           <span className={`text-sm font-medium ${isUrgent ? 'text-amber-600' : 'text-foreground'}`}>
-            Producer Acceptance Window
+            {labels.windowTitle}
           </span>
         </div>
         {isUrgent && (
           <span className="text-xs bg-amber-500 text-white px-2 py-0.5 rounded-full animate-pulse">
-            Urgent
+            {labels.urgent}
           </span>
         )}
       </div>
@@ -193,21 +194,21 @@ const CountdownTimer = ({ deadline }: { deadline: string }) => {
           <div className={`text-2xl font-bold tabular-nums ${isUrgent ? 'text-amber-500' : 'text-primary'}`}>
             {String(hours).padStart(2, '0')}
           </div>
-          <div className="text-[10px] uppercase text-muted-foreground tracking-wider">Hours</div>
+          <div className="text-[10px] uppercase text-muted-foreground tracking-wider">{labels.hours}</div>
         </div>
         <div className="flex items-center text-muted-foreground font-bold">:</div>
         <div className="bg-background rounded-lg px-3 py-2 min-w-[60px] text-center shadow-sm">
           <div className={`text-2xl font-bold tabular-nums ${isUrgent ? 'text-amber-500' : 'text-primary'}`}>
             {String(minutes).padStart(2, '0')}
           </div>
-          <div className="text-[10px] uppercase text-muted-foreground tracking-wider">Mins</div>
+          <div className="text-[10px] uppercase text-muted-foreground tracking-wider">{labels.mins}</div>
         </div>
         <div className="flex items-center text-muted-foreground font-bold">:</div>
         <div className="bg-background rounded-lg px-3 py-2 min-w-[60px] text-center shadow-sm">
           <div className={`text-2xl font-bold tabular-nums ${isUrgent ? 'text-amber-500' : 'text-primary'}`}>
             {String(seconds).padStart(2, '0')}
           </div>
-          <div className="text-[10px] uppercase text-muted-foreground tracking-wider">Secs</div>
+          <div className="text-[10px] uppercase text-muted-foreground tracking-wider">{labels.secs}</div>
         </div>
       </div>
 
@@ -219,26 +220,13 @@ const CountdownTimer = ({ deadline }: { deadline: string }) => {
       </div>
       
       <p className="text-xs text-muted-foreground mt-2 text-center">
-        Waiting for a producer to accept
+        {labels.waiting}
       </p>
     </div>
   );
 };
 
-const getGenreLabel = (genre: string | null): string => {
-  const genreMap: Record<string, string> = {
-    "hip-hop": "Hip Hop / Trap",
-    rnb: "R&B / Soul",
-    reggae: "Reggae",
-    latin: "Latin",
-    electronic: "Electronic",
-    pop: "Pop",
-    rock: "Rock",
-    world: "World / Indigenous",
-    other: "Other",
-  };
-  return genre ? genreMap[genre] || genre : "Not specified";
-};
+// Genre labels are now translated inside the component via useTranslation
 
 const MyProjects = () => {
   const navigate = useNavigate();
@@ -256,6 +244,46 @@ const MyProjects = () => {
   const [requestingCancellationId, setRequestingCancellationId] = useState<string | null>(null);
   const [changingProducerId, setChangingProducerId] = useState<string | null>(null);
   const { toast } = useToast();
+  const { t } = useTranslation();
+  const tm = t.myProjects;
+
+  const statusLabels: Record<string, string> = {
+    pending: tm.statusLabels.pending,
+    pending_payment: tm.statusLabels.pending_payment,
+    paid: tm.statusLabels.paid,
+    accepted: tm.statusLabels.accepted,
+    in_progress: tm.statusLabels.in_progress,
+    review: tm.statusLabels.review,
+    completed: tm.statusLabels.completed,
+    refunded: tm.statusLabels.refunded,
+    cancellation_requested: tm.statusLabels.cancellation_requested,
+  };
+
+  const getGenreLabel = (genre: string | null): string => {
+    const genreMap: Record<string, string> = {
+      "hip-hop": tm.genres.hipHop,
+      rnb: tm.genres.rnb,
+      reggae: tm.genres.reggae,
+      latin: tm.genres.latin,
+      electronic: tm.genres.electronic,
+      pop: tm.genres.pop,
+      rock: tm.genres.rock,
+      world: tm.genres.world,
+      other: tm.genres.other,
+    };
+    return genre ? genreMap[genre] || genre : tm.genres.notSpecified;
+  };
+
+  const countdownLabels: CountdownLabels = {
+    expired: tm.deadlineExpired,
+    processingRefund: tm.processingRefund,
+    windowTitle: tm.producerAcceptanceWindow,
+    urgent: tm.urgent,
+    hours: tm.hours,
+    mins: tm.mins,
+    secs: tm.secs,
+    waiting: tm.waitingForProducer,
+  };
 
   const isProducer = userRole?.isProducer || false;
 
@@ -274,8 +302,8 @@ const MyProjects = () => {
   const handleResendFiles = async (project: SongRequest) => {
     if (!project.file_urls || project.file_urls.length === 0) {
       toast({
-        title: "No Files",
-        description: "This project has no customer files attached.",
+        title: tm.toasts.noFilesTitle,
+        description: tm.toasts.noFilesDesc,
         variant: "destructive",
       });
       return;
@@ -298,14 +326,14 @@ const MyProjects = () => {
       });
 
       toast({
-        title: "Files Sent!",
-        description: "Customer files have been emailed to you.",
+        title: tm.toasts.filesSentTitle,
+        description: tm.toasts.filesSentDesc,
       });
     } catch (error) {
       console.error("Error resending files:", error);
       toast({
-        title: "Error",
-        description: "Failed to send files email. Please try again.",
+        title: tm.toasts.errorTitle,
+        description: tm.toasts.filesEmailFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -324,8 +352,8 @@ const MyProjects = () => {
       if (error) throw error;
 
       toast({
-        title: "Project Cancelled",
-        description: "Your project has been cancelled successfully.",
+        title: tm.toasts.projectCancelledTitle,
+        description: tm.toasts.projectCancelledDesc,
       });
 
       // Remove from local state
@@ -333,8 +361,8 @@ const MyProjects = () => {
     } catch (error) {
       console.error("Error cancelling project:", error);
       toast({
-        title: "Error",
-        description: "Failed to cancel project. Please try again.",
+        title: tm.toasts.errorTitle,
+        description: tm.toasts.cancelFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -364,8 +392,8 @@ const MyProjects = () => {
       }
 
       toast({
-        title: "Cancellation Requested",
-        description: "Request submitted. We'll review it shortly.",
+        title: tm.toasts.cancellationRequestedTitle,
+        description: tm.toasts.cancellationRequestedDesc,
       });
 
       setMyRequests((prev) =>
@@ -376,8 +404,8 @@ const MyProjects = () => {
     } catch (error) {
       console.error("Error requesting cancellation:", error);
       toast({
-        title: "Error",
-        description: "Failed to submit cancellation request. Please try again.",
+        title: tm.toasts.errorTitle,
+        description: tm.toasts.cancellationFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -398,16 +426,16 @@ const MyProjects = () => {
       if (error) throw error;
 
       toast({
-        title: "Producer Change Requested",
-        description: data.message || "Your project will be reassigned. A $25 fee applies.",
+        title: tm.toasts.producerChangeRequestedTitle,
+        description: data.message || tm.toasts.producerChangeRequestedDesc,
       });
 
       fetchProjects();
     } catch (error) {
       console.error("Error changing producer:", error);
       toast({
-        title: "Error",
-        description: "Failed to change producer. Please try again.",
+        title: tm.toasts.errorTitle,
+        description: tm.toasts.producerChangeFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -449,16 +477,16 @@ const MyProjects = () => {
       }
 
       toast({
-        title: "Project Started",
-        description: "Status updated to In Progress. Time to make some music! 🎵",
+        title: tm.toasts.projectStartedTitle,
+        description: tm.toasts.projectStartedDesc,
       });
 
       fetchProjects();
     } catch (error) {
       console.error("Error updating status:", error);
       toast({
-        title: "Error",
-        description: "Failed to update project status",
+        title: tm.toasts.errorTitle,
+        description: tm.toasts.statusUpdateFailedDesc,
         variant: "destructive",
       });
     }
@@ -489,8 +517,8 @@ const MyProjects = () => {
           );
 
           toast({
-            title: "Project Updated",
-            description: `Your project status changed to: ${statusLabels[updatedProject.status] || updatedProject.status}`,
+            title: tm.toasts.projectUpdatedTitle,
+            description: `${tm.toasts.projectUpdatedDesc} ${statusLabels[updatedProject.status] || updatedProject.status}`,
           });
 
           if (updatedProject.assigned_producer_id && !producers[updatedProject.assigned_producer_id]) {
@@ -527,8 +555,8 @@ const MyProjects = () => {
 
           if (updatedPurchase.download_url) {
             toast({
-              title: "🎉 Your Song is Ready!",
-              description: "Your completed song is now available for download.",
+              title: tm.toasts.songReadyTitle,
+              description: tm.toasts.songReadyDesc,
             });
           }
         }
@@ -672,7 +700,7 @@ const MyProjects = () => {
           {/* Progress Bar */}
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-muted-foreground">
-              <span>Progress</span>
+              <span>{tm.progress}</span>
               <span>{getStatusProgress(project.status)}%</span>
             </div>
             <Progress value={getStatusProgress(project.status)} className="h-2" />
@@ -681,7 +709,7 @@ const MyProjects = () => {
           {/* Song Idea */}
           <div className="bg-muted/50 p-4 rounded-lg">
             <p className="text-sm text-muted-foreground mb-1">
-              {isProducerView ? "Client's Idea:" : "Your Idea:"}
+              {isProducerView ? tm.clientsIdea : tm.yourIdea}
             </p>
             <p className="text-foreground">{project.song_idea}</p>
           </div>
@@ -691,7 +719,7 @@ const MyProjects = () => {
             <div className="flex items-center gap-3 p-3 bg-secondary/10 rounded-lg">
               <User className="h-8 w-8 text-muted-foreground" />
               <div>
-                <p className="text-sm text-muted-foreground">Client</p>
+                <p className="text-sm text-muted-foreground">{tm.client}</p>
                 <p className="font-medium">{project.user_email}</p>
               </div>
             </div>
@@ -707,7 +735,7 @@ const MyProjects = () => {
                 className="w-10 h-10 rounded-full object-cover"
               />
               <div>
-                <p className="text-sm text-muted-foreground">Your Producer</p>
+                <p className="text-sm text-muted-foreground">{tm.yourProducer}</p>
                 <p className="font-medium">{producer.name}</p>
               </div>
             </div>
@@ -715,16 +743,16 @@ const MyProjects = () => {
 
           {/* Technical Specifications */}
           <div className="bg-muted/30 border border-border/50 p-3 rounded-lg space-y-2">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Technical Specs</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{tm.technicalSpecs}</p>
             <div className="grid grid-cols-2 gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Bit Depth:</span>
+                <span className="text-xs text-muted-foreground">{tm.bitDepth}</span>
                 <Badge variant="outline" className="text-xs">
-                  {project.bit_depth === '32' ? '32-bit float' : `${project.bit_depth || '24'}-bit`}
+                  {project.bit_depth === '32' ? tm.bit32Float : `${project.bit_depth || '24'}${tm.bitSuffix}`}
                 </Badge>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Sample Rate:</span>
+                <span className="text-xs text-muted-foreground">{tm.sampleRate}</span>
                 <Badge variant="outline" className="text-xs">
                   {project.sample_rate || '44.1'} kHz
                 </Badge>
@@ -735,31 +763,31 @@ const MyProjects = () => {
           {/* Production Add-ons */}
           {(project.wants_recorded_stems || project.wants_analog || project.wants_mixing || project.wants_mastering || (project.number_of_revisions ?? 0) > 0) ? (
             <div className="space-y-1.5">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Production Add-ons</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{tm.productionAddons}</p>
               <div className="flex flex-wrap gap-2">
                 {project.wants_recorded_stems && (
-                  <Badge variant="secondary">🎹 Stems</Badge>
+                  <Badge variant="secondary">{tm.addonStems}</Badge>
                 )}
                 {project.wants_analog && (
-                  <Badge variant="secondary">📻 Analog</Badge>
+                  <Badge variant="secondary">{tm.addonAnalog}</Badge>
                 )}
                 {project.wants_mixing && (
-                  <Badge variant="secondary">🎚️ Mixing</Badge>
+                  <Badge variant="secondary">{tm.addonMixing}</Badge>
                 )}
                 {project.wants_mastering && (
-                  <Badge variant="secondary">🔊 Mastering</Badge>
+                  <Badge variant="secondary">{tm.addonMastering}</Badge>
                 )}
                 {(project.number_of_revisions ?? 0) > 0 && (
                   <Badge variant="secondary">
-                    🔄 {project.number_of_revisions} Revisions
+                    🔄 {project.number_of_revisions} {tm.addonRevisions}
                   </Badge>
                 )}
               </div>
             </div>
           ) : (
             <div className="space-y-1.5">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Production Add-ons</p>
-              <p className="text-sm text-muted-foreground">Raw production only</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{tm.productionAddons}</p>
+              <p className="text-sm text-muted-foreground">{tm.rawProductionOnly}</p>
             </div>
           )}
 
@@ -925,7 +953,7 @@ const MyProjects = () => {
                   </div>
                   
                   {(project.status === "pending" || project.status === "paid") && project.acceptance_deadline && (
-                    <CountdownTimer deadline={project.acceptance_deadline} />
+                    <CountdownTimer deadline={project.acceptance_deadline} labels={countdownLabels} />
                   )}
 
                   {/* Cancel button for pre-acceptance projects (full refund) */}
