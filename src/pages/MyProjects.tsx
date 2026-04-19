@@ -517,8 +517,8 @@ const MyProjects = () => {
           );
 
           toast({
-            title: "Project Updated",
-            description: `Your project status changed to: ${statusLabels[updatedProject.status] || updatedProject.status}`,
+            title: tm.toasts.projectUpdatedTitle,
+            description: `${tm.toasts.projectUpdatedDesc} ${statusLabels[updatedProject.status] || updatedProject.status}`,
           });
 
           if (updatedProject.assigned_producer_id && !producers[updatedProject.assigned_producer_id]) {
@@ -555,8 +555,8 @@ const MyProjects = () => {
 
           if (updatedPurchase.download_url) {
             toast({
-              title: "🎉 Your Song is Ready!",
-              description: "Your completed song is now available for download.",
+              title: tm.toasts.songReadyTitle,
+              description: tm.toasts.songReadyDesc,
             });
           }
         }
@@ -953,7 +953,7 @@ const MyProjects = () => {
                   </div>
                   
                   {(project.status === "pending" || project.status === "paid") && project.acceptance_deadline && (
-                    <CountdownTimer deadline={project.acceptance_deadline} />
+                    <CountdownTimer deadline={project.acceptance_deadline} labels={countdownLabels} />
                   )}
 
                   {/* Cancel button for pre-acceptance projects (full refund) */}
