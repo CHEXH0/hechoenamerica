@@ -1080,10 +1080,10 @@ const MyProjects = () => {
                     <div className="mt-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
                       <div className="flex items-center gap-2 text-amber-600">
                         <MessageSquare className="h-4 w-4" />
-                        <span className="text-sm font-medium">Cancellation Under Review</span>
+                        <span className="text-sm font-medium">{tm.cancellationUnderReview}</span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        We're reviewing your request and will get back to you soon.
+                        {tm.cancellationUnderReviewDesc}
                       </p>
                     </div>
                   )}
