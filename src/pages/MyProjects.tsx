@@ -700,7 +700,7 @@ const MyProjects = () => {
           {/* Progress Bar */}
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-muted-foreground">
-              <span>Progress</span>
+              <span>{tm.progress}</span>
               <span>{getStatusProgress(project.status)}%</span>
             </div>
             <Progress value={getStatusProgress(project.status)} className="h-2" />
@@ -709,7 +709,7 @@ const MyProjects = () => {
           {/* Song Idea */}
           <div className="bg-muted/50 p-4 rounded-lg">
             <p className="text-sm text-muted-foreground mb-1">
-              {isProducerView ? "Client's Idea:" : "Your Idea:"}
+              {isProducerView ? tm.clientsIdea : tm.yourIdea}
             </p>
             <p className="text-foreground">{project.song_idea}</p>
           </div>
@@ -719,7 +719,7 @@ const MyProjects = () => {
             <div className="flex items-center gap-3 p-3 bg-secondary/10 rounded-lg">
               <User className="h-8 w-8 text-muted-foreground" />
               <div>
-                <p className="text-sm text-muted-foreground">Client</p>
+                <p className="text-sm text-muted-foreground">{tm.client}</p>
                 <p className="font-medium">{project.user_email}</p>
               </div>
             </div>
@@ -735,7 +735,7 @@ const MyProjects = () => {
                 className="w-10 h-10 rounded-full object-cover"
               />
               <div>
-                <p className="text-sm text-muted-foreground">Your Producer</p>
+                <p className="text-sm text-muted-foreground">{tm.yourProducer}</p>
                 <p className="font-medium">{producer.name}</p>
               </div>
             </div>
@@ -743,16 +743,16 @@ const MyProjects = () => {
 
           {/* Technical Specifications */}
           <div className="bg-muted/30 border border-border/50 p-3 rounded-lg space-y-2">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Technical Specs</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{tm.technicalSpecs}</p>
             <div className="grid grid-cols-2 gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Bit Depth:</span>
+                <span className="text-xs text-muted-foreground">{tm.bitDepth}</span>
                 <Badge variant="outline" className="text-xs">
-                  {project.bit_depth === '32' ? '32-bit float' : `${project.bit_depth || '24'}-bit`}
+                  {project.bit_depth === '32' ? tm.bit32Float : `${project.bit_depth || '24'}${tm.bitSuffix}`}
                 </Badge>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Sample Rate:</span>
+                <span className="text-xs text-muted-foreground">{tm.sampleRate}</span>
                 <Badge variant="outline" className="text-xs">
                   {project.sample_rate || '44.1'} kHz
                 </Badge>
@@ -763,31 +763,31 @@ const MyProjects = () => {
           {/* Production Add-ons */}
           {(project.wants_recorded_stems || project.wants_analog || project.wants_mixing || project.wants_mastering || (project.number_of_revisions ?? 0) > 0) ? (
             <div className="space-y-1.5">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Production Add-ons</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{tm.productionAddons}</p>
               <div className="flex flex-wrap gap-2">
                 {project.wants_recorded_stems && (
-                  <Badge variant="secondary">🎹 Stems</Badge>
+                  <Badge variant="secondary">{tm.addonStems}</Badge>
                 )}
                 {project.wants_analog && (
-                  <Badge variant="secondary">📻 Analog</Badge>
+                  <Badge variant="secondary">{tm.addonAnalog}</Badge>
                 )}
                 {project.wants_mixing && (
-                  <Badge variant="secondary">🎚️ Mixing</Badge>
+                  <Badge variant="secondary">{tm.addonMixing}</Badge>
                 )}
                 {project.wants_mastering && (
-                  <Badge variant="secondary">🔊 Mastering</Badge>
+                  <Badge variant="secondary">{tm.addonMastering}</Badge>
                 )}
                 {(project.number_of_revisions ?? 0) > 0 && (
                   <Badge variant="secondary">
-                    🔄 {project.number_of_revisions} Revisions
+                    🔄 {project.number_of_revisions} {tm.addonRevisions}
                   </Badge>
                 )}
               </div>
             </div>
           ) : (
             <div className="space-y-1.5">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Production Add-ons</p>
-              <p className="text-sm text-muted-foreground">Raw production only</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{tm.productionAddons}</p>
+              <p className="text-sm text-muted-foreground">{tm.rawProductionOnly}</p>
             </div>
           )}
 
