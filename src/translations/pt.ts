@@ -14,7 +14,7 @@ export const pt: Translations = {
   audioPlatforms: {
     title: "Comunidade",
     treats: "Doces",
-    careers: "Careers",
+    careers: "Carreiras",
     instagram: "Instagram",
     youtube: "YouTube",
   },
