@@ -1145,11 +1145,11 @@ const MyProjects = () => {
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="my-requests" className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
-                My Requests ({myRequests.length})
+                {tm.tabMyRequests} ({myRequests.length})
               </TabsTrigger>
               <TabsTrigger value="producer-projects" className="flex items-center gap-2">
                 <Headphones className="h-4 w-4" />
-                Producer Projects ({producerProjects.length})
+                {tm.tabProducerProjects} ({producerProjects.length})
               </TabsTrigger>
             </TabsList>
 
