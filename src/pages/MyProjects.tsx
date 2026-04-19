@@ -1197,12 +1197,12 @@ const MyProjects = () => {
                   <Card>
                     <CardContent className="py-12 text-center">
                       <Headphones className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No Producer Projects Yet</h3>
+                      <h3 className="text-lg font-semibold mb-2">{tm.emptyProducerProjectsTitle}</h3>
                        <p className="text-muted-foreground mb-4">
-                         No assigned projects yet.
+                         {tm.emptyProducerProjectsDesc}
                        </p>
                        <p className="text-sm text-muted-foreground">
-                         Check Discord for new projects.
+                         {tm.emptyProducerProjectsHint}
                        </p>
                     </CardContent>
                   </Card>
