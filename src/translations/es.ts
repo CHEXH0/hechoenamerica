@@ -2,8 +2,8 @@ import { Translations } from "@/types/translations";
 
 export const es: Translations = {
   hero: {
-    title: "HECHO EN AMÉRICA",
-    subtitle: "La Música Es Medicina",
+    title: "HECHO EN AMERICA",
+    subtitle: "La Music Es Medicine",
   },
   featuredProducers: {
     title: "Productores Destacados",
@@ -124,7 +124,7 @@ export const es: Translations = {
   },
   generateSong: {
     pageTitle: "Crea Tu Sonido",
-    pageSubtitle: "LA MÚSICA ES MEDICINA",
+    pageSubtitle: "La Music Es Medicine",
     selectPrice: "Selecciona el Precio",
     tierDescriptions: [
       "Generado por IA gratis - para comparar",

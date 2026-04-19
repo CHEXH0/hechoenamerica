@@ -2,8 +2,8 @@ import { Translations } from '@/types/translations';
 
 export const ru: Translations = {
   hero: {
-    title: "СДЕЛАНО В АМЕРИКЕ",
-    subtitle: "Музыка - это Лекарство",
+    title: "HECHO EN AMERICA",
+    subtitle: "La Music Es Medicine",
   },
   featuredProducers: {
     title: "Рекомендуемые Продюсеры",
@@ -124,7 +124,7 @@ export const ru: Translations = {
   },
   generateSong: {
     pageTitle: "Создайте Свой Звук",
-    pageSubtitle: "LA MUSIC ES MEDICINE",
+    pageSubtitle: "La Music Es Medicine",
     selectPrice: "Выберите цену",
     tierDescriptions: [
       "Бесплатная генерация ИИ — для сравнения",
