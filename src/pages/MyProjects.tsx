@@ -922,32 +922,32 @@ const MyProjects = () => {
                     {project.status === "in_progress" ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Your producer is working on your song...
+                        {tm.statusInProgress}
                       </>
                     ) : project.status === "review" ? (
                       <>
                         <CheckCircle className="h-4 w-4" />
-                        Almost ready! Under final review...
+                        {tm.statusReview}
                       </>
                     ) : project.status === "accepted" ? (
                       <>
                         <CheckCircle className="h-4 w-4 text-cyan-500" />
-                        A producer has accepted your project!
+                        {tm.statusAccepted}
                       </>
                     ) : project.status === "paid" ? (
                       <>
                         <CheckCircle className="h-4 w-4 text-green-500" />
-                        Payment confirmed! Awaiting producer assignment...
+                        {tm.statusPaid}
                       </>
                     ) : project.status === "pending" ? (
                       <>
                         <Clock className="h-4 w-4" />
-                        Project submitted. Awaiting producer assignment...
+                        {tm.statusPending}
                       </>
                     ) : (
                       <>
                         <Clock className="h-4 w-4" />
-                        Processing your request...
+                        {tm.statusProcessing}
                       </>
                     )}
                   </div>
