@@ -13,12 +13,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useProfile } from '@/hooks/useProfile';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from '@/contexts/TranslationContext';
 
 const ProfileIcon = () => {
   const { user, signOut, loading } = useAuth();
   const { data: roleData } = useUserRole();
   const { data: profile } = useProfile(user?.id);
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const tp = t.profileMenu;
 
   if (loading) {
     return (
@@ -35,7 +38,7 @@ const ProfileIcon = () => {
           className="text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
         >
           <LogIn className="h-4 w-4 mr-2" />
-          Sign In
+          {tp.signIn}
         </Button>
       </Link>
     );
@@ -69,21 +72,21 @@ const ProfileIcon = () => {
           className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
         >
           <User className="h-4 w-4 mr-2" />
-          Profile Settings
+          {tp.profileSettings}
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => navigate('/my-projects')}
           className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
         >
           <Music className="h-4 w-4 mr-2" />
-          My Projects
+          {tp.myProjects}
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => navigate('/purchases')}
           className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
         >
           <ShoppingBag className="h-4 w-4 mr-2" />
-          My Treats
+          {tp.myTreats}
         </DropdownMenuItem>
         {roleData?.isProducer && (
           <DropdownMenuItem 
@@ -91,7 +94,7 @@ const ProfileIcon = () => {
             className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
           >
             <Mic2 className="h-4 w-4 mr-2" />
-            Producer Profile
+            {tp.producerProfile}
           </DropdownMenuItem>
         )}
         {roleData?.isAdmin && (
@@ -100,7 +103,7 @@ const ProfileIcon = () => {
             className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
           >
             <FileText className="h-4 w-4 mr-2" />
-            HEA Projects
+            {tp.heaProjects}
           </DropdownMenuItem>
         )}
         {roleData?.isAdmin && (
@@ -109,14 +112,14 @@ const ProfileIcon = () => {
             className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
           >
             <Settings className="h-4 w-4 mr-2" />
-            Admin Panel
+            {tp.adminPanel}
           </DropdownMenuItem>
         )}
         <DropdownMenuItem 
           onClick={() => signOut()}
           className="text-red-400 hover:text-red-300 hover:bg-red-500/10 cursor-pointer"
         >
-          Sign Out
+          {tp.signOut}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
