@@ -1,6 +1,16 @@
 import { Translations } from '@/types/translations';
 
 export const en: Translations = {
+  profileMenu: {
+    signIn: "Sign In",
+    profileSettings: "Profile Settings",
+    myProjects: "My Projects",
+    myTreats: "My Treats",
+    producerProfile: "Producer Profile",
+    heaProjects: "HEA Projects",
+    adminPanel: "Admin Panel",
+    signOut: "Sign Out",
+  },
   hero: {
     title: "HECHO EN AMERICA",
     subtitle: "La Music Es Medicine",

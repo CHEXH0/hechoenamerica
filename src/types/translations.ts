@@ -1,6 +1,16 @@
 export type Language = 'en' | 'es' | 'zh' | 'pt' | 'ru';
 
 export interface Translations {
+  profileMenu: {
+    signIn: string;
+    profileSettings: string;
+    myProjects: string;
+    myTreats: string;
+    producerProfile: string;
+    heaProjects: string;
+    adminPanel: string;
+    signOut: string;
+  };
   hero: {
     title: string;
     subtitle: string;

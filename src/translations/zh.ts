@@ -1,6 +1,16 @@
 import { Translations } from '@/types/translations';
 
 export const zh: Translations = {
+  profileMenu: {
+    signIn: "登录",
+    profileSettings: "个人资料设置",
+    myProjects: "我的项目",
+    myTreats: "我的美食",
+    producerProfile: "制作人资料",
+    heaProjects: "HEA 项目",
+    adminPanel: "管理面板",
+    signOut: "退出登录",
+  },
   hero: {
     title: "HECHO EN AMERICA",
     subtitle: "La Music Es Medicine",
