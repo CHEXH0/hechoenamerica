@@ -58,15 +58,21 @@ export const useCart = () => {
   const addItem = (product: Product, quantity: number = 1) => {
     setItems(prevItems => {
       const existingItem = prevItems.find(item => item.product_id === product.id);
-      
+      // Plugins (vsts) and audio samples are single-purchase digital goods — only one per cart
+      const isSingleQuantityOnly = product.category !== 'candies';
+
       if (existingItem) {
+        if (isSingleQuantityOnly) {
+          // Already in cart — do not increment
+          return prevItems;
+        }
         return prevItems.map(item =>
           item.product_id === product.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       } else {
-        return [...prevItems, { product_id: product.id, product, quantity }];
+        return [...prevItems, { product_id: product.id, product, quantity: isSingleQuantityOnly ? 1 : quantity }];
       }
     });
   };
@@ -82,11 +88,12 @@ export const useCart = () => {
     }
 
     setItems(prevItems =>
-      prevItems.map(item =>
-        item.product_id === productId
-          ? { ...item, quantity }
-          : item
-      )
+      prevItems.map(item => {
+        if (item.product_id !== productId) return item;
+        // Plugins and audio samples are locked to quantity 1
+        const isSingleQuantityOnly = item.product.category !== 'candies';
+        return { ...item, quantity: isSingleQuantityOnly ? 1 : quantity };
+      })
     );
   };
 
