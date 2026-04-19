@@ -2,8 +2,8 @@ import { Translations } from '@/types/translations';
 
 export const zh: Translations = {
   hero: {
-    title: "美国制造",
-    subtitle: "音乐是良药",
+    title: "HECHO EN AMERICA",
+    subtitle: "La Music Es Medicine",
   },
   featuredProducers: {
     title: "特色制作人",
@@ -124,7 +124,7 @@ export const zh: Translations = {
   },
   generateSong: {
     pageTitle: "创造您的声音",
-    pageSubtitle: "LA MUSIC ES MEDICINE",
+    pageSubtitle: "La Music Es Medicine",
     selectPrice: "选择价格",
     tierDescriptions: [
       "免费AI生成 - 用于比较",

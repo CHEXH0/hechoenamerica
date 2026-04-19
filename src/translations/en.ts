@@ -124,7 +124,7 @@ export const en: Translations = {
   },
   generateSong: {
     pageTitle: "Create Your Sound",
-    pageSubtitle: "LA MUSIC ES MEDICINE",
+    pageSubtitle: "La Music Es Medicine",
     selectPrice: "Select Price",
     tierDescriptions: [
       "Free AI Generated - for comparison",
