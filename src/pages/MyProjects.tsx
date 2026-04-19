@@ -302,8 +302,8 @@ const MyProjects = () => {
   const handleResendFiles = async (project: SongRequest) => {
     if (!project.file_urls || project.file_urls.length === 0) {
       toast({
-        title: "No Files",
-        description: "This project has no customer files attached.",
+        title: tm.toasts.noFilesTitle,
+        description: tm.toasts.noFilesDesc,
         variant: "destructive",
       });
       return;
@@ -326,14 +326,14 @@ const MyProjects = () => {
       });
 
       toast({
-        title: "Files Sent!",
-        description: "Customer files have been emailed to you.",
+        title: tm.toasts.filesSentTitle,
+        description: tm.toasts.filesSentDesc,
       });
     } catch (error) {
       console.error("Error resending files:", error);
       toast({
-        title: "Error",
-        description: "Failed to send files email. Please try again.",
+        title: tm.toasts.errorTitle,
+        description: tm.toasts.filesEmailFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -352,8 +352,8 @@ const MyProjects = () => {
       if (error) throw error;
 
       toast({
-        title: "Project Cancelled",
-        description: "Your project has been cancelled successfully.",
+        title: tm.toasts.projectCancelledTitle,
+        description: tm.toasts.projectCancelledDesc,
       });
 
       // Remove from local state
@@ -361,8 +361,8 @@ const MyProjects = () => {
     } catch (error) {
       console.error("Error cancelling project:", error);
       toast({
-        title: "Error",
-        description: "Failed to cancel project. Please try again.",
+        title: tm.toasts.errorTitle,
+        description: tm.toasts.cancelFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -392,8 +392,8 @@ const MyProjects = () => {
       }
 
       toast({
-        title: "Cancellation Requested",
-        description: "Request submitted. We'll review it shortly.",
+        title: tm.toasts.cancellationRequestedTitle,
+        description: tm.toasts.cancellationRequestedDesc,
       });
 
       setMyRequests((prev) =>
@@ -404,8 +404,8 @@ const MyProjects = () => {
     } catch (error) {
       console.error("Error requesting cancellation:", error);
       toast({
-        title: "Error",
-        description: "Failed to submit cancellation request. Please try again.",
+        title: tm.toasts.errorTitle,
+        description: tm.toasts.cancellationFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -426,16 +426,16 @@ const MyProjects = () => {
       if (error) throw error;
 
       toast({
-        title: "Producer Change Requested",
-        description: data.message || "Your project will be reassigned. A $25 fee applies.",
+        title: tm.toasts.producerChangeRequestedTitle,
+        description: data.message || tm.toasts.producerChangeRequestedDesc,
       });
 
       fetchProjects();
     } catch (error) {
       console.error("Error changing producer:", error);
       toast({
-        title: "Error",
-        description: "Failed to change producer. Please try again.",
+        title: tm.toasts.errorTitle,
+        description: tm.toasts.producerChangeFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -477,20 +477,18 @@ const MyProjects = () => {
       }
 
       toast({
-        title: "Project Started",
-        description: "Status updated to In Progress. Time to make some music! 🎵",
+        title: tm.toasts.projectStartedTitle,
+        description: tm.toasts.projectStartedDesc,
       });
 
       fetchProjects();
     } catch (error) {
       console.error("Error updating status:", error);
       toast({
-        title: "Error",
-        description: "Failed to update project status",
+        title: tm.toasts.errorTitle,
+        description: tm.toasts.statusUpdateFailedDesc,
         variant: "destructive",
       });
-    }
-  };
 
   // Real-time subscription
   useEffect(() => {
