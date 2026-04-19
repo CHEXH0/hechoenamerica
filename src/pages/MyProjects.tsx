@@ -889,23 +889,23 @@ const MyProjects = () => {
                 <div className="flex flex-col items-center gap-3 py-4 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg">
                   <div className="flex items-center gap-2 text-emerald-600">
                     <Mail className="h-6 w-6" />
-                    <span className="font-semibold text-lg">Check Your Email!</span>
+                    <span className="font-semibold text-lg">{tm.checkYourEmail}</span>
                   </div>
                    <p className="text-sm text-muted-foreground text-center px-4">
-                     Download link sent to your email. Check inbox and spam.
+                     {tm.downloadSentDesc}
                    </p>
                   <p className="text-xs text-muted-foreground">
-                    Download link expires in 7 days
+                    {tm.downloadExpires}
                   </p>
                 </div>
               ) : project.status === "refunded" ? (
                 <div className="flex flex-col items-center justify-center gap-2 py-2">
                   <div className="flex items-center gap-2 text-destructive">
                     <RefreshCcw className="h-4 w-4" />
-                    <span className="font-medium">Payment Refunded</span>
+                    <span className="font-medium">{tm.paymentRefunded}</span>
                   </div>
                   <p className="text-sm text-muted-foreground text-center">
-                    No producer available. Your payment has been refunded.
+                    {tm.paymentRefundedDesc}
                   </p>
                   <Button 
                     variant="outline" 
@@ -913,7 +913,7 @@ const MyProjects = () => {
                     onClick={() => navigate("/generate-song")}
                     className="mt-2"
                   >
-                    Try Again
+                    {tm.tryAgain}
                   </Button>
                 </div>
               ) : (
