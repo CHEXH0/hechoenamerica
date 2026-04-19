@@ -152,33 +152,37 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                               </span>
                               
                               <div className="flex items-center gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => updateQuantity(item.product_id, item.quantity - 1)}
-                                  className="h-6 w-6 p-0 text-gray-400 hover:text-white"
-                                >
-                                  <Minus className="h-3 w-3" />
-                                </Button>
-                                
-                                <span className="text-white text-sm w-8 text-center">
-                                  {item.quantity}
-                                </span>
-                                
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    const maxStock = item.product.stock ?? 100;
-                                    if (item.quantity < maxStock) {
-                                      updateQuantity(item.product_id, item.quantity + 1);
-                                    }
-                                  }}
-                                  disabled={(item.product.stock ?? 100) <= item.quantity}
-                                  className="h-6 w-6 p-0 text-gray-400 hover:text-white disabled:opacity-30"
-                                >
-                                  <Plus className="h-3 w-3" />
-                                </Button>
+                                {item.product.category === 'candies' && (
+                                  <>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => updateQuantity(item.product_id, item.quantity - 1)}
+                                      className="h-6 w-6 p-0 text-gray-400 hover:text-white"
+                                    >
+                                      <Minus className="h-3 w-3" />
+                                    </Button>
+
+                                    <span className="text-white text-sm w-8 text-center">
+                                      {item.quantity}
+                                    </span>
+
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        const maxStock = item.product.stock ?? 100;
+                                        if (item.quantity < maxStock) {
+                                          updateQuantity(item.product_id, item.quantity + 1);
+                                        }
+                                      }}
+                                      disabled={(item.product.stock ?? 100) <= item.quantity}
+                                      className="h-6 w-6 p-0 text-gray-400 hover:text-white disabled:opacity-30"
+                                    >
+                                      <Plus className="h-3 w-3" />
+                                    </Button>
+                                  </>
+                                )}
                                 <Button
                                   variant="ghost"
                                   size="sm"
