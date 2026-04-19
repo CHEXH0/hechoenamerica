@@ -225,14 +225,14 @@ const Profile = () => {
             className="mb-4 hover:bg-muted/50"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Home
+            {tp.backToHome}
           </Button>
           
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent mb-2">
-            Profile Settings
+            {tp.pageTitle}
           </h1>
           <p className="text-muted-foreground">
-            Manage your account
+            {tp.pageSubtitle}
           </p>
         </motion.div>
 
@@ -247,7 +247,7 @@ const Profile = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="h-5 w-5" />
-                  Profile Information
+                  {tp.profileInfoTitle}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -283,11 +283,11 @@ const Profile = () => {
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploadingAvatar}
                   >
-                    {uploadingAvatar ? "Uploading..." : "Change Photo"}
+                    {uploadingAvatar ? tp.uploading : tp.changePhoto}
                   </Button>
                 </div>
                 <div>
-                  <Label htmlFor="email">Email Address</Label>
+                  <Label htmlFor="email">{tp.emailLabel}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -296,25 +296,25 @@ const Profile = () => {
                     className="bg-muted/50 cursor-not-allowed"
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Email cannot be changed.
+                    {tp.emailCannotChange}
                   </p>
                 </div>
                 <div>
-                  <Label htmlFor="displayName">Display Name</Label>
+                  <Label htmlFor="displayName">{tp.displayNameLabel}</Label>
                   <Input
                     id="displayName"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    placeholder="Enter your display name"
+                    placeholder={tp.displayNamePlaceholder}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="bio">Bio</Label>
+                  <Label htmlFor="bio">{tp.bioLabel}</Label>
                   <Textarea
                     id="bio"
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
-                    placeholder="Tell us about yourself"
+                    placeholder={tp.bioPlaceholder}
                     rows={3}
                   />
                 </div>
@@ -324,7 +324,7 @@ const Profile = () => {
                   className="w-full"
                 >
                   <Save className="mr-2 h-4 w-4" />
-                  {updateProfile.isPending ? "Saving..." : "Save Profile"}
+                  {updateProfile.isPending ? tp.saving : tp.saveProfile}
                 </Button>
               </CardContent>
             </Card>
@@ -340,12 +340,12 @@ const Profile = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Lock className="h-5 w-5" />
-                  Change Password
+                  {tp.changePasswordTitle}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                  <p className="text-sm text-muted-foreground">
-                   Click below to receive a password reset link via email.
+                   {tp.passwordResetIntro}
                  </p>
                 <Button 
                   onClick={handleSendPasswordResetEmail}
@@ -353,7 +353,7 @@ const Profile = () => {
                   className="w-full"
                 >
                   <Mail className="mr-2 h-4 w-4" />
-                  {sendingResetEmail ? "Sending..." : "Send Password Reset Email"}
+                  {sendingResetEmail ? tp.sending : tp.sendPasswordResetEmail}
                 </Button>
               </CardContent>
             </Card>
@@ -369,15 +369,15 @@ const Profile = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
                   <Trash2 className="h-5 w-5" />
-                  Danger Zone
+                  {tp.dangerZone}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <h3 className="font-semibold text-red-600 dark:text-red-400">Delete Account</h3>
+                    <h3 className="font-semibold text-red-600 dark:text-red-400">{tp.deleteAccount}</h3>
                      <p className="text-sm text-muted-foreground">
-                       Permanently delete your account and all data. This cannot be undone.
+                       {tp.deleteAccountDesc}
                      </p>
                   </div>
                   <AlertDialog open={deleteDialogOpen} onOpenChange={(open) => {
@@ -387,21 +387,21 @@ const Profile = () => {
                     <AlertDialogTrigger asChild>
                       <Button variant="destructive">
                         <Trash2 className="mr-2 h-4 w-4" />
-                        Delete Account
+                        {tp.deleteAccount}
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogTitle>{tp.deleteDialogTitle}</AlertDialogTitle>
                         <AlertDialogDescription className="space-y-4">
                            <p>
-                             This will permanently delete your account and all data, including:
+                             {tp.deleteDialogIntro}
                            </p>
                           <ul className="list-disc pl-5 text-sm space-y-1">
-                            <li>Your profile information</li>
-                            <li>All purchases and order history</li>
-                            <li>Song requests and project files</li>
-                            <li>Any uploaded files in storage</li>
+                            <li>{tp.deleteListProfile}</li>
+                            <li>{tp.deleteListPurchases}</li>
+                            <li>{tp.deleteListSongRequests}</li>
+                            <li>{tp.deleteListFiles}</li>
                           </ul>
                           <div className="pt-4 space-y-4">
                             {!deletionEmailSent ? (
@@ -412,19 +412,19 @@ const Profile = () => {
                                 className="w-full"
                               >
                                 <Mail className="mr-2 h-4 w-4" />
-                                {sendingDeletionEmail ? "Sending..." : "Send Verification Code to Email"}
+                                {sendingDeletionEmail ? tp.sending : tp.sendVerificationCode}
                               </Button>
                             ) : (
                               <>
                                 <div>
                                   <Label htmlFor="deletionCode" className="text-foreground font-medium">
-                                    Enter the 6-digit code sent to your email:
+                                    {tp.enterCodeLabel}
                                   </Label>
                                   <Input
                                     id="deletionCode"
                                     value={deletionCode}
                                     onChange={(e) => setDeletionCode(e.target.value)}
-                                    placeholder="Enter 6-digit code"
+                                    placeholder={tp.codePlaceholder}
                                     className="mt-2"
                                     maxLength={6}
                                     autoComplete="off"
@@ -432,13 +432,13 @@ const Profile = () => {
                                 </div>
                                 <div>
                                   <Label htmlFor="deleteConfirm" className="text-foreground font-medium">
-                                    Type <span className="font-bold text-red-600">DELETE</span> to confirm:
+                                    {tp.typeDeleteLabel}
                                   </Label>
                                   <Input
                                     id="deleteConfirm"
                                     value={deleteConfirmation}
                                     onChange={(e) => setDeleteConfirmation(e.target.value)}
-                                    placeholder="Type DELETE here"
+                                    placeholder={tp.typeDeletePlaceholder}
                                     className="mt-2"
                                     autoComplete="off"
                                   />
@@ -449,13 +449,13 @@ const Profile = () => {
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>{tp.cancel}</AlertDialogCancel>
                         <Button
                           onClick={handleDeleteAccount}
                           disabled={!deletionEmailSent || deleteConfirmation !== "DELETE" || deletionCode !== generatedCode || deleteAccount.isPending}
                           variant="destructive"
                         >
-                          {deleteAccount.isPending ? "Deleting..." : "Delete Account"}
+                          {deleteAccount.isPending ? tp.deleting : tp.deleteAccount}
                         </Button>
                       </AlertDialogFooter>
                     </AlertDialogContent>
