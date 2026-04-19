@@ -160,10 +160,10 @@ const CountdownTimer = ({ deadline, labels }: { deadline: string; labels: Countd
       <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
         <div className="flex items-center gap-2 text-red-500 mb-2">
           <AlertTriangle className="h-5 w-5" />
-          <span className="font-semibold">Deadline Expired</span>
+          <span className="font-semibold">{labels.expired}</span>
         </div>
         <p className="text-sm text-muted-foreground">
-          Processing refund...
+          {labels.processingRefund}
         </p>
       </div>
     );
@@ -179,12 +179,12 @@ const CountdownTimer = ({ deadline, labels }: { deadline: string; labels: Countd
         <div className="flex items-center gap-2">
           <Clock className={`h-4 w-4 ${isUrgent ? 'text-amber-500' : 'text-primary'}`} />
           <span className={`text-sm font-medium ${isUrgent ? 'text-amber-600' : 'text-foreground'}`}>
-            Producer Acceptance Window
+            {labels.windowTitle}
           </span>
         </div>
         {isUrgent && (
           <span className="text-xs bg-amber-500 text-white px-2 py-0.5 rounded-full animate-pulse">
-            Urgent
+            {labels.urgent}
           </span>
         )}
       </div>
@@ -194,21 +194,21 @@ const CountdownTimer = ({ deadline, labels }: { deadline: string; labels: Countd
           <div className={`text-2xl font-bold tabular-nums ${isUrgent ? 'text-amber-500' : 'text-primary'}`}>
             {String(hours).padStart(2, '0')}
           </div>
-          <div className="text-[10px] uppercase text-muted-foreground tracking-wider">Hours</div>
+          <div className="text-[10px] uppercase text-muted-foreground tracking-wider">{labels.hours}</div>
         </div>
         <div className="flex items-center text-muted-foreground font-bold">:</div>
         <div className="bg-background rounded-lg px-3 py-2 min-w-[60px] text-center shadow-sm">
           <div className={`text-2xl font-bold tabular-nums ${isUrgent ? 'text-amber-500' : 'text-primary'}`}>
             {String(minutes).padStart(2, '0')}
           </div>
-          <div className="text-[10px] uppercase text-muted-foreground tracking-wider">Mins</div>
+          <div className="text-[10px] uppercase text-muted-foreground tracking-wider">{labels.mins}</div>
         </div>
         <div className="flex items-center text-muted-foreground font-bold">:</div>
         <div className="bg-background rounded-lg px-3 py-2 min-w-[60px] text-center shadow-sm">
           <div className={`text-2xl font-bold tabular-nums ${isUrgent ? 'text-amber-500' : 'text-primary'}`}>
             {String(seconds).padStart(2, '0')}
           </div>
-          <div className="text-[10px] uppercase text-muted-foreground tracking-wider">Secs</div>
+          <div className="text-[10px] uppercase text-muted-foreground tracking-wider">{labels.secs}</div>
         </div>
       </div>
 
@@ -220,7 +220,7 @@ const CountdownTimer = ({ deadline, labels }: { deadline: string; labels: Countd
       </div>
       
       <p className="text-xs text-muted-foreground mt-2 text-center">
-        Waiting for a producer to accept
+        {labels.waiting}
       </p>
     </div>
   );
@@ -244,6 +244,46 @@ const MyProjects = () => {
   const [requestingCancellationId, setRequestingCancellationId] = useState<string | null>(null);
   const [changingProducerId, setChangingProducerId] = useState<string | null>(null);
   const { toast } = useToast();
+  const { t } = useTranslation();
+  const tm = t.myProjects;
+
+  const statusLabels: Record<string, string> = {
+    pending: tm.statusLabels.pending,
+    pending_payment: tm.statusLabels.pending_payment,
+    paid: tm.statusLabels.paid,
+    accepted: tm.statusLabels.accepted,
+    in_progress: tm.statusLabels.in_progress,
+    review: tm.statusLabels.review,
+    completed: tm.statusLabels.completed,
+    refunded: tm.statusLabels.refunded,
+    cancellation_requested: tm.statusLabels.cancellation_requested,
+  };
+
+  const getGenreLabel = (genre: string | null): string => {
+    const genreMap: Record<string, string> = {
+      "hip-hop": tm.genres.hipHop,
+      rnb: tm.genres.rnb,
+      reggae: tm.genres.reggae,
+      latin: tm.genres.latin,
+      electronic: tm.genres.electronic,
+      pop: tm.genres.pop,
+      rock: tm.genres.rock,
+      world: tm.genres.world,
+      other: tm.genres.other,
+    };
+    return genre ? genreMap[genre] || genre : tm.genres.notSpecified;
+  };
+
+  const countdownLabels: CountdownLabels = {
+    expired: tm.deadlineExpired,
+    processingRefund: tm.processingRefund,
+    windowTitle: tm.producerAcceptanceWindow,
+    urgent: tm.urgent,
+    hours: tm.hours,
+    mins: tm.mins,
+    secs: tm.secs,
+    waiting: tm.waitingForProducer,
+  };
 
   const isProducer = userRole?.isProducer || false;
 
