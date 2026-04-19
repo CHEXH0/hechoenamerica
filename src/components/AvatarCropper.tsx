@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 interface AvatarCropperProps {
   open: boolean;
@@ -12,6 +13,8 @@ interface AvatarCropperProps {
 }
 
 const AvatarCropper = ({ open, onClose, imageFile, onCropComplete }: AvatarCropperProps) => {
+  const { t } = useTranslation();
+  const tp = t.profile;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const [scale, setScale] = useState(1);
@@ -154,7 +157,7 @@ const AvatarCropper = ({ open, onClose, imageFile, onCropComplete }: AvatarCropp
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Adjust Profile Photo</DialogTitle>
+          <DialogTitle>{tp.cropperTitle}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col items-center gap-4">
@@ -187,13 +190,13 @@ const AvatarCropper = ({ open, onClose, imageFile, onCropComplete }: AvatarCropp
 
           <Button variant="ghost" size="sm" onClick={handleReset}>
             <RotateCcw className="h-4 w-4 mr-1" />
-            Reset
+            {tp.cropperReset}
           </Button>
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleCrop}>Save Photo</Button>
+          <Button variant="outline" onClick={onClose}>{tp.cropperCancel}</Button>
+          <Button onClick={handleCrop}>{tp.cropperSave}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
