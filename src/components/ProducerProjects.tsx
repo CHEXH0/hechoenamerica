@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/contexts/TranslationContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +35,6 @@ interface SongRequest {
   wants_recorded_stems: boolean | null;
   bit_depth: string | null;
   sample_rate: string | null;
-  // Payment tracking fields
   payment_intent_id: string | null;
   acceptance_deadline: string | null;
   platform_fee_cents: number | null;
@@ -53,18 +53,13 @@ const statusColors: Record<string, string> = {
   completed: "bg-emerald-500/10 text-emerald-600",
 };
 
-const statusOptions = [
-  { value: "pending", label: "Pending" },
-  { value: "accepted", label: "Accepted" },
-  { value: "in_progress", label: "In Progress" },
-  { value: "review", label: "Under Review" },
-  { value: "completed", label: "Completed" },
-];
-
 export const ProducerProjects = () => {
   const { user } = useAuth();
   const { data: userRole } = useUserRole();
   const { toast } = useToast();
+  const { t } = useTranslation();
+  const tp = t.producerProjects;
+  const tm = t.myProjects;
   const [projects, setProjects] = useState<SongRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
@@ -77,25 +72,29 @@ export const ProducerProjects = () => {
 
   const isAdmin = userRole?.isAdmin || false;
 
+  const statusOptions = [
+    { value: "pending", label: tp.statusOptions.pending },
+    { value: "accepted", label: tp.statusOptions.accepted },
+    { value: "in_progress", label: tp.statusOptions.in_progress },
+    { value: "review", label: tp.statusOptions.review },
+    { value: "completed", label: tp.statusOptions.completed },
+  ];
+
   const getTimeRemaining = (deadline: string | null): { text: string; isUrgent: boolean; isExpired: boolean } => {
-    if (!deadline) return { text: 'No deadline', isUrgent: false, isExpired: false };
-    
+    if (!deadline) return { text: '', isUrgent: false, isExpired: false };
+
     const now = new Date();
     const deadlineDate = new Date(deadline);
     const diffMs = deadlineDate.getTime() - now.getTime();
-    
+
     if (diffMs <= 0) {
-      return { text: 'Expired', isUrgent: true, isExpired: true };
+      return { text: tm.deadlineExpired, isUrgent: true, isExpired: true };
     }
-    
+
     const hours = Math.floor(diffMs / (1000 * 60 * 60));
     const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    
-    if (hours < 12) {
-      return { text: `${hours}h ${minutes}m remaining`, isUrgent: true, isExpired: false };
-    }
-    
-    return { text: `${hours}h ${minutes}m remaining`, isUrgent: false, isExpired: false };
+
+    return { text: `${hours}h ${minutes}m`, isUrgent: hours < 12, isExpired: false };
   };
 
   const handleProcessPayout = async (projectId: string) => {
@@ -108,16 +107,16 @@ export const ProducerProjects = () => {
       if (error) throw error;
 
       toast({
-        title: "Payout Processed",
-        description: `Producer payout of $${(data.payout.producerPayoutCents / 100).toFixed(2)} has been recorded.`,
+        title: tp.toasts.payoutProcessedTitle,
+        description: `${tp.toasts.payoutProcessedDesc} $${(data.payout.producerPayoutCents / 100).toFixed(2)}`,
       });
 
       fetchProjects();
     } catch (error: any) {
       console.error("Error processing payout:", error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to process payout",
+        title: tp.toasts.errorTitle,
+        description: error.message || tp.toasts.payoutFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -135,20 +134,19 @@ export const ProducerProjects = () => {
       setHasDriveConnection(false);
       return;
     }
-    
+
     const { data, error } = await supabase
       .from('producer_google_tokens')
       .select('id')
       .eq('user_id', user.id)
       .maybeSingle();
-    
+
     setHasDriveConnection(!error && !!data);
   };
 
   const fetchProjects = async () => {
     try {
       setLoading(true);
-      // Fetch all song requests (producers can see all via RLS)
       const { data, error } = await supabase
         .from("song_requests")
         .select("*")
@@ -159,8 +157,8 @@ export const ProducerProjects = () => {
     } catch (error) {
       console.error("Error fetching projects:", error);
       toast({
-        title: "Error",
-        description: "Failed to fetch projects",
+        title: tp.toasts.errorTitle,
+        description: tp.toasts.fetchFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -172,7 +170,7 @@ export const ProducerProjects = () => {
     setUpdatingId(projectId);
     const project = projects.find(p => p.id === projectId);
     const oldStatus = project?.status || 'unknown';
-    
+
     try {
       const { error } = await supabase
         .from("song_requests")
@@ -181,7 +179,6 @@ export const ProducerProjects = () => {
 
       if (error) throw error;
 
-      // Send Discord notification for status change
       try {
         await supabase.functions.invoke('send-discord-notification', {
           body: {
@@ -193,13 +190,10 @@ export const ProducerProjects = () => {
         });
       } catch (discordError) {
         console.error("Discord notification failed:", discordError);
-        // Don't fail the whole operation if Discord fails
       }
 
-      // When producer accepts the project, send them the file download links
       if (newStatus === 'accepted' && project?.file_urls && project.file_urls.length > 0) {
         try {
-          // Fetch the producer info based on assigned_producer_id or use current user
           const { data: userData } = await supabase
             .from('profiles')
             .select('display_name')
@@ -215,16 +209,14 @@ export const ProducerProjects = () => {
           });
 
           toast({
-            title: "Files Sent",
-            description: "Customer files have been emailed to you!",
+            title: tp.toasts.filesSentToProducerTitle,
+            description: tp.toasts.filesSentToProducerDesc,
           });
         } catch (emailError) {
           console.error("Files email failed:", emailError);
-          // Don't fail the whole operation
         }
       }
 
-      // Send customer notification email for status change
       try {
         await supabase.functions.invoke('notify-customer-status', {
           body: {
@@ -233,23 +225,21 @@ export const ProducerProjects = () => {
             newStatus
           }
         });
-        console.log("Customer notification sent for status change");
       } catch (customerEmailError) {
         console.error("Customer notification failed:", customerEmailError);
-        // Don't fail the whole operation
       }
 
       toast({
-        title: "Status Updated",
-        description: `Project status changed to ${newStatus}`,
+        title: tp.toasts.statusUpdatedTitle,
+        description: `${tp.toasts.statusUpdatedDesc} ${newStatus}`,
       });
 
       fetchProjects();
     } catch (error) {
       console.error("Error updating status:", error);
       toast({
-        title: "Error",
-        description: "Failed to update status",
+        title: tp.toasts.errorTitle,
+        description: tp.toasts.statusUpdateFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -258,11 +248,10 @@ export const ProducerProjects = () => {
   };
 
   const handleFileUpload = async (projectId: string, file: File) => {
-    // Check if Google Drive is connected
     if (!hasDriveConnection) {
       toast({
-        title: "Google Drive Not Connected",
-        description: "Please connect your Google Drive first to upload deliverables.",
+        title: tp.toasts.driveNotConnectedTitle,
+        description: tp.toasts.driveNotConnectedDesc,
         variant: "destructive",
       });
       return;
@@ -271,20 +260,17 @@ export const ProducerProjects = () => {
     setUploadingId(projectId);
     try {
       const project = projects.find(p => p.id === projectId);
-      
-      // Create form data for the upload
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('requestId', projectId);
       formData.append('customerEmail', project?.user_email || '');
 
-      // Get auth token
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
         throw new Error('Not authenticated');
       }
 
-      // Upload to Google Drive via edge function
       const { data, error } = await supabase.functions.invoke('upload-deliverable-to-drive', {
         body: formData,
       });
@@ -292,18 +278,18 @@ export const ProducerProjects = () => {
       if (error) throw error;
 
       toast({
-        title: "Success! 🎉",
+        title: tp.toasts.uploadSuccessTitle,
         description: (
           <div className="flex flex-col gap-2">
-            <span>File uploaded to Google Drive and project completed!</span>
+            <span>{tp.toasts.uploadSuccessDesc}</span>
             {data.driveLink && (
-              <a 
-                href={data.driveLink} 
-                target="_blank" 
+              <a
+                href={data.driveLink}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary underline flex items-center gap-1"
               >
-                Open Drive Folder <ExternalLink className="h-3 w-3" />
+                {tp.toasts.openDriveFolder} <ExternalLink className="h-3 w-3" />
               </a>
             )}
           </div>
@@ -314,8 +300,8 @@ export const ProducerProjects = () => {
     } catch (error: any) {
       console.error("Error uploading file:", error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to upload file to Google Drive",
+        title: tp.toasts.errorTitle,
+        description: error.message || tp.toasts.uploadFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -326,8 +312,8 @@ export const ProducerProjects = () => {
   const handleResendFiles = async (project: SongRequest) => {
     if (!project.file_urls || project.file_urls.length === 0) {
       toast({
-        title: "No Files",
-        description: "This project has no customer files attached.",
+        title: tp.toasts.noFilesTitle,
+        description: tp.toasts.noFilesDesc,
         variant: "destructive",
       });
       return;
@@ -350,14 +336,14 @@ export const ProducerProjects = () => {
       });
 
       toast({
-        title: "Files Sent!",
-        description: "Customer files have been emailed to you.",
+        title: tp.toasts.filesSentTitle,
+        description: tp.toasts.filesSentDesc,
       });
     } catch (error) {
       console.error("Error resending files:", error);
       toast({
-        title: "Error",
-        description: "Failed to send files email. Please try again.",
+        title: tp.toasts.errorTitle,
+        description: tp.toasts.filesEmailFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -368,11 +354,9 @@ export const ProducerProjects = () => {
   const handleDeleteProject = async (projectId: string, fileUrls: string[] | null) => {
     setDeletingId(projectId);
     try {
-      // Delete associated files from storage if they exist
       if (fileUrls && fileUrls.length > 0) {
         for (const url of fileUrls) {
           try {
-            // Extract file path from signed URL
             const urlObj = new URL(url);
             const pathMatch = urlObj.pathname.match(/\/object\/sign\/product-assets\/(.+)/);
             if (pathMatch) {
@@ -383,12 +367,10 @@ export const ProducerProjects = () => {
             }
           } catch (fileError) {
             console.error("Error deleting file:", fileError);
-            // Continue with other files
           }
         }
       }
 
-      // Delete the song request record
       const { error } = await supabase
         .from("song_requests")
         .delete()
@@ -397,16 +379,16 @@ export const ProducerProjects = () => {
       if (error) throw error;
 
       toast({
-        title: "Project Deleted",
-        description: "The project and associated files have been removed.",
+        title: tp.toasts.projectDeletedTitle,
+        description: tp.toasts.projectDeletedDesc,
       });
 
       fetchProjects();
     } catch (error) {
       console.error("Error deleting project:", error);
       toast({
-        title: "Error",
-        description: "Failed to delete project. Please try again.",
+        title: tp.toasts.errorTitle,
+        description: tp.toasts.deleteFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -416,17 +398,17 @@ export const ProducerProjects = () => {
 
   const getGenreLabel = (genre: string | null) => {
     const genreMap: Record<string, string> = {
-      "hip-hop": "Hip Hop / Trap",
-      "rnb": "R&B / Soul",
-      "reggae": "Reggae",
-      "latin": "Latin",
-      "electronic": "Electronic",
-      "pop": "Pop",
-      "rock": "Rock",
-      "world": "World / Indigenous",
-      "other": "Other",
+      "hip-hop": tm.genres.hipHop,
+      "rnb": tm.genres.rnb,
+      "reggae": tm.genres.reggae,
+      "latin": tm.genres.latin,
+      "electronic": tm.genres.electronic,
+      "pop": tm.genres.pop,
+      "rock": tm.genres.rock,
+      "world": tm.genres.world,
+      "other": tm.genres.other,
     };
-    return genre ? genreMap[genre] || genre : "Not specified";
+    return genre ? genreMap[genre] || genre : tm.genres.notSpecified;
   };
 
   if (loading) {
@@ -448,42 +430,42 @@ export const ProducerProjects = () => {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Music className="h-5 w-5" />
-              My Assigned Projects
+              {tp.cardTitle}
             </CardTitle>
             <CardDescription className="flex items-center gap-2">
-              Manage your song production projects
+              {tp.cardDescription}
               {hasDriveConnection !== null && (
-                <Badge 
+                <Badge
                   variant={hasDriveConnection ? "default" : "destructive"}
                   className="text-xs"
                 >
                   <HardDrive className="h-3 w-3 mr-1" />
-                  {hasDriveConnection ? "Drive Connected" : "Drive Not Connected"}
+                  {hasDriveConnection ? tp.driveConnected : tp.driveNotConnected}
                 </Badge>
               )}
             </CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={fetchProjects}>
             <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
+            {tp.refresh}
           </Button>
         </div>
       </CardHeader>
       <CardContent>
         {projects.length === 0 ? (
           <p className="text-muted-foreground text-center py-8">
-            No projects assigned yet
+            {tp.noProjects}
           </p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Client</TableHead>
-                <TableHead>Genre</TableHead>
-                <TableHead>Tier</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{tp.columnClient}</TableHead>
+                <TableHead>{tp.columnGenre}</TableHead>
+                <TableHead>{tp.columnTier}</TableHead>
+                <TableHead>{tp.columnStatus}</TableHead>
+                <TableHead>{tp.columnDate}</TableHead>
+                <TableHead>{tp.columnActions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -530,7 +512,6 @@ export const ProducerProjects = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2 flex-wrap">
-                      {/* Payout Button - Show prominently for completed unpaid projects */}
                       {project.status === 'completed' && !project.producer_paid_at && (
                         <Button
                           variant="default"
@@ -544,19 +525,17 @@ export const ProducerProjects = () => {
                           ) : (
                             <DollarSign className="h-4 w-4 mr-1" />
                           )}
-                          Get Paid
+                          {tp.getPaid}
                         </Button>
                       )}
-                      
-                      {/* Show paid badge for completed projects */}
+
                       {project.status === 'completed' && project.producer_paid_at && (
                         <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
                           <DollarSign className="h-3 w-3 mr-1" />
-                          Paid
+                          {tp.paid}
                         </Badge>
                       )}
 
-                      {/* View Details */}
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button
@@ -569,56 +548,56 @@ export const ProducerProjects = () => {
                         </DialogTrigger>
                         <DialogContent className="max-w-2xl">
                           <DialogHeader>
-                            <DialogTitle>Project Details</DialogTitle>
+                            <DialogTitle>{tp.projectDetails}</DialogTitle>
                           </DialogHeader>
                           <div className="space-y-4">
                             <div>
-                              <Label className="text-muted-foreground">Client Email</Label>
+                              <Label className="text-muted-foreground">{tp.clientEmail}</Label>
                               <p className="font-medium">{project.user_email}</p>
                             </div>
                             <div>
-                              <Label className="text-muted-foreground">Song Idea</Label>
+                              <Label className="text-muted-foreground">{tp.songIdea}</Label>
                               <p className="bg-muted p-3 rounded-lg">{project.song_idea}</p>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                               <div>
-                                <Label className="text-muted-foreground">Tier</Label>
+                                <Label className="text-muted-foreground">{tp.tier}</Label>
                                 <p className="font-medium">{project.tier} ({project.price})</p>
                               </div>
                               <div>
-                                <Label className="text-muted-foreground">Genre</Label>
+                                <Label className="text-muted-foreground">{tp.genre}</Label>
                                 <p className="font-medium">{getGenreLabel(project.genre_category)}</p>
                               </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                               <div>
-                                <Label className="text-muted-foreground">Bit Depth</Label>
+                                <Label className="text-muted-foreground">{tp.bitDepth}</Label>
                                 <p className="font-medium">{project.bit_depth || '24'}-bit</p>
                               </div>
                               <div>
-                                <Label className="text-muted-foreground">Sample Rate</Label>
+                                <Label className="text-muted-foreground">{tp.sampleRate}</Label>
                                 <p className="font-medium">{project.sample_rate || '44.1'} kHz</p>
                               </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                               <div>
-                                <Label className="text-muted-foreground">Revisions</Label>
+                                <Label className="text-muted-foreground">{tp.revisions}</Label>
                                 <p className="font-medium">{project.number_of_revisions || 0}</p>
                               </div>
                               <div>
-                                <Label className="text-muted-foreground">Options</Label>
+                                <Label className="text-muted-foreground">{tp.options}</Label>
                                 <div className="flex flex-wrap gap-1 mt-1">
-                                  {project.wants_mixing && <Badge variant="secondary">Mixing</Badge>}
-                                  {project.wants_mastering && <Badge variant="secondary">Mastering</Badge>}
-                                  {project.wants_analog && <Badge variant="secondary">Analog</Badge>}
-                                  {project.wants_recorded_stems && <Badge variant="secondary">Stems</Badge>}
+                                  {project.wants_mixing && <Badge variant="secondary">{tp.statusOptions ? tm.addonMixing.replace('🎚️ ', '') : 'Mixing'}</Badge>}
+                                  {project.wants_mastering && <Badge variant="secondary">{tm.addonMastering.replace('🔊 ', '')}</Badge>}
+                                  {project.wants_analog && <Badge variant="secondary">{tm.addonAnalog.replace('📻 ', '')}</Badge>}
+                                  {project.wants_recorded_stems && <Badge variant="secondary">{tm.addonStems.replace('🎹 ', '')}</Badge>}
                                 </div>
                               </div>
                             </div>
                             {project.file_urls && project.file_urls.length > 0 && (
                               <div>
                                 <div className="flex items-center justify-between mb-2">
-                                  <Label className="text-muted-foreground">Client Files</Label>
+                                  <Label className="text-muted-foreground">{tp.clientFiles}</Label>
                                   <Button
                                     variant="outline"
                                     size="sm"
@@ -630,7 +609,7 @@ export const ProducerProjects = () => {
                                     ) : (
                                       <Mail className="h-4 w-4 mr-2" />
                                     )}
-                                    Resend Files to Email
+                                    {tp.resendFilesToEmail}
                                   </Button>
                                 </div>
                                 <div className="space-y-3 max-h-80 overflow-y-auto">
@@ -648,26 +627,24 @@ export const ProducerProjects = () => {
                                 </div>
                               </div>
                             )}
-                            
-                            {/* Payment Information */}
+
                             <div className="border-t pt-4 mt-4">
-                              <Label className="text-muted-foreground">Payment Information</Label>
+                              <Label className="text-muted-foreground">{tp.paymentInformation}</Label>
                               <div className="grid grid-cols-2 gap-4 mt-2">
                                 <div className="bg-muted/50 p-3 rounded-lg">
-                                  <p className="text-xs text-muted-foreground">Total Payment</p>
+                                  <p className="text-xs text-muted-foreground">{tp.totalPayment}</p>
                                   <p className="font-medium">{project.price}</p>
                                 </div>
                                 {project.producer_payout_cents && (
                                   <div className="bg-emerald-500/10 p-3 rounded-lg">
-                                    <p className="text-xs text-muted-foreground">Your Payout (90%)</p>
+                                    <p className="text-xs text-muted-foreground">{tp.yourPayout}</p>
                                     <p className="font-medium text-emerald-600">
                                       ${(project.producer_payout_cents / 100).toFixed(2)}
                                     </p>
                                   </div>
                                 )}
                               </div>
-                              
-                              {/* Acceptance Deadline */}
+
                               {project.status === 'pending' && project.acceptance_deadline && (
                                 <div className="mt-3">
                                   {(() => {
@@ -679,7 +656,7 @@ export const ProducerProjects = () => {
                                       }`}>
                                         {isUrgent ? <AlertTriangle className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
                                         <span className="text-sm font-medium">
-                                          {isExpired ? 'Acceptance deadline expired - Will be refunded' : `Accept within: ${text}`}
+                                          {isExpired ? tp.acceptanceExpired : `${tp.acceptWithin} ${text}`}
                                         </span>
                                       </div>
                                     );
@@ -687,14 +664,13 @@ export const ProducerProjects = () => {
                                 </div>
                               )}
 
-                              {/* Payout Status */}
                               {project.status === 'completed' && (
                                 <div className="mt-3">
                                   {project.producer_paid_at ? (
                                     <div className="flex items-center gap-2 p-2 bg-emerald-500/10 rounded">
                                       <DollarSign className="h-4 w-4 text-emerald-600" />
                                       <span className="text-sm text-emerald-600 font-medium">
-                                        Paid on {new Date(project.producer_paid_at).toLocaleDateString()}
+                                        {tp.paidOn} {new Date(project.producer_paid_at).toLocaleDateString()}
                                       </span>
                                     </div>
                                   ) : (
@@ -708,18 +684,17 @@ export const ProducerProjects = () => {
                                       ) : (
                                         <DollarSign className="h-4 w-4 mr-2" />
                                       )}
-                                      Process Producer Payout
+                                      {tp.processProducerPayout}
                                     </Button>
                                   )}
                                 </div>
                               )}
-                              
-                              {/* Refunded Status */}
+
                               {project.refunded_at && (
                                 <div className="mt-3 flex items-center gap-2 p-2 bg-destructive/10 rounded">
                                   <AlertTriangle className="h-4 w-4 text-destructive" />
                                   <span className="text-sm text-destructive font-medium">
-                                    Refunded on {new Date(project.refunded_at).toLocaleDateString()}
+                                    {tp.refundedOn} {new Date(project.refunded_at).toLocaleDateString()}
                                   </span>
                                 </div>
                               )}
@@ -728,7 +703,6 @@ export const ProducerProjects = () => {
                         </DialogContent>
                       </Dialog>
 
-                      {/* Upload Deliverable to Google Drive */}
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -753,9 +727,9 @@ export const ProducerProjects = () => {
                             </Label>
                           </TooltipTrigger>
                           <TooltipContent>
-                            {hasDriveConnection 
-                              ? "Upload deliverable to Google Drive" 
-                              : "Connect Google Drive first to upload files"
+                            {hasDriveConnection
+                              ? tp.uploadTooltipConnected
+                              : tp.uploadTooltipNotConnected
                             }
                           </TooltipContent>
                         </Tooltip>
@@ -772,7 +746,6 @@ export const ProducerProjects = () => {
                         }}
                       />
 
-                      {/* Admin Delete Button */}
                       {isAdmin && (
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
@@ -790,21 +763,21 @@ export const ProducerProjects = () => {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Project?</AlertDialogTitle>
+                              <AlertDialogTitle>{tp.deleteDialogTitle}</AlertDialogTitle>
                               <AlertDialogDescription>
-                                This will permanently delete this project and all associated files. This action cannot be undone.
+                                {tp.deleteDialogDesc}
                                 <br /><br />
-                                <strong>Client:</strong> {project.user_email}<br />
-                                <strong>Tier:</strong> {project.tier} ({project.price})
+                                <strong>{tp.columnClient}:</strong> {project.user_email}<br />
+                                <strong>{tp.tier}:</strong> {project.tier} ({project.price})
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogCancel>{tp.deleteCancel}</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => handleDeleteProject(project.id, project.file_urls)}
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               >
-                                Delete Project
+                                {tp.deleteConfirm}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
