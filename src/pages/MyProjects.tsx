@@ -872,10 +872,10 @@ const MyProjects = () => {
                 <div className="flex flex-col items-center gap-2 py-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg">
                   <div className="flex items-center gap-2 text-emerald-600">
                     <CheckCircle className="h-5 w-5" />
-                    <span className="font-medium">Delivered!</span>
+                    <span className="font-medium">{tm.delivered}</span>
                   </div>
                   <p className="text-sm text-muted-foreground text-center">
-                    Customer has been emailed the download link
+                    {tm.deliveredEmailedDesc}
                   </p>
                 </div>
               )}
