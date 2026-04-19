@@ -489,6 +489,8 @@ const MyProjects = () => {
         description: tm.toasts.statusUpdateFailedDesc,
         variant: "destructive",
       });
+    }
+  };
 
   // Real-time subscription
   useEffect(() => {
