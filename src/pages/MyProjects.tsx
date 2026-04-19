@@ -833,7 +833,7 @@ const MyProjects = () => {
                   ) : (
                     <Mail className="mr-2 h-4 w-4" />
                   )}
-                  Email Me Customer Files
+                  {tm.emailMeFiles}
                 </Button>
               )}
 
@@ -843,7 +843,7 @@ const MyProjects = () => {
                   onClick={() => handleStartWorking(project.id, project.number_of_revisions || 0)}
                 >
                   <Headphones className="mr-2 h-4 w-4" />
-                  Start Working on Project
+                  {tm.startWorking}
                 </Button>
               )}
               
