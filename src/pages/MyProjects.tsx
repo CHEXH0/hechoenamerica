@@ -1014,23 +1014,23 @@ const MyProjects = () => {
                               ) : (
                                 <UserMinus className="mr-2 h-4 w-4" />
                               )}
-                              Change Producer
+                              {tm.changeProducer}
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Change Producer?</AlertDialogTitle>
+                              <AlertDialogTitle>{tm.changeProducerDialogTitle}</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Your project will be reassigned. A <strong>$25 fee</strong> applies.
+                                <span dangerouslySetInnerHTML={{ __html: tm.changeProducerDialogDesc }} />
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Keep Current Producer</AlertDialogCancel>
+                              <AlertDialogCancel>{tm.keepCurrentProducer}</AlertDialogCancel>
                               <AlertDialogAction 
                                 onClick={() => handleClientChangeProducer(project.id)}
                                 className="bg-blue-600 text-white hover:bg-blue-700"
                               >
-                                Change Producer ($25 fee)
+                                {tm.changeProducerFee}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
