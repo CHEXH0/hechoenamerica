@@ -1117,22 +1117,22 @@ const MyProjects = () => {
             className="mb-4 hover:bg-muted/50"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Home
+            {tm.backToHome}
           </Button>
 
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent mb-2">
-                My Projects
+                {tm.pageTitle}
               </h1>
               <p className="text-muted-foreground">
-                {isProducer ? "Manage requests and assignments" : "Track your song requests"}
+                {isProducer ? tm.subtitleProducer : tm.subtitleClient}
               </p>
             </div>
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${isRealtimeConnected ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
               <span className="text-xs text-muted-foreground">
-                {isRealtimeConnected ? 'Live updates' : 'Connecting...'}
+                {isRealtimeConnected ? tm.liveUpdates : tm.connecting}
               </span>
               <Wifi className={`h-4 w-4 ${isRealtimeConnected ? 'text-green-500' : 'text-muted-foreground'}`} />
             </div>
