@@ -15,6 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import AvatarCropper from "@/components/AvatarCropper";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -23,6 +24,8 @@ const Profile = () => {
   const { data: profile, isLoading } = useProfile(user?.id);
   const updateProfile = useUpdateProfile();
   const deleteAccount = useDeleteAccount();
+  const { t } = useTranslation();
+  const tp = t.profile;
 
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
@@ -63,12 +66,12 @@ const Profile = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.match(/^image\/(jpeg|png)$/)) {
-      toast({ title: "Invalid file", description: "Please select a .jpg or .png image.", variant: "destructive" });
+      toast({ title: tp.invalidFileTitle, description: tp.invalidFileDesc, variant: "destructive" });
       return;
     }
     const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB Supabase free tier limit
     if (file.size > MAX_FILE_SIZE) {
-      toast({ title: "File too large", description: "Maximum file size is 50MB.", variant: "destructive" });
+      toast({ title: tp.fileTooLargeTitle, description: tp.fileTooLargeDesc, variant: "destructive" });
       return;
     }
     setSelectedFile(file);
@@ -95,7 +98,7 @@ const Profile = () => {
       });
     } catch (error) {
       console.error("Avatar upload error:", error);
-      toast({ title: "Upload failed", description: "Could not upload your photo. Please try again.", variant: "destructive" });
+      toast({ title: tp.uploadFailedTitle, description: tp.uploadFailedDesc, variant: "destructive" });
     } finally {
       setUploadingAvatar(false);
       setSelectedFile(null);
@@ -104,10 +107,14 @@ const Profile = () => {
 
   const handleUpdateProfile = () => {
     if (!user?.id) return;
-    updateProfile.mutate({
-      userId: user.id,
-      updates: { display_name: displayName, bio }
-    });
+    updateProfile.mutate(
+      { userId: user.id, updates: { display_name: displayName, bio } },
+      {
+        onSuccess: () => {
+          toast({ title: tp.profileUpdatedTitle, description: tp.profileUpdatedDesc });
+        },
+      }
+    );
   };
 
   const handleSendPasswordResetEmail = async () => {
@@ -122,15 +129,15 @@ const Profile = () => {
       if (error) throw error;
 
       toast({
-        title: "Password reset email sent!",
-        description: "Check your email for a link to reset your password.",
+        title: tp.passwordResetSentTitle,
+        description: tp.passwordResetSentDesc,
         duration: 8000,
       });
     } catch (error) {
       console.error('Password reset error:', error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to send password reset email.",
+        title: tp.errorTitle,
+        description: error instanceof Error ? error.message : tp.passwordResetFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -158,14 +165,14 @@ const Profile = () => {
 
       setDeletionEmailSent(true);
       toast({
-        title: "Verification email sent",
-        description: "Please check your email for the 6-digit verification code.",
+        title: tp.verificationSentTitle,
+        description: tp.verificationSentDesc,
       });
     } catch (error) {
       console.error("Error sending deletion verification:", error);
       toast({
-        title: "Error",
-        description: "Failed to send verification email. Please try again.",
+        title: tp.errorTitle,
+        description: tp.verificationFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -176,16 +183,16 @@ const Profile = () => {
   const handleDeleteAccount = () => {
     if (deleteConfirmation !== "DELETE") {
       toast({
-        title: "Confirmation required",
-        description: "Please type DELETE to confirm account deletion.",
+        title: tp.confirmRequiredTitle,
+        description: tp.confirmRequiredDesc,
         variant: "destructive",
       });
       return;
     }
     if (!deletionEmailSent || deletionCode !== generatedCode) {
       toast({
-        title: "Verification required",
-        description: "Please enter the correct verification code from your email.",
+        title: tp.verificationRequiredTitle,
+        description: tp.verificationRequiredDesc,
         variant: "destructive",
       });
       return;
