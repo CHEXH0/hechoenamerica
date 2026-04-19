@@ -971,25 +971,25 @@ const MyProjects = () => {
                           ) : (
                             <XCircle className="mr-2 h-4 w-4" />
                           )}
-                          Cancel Project
+                          {tm.cancelProject}
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Cancel this project?</AlertDialogTitle>
+                          <AlertDialogTitle>{tm.cancelDialogTitle}</AlertDialogTitle>
                           <AlertDialogDescription>
                             {project.status === "paid" 
-                               ? "You will receive a full refund. This cannot be undone."
-                               : "This will cancel your project permanently."}
+                               ? tm.cancelDialogDescPaid
+                               : tm.cancelDialogDescOther}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Keep Project</AlertDialogCancel>
+                          <AlertDialogCancel>{tm.keepProject}</AlertDialogCancel>
                           <AlertDialogAction 
                             onClick={() => handleCancelProject(project.id)}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           >
-                            Yes, Cancel {project.status === "paid" ? "& Get Refund" : "Project"}
+                            {project.status === "paid" ? tm.cancelConfirmRefund : tm.cancelConfirmProject}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
