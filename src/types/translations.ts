@@ -24,6 +24,10 @@ export interface Translations {
     fileTooLargeDesc: string;
     uploadFailedTitle: string;
     uploadFailedDesc: string;
+    cropperTitle: string;
+    cropperReset: string;
+    cropperCancel: string;
+    cropperSave: string;
     emailLabel: string;
     emailCannotChange: string;
     displayNameLabel: string;
