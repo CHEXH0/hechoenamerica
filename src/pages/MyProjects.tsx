@@ -1051,23 +1051,23 @@ const MyProjects = () => {
                             ) : (
                               <MessageSquare className="mr-2 h-4 w-4" />
                             )}
-                            Request Cancellation
+                            {tm.requestCancellation}
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Request Cancellation</AlertDialogTitle>
+                            <AlertDialogTitle>{tm.requestCancellationDialogTitle}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Work has already started. Our team will review your request and determine any refund.
+                              {tm.requestCancellationDialogDesc}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Keep Project</AlertDialogCancel>
+                            <AlertDialogCancel>{tm.keepProject}</AlertDialogCancel>
                             <AlertDialogAction 
                               onClick={() => handleRequestCancellation(project.id)}
                               className="bg-amber-600 text-white hover:bg-amber-700"
                             >
-                              Submit Request
+                              {tm.submitRequest}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
