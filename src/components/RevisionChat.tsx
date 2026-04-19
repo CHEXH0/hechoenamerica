@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2, Send, MessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 interface Message {
   id: string;
@@ -30,6 +30,8 @@ export const RevisionChat = ({ revisionId, isProducerView }: RevisionChatProps) 
   const scrollRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
+  const tc = t.revisionChat;
 
   const senderRole = isProducerView ? "producer" : "client";
 
@@ -99,8 +101,8 @@ export const RevisionChat = ({ revisionId, isProducerView }: RevisionChatProps) 
     } catch (error) {
       console.error("Error sending message:", error);
       toast({
-        title: "Error",
-        description: "Failed to send message.",
+        title: tc.errorTitle,
+        description: tc.sendFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -117,7 +119,7 @@ export const RevisionChat = ({ revisionId, isProducerView }: RevisionChatProps) 
         className="text-xs gap-1"
       >
         <MessageSquare className="h-3 w-3" />
-        Chat ({messages.length || "..."})
+        {tc.chat} ({messages.length || "..."})
       </Button>
     );
   }
@@ -127,10 +129,10 @@ export const RevisionChat = ({ revisionId, isProducerView }: RevisionChatProps) 
       <div className="flex items-center justify-between p-2 border-b border-border bg-muted/30">
         <span className="text-xs font-medium flex items-center gap-1">
           <MessageSquare className="h-3 w-3" />
-          Revision Chat
+          {tc.revisionChat}
         </span>
         <Button variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => setIsOpen(false)}>
-          Close
+          {tc.close}
         </Button>
       </div>
 
@@ -141,7 +143,7 @@ export const RevisionChat = ({ revisionId, isProducerView }: RevisionChatProps) 
           </div>
         ) : messages.length === 0 ? (
           <p className="text-xs text-muted-foreground text-center py-8">
-            No messages yet. Start a conversation!
+            {tc.noMessages}
           </p>
         ) : (
           messages.map((msg) => {
@@ -156,7 +158,7 @@ export const RevisionChat = ({ revisionId, isProducerView }: RevisionChatProps) 
                   }`}
                 >
                   <div className="text-[10px] opacity-70 mb-0.5">
-                    {msg.sender_role === "producer" ? "Producer" : "Client"} •{" "}
+                    {msg.sender_role === "producer" ? tc.producer : tc.client} •{" "}
                     {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </div>
                   <p className="whitespace-pre-wrap">{msg.message}</p>
@@ -169,7 +171,7 @@ export const RevisionChat = ({ revisionId, isProducerView }: RevisionChatProps) 
 
       <div className="p-2 border-t border-border flex gap-2">
         <Textarea
-          placeholder="Type a message..."
+          placeholder={tc.typeMessage}
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           rows={1}

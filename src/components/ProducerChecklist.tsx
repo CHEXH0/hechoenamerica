@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ClipboardCheck, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 interface ChecklistItem {
   key: string;
@@ -39,50 +40,32 @@ export const ProducerChecklist = ({
   const [checklist, setChecklist] = useState<Record<string, boolean>>(currentChecklist || {});
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
+  const tc = t.producerChecklist;
 
   useEffect(() => {
     setChecklist(currentChecklist || {});
   }, [currentChecklist]);
 
-  // Build checklist items based on what the client requested
   const items: ChecklistItem[] = [
     {
       key: "base_production",
-      label: "Base Production",
-      description: "Core song production (arrangement, sound design, composition)",
+      label: tc.items.base_production.label,
+      description: tc.items.base_production.description,
     },
   ];
 
   if (wantsRecordedStems) {
-    items.push({
-      key: "stems",
-      label: "Recorded Stems",
-      description: "Individual instrument/vocal tracks exported",
-    });
+    items.push({ key: "stems", label: tc.items.stems.label, description: tc.items.stems.description });
   }
-
   if (wantsAnalog) {
-    items.push({
-      key: "analog",
-      label: "Analog Processing",
-      description: "Processed through analog hardware (compressors, EQs, tape)",
-    });
+    items.push({ key: "analog", label: tc.items.analog.label, description: tc.items.analog.description });
   }
-
   if (wantsMixing) {
-    items.push({
-      key: "mixing",
-      label: "Professional Mixing",
-      description: "Levels, EQ, compression, effects, spatial positioning",
-    });
+    items.push({ key: "mixing", label: tc.items.mixing.label, description: tc.items.mixing.description });
   }
-
   if (wantsMastering) {
-    items.push({
-      key: "mastering",
-      label: "Mastering",
-      description: "Final loudness, clarity, and playback optimization",
-    });
+    items.push({ key: "mastering", label: tc.items.mastering.label, description: tc.items.mastering.description });
   }
 
   const completedCount = items.filter((item) => checklist[item.key]).length;
@@ -104,11 +87,10 @@ export const ProducerChecklist = ({
       onChecklistUpdate?.();
     } catch (error) {
       console.error("Error updating checklist:", error);
-      // Revert on error
       setChecklist(checklist);
       toast({
-        title: "Error",
-        description: "Failed to update checklist",
+        title: tc.errorTitle,
+        description: tc.errorDesc,
         variant: "destructive",
       });
     } finally {
@@ -116,16 +98,12 @@ export const ProducerChecklist = ({
     }
   };
 
-  if (items.length <= 1 && !wantsRecordedStems && !wantsAnalog && !wantsMixing && !wantsMastering) {
-    // Only base production, no add-ons — still show it
-  }
-
   return (
     <Card className="p-4 space-y-3 border-border">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ClipboardCheck className="h-4 w-4 text-primary" />
-          <span className="font-medium text-sm">Production Checklist</span>
+          <span className="font-medium text-sm">{tc.title}</span>
         </div>
         <div className="flex items-center gap-2">
           {saving && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
@@ -137,12 +115,11 @@ export const ProducerChecklist = ({
                 : ""
             }
           >
-            {completedCount}/{totalCount} Done
+            {completedCount}/{totalCount} {tc.done}
           </Badge>
         </div>
       </div>
 
-      {/* Progress bar */}
       <div className="h-1.5 bg-muted rounded-full overflow-hidden">
         <div
           className="h-full bg-primary transition-all duration-300 rounded-full"

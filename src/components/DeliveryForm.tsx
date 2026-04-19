@@ -7,6 +7,7 @@ import { Send, Loader2, Link as LinkIcon, AlertCircle, FileCheck } from "lucide-
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { RevisionDeliveryForm } from "@/components/RevisionDeliveryForm";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 interface DeliveryFormProps {
   projectId: string;
@@ -20,11 +21,11 @@ interface Revision {
   status: string;
 }
 
-export const DeliveryForm = ({ 
-  projectId, 
-  customerEmail, 
+export const DeliveryForm = ({
+  projectId,
+  customerEmail,
   numberOfRevisions = 0,
-  onDeliveryComplete 
+  onDeliveryComplete
 }: DeliveryFormProps) => {
   const [downloadLink, setDownloadLink] = useState("");
   const [customMessage, setCustomMessage] = useState("");
@@ -32,6 +33,8 @@ export const DeliveryForm = ({
   const [revisions, setRevisions] = useState<Revision[]>([]);
   const [loadingRevisions, setLoadingRevisions] = useState(true);
   const { toast } = useToast();
+  const { t } = useTranslation();
+  const tc = t.deliveryForm;
 
   useEffect(() => {
     if (numberOfRevisions > 0) {
@@ -66,34 +69,22 @@ export const DeliveryForm = ({
     }
   };
 
-  const allRevisionsDelivered = numberOfRevisions === 0 || 
+  const allRevisionsDelivered = numberOfRevisions === 0 ||
     (revisions.length > 0 && revisions.every(r => r.status === "delivered"));
 
   const handleSendDelivery = async () => {
     if (!downloadLink.trim()) {
-      toast({
-        title: "Missing Link",
-        description: "Please paste your Google Drive or cloud storage link.",
-        variant: "destructive",
-      });
+      toast({ title: tc.missingLinkTitle, description: tc.missingLinkDesc, variant: "destructive" });
       return;
     }
 
     if (!isValidUrl(downloadLink.trim())) {
-      toast({
-        title: "Invalid Link",
-        description: "Please enter a valid URL (e.g., https://drive.google.com/...)",
-        variant: "destructive",
-      });
+      toast({ title: tc.invalidLinkTitle, description: tc.invalidLinkDesc, variant: "destructive" });
       return;
     }
 
     if (!allRevisionsDelivered) {
-      toast({
-        title: "Revisions Incomplete",
-        description: "Please complete all revision deliveries before sending the final project.",
-        variant: "destructive",
-      });
+      toast({ title: tc.revisionsIncompleteTitle, description: tc.revisionsIncompleteDesc, variant: "destructive" });
       return;
     }
 
@@ -112,16 +103,16 @@ export const DeliveryForm = ({
       if (data?.error) throw new Error(data.error);
 
       toast({
-        title: "Delivery Sent! 🎉",
-        description: `Email sent to ${customerEmail}`,
+        title: tc.deliverySentTitle,
+        description: `${tc.deliverySentDesc} ${customerEmail}`,
       });
 
       onDeliveryComplete();
     } catch (error: any) {
       console.error("Error sending delivery:", error);
       toast({
-        title: "Send Failed",
-        description: error.message || "Failed to send delivery email",
+        title: tc.sendFailedTitle,
+        description: error.message || tc.sendFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -133,14 +124,13 @@ export const DeliveryForm = ({
     return (
       <div className="flex items-center gap-2 p-4 text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
-        Loading...
+        {tc.loading}
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      {/* Revision deliveries (if any) */}
       {numberOfRevisions > 0 && (
         <RevisionDeliveryForm
           projectId={projectId}
@@ -150,53 +140,50 @@ export const DeliveryForm = ({
         />
       )}
 
-      {/* Final delivery form */}
       <div className={`space-y-4 p-4 rounded-lg border ${
-        allRevisionsDelivered 
-          ? "bg-muted/30 border-border" 
+        allRevisionsDelivered
+          ? "bg-muted/30 border-border"
           : "bg-muted/10 border-muted opacity-60"
       }`}>
         <div className="flex items-center justify-between">
           <h4 className="font-medium flex items-center gap-2">
             <FileCheck className="h-4 w-4" />
-            Final Project Delivery
+            {tc.finalProjectDelivery}
           </h4>
           {!allRevisionsDelivered && numberOfRevisions > 0 && (
             <span className="text-xs text-amber-600 flex items-center gap-1">
               <AlertCircle className="h-3 w-3" />
-              Complete revisions first
+              {tc.completeRevisionsFirst}
             </span>
           )}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor={`link-${projectId}`} className="text-sm font-medium">
-            Download Link <span className="text-destructive">*</span>
+            {tc.downloadLink} <span className="text-destructive">*</span>
           </Label>
           <div className="relative">
             <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               id={`link-${projectId}`}
               type="url"
-              placeholder="https://drive.google.com/... or Dropbox link"
+              placeholder={tc.downloadPlaceholder}
               value={downloadLink}
               onChange={(e) => setDownloadLink(e.target.value)}
               className="pl-10"
               disabled={isSending || !allRevisionsDelivered}
             />
           </div>
-          <p className="text-xs text-muted-foreground">
-            Paste your Google Drive, Dropbox, or WeTransfer link
-          </p>
+          <p className="text-xs text-muted-foreground">{tc.downloadHint}</p>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor={`message-${projectId}`} className="text-sm font-medium">
-            Personal Message <span className="text-muted-foreground">(optional)</span>
+            {tc.personalMessage} <span className="text-muted-foreground">{tc.optional}</span>
           </Label>
           <Textarea
             id={`message-${projectId}`}
-            placeholder="Hey! Here's your finished track. I hope you love it! Let me know if you have any questions..."
+            placeholder={tc.messagePlaceholder}
             value={customMessage}
             onChange={(e) => setCustomMessage(e.target.value)}
             rows={3}
@@ -208,20 +195,20 @@ export const DeliveryForm = ({
           </p>
         </div>
 
-        <Button 
-          className="w-full" 
+        <Button
+          className="w-full"
           onClick={handleSendDelivery}
           disabled={isSending || !downloadLink.trim() || !allRevisionsDelivered}
         >
           {isSending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Sending to {customerEmail}...
+              {tc.sending} {customerEmail}...
             </>
           ) : (
             <>
               <Send className="mr-2 h-4 w-4" />
-              Send Final Delivery Email
+              {tc.sendFinalDelivery}
             </>
           )}
         </Button>

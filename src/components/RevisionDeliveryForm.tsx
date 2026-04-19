@@ -4,10 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Loader2, 
-  Link as LinkIcon, 
-  Send, 
+import {
+  Loader2,
+  Link as LinkIcon,
+  Send,
   CheckCircle,
   AlertCircle,
   FileCheck,
@@ -16,6 +16,7 @@ import {
 import { RevisionChat } from "@/components/RevisionChat";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 interface Revision {
   id: string;
@@ -49,6 +50,8 @@ export const RevisionDeliveryForm = ({
   const [revisionLinks, setRevisionLinks] = useState<Record<string, string>>({});
   const [meetingLinks, setMeetingLinks] = useState<Record<string, string>>({});
   const { toast } = useToast();
+  const { t } = useTranslation();
+  const tc = t.revisionDeliveryForm;
 
   useEffect(() => {
     fetchRevisions();
@@ -83,28 +86,19 @@ export const RevisionDeliveryForm = ({
 
   const handleDeliverRevision = async (revisionId: string, revisionNumber: number) => {
     const link = revisionLinks[revisionId];
-    
+
     if (!link?.trim()) {
-      toast({
-        title: "Missing Link",
-        description: "Please enter a download link for this revision.",
-        variant: "destructive",
-      });
+      toast({ title: tc.missingLinkTitle, description: tc.missingLinkDesc, variant: "destructive" });
       return;
     }
 
     if (!isValidUrl(link.trim())) {
-      toast({
-        title: "Invalid Link",
-        description: "Please enter a valid URL.",
-        variant: "destructive",
-      });
+      toast({ title: tc.invalidLinkTitle, description: tc.invalidLinkDesc, variant: "destructive" });
       return;
     }
 
     setDeliveringRevision(revisionId);
     try {
-      // Get the song request ID from the revision
       const revision = revisions.find(r => r.id === revisionId);
       if (!revision) throw new Error("Revision not found");
 
@@ -122,7 +116,6 @@ export const RevisionDeliveryForm = ({
 
       if (error) throw error;
 
-      // Send notification email to customer about revision delivery
       try {
         await supabase.functions.invoke('send-revision-notification', {
           body: {
@@ -137,8 +130,8 @@ export const RevisionDeliveryForm = ({
       }
 
       toast({
-        title: "Revision Delivered! 🎉",
-        description: `Revision ${revisionNumber} has been sent to ${customerEmail}`,
+        title: tc.revisionDeliveredTitle,
+        description: `${tc.revision} ${revisionNumber} ${tc.revisionDeliveredDesc} ${customerEmail}`,
       });
 
       fetchRevisions();
@@ -146,8 +139,8 @@ export const RevisionDeliveryForm = ({
     } catch (error) {
       console.error("Error delivering revision:", error);
       toast({
-        title: "Error",
-        description: "Failed to deliver revision. Please try again.",
+        title: tc.errorTitle,
+        description: tc.deliverFailedDesc,
         variant: "destructive",
       });
     } finally {
@@ -155,10 +148,9 @@ export const RevisionDeliveryForm = ({
     }
   };
 
-  const allRevisionsDelivered = revisions.length > 0 && 
+  const allRevisionsDelivered = revisions.length > 0 &&
     revisions.every(r => r.status === "delivered");
 
-  // Show both pending and requested revisions - producers can deliver proactively
   const deliverableRevisions = revisions.filter(r => r.status === "pending" || r.status === "requested");
   const deliveredCount = revisions.filter(r => r.status === "delivered").length;
 
@@ -166,7 +158,7 @@ export const RevisionDeliveryForm = ({
     return (
       <div className="flex items-center gap-2 p-4 text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
-        Loading revisions...
+        {tc.loading}
       </div>
     );
   }
@@ -180,10 +172,10 @@ export const RevisionDeliveryForm = ({
       <div className="flex items-center justify-between">
         <h4 className="font-medium flex items-center gap-2">
           <FileCheck className="h-4 w-4" />
-          Revision Deliveries
+          {tc.revisionDeliveries}
         </h4>
         <Badge variant="secondary">
-          {deliveredCount}/{numberOfRevisions} Delivered
+          {deliveredCount}/{numberOfRevisions} {tc.deliveredCount}
         </Badge>
       </div>
 
@@ -191,16 +183,16 @@ export const RevisionDeliveryForm = ({
         <div className="flex flex-col items-center gap-2 py-4 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg">
           <div className="flex items-center gap-2 text-emerald-600">
             <CheckCircle className="h-5 w-5" />
-            <span className="font-medium">All Revisions Complete!</span>
+            <span className="font-medium">{tc.allRevisionsComplete}</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            You can now send the final project
+            {tc.canSendFinalProject}
           </p>
         </div>
       ) : deliverableRevisions.length === 0 ? (
         <div className="flex items-center gap-2 text-muted-foreground py-4">
           <AlertCircle className="h-4 w-4" />
-          <span className="text-sm">No revisions available to deliver</span>
+          <span className="text-sm">{tc.noRevisionsAvailable}</span>
         </div>
       ) : (
         <div className="space-y-4">
@@ -208,9 +200,9 @@ export const RevisionDeliveryForm = ({
             <Card key={revision.id} className={`p-4 ${revision.status === "requested" ? "border-yellow-500/30 bg-yellow-500/5" : "border-border"}`}>
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <span className="font-medium">Revision {revision.revision_number}</span>
+                  <span className="font-medium">{tc.revision} {revision.revision_number}</span>
                   <Badge className={`ml-2 text-xs ${revision.status === "requested" ? "bg-yellow-500 text-white" : "bg-muted text-muted-foreground"}`}>
-                    {revision.status === "requested" ? "Requested" : "Available"}
+                    {revision.status === "requested" ? tc.requested : tc.available}
                   </Badge>
                 </div>
                 {revision.requested_at && (
@@ -222,7 +214,7 @@ export const RevisionDeliveryForm = ({
 
               {revision.client_notes && (
                 <div className="mb-3 p-2 bg-muted/50 rounded text-sm">
-                  <span className="text-muted-foreground">Client notes: </span>
+                  <span className="text-muted-foreground">{tc.clientNotes} </span>
                   {revision.client_notes}
                 </div>
               )}
@@ -230,17 +222,17 @@ export const RevisionDeliveryForm = ({
               {revision.wants_meeting && (
                 <div className="mb-3 p-2 bg-primary/5 border border-primary/20 rounded flex items-center gap-2 text-sm">
                   <Video className="h-4 w-4 text-primary" />
-                  <span className="font-medium">Client requested a Google Meet</span>
+                  <span className="font-medium">{tc.clientRequestedMeet}</span>
                 </div>
               )}
 
               <div className="space-y-2">
-                <Label className="text-sm">Download Link</Label>
+                <Label className="text-sm">{tc.downloadLink}</Label>
                 <div className="relative">
                   <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="url"
-                    placeholder="https://drive.google.com/..."
+                    placeholder={tc.downloadPlaceholder}
                     value={revisionLinks[revision.id] || ""}
                     onChange={(e) => setRevisionLinks(prev => ({
                       ...prev,
@@ -256,11 +248,11 @@ export const RevisionDeliveryForm = ({
                 <div className="space-y-2 mt-2">
                   <Label className="text-sm flex items-center gap-1">
                     <Video className="h-3 w-3" />
-                    Google Meet Link (optional)
+                    {tc.googleMeetLinkOptional}
                   </Label>
                   <Input
                     type="url"
-                    placeholder="https://meet.google.com/..."
+                    placeholder={tc.meetPlaceholder}
                     value={meetingLinks[revision.id] || ""}
                     onChange={(e) => setMeetingLinks(prev => ({
                       ...prev,
@@ -280,38 +272,36 @@ export const RevisionDeliveryForm = ({
                 {deliveringRevision === revision.id ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
+                    {tc.sending}
                   </>
                 ) : (
                   <>
                     <Send className="mr-2 h-4 w-4" />
-                    Deliver Revision {revision.revision_number}
+                    {tc.deliverRevision} {revision.revision_number}
                   </>
                 )}
               </Button>
 
-              {/* Chat with client */}
               <RevisionChat revisionId={revision.id} isProducerView={true} />
             </Card>
           ))}
         </div>
       )}
 
-      {/* Show delivered revisions */}
       {deliveredCount > 0 && (
         <div className="pt-3 border-t border-border">
-          <h5 className="text-sm font-medium mb-2 text-muted-foreground">Delivered Revisions</h5>
+          <h5 className="text-sm font-medium mb-2 text-muted-foreground">{tc.deliveredRevisions}</h5>
           <div className="flex flex-wrap gap-2">
             {revisions
               .filter(r => r.status === "delivered")
               .map((revision) => (
-                <Badge 
+                <Badge
                   key={revision.id}
                   variant="outline"
                   className="border-emerald-500 text-emerald-600"
                 >
                   <CheckCircle className="mr-1 h-3 w-3" />
-                  Rev {revision.revision_number}
+                  {tc.revPrefix} {revision.revision_number}
                 </Badge>
               ))}
           </div>
