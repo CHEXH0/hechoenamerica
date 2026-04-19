@@ -1163,12 +1163,12 @@ const MyProjects = () => {
                   <Card>
                     <CardContent className="py-12 text-center">
                       <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No Requests Yet</h3>
+                      <h3 className="text-lg font-semibold mb-2">{tm.emptyRequestsTitle}</h3>
                        <p className="text-muted-foreground mb-4">
-                         No song requests yet.
+                         {tm.emptyRequestsDesc}
                        </p>
                       <Button onClick={() => navigate("/generate-song")}>
-                        Create Your First Song
+                        {tm.createFirstSong}
                       </Button>
                     </CardContent>
                   </Card>
