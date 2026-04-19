@@ -73,17 +73,7 @@ interface Producer {
   image: string;
 }
 
-const statusLabels: Record<string, string> = {
-  pending: "Pending",
-  pending_payment: "Awaiting Payment",
-  paid: "Paid",
-  accepted: "Accepted",
-  in_progress: "In Production",
-  review: "Under Review",
-  completed: "Completed",
-  refunded: "Refunded",
-  cancellation_requested: "Cancellation Requested",
-};
+// Status labels are now translated inside the component via useTranslation
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500",
@@ -139,8 +129,18 @@ const getTimeRemaining = (deadline: string | null): { text: string; hours: numbe
   };
 };
 
-// Countdown Timer Component
-const CountdownTimer = ({ deadline }: { deadline: string }) => {
+// Countdown Timer Component (accepts translated labels via props)
+interface CountdownLabels {
+  expired: string;
+  processingRefund: string;
+  windowTitle: string;
+  urgent: string;
+  hours: string;
+  mins: string;
+  secs: string;
+  waiting: string;
+}
+const CountdownTimer = ({ deadline, labels }: { deadline: string; labels: CountdownLabels }) => {
   const [timeRemaining, setTimeRemaining] = useState(getTimeRemaining(deadline));
 
   useEffect(() => {
@@ -226,20 +226,7 @@ const CountdownTimer = ({ deadline }: { deadline: string }) => {
   );
 };
 
-const getGenreLabel = (genre: string | null): string => {
-  const genreMap: Record<string, string> = {
-    "hip-hop": "Hip Hop / Trap",
-    rnb: "R&B / Soul",
-    reggae: "Reggae",
-    latin: "Latin",
-    electronic: "Electronic",
-    pop: "Pop",
-    rock: "Rock",
-    world: "World / Indigenous",
-    other: "Other",
-  };
-  return genre ? genreMap[genre] || genre : "Not specified";
-};
+// Genre labels are now translated inside the component via useTranslation
 
 const MyProjects = () => {
   const navigate = useNavigate();
