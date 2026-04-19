@@ -833,7 +833,7 @@ const MyProjects = () => {
                   ) : (
                     <Mail className="mr-2 h-4 w-4" />
                   )}
-                  Email Me Customer Files
+                  {tm.emailMeFiles}
                 </Button>
               )}
 
@@ -843,7 +843,7 @@ const MyProjects = () => {
                   onClick={() => handleStartWorking(project.id, project.number_of_revisions || 0)}
                 >
                   <Headphones className="mr-2 h-4 w-4" />
-                  Start Working on Project
+                  {tm.startWorking}
                 </Button>
               )}
               
@@ -872,10 +872,10 @@ const MyProjects = () => {
                 <div className="flex flex-col items-center gap-2 py-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg">
                   <div className="flex items-center gap-2 text-emerald-600">
                     <CheckCircle className="h-5 w-5" />
-                    <span className="font-medium">Delivered!</span>
+                    <span className="font-medium">{tm.delivered}</span>
                   </div>
                   <p className="text-sm text-muted-foreground text-center">
-                    Customer has been emailed the download link
+                    {tm.deliveredEmailedDesc}
                   </p>
                 </div>
               )}
@@ -889,23 +889,23 @@ const MyProjects = () => {
                 <div className="flex flex-col items-center gap-3 py-4 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg">
                   <div className="flex items-center gap-2 text-emerald-600">
                     <Mail className="h-6 w-6" />
-                    <span className="font-semibold text-lg">Check Your Email!</span>
+                    <span className="font-semibold text-lg">{tm.checkYourEmail}</span>
                   </div>
                    <p className="text-sm text-muted-foreground text-center px-4">
-                     Download link sent to your email. Check inbox and spam.
+                     {tm.downloadSentDesc}
                    </p>
                   <p className="text-xs text-muted-foreground">
-                    Download link expires in 7 days
+                    {tm.downloadExpires}
                   </p>
                 </div>
               ) : project.status === "refunded" ? (
                 <div className="flex flex-col items-center justify-center gap-2 py-2">
                   <div className="flex items-center gap-2 text-destructive">
                     <RefreshCcw className="h-4 w-4" />
-                    <span className="font-medium">Payment Refunded</span>
+                    <span className="font-medium">{tm.paymentRefunded}</span>
                   </div>
                   <p className="text-sm text-muted-foreground text-center">
-                    No producer available. Your payment has been refunded.
+                    {tm.paymentRefundedDesc}
                   </p>
                   <Button 
                     variant="outline" 
@@ -913,7 +913,7 @@ const MyProjects = () => {
                     onClick={() => navigate("/generate-song")}
                     className="mt-2"
                   >
-                    Try Again
+                    {tm.tryAgain}
                   </Button>
                 </div>
               ) : (
@@ -922,32 +922,32 @@ const MyProjects = () => {
                     {project.status === "in_progress" ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Your producer is working on your song...
+                        {tm.statusInProgress}
                       </>
                     ) : project.status === "review" ? (
                       <>
                         <CheckCircle className="h-4 w-4" />
-                        Almost ready! Under final review...
+                        {tm.statusReview}
                       </>
                     ) : project.status === "accepted" ? (
                       <>
                         <CheckCircle className="h-4 w-4 text-cyan-500" />
-                        A producer has accepted your project!
+                        {tm.statusAccepted}
                       </>
                     ) : project.status === "paid" ? (
                       <>
                         <CheckCircle className="h-4 w-4 text-green-500" />
-                        Payment confirmed! Awaiting producer assignment...
+                        {tm.statusPaid}
                       </>
                     ) : project.status === "pending" ? (
                       <>
                         <Clock className="h-4 w-4" />
-                        Project submitted. Awaiting producer assignment...
+                        {tm.statusPending}
                       </>
                     ) : (
                       <>
                         <Clock className="h-4 w-4" />
-                        Processing your request...
+                        {tm.statusProcessing}
                       </>
                     )}
                   </div>
@@ -971,25 +971,25 @@ const MyProjects = () => {
                           ) : (
                             <XCircle className="mr-2 h-4 w-4" />
                           )}
-                          Cancel Project
+                          {tm.cancelProject}
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Cancel this project?</AlertDialogTitle>
+                          <AlertDialogTitle>{tm.cancelDialogTitle}</AlertDialogTitle>
                           <AlertDialogDescription>
                             {project.status === "paid" 
-                               ? "You will receive a full refund. This cannot be undone."
-                               : "This will cancel your project permanently."}
+                               ? tm.cancelDialogDescPaid
+                               : tm.cancelDialogDescOther}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Keep Project</AlertDialogCancel>
+                          <AlertDialogCancel>{tm.keepProject}</AlertDialogCancel>
                           <AlertDialogAction 
                             onClick={() => handleCancelProject(project.id)}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           >
-                            Yes, Cancel {project.status === "paid" ? "& Get Refund" : "Project"}
+                            {project.status === "paid" ? tm.cancelConfirmRefund : tm.cancelConfirmProject}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -1014,23 +1014,23 @@ const MyProjects = () => {
                               ) : (
                                 <UserMinus className="mr-2 h-4 w-4" />
                               )}
-                              Change Producer
+                              {tm.changeProducer}
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Change Producer?</AlertDialogTitle>
+                              <AlertDialogTitle>{tm.changeProducerDialogTitle}</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Your project will be reassigned. A <strong>$25 fee</strong> applies.
+                                <span dangerouslySetInnerHTML={{ __html: tm.changeProducerDialogDesc }} />
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Keep Current Producer</AlertDialogCancel>
+                              <AlertDialogCancel>{tm.keepCurrentProducer}</AlertDialogCancel>
                               <AlertDialogAction 
                                 onClick={() => handleClientChangeProducer(project.id)}
                                 className="bg-blue-600 text-white hover:bg-blue-700"
                               >
-                                Change Producer ($25 fee)
+                                {tm.changeProducerFee}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
@@ -1051,23 +1051,23 @@ const MyProjects = () => {
                             ) : (
                               <MessageSquare className="mr-2 h-4 w-4" />
                             )}
-                            Request Cancellation
+                            {tm.requestCancellation}
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Request Cancellation</AlertDialogTitle>
+                            <AlertDialogTitle>{tm.requestCancellationDialogTitle}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Work has already started. Our team will review your request and determine any refund.
+                              {tm.requestCancellationDialogDesc}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Keep Project</AlertDialogCancel>
+                            <AlertDialogCancel>{tm.keepProject}</AlertDialogCancel>
                             <AlertDialogAction 
                               onClick={() => handleRequestCancellation(project.id)}
                               className="bg-amber-600 text-white hover:bg-amber-700"
                             >
-                              Submit Request
+                              {tm.submitRequest}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -1080,10 +1080,10 @@ const MyProjects = () => {
                     <div className="mt-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
                       <div className="flex items-center gap-2 text-amber-600">
                         <MessageSquare className="h-4 w-4" />
-                        <span className="text-sm font-medium">Cancellation Under Review</span>
+                        <span className="text-sm font-medium">{tm.cancellationUnderReview}</span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        We're reviewing your request and will get back to you soon.
+                        {tm.cancellationUnderReviewDesc}
                       </p>
                     </div>
                   )}
@@ -1117,22 +1117,22 @@ const MyProjects = () => {
             className="mb-4 hover:bg-muted/50"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Home
+            {tm.backToHome}
           </Button>
 
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent mb-2">
-                My Projects
+                {tm.pageTitle}
               </h1>
               <p className="text-muted-foreground">
-                {isProducer ? "Manage requests and assignments" : "Track your song requests"}
+                {isProducer ? tm.subtitleProducer : tm.subtitleClient}
               </p>
             </div>
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${isRealtimeConnected ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
               <span className="text-xs text-muted-foreground">
-                {isRealtimeConnected ? 'Live updates' : 'Connecting...'}
+                {isRealtimeConnected ? tm.liveUpdates : tm.connecting}
               </span>
               <Wifi className={`h-4 w-4 ${isRealtimeConnected ? 'text-green-500' : 'text-muted-foreground'}`} />
             </div>
@@ -1145,11 +1145,11 @@ const MyProjects = () => {
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="my-requests" className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
-                My Requests ({myRequests.length})
+                {tm.tabMyRequests} ({myRequests.length})
               </TabsTrigger>
               <TabsTrigger value="producer-projects" className="flex items-center gap-2">
                 <Headphones className="h-4 w-4" />
-                Producer Projects ({producerProjects.length})
+                {tm.tabProducerProjects} ({producerProjects.length})
               </TabsTrigger>
             </TabsList>
 
@@ -1163,12 +1163,12 @@ const MyProjects = () => {
                   <Card>
                     <CardContent className="py-12 text-center">
                       <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No Requests Yet</h3>
+                      <h3 className="text-lg font-semibold mb-2">{tm.emptyRequestsTitle}</h3>
                        <p className="text-muted-foreground mb-4">
-                         No song requests yet.
+                         {tm.emptyRequestsDesc}
                        </p>
                       <Button onClick={() => navigate("/generate-song")}>
-                        Create Your First Song
+                        {tm.createFirstSong}
                       </Button>
                     </CardContent>
                   </Card>
@@ -1197,12 +1197,12 @@ const MyProjects = () => {
                   <Card>
                     <CardContent className="py-12 text-center">
                       <Headphones className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No Producer Projects Yet</h3>
+                      <h3 className="text-lg font-semibold mb-2">{tm.emptyProducerProjectsTitle}</h3>
                        <p className="text-muted-foreground mb-4">
-                         No assigned projects yet.
+                         {tm.emptyProducerProjectsDesc}
                        </p>
                        <p className="text-sm text-muted-foreground">
-                         Check Discord for new projects.
+                         {tm.emptyProducerProjectsHint}
                        </p>
                     </CardContent>
                   </Card>
@@ -1233,12 +1233,12 @@ const MyProjects = () => {
               <Card>
                 <CardContent className="py-12 text-center">
                   <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Projects Yet</h3>
+                  <h3 className="text-lg font-semibold mb-2">{tm.emptyProjectsTitle}</h3>
                    <p className="text-muted-foreground mb-4">
-                     No song requests yet.
+                     {tm.emptyRequestsDesc}
                    </p>
                   <Button onClick={() => navigate("/generate-song")}>
-                    Create Your First Song
+                    {tm.createFirstSong}
                   </Button>
                 </CardContent>
               </Card>
