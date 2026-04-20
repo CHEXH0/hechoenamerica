@@ -85,7 +85,7 @@ serve(async (req) => {
       <p style="color:#aaa;font-size:14px;line-height:1.6;">
         ${isSigned
           ? "Please find below your signed contract and receipt for your records."
-          : "Thank you for choosing Hecho En America Studio. Below are the details of your project agreement."}
+          : "Thank you for choosing Hecho En America. Below are the details of your project agreement."}
       </p>
 
       <!-- Project Details -->
@@ -143,7 +143,7 @@ serve(async (req) => {
 
     <!-- Footer -->
     <div style="background:#0a0a0a;padding:20px 30px;text-align:center;border-top:1px solid #222;">
-      <p style="color:#555;font-size:12px;margin:0;">© ${new Date().getFullYear()} Hecho En America Studio. All rights reserved.</p>
+      <p style="color:#555;font-size:12px;margin:0;">© ${new Date().getFullYear()} Hecho En America. All rights reserved.</p>
       <p style="color:#444;font-size:11px;margin:4px 0 0;">team@hechoenamericastudio.com</p>
     </div>
   </div>

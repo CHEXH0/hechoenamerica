@@ -106,7 +106,7 @@ const handler = async (req: Request): Promise<Response> => {
                 </div>
               </div>
               <div class="footer">
-                <p>HechoEnAmerica Studio</p>
+                <p>HechoEnAmerica</p>
               </div>
             </div>
           </body>
@@ -154,7 +154,7 @@ const handler = async (req: Request): Promise<Response> => {
                 </div>
               </div>
               <div class="footer">
-                <p>HechoEnAmerica Studio</p>
+                <p>HechoEnAmerica</p>
               </div>
             </div>
           </body>
@@ -208,7 +208,7 @@ const handler = async (req: Request): Promise<Response> => {
                 </div>
               </div>
               <div class="footer">
-                <p>HechoEnAmerica Studio</p>
+                <p>HechoEnAmerica</p>
               </div>
             </div>
           </body>

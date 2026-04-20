@@ -229,7 +229,7 @@ serve(async (req) => {
                 <p style="color: #9ca3af; font-size: 13px;">
                   Questions about your order? Reply to this email or contact us at team@hechoenamericastudio.com
                 </p>
-                <p style="color: #d1d5db; font-size: 12px;">Hecho en America Studio</p>
+                <p style="color: #d1d5db; font-size: 12px;">Hecho en America</p>
               </div>
             </div>
           `;

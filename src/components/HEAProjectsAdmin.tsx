@@ -124,7 +124,7 @@ export const HEAProjectsAdmin = () => {
       email: "",
       address: "",
       price: "",
-      terms: "This agreement is between Hecho En America Studio (\"HEA\") and the Client for music production services. The Client agrees to the terms outlined herein including project scope, payment, and delivery timeline.",
+      terms: "This agreement is between Hecho En America (\"HEA\") and the Client for music production services. The Client agrees to the terms outlined herein including project scope, payment, and delivery timeline.",
       details: "",
       number_of_revisions: 0,
       assigned_producer_id: "",
@@ -248,7 +248,7 @@ ${project.terms ? `<h2>Terms & Conditions</h2><p style="white-space:pre-wrap;fon
   <p><strong>Date:</strong> ${signedDate}</p>
   <p style="color:green;font-weight:bold">✓ Contract Electronically Signed</p>
 </div>
-<div class="footer">© ${new Date().getFullYear()} Hecho En America Studio. All rights reserved. • team@hechoenamericastudio.com</div>
+<div class="footer">© ${new Date().getFullYear()} Hecho En America. All rights reserved. • team@hechoenamericastudio.com</div>
 </body></html>`;
 
     const printWindow = window.open("", "_blank");

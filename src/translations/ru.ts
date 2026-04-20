@@ -159,7 +159,7 @@ export const ru: Translations = {
     close: "Close",
   },
   footer: {
-    studioName: "Hecho En America Studio",
+    studioName: "Hecho En America",
     tagline: "Безопасный продюсерский портал для доставки качественного медиаконтента артистам.",
     privacyPolicy: "Политика конфиденциальности",
     termsOfService: "Условия использования",

@@ -159,7 +159,7 @@ export const es: Translations = {
     close: "Cerrar",
   },
   footer: {
-    studioName: "Hecho En America Studio",
+    studioName: "Hecho En America",
     tagline: "Un portal de producción seguro para que los productores entreguen medios de alta calidad a los artistas.",
     privacyPolicy: "Política de Privacidad",
     termsOfService: "Términos de Servicio",

@@ -235,7 +235,7 @@ const SignContract = () => {
         </Card>
 
         <p className="text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Hecho En America Studio. All rights reserved.
+          © {new Date().getFullYear()} Hecho En America. All rights reserved.
         </p>
       </div>
     </div>

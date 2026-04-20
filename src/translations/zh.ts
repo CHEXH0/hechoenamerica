@@ -159,7 +159,7 @@ export const zh: Translations = {
     close: "Close",
   },
   footer: {
-    studioName: "Hecho En America Studio",
+    studioName: "Hecho En America",
     tagline: "为制作人提供安全的制作门户，向艺术家交付高质量的媒体作品。",
     privacyPolicy: "隐私政策",
     termsOfService: "服务条款",

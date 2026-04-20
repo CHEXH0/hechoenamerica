@@ -236,7 +236,7 @@ serve(async (req) => {
             
             <!-- HEA Logo Header -->
             <div style="background: #0a0a0a; padding: 20px; text-align: center;">
-              <img src="${APP_URL}/laptop-uploads/HEA_White.png" alt="HechoEnAmerica" style="height: 50px; width: auto;" />
+              <img src="${APP_URL}/laptop-uploads/HEA.png" alt="HechoEnAmerica" style="height: 50px; width: auto;" />
             </div>
             
             <!-- Success Header -->
@@ -300,7 +300,7 @@ serve(async (req) => {
           <!-- Footer -->
           <div style="text-align: center; padding: 24px; color: #999; font-size: 13px;">
             <p style="margin: 0 0 8px 0;">Questions? Reply to this email or contact us.</p>
-            <p style="margin: 0;">HechoEnAmerica • LA MÚSICA ES MEDICINE 🎶</p>
+            <p style="margin: 0;">HechoEnAmerica • LA MUSIC ES MEDICINE 🎶</p>
           </div>
 
         </body>
