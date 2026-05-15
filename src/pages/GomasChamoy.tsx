@@ -14,6 +14,7 @@ import { useGomasChamoyVisible } from "@/hooks/useStoreVisibility";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 const GomasChamoy = () => {
   const [searchParams] = useSearchParams();
