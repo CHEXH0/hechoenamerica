@@ -254,7 +254,7 @@ const GomasChamoy = () => {
                         )}
                         {product.stock !== null && product.stock !== undefined && (
                           <p className={`text-xs text-center ${(product.stock ?? 100) <= 10 ? 'text-red-400' : 'text-gray-500'}`}>
-                            {(product.stock ?? 100) <= 0 ? 'Out of Stock' : `${product.stock} left in stock`}
+                            {(product.stock ?? 100) <= 0 ? tg.outOfStock : `${product.stock} ${tg.leftInStock}`}
                           </p>
                         )}
                       </div>
