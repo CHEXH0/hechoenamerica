@@ -90,7 +90,7 @@ const GomasChamoy = () => {
             <motion.div whileHover={{ x: -5 }} transition={{ duration: 0.2 }}>
               <ArrowLeft className="h-5 w-5 mr-2" />
             </motion.div>
-            Back to Treats
+            {tg.backToTreats}
           </Link>
 
           <Button
@@ -99,7 +99,7 @@ const GomasChamoy = () => {
             className="bg-pink-500/50 border-pink-20 text-gray-200 relative border-pink-400/50 hover:border-pink-400/50 hover:text-pink-700"
           >
             <ShoppingCart className="h-4 w-4 mr-2" />
-            Cart
+            {tg.cart}
             {getItemCount() > 0 && (
               <Badge className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs px-1.5 py-0.5">
                 {getItemCount()}
