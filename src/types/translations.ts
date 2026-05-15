@@ -855,5 +855,6 @@ export interface Translations {
     addedToCartTitle: string;
     addedToCartDesc: string;
     noProducts: string;
+    products: Record<string, { type: string; description: string }>;
   };
 }

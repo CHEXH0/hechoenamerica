@@ -1045,5 +1045,17 @@ export const es: Translations = {
     addedToCartTitle: "¡Agregado al carrito! 🛒",
     addedToCartDesc: "se ha agregado a tu carrito.",
     noProducts: "Aún no hay productos disponibles. ¡Vuelve pronto!",
+    products: {
+      c001: { type: "Dulce y Picante", description: "Ositos de goma clásicos cubiertos con nuestra salsa de chamoy y un toque de chile y limón. Dulces, ácidos e irresistiblemente picantes." },
+      c002: { type: "Dulce y Picante", description: "Aros de goma jugosos bañados en chamoy con sazonador Tajín. Equilibrio perfecto entre dulzor frutal y sabor mexicano intenso." },
+      c003: { type: "Dulce y Picante", description: "Gusanitos de goma jugosos cubiertos con salsa chamoy y un toque de chile y limón. Dulce al inicio, picante al final." },
+      c004: { type: "Dulce y Picante", description: "Aros de goma bañados en chamoy con un extra de jugo de limón. Ácidos, brillantes y muy picantes." },
+      c005: { type: "Dulce y Picante", description: "Ositos de goma con sabor a mango envueltos en nuestro chamoy picante. Un giro tropical al dulce clásico." },
+      c006: { type: "Dulce y Picante", description: "Cuadritos de goma chamoy masticables cubiertos con sazonador estilo Tajín. Picor perfecto en cada bocado." },
+      c007: { type: "Dulce y Picante", description: "Botellitas de goma sabor cola cubiertas con salsa chamoy. Sabor a cola con un final ácido y picante." },
+      c008: { type: "Dulce y Picante", description: "Duraznitos de goma suaves cubiertos con chamoy y un sutil toque de chile y limón. Frutales, ácidos y adictivamente deliciosos." },
+      c009: { type: "Dulce y Picante", description: "Rebanadas de goma de fresa bañadas en salsa chamoy. Dulzura de fresa equilibrada con el picor del chile." },
+      c010: { type: "Dulce y Picante", description: "Una mezcla de nuestras mejores formas de gomitas chamoy en una sola bolsa. Dulce, ácido y picante en cada mordida." },
+    },
   },
 };

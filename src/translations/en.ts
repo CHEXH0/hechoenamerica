@@ -1045,5 +1045,17 @@ export const en: Translations = {
     addedToCartTitle: "Added to Cart! 🛒",
     addedToCartDesc: "has been added to your cart.",
     noProducts: "No products available yet. Check back soon!",
+    products: {
+      c001: { type: "Sweet & Spicy", description: "Classic gummy bears coated in our signature chamoy sauce with a hint of chili lime. Sweet, tangy, and irresistibly spicy." },
+      c002: { type: "Sweet & Spicy", description: "Juicy ring gummies drenched in chamoy with Tajín seasoning. A perfect balance of fruity sweetness and bold Mexican flavor." },
+      c003: { type: "Sweet & Spicy", description: "Juicy gummy worms coated in zesty chamoy sauce with a chili-lime kick. Sweet first, spicy finish." },
+      c004: { type: "Sweet & Spicy", description: "Chamoy-drenched gummy rings with an extra squeeze of lime. Tangy, bright, and boldly spicy." },
+      c005: { type: "Sweet & Spicy", description: "Gummy bears infused with mango flavor and wrapped in our signature chamoy heat. A tropical twist on classic candy." },
+      c006: { type: "Sweet & Spicy", description: "Chewy chamoy gummy squares coated in Tajín-style seasoning. Perfect bite-size heat for snack time." },
+      c007: { type: "Sweet & Spicy", description: "Fizzy cola-inspired gummy bottles covered in chamoy sauce. Sweet cola vibes with a spicy tangy finish." },
+      c008: { type: "Sweet & Spicy", description: "Soft gummy peaches coated in chamoy with a subtle chili lime sparkle. Fruity, tart, and addictively delicious." },
+      c009: { type: "Sweet & Spicy", description: "Strawberry gummy slices drenched in chamoy sauce. Bright berry sweetness balanced with spicy chile tang." },
+      c010: { type: "Sweet & Spicy", description: "A mixed pack of our best chamoy gummy shapes in one bag. Sweet, tangy, and spicy variety in every bite." },
+    },
   },
 };
