@@ -195,7 +195,7 @@ const GomasChamoy = () => {
                             {product.name}
                           </CardTitle>
                           <p className="text-xs text-pink-400/70 font-medium uppercase tracking-wider">
-                            {product.type}
+                            {tg.products[product.id]?.type ?? product.type}
                           </p>
                         </div>
                       </div>
@@ -203,7 +203,7 @@ const GomasChamoy = () => {
 
                     <CardContent className="flex-1">
                       <CardDescription className="text-gray-300 leading-relaxed text-sm">
-                        {product.description}
+                        {tg.products[product.id]?.description ?? product.description}
                       </CardDescription>
                       {product.weight && (
                         <Badge variant="outline" className="mt-3 border-pink-400/30 text-pink-300 text-xs">
