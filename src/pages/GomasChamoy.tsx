@@ -249,7 +249,7 @@ const GomasChamoy = () => {
                             className="w-full bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-500 hover:to-red-500 text-white border-0 disabled:opacity-50"
                           >
                             <Plus className="h-4 w-4 mr-2" />
-                            Add to Cart
+                            {tg.addToCart}
                           </Button>
                         )}
                         {product.stock !== null && product.stock !== undefined && (
