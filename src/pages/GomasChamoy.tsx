@@ -136,7 +136,7 @@ const GomasChamoy = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            Handcrafted chamoy gummy candy with authentic Latin American flavors. Pick your favorites!
+            {tg.pageSubtitle}
           </motion.p>
           <motion.p
             className="text-sm text-pink-400/70 mt-3 max-w-xl mx-auto"
@@ -144,7 +144,7 @@ const GomasChamoy = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.5 }}
           >
-            🌎 Currently shipping to Latin America only. More countries coming soon!
+            {tg.shippingNotice}
           </motion.p>
         </div>
 
