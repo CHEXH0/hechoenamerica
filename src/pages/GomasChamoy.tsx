@@ -267,7 +267,7 @@ const GomasChamoy = () => {
         ) : (
           <div className="text-center py-20 text-gray-400">
             <Candy className="h-12 w-12 mx-auto mb-4 text-pink-400/50" />
-            <p className="text-lg">No products available yet. Check back soon!</p>
+            <p className="text-lg">{tg.noProducts}</p>
           </div>
         )}
       </div>
