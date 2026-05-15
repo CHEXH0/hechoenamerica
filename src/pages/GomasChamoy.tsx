@@ -24,6 +24,8 @@ const GomasChamoy = () => {
   const { addItem, removeItem, updateQuantity, getItemCount, items: cartItems } = useCart();
   const [cartOpen, setCartOpen] = useState(false);
   const { data: isVisible, isLoading: visibilityLoading } = useGomasChamoyVisible();
+  const { t } = useTranslation();
+  const tg = t.gomasChamoy;
 
   const candyProducts = React.useMemo(
     () => allProducts?.filter((p) => p.category === "candies") || [],
@@ -34,12 +36,12 @@ const GomasChamoy = () => {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white gap-4">
         <Candy className="h-16 w-16 text-pink-400" />
-        <h1 className="text-2xl font-bold">This page is currently unavailable</h1>
-        <p className="text-gray-400">Check back soon!</p>
+        <h1 className="text-2xl font-bold">{tg.unavailableTitle}</h1>
+        <p className="text-gray-400">{tg.unavailableDesc}</p>
         <Button 
         variant="outline" 
         className="text-black"
-        onClick={() => navigate("/")}>Go Home</Button>
+        onClick={() => navigate("/")}>{tg.goHome}</Button>
       </div>
     );
   }
@@ -57,11 +59,11 @@ const GomasChamoy = () => {
   const handleAddToCart = (product: Product) => {
     const available = getAvailableStock(product);
     if (available <= 0) {
-      toast({ title: "Out of Stock", description: `${product.name} is out of stock.`, variant: "destructive" });
+      toast({ title: tg.outOfStock, description: `${product.name} ${tg.outOfStockDesc}`, variant: "destructive" });
       return;
     }
     addItem(product);
-    toast({ title: "Added to Cart! 🛒", description: `${product.name} has been added to your cart.` });
+    toast({ title: tg.addedToCartTitle, description: `${product.name} ${tg.addedToCartDesc}` });
   };
 
   return (
