@@ -161,20 +161,38 @@ export const DistroRequestsAdmin = () => {
                 </div>
               </div>
 
+              {/* Assignment status */}
+              {req.assigned_support_id && req.assigned_support_id !== meId && req.status !== "completed" && req.status !== "declined" && (
+                <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-md px-2 py-1.5">
+                  <Lock className="h-3 w-3" />
+                  Accepted by another support member
+                </div>
+              )}
+              {req.assigned_support_id === meId && req.status !== "completed" && req.status !== "declined" && (
+                <div className="flex items-center gap-2 text-xs text-green-700 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-md px-2 py-1.5">
+                  <UserCheck className="h-3 w-3" />
+                  You accepted this consultation
+                </div>
+              )}
+
               {/* Actions */}
-              {req.status === "pending" && isSongDelivered(req.song_requests?.status) && (
+              {!req.assigned_support_id && req.status !== "completed" && req.status !== "declined" && (
                 <div className="flex gap-2 flex-wrap">
                   <Button
                     size="sm"
                     onClick={() =>
                       updateMutation.mutate({
                         id: req.id,
-                        patch: { status: "scheduled", scheduled_at: new Date().toISOString() },
+                        patch: {
+                          assigned_support_id: meId as any,
+                          status: "scheduled",
+                          scheduled_at: req.scheduled_at || (new Date().toISOString() as any),
+                        },
                       })
                     }
                   >
-                    <Calendar className="h-3 w-3" />
-                    Accept & send booking link
+                    <UserCheck className="h-3 w-3" />
+                    Accept consultation
                   </Button>
                   <Button
                     size="sm"
@@ -186,7 +204,7 @@ export const DistroRequestsAdmin = () => {
                 </div>
               )}
 
-              {req.status === "scheduled" && (
+              {req.assigned_support_id === meId && req.status !== "completed" && req.status !== "declined" && (
                 <div className="space-y-2">
                   <a
                     href={req.google_meet_link}
