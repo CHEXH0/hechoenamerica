@@ -335,44 +335,66 @@ export const PaymentAnalyticsDashboard = () => {
                     <TableRow>
                       <TableHead>Project</TableHead>
                       <TableHead>Producer</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Est. Payout</TableHead>
+                      <TableHead className="text-right">Price</TableHead>
+                      <TableHead className="text-right">Est. Payout (90%)</TableHead>
                       <TableHead>Created</TableHead>
-                      <TableHead>Action</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {analytics.payouts.pending.map((payout) => (
-                      <TableRow key={payout.id}>
-                        <TableCell>
-                          <Badge variant="outline">{payout.tier}</Badge>
-                        </TableCell>
-                        <TableCell>{payout.producer?.name || "Unknown"}</TableCell>
-                        <TableCell>${parseFloat(payout.price).toFixed(2)}</TableCell>
-                        <TableCell className="text-green-600 font-medium">
-                          ${payout.estimatedPayout.toFixed(2)}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">
-                          {format(new Date(payout.createdAt), "MMM d, yyyy")}
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            size="sm"
-                            onClick={() => handleProcessPayout(payout.id)}
-                            disabled={processingPayout === payout.id}
-                          >
-                            {processingPayout === payout.id ? (
-                              <RefreshCw className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <>
-                                <DollarSign className="h-4 w-4 mr-1" />
-                                Process
-                              </>
-                            )}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {analytics.payouts.pending.map((payout) => {
+                      const price = parsePrice(payout.price);
+                      const est = payout.estimatedPayout && payout.estimatedPayout > 0
+                        ? payout.estimatedPayout
+                        : price * 0.9;
+                      return (
+                        <TableRow key={payout.id}>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <Badge variant="outline" className="w-fit">{payout.tier || "Song"}</Badge>
+                              <span className="text-[10px] text-muted-foreground mt-1 font-mono">
+                                {payout.id.slice(0, 8)}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span className="font-medium">{payout.producer?.name || "Unknown"}</span>
+                              {payout.producer?.email && (
+                                <span className="text-xs text-muted-foreground">{payout.producer.email}</span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right tabular-nums">{fmtUSD(price)}</TableCell>
+                          <TableCell className="text-right tabular-nums text-green-600 font-semibold">
+                            {fmtUSD(est)}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
+                            {format(new Date(payout.createdAt), "MMM d, yyyy")}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              size="sm"
+                              onClick={() => handleProcessPayout(payout.id)}
+                              disabled={processingPayout === payout.id}
+                              className="gap-1.5"
+                            >
+                              {processingPayout === payout.id ? (
+                                <>
+                                  <RefreshCw className="h-4 w-4 animate-spin" />
+                                  Processing…
+                                </>
+                              ) : (
+                                <>
+                                  <DollarSign className="h-4 w-4" />
+                                  Pay Out {fmtUSD(est)}
+                                </>
+                              )}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               )}
