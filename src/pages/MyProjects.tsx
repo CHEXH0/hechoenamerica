@@ -807,6 +807,9 @@ const MyProjects = () => {
             />
           )}
 
+          {/* Distro Help Card (client view, only renders if a distro request exists) */}
+          {!isProducerView && <DistroHelpCard songRequestId={project.id} />}
+
           {/* Revision Tracker for Client View */}
           {!isProducerView && (project.number_of_revisions ?? 0) > 0 && 
            ["in_progress", "review", "completed"].includes(project.status) && (
