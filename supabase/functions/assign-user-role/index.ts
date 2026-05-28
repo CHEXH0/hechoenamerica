@@ -42,7 +42,7 @@ serve(async (req) => {
       throw new Error('Missing required fields: userId, role, action');
     }
 
-    if (!['admin', 'producer', 'user'].includes(role)) {
+    if (!['admin', 'producer', 'support', 'user'].includes(role)) {
       throw new Error('Invalid role');
     }
 

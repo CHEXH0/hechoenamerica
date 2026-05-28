@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-export type UserRole = 'admin' | 'producer' | 'user';
+export type UserRole = 'admin' | 'producer' | 'support' | 'user';
 
 export const useUserRole = () => {
   const { user } = useAuth();
@@ -22,19 +22,19 @@ export const useUserRole = () => {
         return null;
       }
 
-      // Return all roles as an array
       const roles = data?.map(r => r.role as UserRole) || [];
       const isAdmin = roles.includes('admin');
-      
+
       return {
         roles,
         isAdmin,
-        // Admins automatically have producer permissions
+        // Admins automatically have producer + support permissions
         isProducer: isAdmin || roles.includes('producer'),
+        isSupport: isAdmin || roles.includes('support'),
         hasAccess: isAdmin || roles.includes('producer'),
       };
     },
     enabled: !!user,
-    gcTime: 1000 * 60 * 5, // Cache for 5 minutes
+    gcTime: 1000 * 60 * 5,
   });
 };

@@ -94,6 +94,8 @@ serve(async (req) => {
     const producerPayoutCents = session.metadata?.producer_payout_cents || "0";
     const acceptanceDeadline = session.metadata?.acceptance_deadline || null;
     const paymentIntentId = (session.payment_intent as string) || null;
+    const wantsDistroHelp = session.metadata?.wants_distro_help === "true";
+    const wantsHeaBox = session.metadata?.wants_hea_box === "true";
 
     // Get product name from line items
     const lineItem = session.line_items?.data[0];
@@ -472,6 +474,54 @@ serve(async (req) => {
       } else {
         logStep("Song request record created successfully");
       }
+    }
+
+    // --- Add-on side effects (idempotent via stripe_session_id / song_request_id) ---
+    try {
+      if (wantsHeaBox && userId) {
+        const { data: existingBox } = await supabaseAdmin
+          .from("chamoy_requests")
+          .select("id")
+          .eq("stripe_session_id", `${session_id}_heabox`)
+          .maybeSingle();
+
+        if (!existingBox) {
+          const { error: boxErr } = await supabaseAdmin.from("chamoy_requests").insert({
+            user_id: userId,
+            user_email: customerEmail,
+            description: "HEA Exclusive Box (bundled with song request) — gomas chamoy, stickers & creative fuel",
+            admin_description: "HEA Exclusive Box bundled with song request",
+            admin_price: "27.68",
+            status: "paid",
+            stripe_session_id: `${session_id}_heabox`,
+            paid_at: new Date().toISOString(),
+            shipping_status: "pending",
+          });
+          if (boxErr) logStep("Error creating HEA Box order", { error: boxErr });
+          else logStep("HEA Exclusive Box order created in chamoy_requests");
+        }
+      }
+
+      if (wantsDistroHelp && userId && requestId) {
+        const { data: existingDistro } = await supabaseAdmin
+          .from("distro_requests")
+          .select("id")
+          .eq("song_request_id", requestId)
+          .maybeSingle();
+
+        if (!existingDistro) {
+          const { error: distroErr } = await supabaseAdmin.from("distro_requests").insert({
+            song_request_id: requestId,
+            user_id: userId,
+            user_email: customerEmail,
+            status: "pending",
+          });
+          if (distroErr) logStep("Error creating distro request", { error: distroErr });
+          else logStep("Distro help request created");
+        }
+      }
+    } catch (addOnErr) {
+      logStep("Error processing add-ons", { error: String(addOnErr) });
     }
 
     return new Response(
