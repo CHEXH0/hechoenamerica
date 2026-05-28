@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, LogIn, Settings, Music, ShoppingBag, Mic2, FileText } from 'lucide-react';
+import { User, LogIn, Settings, Music, ShoppingBag, Mic2, FileText, Compass } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
