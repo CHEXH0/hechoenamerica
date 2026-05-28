@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { MyTreatsOrders } from "@/components/MyTreatsOrders";
 
 const Purchases = () => {
   const navigate = useNavigate();
@@ -255,6 +256,9 @@ const Purchases = () => {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* My Treats Orders (HEA Box, Gomas Chamoy) */}
+        <MyTreatsOrders />
 
         {/* Purchases Table */}
         <motion.div
