@@ -48,10 +48,18 @@ export const DistroHelpCard = ({ songRequestId }: Props) => {
         .update(patch)
         .eq("id", data.id);
       if (error) throw error;
+      // Notify the support team that a client picked a time
+      try {
+        await supabase.functions.invoke("notify-distro-time-selected", {
+          body: { distroRequestId: data.id },
+        });
+      } catch (e) {
+        console.error("Failed to notify support team:", e);
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["distroRequest", songRequestId] });
-      toast({ title: "Time saved", description: "We've noted your preferred time." });
+      toast({ title: "Time saved", description: "HEA Support has been notified." });
       setPicking(false);
     },
     onError: (e: Error) =>
