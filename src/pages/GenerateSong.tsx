@@ -579,6 +579,7 @@ const GenerateSong = () => {
     return colors[position];
   };
   return (
+    <>
     <motion.div
       className="relative min-h-screen flex items-center justify-center overflow-hidden p-4"
       animate={{
