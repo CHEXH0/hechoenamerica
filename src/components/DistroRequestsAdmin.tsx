@@ -89,26 +89,34 @@ export const DistroRequestsAdmin = () => {
     );
   }
 
-  if (!rows?.length) {
+  // Only surface requests where the client has actually picked a time.
+  const withClientTime = (rows || []).filter((r) => !!r.client_selected_time);
+
+  if (!withClientTime.length) {
     return (
       <Card>
         <CardContent className="py-12 text-center text-muted-foreground">
-          No distro consultation requests yet.
+          No distro consultations to review yet — clients will appear here once they pick a meeting time.
         </CardContent>
       </Card>
     );
   }
 
-  // Sort: actionable (song delivered/completed, status pending) first
-  const isSongDelivered = (s?: string | null) => s === "delivered" || s === "completed";
-  const actionable = rows.filter(
-    (r) => r.status === "pending" && isSongDelivered(r.song_requests?.status)
+  const meId = user?.id;
+  const awaiting = withClientTime.filter(
+    (r) => r.status !== "completed" && r.status !== "declined" && !r.assigned_support_id,
   );
-  const waitingOnSong = rows.filter(
-    (r) => r.status === "pending" && !isSongDelivered(r.song_requests?.status)
+  const mine = withClientTime.filter(
+    (r) => r.status !== "completed" && r.status !== "declined" && r.assigned_support_id === meId,
   );
-  const scheduled = rows.filter((r) => r.status === "scheduled");
-  const done = rows.filter((r) => r.status === "completed" || r.status === "declined");
+  const taken = withClientTime.filter(
+    (r) =>
+      r.status !== "completed" &&
+      r.status !== "declined" &&
+      r.assigned_support_id &&
+      r.assigned_support_id !== meId,
+  );
+  const done = withClientTime.filter((r) => r.status === "completed" || r.status === "declined");
 
   const Section = ({ title, items, hint }: { title: string; items: DistroRow[]; hint?: string }) =>
     items.length === 0 ? null : (
