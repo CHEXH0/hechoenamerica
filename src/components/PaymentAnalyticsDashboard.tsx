@@ -79,6 +79,16 @@ interface PaymentAnalytics {
   };
 }
 
+// Robustly parse price strings like "$125", "125.00", "USD 125", etc.
+const parsePrice = (val: unknown): number => {
+  if (typeof val === "number") return isFinite(val) ? val : 0;
+  if (!val) return 0;
+  const n = parseFloat(String(val).replace(/[^0-9.\-]/g, ""));
+  return isFinite(n) ? n : 0;
+};
+
+const fmtUSD = (n: number) => `$${(isFinite(n) ? n : 0).toFixed(2)}`;
+
 export const PaymentAnalyticsDashboard = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
