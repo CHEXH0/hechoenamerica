@@ -36,6 +36,7 @@ const SignContract = lazy(() => import("./pages/SignContract"));
 const Producers = lazy(() => import("./pages/Producers"));
 const HEAProjects = lazy(() => import("./pages/HEAProjects"));
 const GomasChamoy = lazy(() => import("./pages/GomasChamoy"));
+const Support = lazy(() => import("./pages/Support"));
 
 // Loading fallback for lazy-loaded routes
 const PageLoader = () => (
