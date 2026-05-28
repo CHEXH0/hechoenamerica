@@ -151,7 +151,7 @@ export const DistroRequestsAdmin = () => {
               </div>
 
               {/* Actions */}
-              {req.status === "pending" && req.song_requests?.status === "delivered" && (
+              {req.status === "pending" && isSongDelivered(req.song_requests?.status) && (
                 <div className="flex gap-2 flex-wrap">
                   <Button
                     size="sm"
