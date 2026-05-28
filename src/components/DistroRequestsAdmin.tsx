@@ -21,6 +21,7 @@ type DistroRow = {
   scheduled_at: string | null;
   completed_at: string | null;
   created_at: string;
+  assigned_support_id: string | null;
   song_requests: {
     tier: string;
     song_idea: string;
