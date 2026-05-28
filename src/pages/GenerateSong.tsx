@@ -66,6 +66,7 @@ const GenerateSong = () => {
   const [showDriveLinkInput, setShowDriveLinkInput] = useState(false);
   const [newDriveLink, setNewDriveLink] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAddOnsDialog, setShowAddOnsDialog] = useState(false);
   const [showTooltip, setShowTooltip] = useState(true);
   const [numberOfRevisions, setNumberOfRevisions] = useState(0);
   const [wantsRecordedStems, setWantsRecordedStems] = useState(false);
