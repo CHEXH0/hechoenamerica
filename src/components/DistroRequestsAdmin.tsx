@@ -285,19 +285,19 @@ export const DistroRequestsAdmin = () => {
   return (
     <div className="space-y-4">
       <Section
-        title="Ready to schedule"
-        items={actionable}
-        hint="Song has been delivered — reach out to schedule the distro consultation."
+        title="Awaiting acceptance"
+        items={awaiting}
+        hint="Client has picked a time — first support member to accept will own this consultation."
       />
       <Section
-        title="Scheduled"
-        items={scheduled}
-        hint="Client has been invited to pick a meeting time."
+        title="My consultations"
+        items={mine}
+        hint="Consultations you've accepted. Open the booking link and mark complete when done."
       />
       <Section
-        title="Waiting on song delivery"
-        items={waitingOnSong}
-        hint="Will become actionable once the producer delivers the song."
+        title="Taken by another support member"
+        items={taken}
+        hint="Read-only — another support team member has already accepted these."
       />
       <Section title="Archive" items={done} />
     </div>
