@@ -97,6 +97,15 @@ const ProfileIcon = () => {
             {tp.producerProfile}
           </DropdownMenuItem>
         )}
+        {roleData?.isSupport && (
+          <DropdownMenuItem 
+            onClick={() => navigate('/support')}
+            className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
+          >
+            <Compass className="h-4 w-4 mr-2" />
+            Support Panel
+          </DropdownMenuItem>
+        )}
         {roleData?.isAdmin && (
           <DropdownMenuItem 
             onClick={() => navigate('/hea-projects')}
