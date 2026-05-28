@@ -100,6 +100,8 @@ serve(async (req) => {
     if (addOns?.mixing) addOnsList.push("Mixing Service");
     if (addOns?.mastering) addOnsList.push("Mastering Service");
     if (addOns?.revisions > 0) addOnsList.push(`${addOns.revisions} Revision(s)`);
+    if (wantsDistroHelp) addOnsList.push("Discover Your Distro");
+    if (wantsHeaBox) addOnsList.push("HEA Exclusive Box (25% off)");
     
     if (addOnsList.length > 0) {
       description += ` + ${addOnsList.join(", ")}`;
