@@ -25,7 +25,13 @@ export const DistroHelpCard = ({ songRequestId }: Props) => {
         .eq("song_request_id", songRequestId)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      if (!data) return null;
+      const { data: song } = await supabase
+        .from("song_requests")
+        .select("status")
+        .eq("id", songRequestId)
+        .maybeSingle();
+      return { ...data, song_status: song?.status as string | undefined };
     },
   });
 
