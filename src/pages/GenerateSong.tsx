@@ -1399,7 +1399,16 @@ const GenerateSong = () => {
           </Button>
         </div>
       </motion.div>
-    </motion.div>);
+    </motion.div>
+
+    <SongAddOnsDialog
+      open={showAddOnsDialog}
+      onOpenChange={(o) => { if (!isSubmitting) setShowAddOnsDialog(o); }}
+      baseTotal={totalPrice}
+      onConfirm={proceedToCheckout}
+      isSubmitting={isSubmitting}
+    />
+    </>);
 
 };
 export default GenerateSong;
