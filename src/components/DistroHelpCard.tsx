@@ -67,17 +67,17 @@ export const DistroHelpCard = ({ songRequestId }: Props) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
-        {data.status === "pending" && (
+        {data.status === "pending" && !(data.song_status === "delivered" || data.song_status === "completed") && (
           <p className="text-muted-foreground">
             HEA Support will reach out as soon as your song has been delivered to schedule your
             distribution consultation.
           </p>
         )}
 
-        {data.status === "scheduled" && (
+        {((data.status === "pending" && (data.song_status === "delivered" || data.song_status === "completed")) || data.status === "scheduled") && (
           <>
             <p className="text-muted-foreground">
-              HEA Support is ready! Pick a time that works for you using our Google Calendar.
+              Your song is ready! Pick a time that works for you using our Google Calendar — HEA Support will meet you there.
             </p>
             <Button asChild className="w-full sm:w-auto">
               <a href={data.google_meet_link} target="_blank" rel="noreferrer">
