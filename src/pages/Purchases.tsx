@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { MyTreatsOrders } from "@/components/MyTreatsOrders";
 
 const Purchases = () => {
   const navigate = useNavigate();
