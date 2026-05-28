@@ -38,9 +38,14 @@ export const DistroHelpCard = ({ songRequestId }: Props) => {
   const confirmTime = useMutation({
     mutationFn: async (iso: string) => {
       if (!data) return;
+      const patch: Record<string, unknown> = { client_selected_time: iso };
+      if (data.status === "pending") {
+        patch.status = "scheduled";
+        patch.scheduled_at = new Date().toISOString();
+      }
       const { error } = await supabase
         .from("distro_requests")
-        .update({ client_selected_time: iso })
+        .update(patch)
         .eq("id", data.id);
       if (error) throw error;
     },
