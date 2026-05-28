@@ -26,6 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useUserRole } from "@/hooks/useUserRole";
 import { DeliveryForm } from "@/components/DeliveryForm";
 import { RevisionTracker } from "@/components/RevisionTracker";
+import { DistroHelpCard } from "@/components/DistroHelpCard";
 import { ProducerPayoutsDialog } from "@/components/ProducerPayoutsDialog";
 import { useTranslation } from "@/contexts/TranslationContext";
 
