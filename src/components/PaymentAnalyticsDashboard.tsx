@@ -409,9 +409,9 @@ export const PaymentAnalyticsDashboard = () => {
                     <TableRow>
                       <TableHead>Project</TableHead>
                       <TableHead>Producer</TableHead>
-                      <TableHead>Total</TableHead>
-                      <TableHead>Platform Fee</TableHead>
-                      <TableHead>Producer Payout</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead className="text-right">Platform Fee</TableHead>
+                      <TableHead className="text-right">Producer Payout</TableHead>
                       <TableHead>Paid At</TableHead>
                     </TableRow>
                   </TableHeader>
