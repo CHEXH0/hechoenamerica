@@ -44,12 +44,24 @@ export const DistroRequestsAdmin = () => {
   const { data: rows, isLoading } = useQuery({
     queryKey: ["distroRequests"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: distros, error } = await supabase
         .from("distro_requests")
-        .select(`*, song_requests:song_request_id (tier, song_idea, status, genre_category)`)
+        .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data || []) as unknown as DistroRow[];
+      const ids = Array.from(new Set((distros || []).map((d) => d.song_request_id).filter(Boolean)));
+      let songMap = new Map<string, DistroRow["song_requests"]>();
+      if (ids.length) {
+        const { data: songs } = await supabase
+          .from("song_requests")
+          .select("id, tier, song_idea, status, genre_category")
+          .in("id", ids);
+        (songs || []).forEach((s: any) => songMap.set(s.id, s));
+      }
+      return (distros || []).map((d: any) => ({
+        ...d,
+        song_requests: songMap.get(d.song_request_id) || null,
+      })) as DistroRow[];
     },
   });
 
