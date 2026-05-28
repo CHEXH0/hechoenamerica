@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, LogIn, Settings, Music, ShoppingBag, Mic2, FileText } from 'lucide-react';
+import { User, LogIn, Settings, Music, ShoppingBag, Mic2, FileText, Compass } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -95,6 +95,15 @@ const ProfileIcon = () => {
           >
             <Mic2 className="h-4 w-4 mr-2" />
             {tp.producerProfile}
+          </DropdownMenuItem>
+        )}
+        {roleData?.isSupport && (
+          <DropdownMenuItem 
+            onClick={() => navigate('/support')}
+            className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
+          >
+            <Compass className="h-4 w-4 mr-2" />
+            Support Panel
           </DropdownMenuItem>
         )}
         {roleData?.isAdmin && (
