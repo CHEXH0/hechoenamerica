@@ -94,6 +94,8 @@ serve(async (req) => {
     const producerPayoutCents = session.metadata?.producer_payout_cents || "0";
     const acceptanceDeadline = session.metadata?.acceptance_deadline || null;
     const paymentIntentId = (session.payment_intent as string) || null;
+    const wantsDistroHelp = session.metadata?.wants_distro_help === "true";
+    const wantsHeaBox = session.metadata?.wants_hea_box === "true";
 
     // Get product name from line items
     const lineItem = session.line_items?.data[0];
