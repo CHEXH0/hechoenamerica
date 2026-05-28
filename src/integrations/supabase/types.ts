@@ -662,6 +662,7 @@ export type Database = {
           id: string
           number_of_revisions: number | null
           payment_intent_id: string | null
+          payout_method: string | null
           platform_fee_cents: number | null
           price: string
           producer_checklist: Json | null
@@ -672,6 +673,7 @@ export type Database = {
           song_idea: string
           status: string
           stripe_session_id: string | null
+          stripe_transfer_id: string | null
           tier: string
           updated_at: string
           user_email: string
@@ -693,6 +695,7 @@ export type Database = {
           id?: string
           number_of_revisions?: number | null
           payment_intent_id?: string | null
+          payout_method?: string | null
           platform_fee_cents?: number | null
           price: string
           producer_checklist?: Json | null
@@ -703,6 +706,7 @@ export type Database = {
           song_idea: string
           status?: string
           stripe_session_id?: string | null
+          stripe_transfer_id?: string | null
           tier: string
           updated_at?: string
           user_email: string
@@ -724,6 +728,7 @@ export type Database = {
           id?: string
           number_of_revisions?: number | null
           payment_intent_id?: string | null
+          payout_method?: string | null
           platform_fee_cents?: number | null
           price?: string
           producer_checklist?: Json | null
@@ -734,6 +739,7 @@ export type Database = {
           song_idea?: string
           status?: string
           stripe_session_id?: string | null
+          stripe_transfer_id?: string | null
           tier?: string
           updated_at?: string
           user_email?: string
