@@ -257,6 +257,9 @@ const Purchases = () => {
           </Card>
         </motion.div>
 
+        {/* My Treats Orders (HEA Box, Gomas Chamoy) */}
+        <MyTreatsOrders />
+
         {/* Purchases Table */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
