@@ -40,6 +40,7 @@ const STATUS_COLORS: Record<string, string> = {
 export const DistroRequestsAdmin = () => {
   const qc = useQueryClient();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [editingNotes, setEditingNotes] = useState<string | null>(null);
   const [notesDraft, setNotesDraft] = useState("");
 
