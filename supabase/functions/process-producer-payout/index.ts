@@ -147,26 +147,64 @@ serve(async (req) => {
       );
     }
 
+    // Resolve the charge id from the payment intent so we can attach the transfer
+    // to the original charge (source_transaction). This makes the transfer pull
+    // directly from that charge and avoids "insufficient available funds" errors
+    // when the platform's available balance is empty (common in test mode).
+    let sourceChargeId: string | null = null;
+    const latestCharge = (paymentIntent as any).latest_charge;
+    if (typeof latestCharge === "string") {
+      sourceChargeId = latestCharge;
+    } else if (latestCharge?.id) {
+      sourceChargeId = latestCharge.id;
+    } else {
+      try {
+        const charges = await stripe.charges.list({ payment_intent: request.payment_intent_id, limit: 1 });
+        sourceChargeId = charges.data[0]?.id ?? null;
+      } catch (e) {
+        logStep("Could not list charges for PI", { error: e instanceof Error ? e.message : String(e) });
+      }
+    }
+    logStep("Resolved source charge", { sourceChargeId });
+
     // Create the Stripe transfer to the producer's Connect account
     let transferId: string;
+    const baseTransfer: Record<string, any> = {
+      amount: producerPayoutCents,
+      currency: paymentIntent.currency || "usd",
+      destination: producerData.stripe_connect_account_id,
+      transfer_group: request.id,
+      metadata: {
+        request_id: request.id,
+        tier: request.tier,
+        producer_id: request.assigned_producer_id,
+      },
+    };
+    if (sourceChargeId) baseTransfer.source_transaction = sourceChargeId;
+
     try {
-      const transfer = await stripe.transfers.create({
-        amount: producerPayoutCents,
-        currency: paymentIntent.currency || "usd",
-        destination: producerData.stripe_connect_account_id,
-        transfer_group: request.id,
-        metadata: {
-          request_id: request.id,
-          tier: request.tier,
-          producer_id: request.assigned_producer_id,
-        },
-      });
+      const transfer = await stripe.transfers.create(baseTransfer);
       transferId = transfer.id;
-      logStep("Stripe transfer created", { transferId, amount: producerPayoutCents });
+      logStep("Stripe transfer created", { transferId, amount: producerPayoutCents, usedSourceTransaction: !!sourceChargeId });
     } catch (transferError) {
       const msg = transferError instanceof Error ? transferError.message : String(transferError);
-      logStep("Transfer failed", { error: msg });
-      throw new Error(`Stripe transfer failed: ${msg}`);
+      logStep("Transfer failed (first attempt)", { error: msg });
+
+      // Fallback: if source_transaction wasn't accepted, try without it
+      if (sourceChargeId) {
+        try {
+          delete baseTransfer.source_transaction;
+          const transfer = await stripe.transfers.create(baseTransfer);
+          transferId = transfer.id;
+          logStep("Stripe transfer created (fallback)", { transferId });
+        } catch (fallbackErr) {
+          const fmsg = fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr);
+          logStep("Transfer failed (fallback)", { error: fmsg });
+          throw new Error(`Stripe transfer failed: ${fmsg}`);
+        }
+      } else {
+        throw new Error(`Stripe transfer failed: ${msg}`);
+      }
     }
 
     // Only mark paid AFTER transfer succeeds
