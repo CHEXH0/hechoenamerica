@@ -96,12 +96,13 @@ export const DistroRequestsAdmin = () => {
     );
   }
 
-  // Sort: actionable (song delivered, status pending) first
+  // Sort: actionable (song delivered/completed, status pending) first
+  const isSongDelivered = (s?: string | null) => s === "delivered" || s === "completed";
   const actionable = rows.filter(
-    (r) => r.status === "pending" && r.song_requests?.status === "delivered"
+    (r) => r.status === "pending" && isSongDelivered(r.song_requests?.status)
   );
   const waitingOnSong = rows.filter(
-    (r) => r.status === "pending" && r.song_requests?.status !== "delivered"
+    (r) => r.status === "pending" && !isSongDelivered(r.song_requests?.status)
   );
   const scheduled = rows.filter((r) => r.status === "scheduled");
   const done = rows.filter((r) => r.status === "completed" || r.status === "declined");
@@ -150,7 +151,7 @@ export const DistroRequestsAdmin = () => {
               </div>
 
               {/* Actions */}
-              {req.status === "pending" && req.song_requests?.status === "delivered" && (
+              {req.status === "pending" && isSongDelivered(req.song_requests?.status) && (
                 <div className="flex gap-2 flex-wrap">
                   <Button
                     size="sm"
