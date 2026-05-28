@@ -46,13 +46,22 @@ serve(async (req) => {
       idea, 
       fileUrls, 
       requestId,
-      totalPrice,
+      totalPrice: baseTotalPrice,
       basePrice,
       addOns,
       bitDepth,
       sampleRate,
-      platformFeePercent
+      platformFeePercent,
+      wantsDistroHelp,
+      wantsHeaBox
     } = await req.json();
+
+    // Extra add-ons priced server-side so they can't be tampered with
+    const DISTRO_HELP_PRICE = 15;
+    const HEA_BOX_PRICE = 27.68; // $36.90 with 25% bundle discount
+    const distroHelpAmount = wantsDistroHelp ? DISTRO_HELP_PRICE : 0;
+    const heaBoxAmount = wantsHeaBox ? HEA_BOX_PRICE : 0;
+    const totalPrice = Number(baseTotalPrice) + distroHelpAmount + heaBoxAmount;
     
     const PLATFORM_FEE_PERCENT = typeof platformFeePercent === 'number' ? platformFeePercent : 10;
     
@@ -91,6 +100,8 @@ serve(async (req) => {
     if (addOns?.mixing) addOnsList.push("Mixing Service");
     if (addOns?.mastering) addOnsList.push("Mastering Service");
     if (addOns?.revisions > 0) addOnsList.push(`${addOns.revisions} Revision(s)`);
+    if (wantsDistroHelp) addOnsList.push("Discover Your Distro");
+    if (wantsHeaBox) addOnsList.push("HEA Exclusive Box (25% off)");
     
     if (addOnsList.length > 0) {
       description += ` + ${addOnsList.join(", ")}`;

@@ -679,6 +679,8 @@ export type Database = {
           user_email: string
           user_id: string
           wants_analog: boolean | null
+          wants_distro_help: boolean
+          wants_hea_box: boolean
           wants_mastering: boolean | null
           wants_mixing: boolean | null
           wants_recorded_stems: boolean | null
@@ -712,6 +714,8 @@ export type Database = {
           user_email: string
           user_id: string
           wants_analog?: boolean | null
+          wants_distro_help?: boolean
+          wants_hea_box?: boolean
           wants_mastering?: boolean | null
           wants_mixing?: boolean | null
           wants_recorded_stems?: boolean | null
@@ -745,6 +749,8 @@ export type Database = {
           user_email?: string
           user_id?: string
           wants_analog?: boolean | null
+          wants_distro_help?: boolean
+          wants_hea_box?: boolean
           wants_mastering?: boolean | null
           wants_mixing?: boolean | null
           wants_recorded_stems?: boolean | null
@@ -930,7 +936,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "producer" | "user"
+      app_role: "admin" | "producer" | "user" | "support"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1058,7 +1064,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "producer", "user"],
+      app_role: ["admin", "producer", "user", "support"],
     },
   },
 } as const
