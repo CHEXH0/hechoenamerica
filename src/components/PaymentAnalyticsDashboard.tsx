@@ -79,6 +79,16 @@ interface PaymentAnalytics {
   };
 }
 
+// Robustly parse price strings like "$125", "125.00", "USD 125", etc.
+const parsePrice = (val: unknown): number => {
+  if (typeof val === "number") return isFinite(val) ? val : 0;
+  if (!val) return 0;
+  const n = parseFloat(String(val).replace(/[^0-9.\-]/g, ""));
+  return isFinite(n) ? n : 0;
+};
+
+const fmtUSD = (n: number) => `$${(isFinite(n) ? n : 0).toFixed(2)}`;
+
 export const PaymentAnalyticsDashboard = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
@@ -325,44 +335,66 @@ export const PaymentAnalyticsDashboard = () => {
                     <TableRow>
                       <TableHead>Project</TableHead>
                       <TableHead>Producer</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Est. Payout</TableHead>
+                      <TableHead className="text-right">Price</TableHead>
+                      <TableHead className="text-right">Est. Payout (90%)</TableHead>
                       <TableHead>Created</TableHead>
-                      <TableHead>Action</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {analytics.payouts.pending.map((payout) => (
-                      <TableRow key={payout.id}>
-                        <TableCell>
-                          <Badge variant="outline">{payout.tier}</Badge>
-                        </TableCell>
-                        <TableCell>{payout.producer?.name || "Unknown"}</TableCell>
-                        <TableCell>${parseFloat(payout.price).toFixed(2)}</TableCell>
-                        <TableCell className="text-green-600 font-medium">
-                          ${payout.estimatedPayout.toFixed(2)}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">
-                          {format(new Date(payout.createdAt), "MMM d, yyyy")}
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            size="sm"
-                            onClick={() => handleProcessPayout(payout.id)}
-                            disabled={processingPayout === payout.id}
-                          >
-                            {processingPayout === payout.id ? (
-                              <RefreshCw className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <>
-                                <DollarSign className="h-4 w-4 mr-1" />
-                                Process
-                              </>
-                            )}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {analytics.payouts.pending.map((payout) => {
+                      const price = parsePrice(payout.price);
+                      const est = payout.estimatedPayout && payout.estimatedPayout > 0
+                        ? payout.estimatedPayout
+                        : price * 0.9;
+                      return (
+                        <TableRow key={payout.id}>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <Badge variant="outline" className="w-fit">{payout.tier || "Song"}</Badge>
+                              <span className="text-[10px] text-muted-foreground mt-1 font-mono">
+                                {payout.id.slice(0, 8)}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span className="font-medium">{payout.producer?.name || "Unknown"}</span>
+                              {payout.producer?.email && (
+                                <span className="text-xs text-muted-foreground">{payout.producer.email}</span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right tabular-nums">{fmtUSD(price)}</TableCell>
+                          <TableCell className="text-right tabular-nums text-green-600 font-semibold">
+                            {fmtUSD(est)}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
+                            {format(new Date(payout.createdAt), "MMM d, yyyy")}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              size="sm"
+                              onClick={() => handleProcessPayout(payout.id)}
+                              disabled={processingPayout === payout.id}
+                              className="gap-1.5"
+                            >
+                              {processingPayout === payout.id ? (
+                                <>
+                                  <RefreshCw className="h-4 w-4 animate-spin" />
+                                  Processing…
+                                </>
+                              ) : (
+                                <>
+                                  <DollarSign className="h-4 w-4" />
+                                  Pay Out {fmtUSD(est)}
+                                </>
+                              )}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               )}
@@ -377,9 +409,9 @@ export const PaymentAnalyticsDashboard = () => {
                     <TableRow>
                       <TableHead>Project</TableHead>
                       <TableHead>Producer</TableHead>
-                      <TableHead>Total</TableHead>
-                      <TableHead>Platform Fee</TableHead>
-                      <TableHead>Producer Payout</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead className="text-right">Platform Fee</TableHead>
+                      <TableHead className="text-right">Producer Payout</TableHead>
                       <TableHead>Paid At</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -387,17 +419,17 @@ export const PaymentAnalyticsDashboard = () => {
                     {analytics.payouts.completed.map((payout) => (
                       <TableRow key={payout.id}>
                         <TableCell>
-                          <Badge variant="outline">{payout.tier}</Badge>
+                          <Badge variant="outline">{payout.tier || "Song"}</Badge>
                         </TableCell>
                         <TableCell>{payout.producer?.name || "Unknown"}</TableCell>
-                        <TableCell>${parseFloat(payout.price).toFixed(2)}</TableCell>
-                        <TableCell className="text-orange-600">
-                          ${payout.platformFee.toFixed(2)}
+                        <TableCell className="text-right tabular-nums">{fmtUSD(parsePrice(payout.price))}</TableCell>
+                        <TableCell className="text-right tabular-nums text-orange-600">
+                          {fmtUSD(payout.platformFee)}
                         </TableCell>
-                        <TableCell className="text-green-600 font-medium">
-                          ${payout.producerPayout.toFixed(2)}
+                        <TableCell className="text-right tabular-nums text-green-600 font-semibold">
+                          {fmtUSD(payout.producerPayout)}
                         </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">
+                        <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
                           {format(new Date(payout.paidAt), "MMM d, yyyy HH:mm")}
                         </TableCell>
                       </TableRow>
