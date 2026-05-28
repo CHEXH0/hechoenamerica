@@ -43,21 +43,22 @@ serve(async (req) => {
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
     
     const user = userData.user;
-    if (!user?.id) throw new Error("User not authenticated");
+    if (!user?.id || !user?.email) throw new Error("User not authenticated");
     logStep("User authenticated", { userId: user.id });
 
-    // Check if user is admin or producer
-    const { data: roleData } = await supabaseAdmin
+    // Determine caller roles
+    const { data: roles } = await supabaseAdmin
       .from("user_roles")
       .select("role")
-      .eq("user_id", user.id)
-      .in("role", ["admin", "producer"])
-      .single();
+      .eq("user_id", user.id);
 
-    if (!roleData) {
+    const isAdmin = roles?.some((r: any) => r.role === "admin");
+    const isProducer = roles?.some((r: any) => r.role === "producer");
+
+    if (!isAdmin && !isProducer) {
       throw new Error("Unauthorized: Admin or Producer role required");
     }
-    logStep("Role verified", { role: roleData.role });
+    logStep("Role verified", { isAdmin, isProducer });
 
     const { requestId } = await req.json();
     if (!requestId) throw new Error("Missing requestId");
@@ -65,12 +66,19 @@ serve(async (req) => {
     // Fetch the song request
     const { data: request, error: requestError } = await supabaseAdmin
       .from("song_requests")
-      .select("*, producers(id, name, email)")
+      .select("*, producers(id, name, email, stripe_connect_account_id, stripe_connect_onboarded_at)")
       .eq("id", requestId)
       .single();
 
     if (requestError || !request) {
       throw new Error(`Request not found: ${requestError?.message || "Unknown error"}`);
+    }
+
+    // If caller is a producer (not admin), they must own this project
+    if (!isAdmin) {
+      if (!request.producers || request.producers.email !== user.email) {
+        throw new Error("Forbidden: you can only request payouts for your own projects");
+      }
     }
 
     if (request.status !== "completed") {
@@ -95,10 +103,8 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
-    // Retrieve the payment intent to get the actual charge
-    const paymentIntent = await stripe.paymentIntents.retrieve(request.payment_intent_id, {
-      expand: ["charges"],
-    });
+    // Retrieve the payment intent to confirm payment succeeded
+    const paymentIntent = await stripe.paymentIntents.retrieve(request.payment_intent_id);
 
     if (paymentIntent.status !== "succeeded") {
       throw new Error("Payment has not been completed");
@@ -128,50 +134,50 @@ serve(async (req) => {
       platformFeePercent: PLATFORM_FEE_PERCENT,
     });
 
-// Check if producer has Stripe Connect account for automatic payout
-    const { data: producerData } = await supabaseAdmin
-      .from("producers")
-      .select("stripe_connect_account_id, stripe_connect_onboarded_at")
-      .eq("id", request.assigned_producer_id)
-      .single();
-
-    let transferId = null;
-    let payoutMethod = "manual";
-
-    if (producerData?.stripe_connect_account_id && producerData?.stripe_connect_onboarded_at) {
-      // Create actual Stripe transfer to producer's Connect account
-      try {
-        const transfer = await stripe.transfers.create({
-          amount: producerPayoutCents,
-          currency: "usd",
-          destination: producerData.stripe_connect_account_id,
-          transfer_group: request.id,
-          metadata: {
-            request_id: request.id,
-            tier: request.tier,
-            producer_id: request.assigned_producer_id,
-          },
-        });
-        transferId = transfer.id;
-        payoutMethod = "stripe_connect";
-        logStep("Stripe transfer created", { transferId, amount: producerPayoutCents });
-      } catch (transferError) {
-        logStep("Transfer failed, falling back to manual", { 
-          error: transferError instanceof Error ? transferError.message : String(transferError) 
-        });
-        // Fall back to manual payout tracking
-      }
-    } else {
-      logStep("Producer not onboarded to Stripe Connect, recording manual payout");
+    const producerData = request.producers;
+    if (!producerData?.stripe_connect_account_id) {
+      throw new Error("Producer has not connected a Stripe account. Set up Stripe Connect before requesting a payout.");
     }
 
-    // Update the song request with payout information
+    // Verify the Connect account is fully onboarded and payouts-enabled
+    const account = await stripe.accounts.retrieve(producerData.stripe_connect_account_id);
+    if (!account.charges_enabled || !account.payouts_enabled || !account.details_submitted) {
+      throw new Error(
+        "Stripe Connect account is not ready to receive transfers. Complete onboarding (details submitted, charges & payouts enabled)."
+      );
+    }
+
+    // Create the Stripe transfer to the producer's Connect account
+    let transferId: string;
+    try {
+      const transfer = await stripe.transfers.create({
+        amount: producerPayoutCents,
+        currency: paymentIntent.currency || "usd",
+        destination: producerData.stripe_connect_account_id,
+        transfer_group: request.id,
+        metadata: {
+          request_id: request.id,
+          tier: request.tier,
+          producer_id: request.assigned_producer_id,
+        },
+      });
+      transferId = transfer.id;
+      logStep("Stripe transfer created", { transferId, amount: producerPayoutCents });
+    } catch (transferError) {
+      const msg = transferError instanceof Error ? transferError.message : String(transferError);
+      logStep("Transfer failed", { error: msg });
+      throw new Error(`Stripe transfer failed: ${msg}`);
+    }
+
+    // Only mark paid AFTER transfer succeeds
     const { error: updateError } = await supabaseAdmin
       .from("song_requests")
       .update({
         platform_fee_cents: platformFeeCents,
         producer_payout_cents: producerPayoutCents,
         producer_paid_at: new Date().toISOString(),
+        stripe_transfer_id: transferId,
+        payout_method: "stripe_connect",
         updated_at: new Date().toISOString(),
       })
       .eq("id", requestId);
@@ -180,7 +186,7 @@ serve(async (req) => {
       throw new Error(`Failed to update payout record: ${updateError.message}`);
     }
 
-    logStep("Payout recorded", { requestId });
+    logStep("Payout recorded", { requestId, transferId });
 
     // Notify the producer about the payout
     if (request.producers?.email) {
@@ -196,7 +202,7 @@ serve(async (req) => {
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
               <h2 style="color: #10b981;">Payment Processed! 💰</h2>
               <p>Hi ${request.producers.name},</p>
-              <p>Great news! Your payment for the completed project has been processed.</p>
+              <p>Great news! Your payment for the completed project has been transferred to your Stripe Connect account.</p>
               
               <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
                 <h3 style="margin-top: 0;">Payment Details</h3>
@@ -204,9 +210,10 @@ serve(async (req) => {
                 <p><strong>Total Project Value:</strong> $${(totalAmountCents / 100).toFixed(2)}</p>
                 <p><strong>Platform Fee (${PLATFORM_FEE_PERCENT}%):</strong> $${(platformFeeCents / 100).toFixed(2)}</p>
                 <p style="font-size: 1.2em; color: #10b981;"><strong>Your Payout:</strong> $${(producerPayoutCents / 100).toFixed(2)}</p>
+                <p style="font-size: 0.85em; color: #666;">Stripe Transfer ID: ${transferId}</p>
               </div>
               
-              <p>The payout will be transferred to your account according to our payout schedule.</p>
+              <p>Funds will land in your bank account on your normal Stripe payout schedule.</p>
               <p>Thank you for your excellent work!</p>
               
               <p style="color: #666; margin-top: 30px;">— The Hecho En America Team</p>
@@ -228,6 +235,8 @@ serve(async (req) => {
         platformFeeCents,
         producerPayoutCents,
         platformFeePercent: PLATFORM_FEE_PERCENT,
+        transferId,
+        payoutMethod: "stripe_connect",
       },
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
