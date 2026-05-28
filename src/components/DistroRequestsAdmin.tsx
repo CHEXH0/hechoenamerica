@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Compass, Calendar, CheckCircle, Loader2, ExternalLink, Music } from "lucide-react";
+import { Compass, Calendar, CheckCircle, Loader2, ExternalLink, Music, UserCheck, Lock } from "lucide-react";
 
 type DistroRow = {
   id: string;
@@ -20,6 +21,7 @@ type DistroRow = {
   scheduled_at: string | null;
   completed_at: string | null;
   created_at: string;
+  assigned_support_id: string | null;
   song_requests: {
     tier: string;
     song_idea: string;
@@ -38,6 +40,7 @@ const STATUS_COLORS: Record<string, string> = {
 export const DistroRequestsAdmin = () => {
   const qc = useQueryClient();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [editingNotes, setEditingNotes] = useState<string | null>(null);
   const [notesDraft, setNotesDraft] = useState("");
 
@@ -86,26 +89,34 @@ export const DistroRequestsAdmin = () => {
     );
   }
 
-  if (!rows?.length) {
+  // Only surface requests where the client has actually picked a time.
+  const withClientTime = (rows || []).filter((r) => !!r.client_selected_time);
+
+  if (!withClientTime.length) {
     return (
       <Card>
         <CardContent className="py-12 text-center text-muted-foreground">
-          No distro consultation requests yet.
+          No distro consultations to review yet — clients will appear here once they pick a meeting time.
         </CardContent>
       </Card>
     );
   }
 
-  // Sort: actionable (song delivered/completed, status pending) first
-  const isSongDelivered = (s?: string | null) => s === "delivered" || s === "completed";
-  const actionable = rows.filter(
-    (r) => r.status === "pending" && isSongDelivered(r.song_requests?.status)
+  const meId = user?.id;
+  const awaiting = withClientTime.filter(
+    (r) => r.status !== "completed" && r.status !== "declined" && !r.assigned_support_id,
   );
-  const waitingOnSong = rows.filter(
-    (r) => r.status === "pending" && !isSongDelivered(r.song_requests?.status)
+  const mine = withClientTime.filter(
+    (r) => r.status !== "completed" && r.status !== "declined" && r.assigned_support_id === meId,
   );
-  const scheduled = rows.filter((r) => r.status === "scheduled");
-  const done = rows.filter((r) => r.status === "completed" || r.status === "declined");
+  const taken = withClientTime.filter(
+    (r) =>
+      r.status !== "completed" &&
+      r.status !== "declined" &&
+      r.assigned_support_id &&
+      r.assigned_support_id !== meId,
+  );
+  const done = withClientTime.filter((r) => r.status === "completed" || r.status === "declined");
 
   const Section = ({ title, items, hint }: { title: string; items: DistroRow[]; hint?: string }) =>
     items.length === 0 ? null : (
@@ -150,20 +161,38 @@ export const DistroRequestsAdmin = () => {
                 </div>
               </div>
 
+              {/* Assignment status */}
+              {req.assigned_support_id && req.assigned_support_id !== meId && req.status !== "completed" && req.status !== "declined" && (
+                <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-md px-2 py-1.5">
+                  <Lock className="h-3 w-3" />
+                  Accepted by another support member
+                </div>
+              )}
+              {req.assigned_support_id === meId && req.status !== "completed" && req.status !== "declined" && (
+                <div className="flex items-center gap-2 text-xs text-green-700 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-md px-2 py-1.5">
+                  <UserCheck className="h-3 w-3" />
+                  You accepted this consultation
+                </div>
+              )}
+
               {/* Actions */}
-              {req.status === "pending" && isSongDelivered(req.song_requests?.status) && (
+              {!req.assigned_support_id && req.status !== "completed" && req.status !== "declined" && (
                 <div className="flex gap-2 flex-wrap">
                   <Button
                     size="sm"
                     onClick={() =>
                       updateMutation.mutate({
                         id: req.id,
-                        patch: { status: "scheduled", scheduled_at: new Date().toISOString() },
+                        patch: {
+                          assigned_support_id: meId as any,
+                          status: "scheduled",
+                          scheduled_at: req.scheduled_at || (new Date().toISOString() as any),
+                        },
                       })
                     }
                   >
-                    <Calendar className="h-3 w-3" />
-                    Accept & send booking link
+                    <UserCheck className="h-3 w-3" />
+                    Accept consultation
                   </Button>
                   <Button
                     size="sm"
@@ -175,7 +204,7 @@ export const DistroRequestsAdmin = () => {
                 </div>
               )}
 
-              {req.status === "scheduled" && (
+              {req.assigned_support_id === meId && req.status !== "completed" && req.status !== "declined" && (
                 <div className="space-y-2">
                   <a
                     href={req.google_meet_link}
@@ -256,19 +285,19 @@ export const DistroRequestsAdmin = () => {
   return (
     <div className="space-y-4">
       <Section
-        title="Ready to schedule"
-        items={actionable}
-        hint="Song has been delivered — reach out to schedule the distro consultation."
+        title="Awaiting acceptance"
+        items={awaiting}
+        hint="Client has picked a time — first support member to accept will own this consultation."
       />
       <Section
-        title="Scheduled"
-        items={scheduled}
-        hint="Client has been invited to pick a meeting time."
+        title="My consultations"
+        items={mine}
+        hint="Consultations you've accepted. Open the booking link and mark complete when done."
       />
       <Section
-        title="Waiting on song delivery"
-        items={waitingOnSong}
-        hint="Will become actionable once the producer delivers the song."
+        title="Taken by another support member"
+        items={taken}
+        hint="Read-only — another support team member has already accepted these."
       />
       <Section title="Archive" items={done} />
     </div>
