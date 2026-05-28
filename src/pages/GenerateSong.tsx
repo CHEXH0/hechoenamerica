@@ -16,6 +16,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { Progress } from "@/components/ui/progress";
 import { useSongPricing, DEFAULT_PRICING } from "@/hooks/useSongPricing";
 import { useTranslation } from "@/contexts/TranslationContext";
+import { SongAddOnsDialog } from "@/components/SongAddOnsDialog";
 
 // Google Drive link type
 interface DriveLink {
