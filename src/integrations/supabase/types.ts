@@ -179,6 +179,54 @@ export type Database = {
         }
         Relationships: []
       }
+      distro_requests: {
+        Row: {
+          assigned_support_id: string | null
+          client_selected_time: string | null
+          completed_at: string | null
+          created_at: string
+          google_meet_link: string
+          id: string
+          scheduled_at: string | null
+          song_request_id: string
+          status: string
+          support_notes: string | null
+          updated_at: string
+          user_email: string
+          user_id: string
+        }
+        Insert: {
+          assigned_support_id?: string | null
+          client_selected_time?: string | null
+          completed_at?: string | null
+          created_at?: string
+          google_meet_link?: string
+          id?: string
+          scheduled_at?: string | null
+          song_request_id: string
+          status?: string
+          support_notes?: string | null
+          updated_at?: string
+          user_email: string
+          user_id: string
+        }
+        Update: {
+          assigned_support_id?: string | null
+          client_selected_time?: string | null
+          completed_at?: string | null
+          created_at?: string
+          google_meet_link?: string
+          id?: string
+          scheduled_at?: string | null
+          song_request_id?: string
+          status?: string
+          support_notes?: string | null
+          updated_at?: string
+          user_email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       hea_projects: {
         Row: {
           address: string | null
@@ -679,8 +727,6 @@ export type Database = {
           user_email: string
           user_id: string
           wants_analog: boolean | null
-          wants_distro_help: boolean
-          wants_hea_box: boolean
           wants_mastering: boolean | null
           wants_mixing: boolean | null
           wants_recorded_stems: boolean | null
@@ -714,8 +760,6 @@ export type Database = {
           user_email: string
           user_id: string
           wants_analog?: boolean | null
-          wants_distro_help?: boolean
-          wants_hea_box?: boolean
           wants_mastering?: boolean | null
           wants_mixing?: boolean | null
           wants_recorded_stems?: boolean | null
@@ -749,8 +793,6 @@ export type Database = {
           user_email?: string
           user_id?: string
           wants_analog?: boolean | null
-          wants_distro_help?: boolean
-          wants_hea_box?: boolean
           wants_mastering?: boolean | null
           wants_mixing?: boolean | null
           wants_recorded_stems?: boolean | null
