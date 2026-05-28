@@ -630,6 +630,12 @@ const Admin = () => {
                                     {userRoles[usr.id]?.includes('admin') && (
                                       <SelectItem value="admin:remove">Remove Admin</SelectItem>
                                     )}
+                                    {!userRoles[usr.id]?.includes('support') && (
+                                      <SelectItem value="support:add">Add Support</SelectItem>
+                                    )}
+                                    {userRoles[usr.id]?.includes('support') && (
+                                      <SelectItem value="support:remove">Remove Support</SelectItem>
+                                    )}
                                   </SelectContent>
                                 </Select>
                               </div>
