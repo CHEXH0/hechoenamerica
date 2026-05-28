@@ -102,6 +102,7 @@ const App = () => {
                   <Route path="/hea-projects" element={<HEAProjects />} />
                   <Route path="/sign-contract" element={<SignContract />} />
                   <Route path="/gomas-chamoy" element={<GomasChamoy />} />
+                  <Route path="/support" element={<Support />} />
                 </Routes>
               </Suspense>
               <CookieConsent />
