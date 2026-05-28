@@ -439,13 +439,26 @@ const GenerateSong = () => {
       return;
     }
 
+    // Open the add-ons dialog; checkout happens from there
+    setShowAddOnsDialog(true);
+  };
+
+  const proceedToCheckout = async (selections: { wantsDistroHelp: boolean; wantsHeaBox: boolean }) => {
+    if (!user) return;
     setIsSubmitting(true);
 
     try {
       // Collect drive links as file URLs
       const allFileUrls = driveLinks.map((link) => link.url);
 
-      // For paid tiers only - create song request and redirect to Stripe
+      // Compute final price with optional add-ons (mirrors edge function)
+      const DISTRO_HELP_PRICE = 15;
+      const HEA_BOX_PRICE = 27.68;
+      const addOnsExtra =
+        (selections.wantsDistroHelp ? DISTRO_HELP_PRICE : 0) +
+        (selections.wantsHeaBox ? HEA_BOX_PRICE : 0);
+      const finalTotal = totalPrice + addOnsExtra;
+
       console.log("Creating paid tier song request...");
       const { data: requestData, error: insertError } = await supabase.
       from("song_requests").
@@ -454,7 +467,7 @@ const GenerateSong = () => {
         user_email: user.email || "",
         song_idea: idea,
         tier: currentTier.label,
-        price: `$${totalPrice}`,
+        price: `$${finalTotal.toFixed(2)}`,
         status: "pending_payment",
         file_urls: allFileUrls.length > 0 ? allFileUrls : null,
         number_of_revisions: numberOfRevisions,
@@ -462,6 +475,8 @@ const GenerateSong = () => {
         wants_analog: wantsAnalog,
         wants_mixing: wantsMixing,
         wants_mastering: wantsMastering,
+        wants_distro_help: selections.wantsDistroHelp,
+        wants_hea_box: selections.wantsHeaBox,
         genre_category: selectedGenre || null,
         bit_depth: bitDepth,
         sample_rate: sampleRate
@@ -475,10 +490,6 @@ const GenerateSong = () => {
       }
 
       console.log("Song request created:", requestData?.id);
-
-      // Note: Producer assignment happens when a producer accepts via Discord
-      // Discord notification is sent AFTER payment verification in verify-song-payment
-
       console.log("Initiating checkout...");
 
       const { data: sessionData, error } = await supabase.functions.invoke("create-song-checkout", {
@@ -498,7 +509,9 @@ const GenerateSong = () => {
           },
           bitDepth,
           sampleRate,
-          platformFeePercent: pricingConfig?.platformFeePercent ?? 10
+          platformFeePercent: pricingConfig?.platformFeePercent ?? 10,
+          wantsDistroHelp: selections.wantsDistroHelp,
+          wantsHeaBox: selections.wantsHeaBox
         }
       });
 
@@ -518,6 +531,7 @@ const GenerateSong = () => {
         description: error instanceof Error ? error.message : tg.errorDesc,
         variant: "destructive"
       });
+      setShowAddOnsDialog(false);
     } finally {
       setIsSubmitting(false);
     }
