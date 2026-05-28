@@ -310,60 +310,8 @@ serve(async (req) => {
 
     console.log("Customer email sent with download link");
 
-    // Notify support team if there are pending distro requests for this song
-    try {
-      const { data: distroRows } = await supabase
-        .from("distro_requests")
-        .select("id, user_email, google_meet_link")
-        .eq("song_request_id", requestId)
-        .eq("status", "pending");
-
-      if (distroRows && distroRows.length > 0) {
-        // Collect support team emails
-        const { data: supportRoles } = await supabase
-          .from("user_roles")
-          .select("user_id")
-          .eq("role", "support");
-
-        const supportEmails: string[] = [];
-        for (const r of supportRoles || []) {
-          const { data: u } = await supabase.auth.admin.getUserById(r.user_id);
-          if (u?.user?.email) supportEmails.push(u.user.email);
-        }
-        // Always include the team mailbox as fallback/cc
-        if (!supportEmails.includes("team@hechoenamericastudio.com")) {
-          supportEmails.push("team@hechoenamericastudio.com");
-        }
-
-        const distro = distroRows[0];
-        await resend.emails.send({
-          from: "HEA Support <team@hechoenamericastudio.com>",
-          to: supportEmails,
-          subject: `🧭 New Discover Your Distro consultation ready — ${distro.user_email}`,
-          html: `
-            <div style="font-family: -apple-system, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
-              <div style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); color: white; padding: 24px; border-radius: 12px; text-align: center;">
-                <h1 style="margin: 0; font-size: 22px;">🧭 New Distro Consultation</h1>
-                <p style="margin: 8px 0 0; opacity: 0.95;">A client's song has been delivered and is ready for their Discover Your Distro session.</p>
-              </div>
-              <div style="background: #fff; border: 1px solid #eee; border-top: 0; padding: 24px; border-radius: 0 0 12px 12px;">
-                <p><strong>Client:</strong> ${distro.user_email}</p>
-                <p><strong>Song tier:</strong> ${songRequest.tier}</p>
-                <p><strong>Genre:</strong> ${genreDisplay}</p>
-                <p style="color:#555; font-size:14px;">The client can now book a time using your Google Meet link. Please follow up via the Support Panel and confirm the meeting.</p>
-                <div style="margin-top: 20px; text-align:center;">
-                  <a href="${APP_URL}/support" style="display:inline-block; background:#7c3aed; color:white; padding:12px 28px; border-radius:8px; text-decoration:none; font-weight:600;">Open Support Panel →</a>
-                </div>
-                <p style="margin-top:16px; font-size:13px; color:#666;">Booking link: <a href="${distro.google_meet_link}">${distro.google_meet_link}</a></p>
-              </div>
-            </div>
-          `,
-        });
-        console.log(`Support team notified (${supportEmails.length} recipients) about distro request.`);
-      }
-    } catch (supportErr) {
-      console.error("Failed to notify support team:", supportErr);
-    }
+    // Note: support team is notified separately when the client picks a meeting time
+    // via the `notify-distro-time-selected` edge function.
 
     // Send Discord notification
     try {
