@@ -419,17 +419,17 @@ export const PaymentAnalyticsDashboard = () => {
                     {analytics.payouts.completed.map((payout) => (
                       <TableRow key={payout.id}>
                         <TableCell>
-                          <Badge variant="outline">{payout.tier}</Badge>
+                          <Badge variant="outline">{payout.tier || "Song"}</Badge>
                         </TableCell>
                         <TableCell>{payout.producer?.name || "Unknown"}</TableCell>
-                        <TableCell>${parseFloat(payout.price).toFixed(2)}</TableCell>
-                        <TableCell className="text-orange-600">
-                          ${payout.platformFee.toFixed(2)}
+                        <TableCell className="text-right tabular-nums">{fmtUSD(parsePrice(payout.price))}</TableCell>
+                        <TableCell className="text-right tabular-nums text-orange-600">
+                          {fmtUSD(payout.platformFee)}
                         </TableCell>
-                        <TableCell className="text-green-600 font-medium">
-                          ${payout.producerPayout.toFixed(2)}
+                        <TableCell className="text-right tabular-nums text-green-600 font-semibold">
+                          {fmtUSD(payout.producerPayout)}
                         </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">
+                        <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
                           {format(new Date(payout.paidAt), "MMM d, yyyy HH:mm")}
                         </TableCell>
                       </TableRow>
