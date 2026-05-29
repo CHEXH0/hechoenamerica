@@ -116,7 +116,23 @@ export const PaymentAnalyticsDashboard = () => {
 
   useEffect(() => {
     fetchAnalytics();
+
+    // Keep payout/refund state in sync with payouts processed elsewhere
+    // (e.g. a producer paying out from "My Project Assignments").
+    const channel = supabase
+      .channel("payment-analytics-song-requests")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "song_requests" },
+        () => fetchAnalytics()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
+
 
   const handleProcessPayout = async (requestId: string) => {
     setProcessingPayout(requestId);
