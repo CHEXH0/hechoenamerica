@@ -682,9 +682,55 @@ const Admin = () => {
                                       <SelectItem value="support:remove">Remove Support</SelectItem>
                                     )}
                                   </SelectContent>
-                                </Select>
                               </div>
                             </TableCell>
+                            <TableCell className="text-right">
+                              {usr.id === user?.id ? (
+                                <span className="text-xs text-muted-foreground">You</span>
+                              ) : (
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                      disabled={deletingUser === usr.id}
+                                    >
+                                      {deletingUser === usr.id ? (
+                                        <RefreshCw className="h-4 w-4 animate-spin" />
+                                      ) : (
+                                        <Trash2 className="h-4 w-4" />
+                                      )}
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Delete this user?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This permanently deletes{" "}
+                                        <span className="font-medium">
+                                          {usr.display_name || usr.email || "this user"}
+                                        </span>{" "}
+                                        and all of their related data (purchases, song requests,
+                                        roles, profile). This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        onClick={() => handleDeleteUser(usr.id)}
+                                      >
+                                        Delete User
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+
                           </TableRow>
                         ))}
                       </TableBody>
