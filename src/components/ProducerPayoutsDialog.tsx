@@ -69,11 +69,31 @@ export const ProducerPayoutsDialog = () => {
   };
 
   useEffect(() => {
-    if (open && producer?.id) {
-      fetchProjects();
-      fetchConnectStatus();
-    }
+    if (!open || !producer?.id) return;
+
+    fetchProjects();
+    fetchConnectStatus();
+
+    // Refresh when payouts/status change elsewhere (e.g. admin Payment Activity).
+    const channel = supabase
+      .channel(`producer-payouts-${producer.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "song_requests",
+          filter: `assigned_producer_id=eq.${producer.id}`,
+        },
+        () => fetchProjects()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [open, producer?.id]);
+
 
   const handlePayout = async (requestId: string) => {
     setProcessing(requestId);
