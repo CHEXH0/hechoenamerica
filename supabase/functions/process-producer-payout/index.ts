@@ -288,7 +288,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       success: true,
       payout: {
-        totalAmountCents,
+        songAmountCents,
         platformFeeCents,
         producerPayoutCents,
         platformFeePercent: PLATFORM_FEE_PERCENT,
