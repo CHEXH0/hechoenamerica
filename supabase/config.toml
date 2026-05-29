@@ -122,3 +122,7 @@ verify_jwt = true
 
 [functions.sign-hea-contract]
 verify_jwt = false
+
+[functions.admin-delete-user]
+verify_jwt = false
+
