@@ -549,8 +549,8 @@ const Admin = () => {
           transition={{ delay: 0.1 }}
           className="space-y-6"
         >
-          {/* Producer-specific sections */}
-          {userRole?.isProducer && linkedProducerId && (
+          {/* Producer-specific sections (admins use their own Stripe dashboard, no Connect needed) */}
+          {userRole?.isProducer && !isAdmin && linkedProducerId && (
             <StripeConnectOnboarding producerId={linkedProducerId} />
           )}
 
