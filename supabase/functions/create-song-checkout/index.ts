@@ -107,15 +107,25 @@ serve(async (req) => {
       description += ` + ${addOnsList.join(", ")}`;
     }
 
-    // Calculate amounts in cents
+    // Calculate amounts in cents.
+    // The Stripe charge is the FULL total (song + production add-ons + Distro + HEA Box).
     const totalAmountCents = Math.round(totalPrice * 100);
-    const platformFeeCents = Math.round(totalAmountCents * (PLATFORM_FEE_PERCENT / 100));
-    const producerPayoutCents = totalAmountCents - platformFeeCents;
+
+    // The producer 90/10 split applies to the SONG amount ONLY (base tier +
+    // production add-ons). The Discover Your Distro fee ($15, paid to the support
+    // user) and the HEA Box ($27.68, a physical product kept by admin) are NOT
+    // the producer's work and are excluded from their payout.
+    const songAmountCents = Math.round(Number(baseTotalPrice) * 100);
+    const platformFeeCents = Math.round(songAmountCents * (PLATFORM_FEE_PERCENT / 100));
+    const producerPayoutCents = songAmountCents - platformFeeCents;
 
     logStep("Payment calculation", {
       totalAmountCents,
+      songAmountCents,
       platformFeeCents,
       producerPayoutCents,
+      distroHelpAmount,
+      heaBoxAmount,
     });
 
     // Calculate acceptance deadline (48 hours from now)

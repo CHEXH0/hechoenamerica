@@ -122,16 +122,35 @@ serve(async (req) => {
     }
     logStep("Platform fee loaded", { PLATFORM_FEE_PERCENT });
 
-    // Calculate amounts
-    const totalAmountCents = paymentIntent.amount;
-    const platformFeeCents = Math.round(totalAmountCents * (PLATFORM_FEE_PERCENT / 100));
-    const producerPayoutCents = totalAmountCents - platformFeeCents;
+    // Producer payout is based on the SONG amount ONLY. The Discover Your Distro
+    // fee ($15, paid to the support user who handled the consultation) and the
+    // HEA Box ($27.68, a physical product kept by admin) are excluded — they are
+    // not the producer's work. We use the song-only split stored at checkout;
+    // if it's missing (legacy rows) we derive it from the song price.
+    let producerPayoutCents = request.producer_payout_cents ?? 0;
+    let platformFeeCents = request.platform_fee_cents ?? 0;
+
+    if (!producerPayoutCents || producerPayoutCents <= 0) {
+      const songCents = Math.round(
+        parseFloat(String(request.price ?? "0").replace(/[^0-9.]/g, "")) * 100
+      );
+      platformFeeCents = Math.round(songCents * (PLATFORM_FEE_PERCENT / 100));
+      producerPayoutCents = songCents - platformFeeCents;
+      logStep("Stored payout missing — derived from song price", { songCents });
+    }
+
+    const songAmountCents = producerPayoutCents + platformFeeCents;
+
+    if (producerPayoutCents <= 0) {
+      throw new Error("Unable to determine producer payout amount for this project");
+    }
 
     logStep("Payout calculation", {
-      totalAmountCents,
+      songAmountCents,
       platformFeeCents,
       producerPayoutCents,
       platformFeePercent: PLATFORM_FEE_PERCENT,
+      chargeAmountCents: paymentIntent.amount,
     });
 
     const producerData = request.producers;
@@ -245,7 +264,7 @@ serve(async (req) => {
               <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
                 <h3 style="margin-top: 0;">Payment Details</h3>
                 <p><strong>Project:</strong> ${request.tier} Song</p>
-                <p><strong>Total Project Value:</strong> $${(totalAmountCents / 100).toFixed(2)}</p>
+                <p><strong>Song Value:</strong> $${(songAmountCents / 100).toFixed(2)}</p>
                 <p><strong>Platform Fee (${PLATFORM_FEE_PERCENT}%):</strong> $${(platformFeeCents / 100).toFixed(2)}</p>
                 <p style="font-size: 1.2em; color: #10b981;"><strong>Your Payout:</strong> $${(producerPayoutCents / 100).toFixed(2)}</p>
                 <p style="font-size: 0.85em; color: #666;">Stripe Transfer ID: ${transferId}</p>
@@ -269,7 +288,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       success: true,
       payout: {
-        totalAmountCents,
+        songAmountCents,
         platformFeeCents,
         producerPayoutCents,
         platformFeePercent: PLATFORM_FEE_PERCENT,

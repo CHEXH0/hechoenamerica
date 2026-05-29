@@ -37,6 +37,11 @@ const STATUS_COLORS: Record<string, string> = {
   declined: "bg-red-500/20 text-red-700 border-red-500/40",
 };
 
+// Flat fee the support member earns for each completed Discover Your Distro
+// consultation. Paid manually / offline — this is for tracking only.
+const DISTRO_FEE = 15;
+
+
 export const DistroRequestsAdmin = () => {
   const qc = useQueryClient();
   const { toast } = useToast();
@@ -118,6 +123,12 @@ export const DistroRequestsAdmin = () => {
   );
   const done = withClientTime.filter((r) => r.status === "completed" || r.status === "declined");
 
+  // Manual/offline earnings tracking: $15 per consultation this support member completed.
+  const myCompletedCount = withClientTime.filter(
+    (r) => r.status === "completed" && r.assigned_support_id === meId,
+  ).length;
+  const myEarnings = myCompletedCount * DISTRO_FEE;
+
   const Section = ({ title, items, hint }: { title: string; items: DistroRow[]; hint?: string }) =>
     items.length === 0 ? null : (
       <Card>
@@ -141,6 +152,9 @@ export const DistroRequestsAdmin = () => {
                     {req.song_requests?.status && (
                       <Badge variant="secondary">Song: {req.song_requests.status}</Badge>
                     )}
+                    <Badge className="bg-emerald-500/20 text-emerald-700 border-emerald-500/40">
+                      ${DISTRO_FEE} fee
+                    </Badge>
                   </div>
                   <p className="text-sm font-medium">{req.user_email}</p>
                   {req.song_requests?.song_idea && (
@@ -284,6 +298,23 @@ export const DistroRequestsAdmin = () => {
 
   return (
     <div className="space-y-4">
+      <Card className="border-emerald-500/40 bg-emerald-500/5">
+        <CardContent className="py-4 flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <p className="text-sm font-medium">Your Discover Your Distro earnings</p>
+            <p className="text-xs text-muted-foreground">
+              ${DISTRO_FEE} per completed consultation · paid manually / offline
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-bold text-emerald-600">${myEarnings}</p>
+            <p className="text-xs text-muted-foreground">
+              {myCompletedCount} completed × ${DISTRO_FEE}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       <Section
         title="Awaiting acceptance"
         items={awaiting}
