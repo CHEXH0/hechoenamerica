@@ -298,6 +298,23 @@ export const DistroRequestsAdmin = () => {
 
   return (
     <div className="space-y-4">
+      <Card className="border-emerald-500/40 bg-emerald-500/5">
+        <CardContent className="py-4 flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <p className="text-sm font-medium">Your Discover Your Distro earnings</p>
+            <p className="text-xs text-muted-foreground">
+              ${DISTRO_FEE} per completed consultation · paid manually / offline
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-bold text-emerald-600">${myEarnings}</p>
+            <p className="text-xs text-muted-foreground">
+              {myCompletedCount} completed × ${DISTRO_FEE}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       <Section
         title="Awaiting acceptance"
         items={awaiting}
