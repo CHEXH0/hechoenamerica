@@ -123,6 +123,12 @@ export const DistroRequestsAdmin = () => {
   );
   const done = withClientTime.filter((r) => r.status === "completed" || r.status === "declined");
 
+  // Manual/offline earnings tracking: $15 per consultation this support member completed.
+  const myCompletedCount = withClientTime.filter(
+    (r) => r.status === "completed" && r.assigned_support_id === meId,
+  ).length;
+  const myEarnings = myCompletedCount * DISTRO_FEE;
+
   const Section = ({ title, items, hint }: { title: string; items: DistroRow[]; hint?: string }) =>
     items.length === 0 ? null : (
       <Card>
