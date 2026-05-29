@@ -37,6 +37,11 @@ const STATUS_COLORS: Record<string, string> = {
   declined: "bg-red-500/20 text-red-700 border-red-500/40",
 };
 
+// Flat fee the support member earns for each completed Discover Your Distro
+// consultation. Paid manually / offline — this is for tracking only.
+const DISTRO_FEE = 15;
+
+
 export const DistroRequestsAdmin = () => {
   const qc = useQueryClient();
   const { toast } = useToast();
