@@ -733,8 +733,6 @@ const Admin = () => {
                           </TableRow>
                         ))}
 
-                          </TableRow>
-                        ))}
                       </TableBody>
                     </Table>
                   )}
