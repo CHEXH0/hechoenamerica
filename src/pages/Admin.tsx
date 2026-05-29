@@ -201,6 +201,36 @@ const Admin = () => {
     }
   };
 
+  const handleDeleteUser = async (userId: string) => {
+    setDeletingUser(userId);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+        body: { userId }
+      });
+
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+
+      toast({
+        title: "User deleted",
+        description: "The user account and related data were removed.",
+      });
+
+      fetchUsers();
+      fetchSystemStats();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete user.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingUser(null);
+    }
+  };
+
+
   if (authLoading || roleLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20 flex items-center justify-center">
