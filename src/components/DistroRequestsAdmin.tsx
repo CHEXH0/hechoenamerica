@@ -152,6 +152,9 @@ export const DistroRequestsAdmin = () => {
                     {req.song_requests?.status && (
                       <Badge variant="secondary">Song: {req.song_requests.status}</Badge>
                     )}
+                    <Badge className="bg-emerald-500/20 text-emerald-700 border-emerald-500/40">
+                      ${DISTRO_FEE} fee
+                    </Badge>
                   </div>
                   <p className="text-sm font-medium">{req.user_email}</p>
                   {req.song_requests?.song_idea && (
