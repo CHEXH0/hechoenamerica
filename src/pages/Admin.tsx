@@ -682,8 +682,10 @@ const Admin = () => {
                                       <SelectItem value="support:remove">Remove Support</SelectItem>
                                     )}
                                   </SelectContent>
+                                </Select>
                               </div>
                             </TableCell>
+
                             <TableCell className="text-right">
                               {usr.id === user?.id ? (
                                 <span className="text-xs text-muted-foreground">You</span>
