@@ -42,6 +42,8 @@ const Admin = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
   const [assigningRole, setAssigningRole] = useState<string | null>(null);
+  const [deletingUser, setDeletingUser] = useState<string | null>(null);
+
   const [linkedProducerId, setLinkedProducerId] = useState<string | null>(null);
   const [systemStats, setSystemStats] = useState({
     totalUsers: 0,
