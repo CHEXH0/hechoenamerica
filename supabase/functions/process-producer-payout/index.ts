@@ -264,7 +264,7 @@ serve(async (req) => {
               <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
                 <h3 style="margin-top: 0;">Payment Details</h3>
                 <p><strong>Project:</strong> ${request.tier} Song</p>
-                <p><strong>Total Project Value:</strong> $${(totalAmountCents / 100).toFixed(2)}</p>
+                <p><strong>Song Value:</strong> $${(songAmountCents / 100).toFixed(2)}</p>
                 <p><strong>Platform Fee (${PLATFORM_FEE_PERCENT}%):</strong> $${(platformFeeCents / 100).toFixed(2)}</p>
                 <p style="font-size: 1.2em; color: #10b981;"><strong>Your Payout:</strong> $${(producerPayoutCents / 100).toFixed(2)}</p>
                 <p style="font-size: 0.85em; color: #666;">Stripe Transfer ID: ${transferId}</p>
