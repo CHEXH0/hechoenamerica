@@ -34,7 +34,7 @@ const Hero = React.memo(() => {
             transition={{ duration: 0.15, ease: "easeOut" }}
           >
             <img
-              src="/lovable-uploads/d5eed490-6d34-4af5-8428-15981ab0f9c3.png"
+              src="public\laptop-uploads\HEA_White.png"
               alt="HechoEnAmerica Logo"
               className="w-full h-full object-contain"
               loading="eager"

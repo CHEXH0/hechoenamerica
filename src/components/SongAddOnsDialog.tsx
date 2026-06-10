@@ -3,8 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Compass, Gift, Loader2, Sparkles, Check } from "lucide-react";
-import distroImage from "@/assets/discover-your-distro.jpg";
-import heaBoxImage from "@/assets/hea-exclusive-box.jpg";
 
 export const DISTRO_HELP_PRICE = 15;
 export const HEA_BOX_FULL_PRICE = 36.90;
@@ -44,7 +42,7 @@ export const SongAddOnsDialog = ({
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl" />
           <DialogHeader className="relative z-10">
             <DialogTitle className="text-xl font-display flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-amber-400 animate-pulse" />
+              <Sparkles className="h-5 w-5 text-purpler-400 animate-pulse" />
               Want to add anything else?
             </DialogTitle>
             <DialogDescription className="text-white/70">
@@ -59,8 +57,8 @@ export const SongAddOnsDialog = ({
             htmlFor="distro-help"
             className={`group relative flex gap-4 rounded-xl border-2 cursor-pointer overflow-hidden transition-all duration-300 ${
               wantsDistroHelp
-                ? "border-amber-500/60 bg-gradient-to-br from-amber-50 to-orange-50 shadow-lg shadow-amber-500/10 scale-[1.01]"
-                : "border-border hover:border-amber-300/50 hover:shadow-md hover:shadow-amber-500/5 bg-card"
+                ? "border-purple-500/60 bg-gradient-to-br from-purple-50 to-purpla-50 shadow-lg shadow-purple-500/10 scale-[1.01]"
+                : "border-border hover:border-purple-300/50 hover:shadow-md hover:shadow-purple-500/5 bg-card"
             }`}
             onMouseEnter={() => setHoveredCard("distro")}
             onMouseLeave={() => setHoveredCard(null)}
@@ -68,16 +66,14 @@ export const SongAddOnsDialog = ({
             {/* Image Section */}
             <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 overflow-hidden">
               <img
-                src={distroImage}
+                src="public\laptop-uploads\Find_Your_Distro.png"
                 alt="Discover Your Distro"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 loading="lazy"
-                width={128}
-                height={128}
               />
               <div className={`absolute inset-0 bg-gradient-to-t from-black/40 to-transparent transition-opacity duration-300 ${hoveredCard === "distro" ? "opacity-60" : "opacity-0"}`} />
               {wantsDistroHelp && (
-                <div className="absolute top-2 left-2 bg-amber-500 text-white rounded-full p-1 shadow-lg animate-scale-in">
+                <div className="absolute top-2 left-2 bg-purple-500 text-white rounded-full p-1 shadow-lg animate-scale-in">
                   <Check className="h-3 w-3" />
                 </div>
               )}
@@ -88,10 +84,10 @@ export const SongAddOnsDialog = ({
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 font-display font-semibold text-foreground">
-                    <Compass className={`h-5 w-5 transition-colors duration-300 ${wantsDistroHelp ? "text-amber-600" : "text-amber-500"}`} />
+                    <Compass className={`h-5 w-5 transition-colors duration-300 ${wantsDistroHelp ? "text-purple-600" : "text-purple-500"}`} />
                     <span>Discover Your Distro</span>
                   </div>
-                  <span className="text-sm font-bold text-amber-600 bg-amber-100 px-2.5 py-1 rounded-full">
+                  <span className="text-sm font-bold text-purple-600 bg-purple-100 px-2.5 py-1 rounded-full">
                     +${DISTRO_HELP_PRICE}
                   </span>
                 </div>
@@ -102,8 +98,8 @@ export const SongAddOnsDialog = ({
                 }`}>
                   A member of the HEA Support team helps you find the best distribution
                   platform for your budget and project.
-                  <span className="block mt-1 text-xs font-medium text-amber-600/80">
-                    Handled by HEA Support, not your producer.
+                  <span className="block mt-1 text-xs font-medium text-purple-600/80">
+                    Handled by our support team.
                   </span>
                 </p>
               </div>
@@ -112,9 +108,9 @@ export const SongAddOnsDialog = ({
                   id="distro-help"
                   checked={wantsDistroHelp}
                   onCheckedChange={(c) => setWantsDistroHelp(c === true)}
-                  className="data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
+                  className="data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
                 />
-                <span className={`text-sm font-medium transition-colors ${wantsDistroHelp ? "text-amber-700" : "text-muted-foreground"}`}>
+                <span className={`text-sm font-medium transition-colors ${wantsDistroHelp ? "text-purple-700" : "text-muted-foreground"}`}>
                   {wantsDistroHelp ? "Added to order" : "Click to add"}
                 </span>
               </div>
@@ -135,12 +131,10 @@ export const SongAddOnsDialog = ({
             {/* Image Section */}
             <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 overflow-hidden">
               <img
-                src={heaBoxImage}
+                src="public\laptop-uploads\Goodie_Box.png"
                 alt="HEA Exclusive Box"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 loading="lazy"
-                width={128}
-                height={128}
               />
               <div className={`absolute inset-0 bg-gradient-to-t from-black/40 to-transparent transition-opacity duration-300 ${hoveredCard === "box" ? "opacity-60" : "opacity-0"}`} />
               {wantsHeaBox && (
@@ -234,7 +228,7 @@ export const SongAddOnsDialog = ({
             disabled={isSubmitting}
             className={`flex-[2] transition-all duration-300 ${
               addOnsTotal > 0
-                ? "bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white shadow-lg"
+                ? "bg-gradient-to-r from-purple-500 to-rose-500 hover:from-purple-600 hover:to-rose-600 text-white shadow-lg"
                 : ""
             }`}
           >
