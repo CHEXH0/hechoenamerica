@@ -993,7 +993,11 @@ const Treats = () => {
                   <p className="text-gray-300 text-lg max-w-lg mx-auto">
                     {tt.sweetTreatsDesc}
                   </p>
-                  <Link to="/gomas-chamoy">
+                  <a
+                    href="https://www.instagram.com/gomaschamoy/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Button
                       size="lg"
                       className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white border-0 px-8 mt-4"
@@ -1001,7 +1005,7 @@ const Treats = () => {
                       <Candy className="h-5 w-5 mr-2" />
                       {tt.orderGomas}
                     </Button>
-                  </Link>
+                  </a>
                 </motion.div>
               </div>
             </TabsContent>}
