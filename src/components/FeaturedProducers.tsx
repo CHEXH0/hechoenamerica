@@ -165,7 +165,7 @@ const FeaturedProducers = () => {
             </motion.div>
             <div className="flex justify-center items-center gap-3 md:gap-4 mt-6 flex-wrap px-4">
               {[
-                { code: "us", name: "USA" },
+                /*{ code: "us", name: "USA" },
                 { code: "br", name: "Brazil" },
                 { code: "co", name: "Colombia" },
                 { code: "mx", name: "Mexico" },
@@ -193,6 +193,7 @@ const FeaturedProducers = () => {
                 { code: "vn", name: "Vietnam" },
                 { code: "ru", name: "Russia" },
                 { code: "ua", name: "Ukraine" },
+                 */
               ].map((flag, i) => (
                 <motion.img
                   key={flag.code}
