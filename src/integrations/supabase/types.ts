@@ -179,6 +179,54 @@ export type Database = {
         }
         Relationships: []
       }
+      distro_requests: {
+        Row: {
+          assigned_support_id: string | null
+          client_selected_time: string | null
+          completed_at: string | null
+          created_at: string
+          google_meet_link: string
+          id: string
+          scheduled_at: string | null
+          song_request_id: string
+          status: string
+          support_notes: string | null
+          updated_at: string
+          user_email: string
+          user_id: string
+        }
+        Insert: {
+          assigned_support_id?: string | null
+          client_selected_time?: string | null
+          completed_at?: string | null
+          created_at?: string
+          google_meet_link?: string
+          id?: string
+          scheduled_at?: string | null
+          song_request_id: string
+          status?: string
+          support_notes?: string | null
+          updated_at?: string
+          user_email: string
+          user_id: string
+        }
+        Update: {
+          assigned_support_id?: string | null
+          client_selected_time?: string | null
+          completed_at?: string | null
+          created_at?: string
+          google_meet_link?: string
+          id?: string
+          scheduled_at?: string | null
+          song_request_id?: string
+          status?: string
+          support_notes?: string | null
+          updated_at?: string
+          user_email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       hea_projects: {
         Row: {
           address: string | null
@@ -662,6 +710,7 @@ export type Database = {
           id: string
           number_of_revisions: number | null
           payment_intent_id: string | null
+          payout_method: string | null
           platform_fee_cents: number | null
           price: string
           producer_checklist: Json | null
@@ -672,6 +721,7 @@ export type Database = {
           song_idea: string
           status: string
           stripe_session_id: string | null
+          stripe_transfer_id: string | null
           tier: string
           updated_at: string
           user_email: string
@@ -693,6 +743,7 @@ export type Database = {
           id?: string
           number_of_revisions?: number | null
           payment_intent_id?: string | null
+          payout_method?: string | null
           platform_fee_cents?: number | null
           price: string
           producer_checklist?: Json | null
@@ -703,6 +754,7 @@ export type Database = {
           song_idea: string
           status?: string
           stripe_session_id?: string | null
+          stripe_transfer_id?: string | null
           tier: string
           updated_at?: string
           user_email: string
@@ -724,6 +776,7 @@ export type Database = {
           id?: string
           number_of_revisions?: number | null
           payment_intent_id?: string | null
+          payout_method?: string | null
           platform_fee_cents?: number | null
           price?: string
           producer_checklist?: Json | null
@@ -734,6 +787,7 @@ export type Database = {
           song_idea?: string
           status?: string
           stripe_session_id?: string | null
+          stripe_transfer_id?: string | null
           tier?: string
           updated_at?: string
           user_email?: string
@@ -924,7 +978,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "producer" | "user"
+      app_role: "admin" | "producer" | "user" | "support"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1052,7 +1106,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "producer", "user"],
+      app_role: ["admin", "producer", "user", "support"],
     },
   },
 } as const

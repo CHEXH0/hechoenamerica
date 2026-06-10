@@ -310,6 +310,9 @@ serve(async (req) => {
 
     console.log("Customer email sent with download link");
 
+    // Note: support team is notified separately when the client picks a meeting time
+    // via the `notify-distro-time-selected` edge function.
+
     // Send Discord notification
     try {
       await supabase.functions.invoke("send-discord-notification", {

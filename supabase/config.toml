@@ -61,7 +61,7 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.process-producer-payout]
-verify_jwt = true
+verify_jwt = false
 
 [functions.stripe-connect-onboard]
 verify_jwt = true
@@ -122,3 +122,7 @@ verify_jwt = true
 
 [functions.sign-hea-contract]
 verify_jwt = false
+
+[functions.admin-delete-user]
+verify_jwt = false
+

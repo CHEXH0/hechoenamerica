@@ -46,13 +46,22 @@ serve(async (req) => {
       idea, 
       fileUrls, 
       requestId,
-      totalPrice,
+      totalPrice: baseTotalPrice,
       basePrice,
       addOns,
       bitDepth,
       sampleRate,
-      platformFeePercent
+      platformFeePercent,
+      wantsDistroHelp,
+      wantsHeaBox
     } = await req.json();
+
+    // Extra add-ons priced server-side so they can't be tampered with
+    const DISTRO_HELP_PRICE = 15;
+    const HEA_BOX_PRICE = 27.68; // $36.90 with 25% bundle discount
+    const distroHelpAmount = wantsDistroHelp ? DISTRO_HELP_PRICE : 0;
+    const heaBoxAmount = wantsHeaBox ? HEA_BOX_PRICE : 0;
+    const totalPrice = Number(baseTotalPrice) + distroHelpAmount + heaBoxAmount;
     
     const PLATFORM_FEE_PERCENT = typeof platformFeePercent === 'number' ? platformFeePercent : 10;
     
@@ -91,20 +100,32 @@ serve(async (req) => {
     if (addOns?.mixing) addOnsList.push("Mixing Service");
     if (addOns?.mastering) addOnsList.push("Mastering Service");
     if (addOns?.revisions > 0) addOnsList.push(`${addOns.revisions} Revision(s)`);
+    if (wantsDistroHelp) addOnsList.push("Discover Your Distro");
+    if (wantsHeaBox) addOnsList.push("HEA Exclusive Box (25% off)");
     
     if (addOnsList.length > 0) {
       description += ` + ${addOnsList.join(", ")}`;
     }
 
-    // Calculate amounts in cents
+    // Calculate amounts in cents.
+    // The Stripe charge is the FULL total (song + production add-ons + Distro + HEA Box).
     const totalAmountCents = Math.round(totalPrice * 100);
-    const platformFeeCents = Math.round(totalAmountCents * (PLATFORM_FEE_PERCENT / 100));
-    const producerPayoutCents = totalAmountCents - platformFeeCents;
+
+    // The producer 90/10 split applies to the SONG amount ONLY (base tier +
+    // production add-ons). The Discover Your Distro fee ($15, paid to the support
+    // user) and the HEA Box ($27.68, a physical product kept by admin) are NOT
+    // the producer's work and are excluded from their payout.
+    const songAmountCents = Math.round(Number(baseTotalPrice) * 100);
+    const platformFeeCents = Math.round(songAmountCents * (PLATFORM_FEE_PERCENT / 100));
+    const producerPayoutCents = songAmountCents - platformFeeCents;
 
     logStep("Payment calculation", {
       totalAmountCents,
+      songAmountCents,
       platformFeeCents,
       producerPayoutCents,
+      distroHelpAmount,
+      heaBoxAmount,
     });
 
     // Calculate acceptance deadline (48 hours from now)
@@ -153,6 +174,9 @@ serve(async (req) => {
         platform_fee_cents: platformFeeCents.toString(),
         producer_payout_cents: producerPayoutCents.toString(),
         acceptance_deadline: acceptanceDeadline.toISOString(),
+        wants_distro_help: wantsDistroHelp ? "true" : "false",
+        wants_hea_box: wantsHeaBox ? "true" : "false",
+        user_email: user.email,
       },
       success_url: `${req.headers.get("origin")}/purchase-confirmation?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/generate-song`,

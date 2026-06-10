@@ -839,4 +839,22 @@ export interface Translations {
     errorTitle: string;
     deliverFailedDesc: string;
   };
+  gomasChamoy: {
+    unavailableTitle: string;
+    unavailableDesc: string;
+    goHome: string;
+    backToTreats: string;
+    cart: string;
+    pageTitle: string;
+    pageSubtitle: string;
+    shippingNotice: string;
+    addToCart: string;
+    outOfStock: string;
+    outOfStockDesc: string;
+    leftInStock: string;
+    addedToCartTitle: string;
+    addedToCartDesc: string;
+    noProducts: string;
+    products: Record<string, { type: string; description: string }>;
+  };
 }

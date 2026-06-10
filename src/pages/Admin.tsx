@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload, Users, User, Database, TrendingUp, DollarSign, FileText, HardDrive, UserPlus, Candy } from "lucide-react";
+import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload, Users, User, Database, TrendingUp, DollarSign, FileText, HardDrive, UserPlus, Candy, Trash2 } from "lucide-react";
 import PricingAdmin from "@/components/PricingAdmin";
 import { GoogleDriveConnect } from "@/components/GoogleDriveConnect";
 import { ProducerProjects } from "@/components/ProducerProjects";
@@ -29,6 +29,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import type { Purchase } from "@/hooks/usePurchases";
 
 const Admin = () => {
@@ -42,6 +53,8 @@ const Admin = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
   const [assigningRole, setAssigningRole] = useState<string | null>(null);
+  const [deletingUser, setDeletingUser] = useState<string | null>(null);
+
   const [linkedProducerId, setLinkedProducerId] = useState<string | null>(null);
   const [systemStats, setSystemStats] = useState({
     totalUsers: 0,
@@ -198,6 +211,36 @@ const Admin = () => {
       setAssigningRole(null);
     }
   };
+
+  const handleDeleteUser = async (userId: string) => {
+    setDeletingUser(userId);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+        body: { userId }
+      });
+
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+
+      toast({
+        title: "User deleted",
+        description: "The user account and related data were removed.",
+      });
+
+      fetchUsers();
+      fetchSystemStats();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete user.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingUser(null);
+    }
+  };
+
 
   if (authLoading || roleLoading) {
     return (
@@ -506,8 +549,8 @@ const Admin = () => {
           transition={{ delay: 0.1 }}
           className="space-y-6"
         >
-          {/* Producer-specific sections */}
-          {userRole?.isProducer && linkedProducerId && (
+          {/* Producer-specific sections (admins use their own Stripe dashboard, no Connect needed) */}
+          {userRole?.isProducer && !isAdmin && linkedProducerId && (
             <StripeConnectOnboarding producerId={linkedProducerId} />
           )}
 
@@ -568,6 +611,8 @@ const Admin = () => {
                           <TableHead>Joined</TableHead>
                           <TableHead>Current Roles</TableHead>
                           <TableHead>Assign Role</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -630,12 +675,64 @@ const Admin = () => {
                                     {userRoles[usr.id]?.includes('admin') && (
                                       <SelectItem value="admin:remove">Remove Admin</SelectItem>
                                     )}
+                                    {!userRoles[usr.id]?.includes('support') && (
+                                      <SelectItem value="support:add">Add Support</SelectItem>
+                                    )}
+                                    {userRoles[usr.id]?.includes('support') && (
+                                      <SelectItem value="support:remove">Remove Support</SelectItem>
+                                    )}
                                   </SelectContent>
                                 </Select>
                               </div>
                             </TableCell>
+
+                            <TableCell className="text-right">
+                              {usr.id === user?.id ? (
+                                <span className="text-xs text-muted-foreground">You</span>
+                              ) : (
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                      disabled={deletingUser === usr.id}
+                                    >
+                                      {deletingUser === usr.id ? (
+                                        <RefreshCw className="h-4 w-4 animate-spin" />
+                                      ) : (
+                                        <Trash2 className="h-4 w-4" />
+                                      )}
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Delete this user?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This permanently deletes{" "}
+                                        <span className="font-medium">
+                                          {usr.display_name || usr.email || "this user"}
+                                        </span>{" "}
+                                        and all of their related data (purchases, song requests,
+                                        roles, profile). This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        onClick={() => handleDeleteUser(usr.id)}
+                                      >
+                                        Delete User
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              )}
+                            </TableCell>
                           </TableRow>
                         ))}
+
                       </TableBody>
                     </Table>
                   )}

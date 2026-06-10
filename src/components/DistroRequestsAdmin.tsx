@@ -1,0 +1,336 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { Compass, Calendar, CheckCircle, Loader2, ExternalLink, Music, UserCheck, Lock } from "lucide-react";
+
+type DistroRow = {
+  id: string;
+  song_request_id: string;
+  user_id: string;
+  user_email: string;
+  status: string;
+  google_meet_link: string;
+  client_selected_time: string | null;
+  support_notes: string | null;
+  scheduled_at: string | null;
+  completed_at: string | null;
+  created_at: string;
+  assigned_support_id: string | null;
+  song_requests: {
+    tier: string;
+    song_idea: string;
+    status: string;
+    genre_category: string | null;
+  } | null;
+};
+
+const STATUS_COLORS: Record<string, string> = {
+  pending: "bg-yellow-500/20 text-yellow-700 border-yellow-500/40",
+  scheduled: "bg-blue-500/20 text-blue-700 border-blue-500/40",
+  completed: "bg-green-500/20 text-green-700 border-green-500/40",
+  declined: "bg-red-500/20 text-red-700 border-red-500/40",
+};
+
+// Flat fee the support member earns for each completed Discover Your Distro
+// consultation. Paid manually / offline — this is for tracking only.
+const DISTRO_FEE = 15;
+
+
+export const DistroRequestsAdmin = () => {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const [editingNotes, setEditingNotes] = useState<string | null>(null);
+  const [notesDraft, setNotesDraft] = useState("");
+
+  const { data: rows, isLoading } = useQuery({
+    queryKey: ["distroRequests"],
+    queryFn: async () => {
+      const { data: distros, error } = await supabase
+        .from("distro_requests")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const ids = Array.from(new Set((distros || []).map((d) => d.song_request_id).filter(Boolean)));
+      let songMap = new Map<string, DistroRow["song_requests"]>();
+      if (ids.length) {
+        const { data: songs } = await supabase
+          .from("song_requests")
+          .select("id, tier, song_idea, status, genre_category")
+          .in("id", ids);
+        (songs || []).forEach((s: any) => songMap.set(s.id, s));
+      }
+      return (distros || []).map((d: any) => ({
+        ...d,
+        song_requests: songMap.get(d.song_request_id) || null,
+      })) as DistroRow[];
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: Partial<DistroRow> }) => {
+      const { error } = await supabase.from("distro_requests").update(patch).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["distroRequests"] });
+      toast({ title: "Updated" });
+    },
+    onError: (e: Error) =>
+      toast({ title: "Update failed", description: e.message, variant: "destructive" }),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" /> Loading distro requests…
+      </div>
+    );
+  }
+
+  // Only surface requests where the client has actually picked a time.
+  const withClientTime = (rows || []).filter((r) => !!r.client_selected_time);
+
+  if (!withClientTime.length) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center text-muted-foreground">
+          No distro consultations to review yet — clients will appear here once they pick a meeting time.
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const meId = user?.id;
+  const awaiting = withClientTime.filter(
+    (r) => r.status !== "completed" && r.status !== "declined" && !r.assigned_support_id,
+  );
+  const mine = withClientTime.filter(
+    (r) => r.status !== "completed" && r.status !== "declined" && r.assigned_support_id === meId,
+  );
+  const taken = withClientTime.filter(
+    (r) =>
+      r.status !== "completed" &&
+      r.status !== "declined" &&
+      r.assigned_support_id &&
+      r.assigned_support_id !== meId,
+  );
+  const done = withClientTime.filter((r) => r.status === "completed" || r.status === "declined");
+
+  // Manual/offline earnings tracking: $15 per consultation this support member completed.
+  const myCompletedCount = withClientTime.filter(
+    (r) => r.status === "completed" && r.assigned_support_id === meId,
+  ).length;
+  const myEarnings = myCompletedCount * DISTRO_FEE;
+
+  const Section = ({ title, items, hint }: { title: string; items: DistroRow[]; hint?: string }) =>
+    items.length === 0 ? null : (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Compass className="h-4 w-4" />
+            {title} ({items.length})
+          </CardTitle>
+          {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {items.map((req) => (
+            <div key={req.id} className="border rounded-lg p-4 space-y-3 bg-card">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-1 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge className={STATUS_COLORS[req.status] || ""}>{req.status}</Badge>
+                    {req.song_requests?.tier && (
+                      <Badge variant="outline">{req.song_requests.tier}</Badge>
+                    )}
+                    {req.song_requests?.status && (
+                      <Badge variant="secondary">Song: {req.song_requests.status}</Badge>
+                    )}
+                    <Badge className="bg-emerald-500/20 text-emerald-700 border-emerald-500/40">
+                      ${DISTRO_FEE} fee
+                    </Badge>
+                  </div>
+                  <p className="text-sm font-medium">{req.user_email}</p>
+                  {req.song_requests?.song_idea && (
+                    <p className="text-xs text-muted-foreground flex items-start gap-1.5">
+                      <Music className="h-3 w-3 mt-0.5 shrink-0" />
+                      <span className="line-clamp-2">{req.song_requests.song_idea}</span>
+                    </p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Requested {new Date(req.created_at).toLocaleString()}
+                  </p>
+                  {req.client_selected_time && (
+                    <p className="text-xs text-blue-600 flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      Client booked for {new Date(req.client_selected_time).toLocaleString()}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Assignment status */}
+              {req.assigned_support_id && req.assigned_support_id !== meId && req.status !== "completed" && req.status !== "declined" && (
+                <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-md px-2 py-1.5">
+                  <Lock className="h-3 w-3" />
+                  Accepted by another support member
+                </div>
+              )}
+              {req.assigned_support_id === meId && req.status !== "completed" && req.status !== "declined" && (
+                <div className="flex items-center gap-2 text-xs text-green-700 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-md px-2 py-1.5">
+                  <UserCheck className="h-3 w-3" />
+                  You accepted this consultation
+                </div>
+              )}
+
+              {/* Actions */}
+              {!req.assigned_support_id && req.status !== "completed" && req.status !== "declined" && (
+                <div className="flex gap-2 flex-wrap">
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      updateMutation.mutate({
+                        id: req.id,
+                        patch: {
+                          assigned_support_id: meId as any,
+                          status: "scheduled",
+                          scheduled_at: req.scheduled_at || (new Date().toISOString() as any),
+                        },
+                      })
+                    }
+                  >
+                    <UserCheck className="h-3 w-3" />
+                    Accept consultation
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => updateMutation.mutate({ id: req.id, patch: { status: "declined" } })}
+                  >
+                    Decline
+                  </Button>
+                </div>
+              )}
+
+              {req.assigned_support_id === meId && req.status !== "completed" && req.status !== "declined" && (
+                <div className="space-y-2">
+                  <a
+                    href={req.google_meet_link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-primary underline"
+                  >
+                    <ExternalLink className="h-3 w-3" /> Open Google Calendar booking link
+                  </a>
+                  <div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        updateMutation.mutate({
+                          id: req.id,
+                          patch: { status: "completed", completed_at: new Date().toISOString() },
+                        })
+                      }
+                    >
+                      <CheckCircle className="h-3 w-3" />
+                      Mark complete
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Notes */}
+              <div className="border-t pt-2">
+                {editingNotes === req.id ? (
+                  <div className="space-y-2">
+                    <Textarea
+                      rows={2}
+                      placeholder="Internal support notes…"
+                      value={notesDraft}
+                      onChange={(e) => setNotesDraft(e.target.value)}
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          updateMutation.mutate({ id: req.id, patch: { support_notes: notesDraft } });
+                          setEditingNotes(null);
+                        }}
+                      >
+                        Save
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setEditingNotes(null)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    {req.support_notes && (
+                      <p className="text-xs text-muted-foreground italic flex-1">{req.support_notes}</p>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-xs"
+                      onClick={() => {
+                        setEditingNotes(req.id);
+                        setNotesDraft(req.support_notes || "");
+                      }}
+                    >
+                      {req.support_notes ? "Edit notes" : "Add notes"}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    );
+
+  return (
+    <div className="space-y-4">
+      <Card className="border-emerald-500/40 bg-emerald-500/5">
+        <CardContent className="py-4 flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <p className="text-sm font-medium">Your Discover Your Distro earnings</p>
+            <p className="text-xs text-muted-foreground">
+              ${DISTRO_FEE} per completed consultation · paid manually / offline
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-bold text-emerald-600">${myEarnings}</p>
+            <p className="text-xs text-muted-foreground">
+              {myCompletedCount} completed × ${DISTRO_FEE}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Section
+        title="Awaiting acceptance"
+        items={awaiting}
+        hint="Client has picked a time — first support member to accept will own this consultation."
+      />
+      <Section
+        title="My consultations"
+        items={mine}
+        hint="Consultations you've accepted. Open the booking link and mark complete when done."
+      />
+      <Section
+        title="Taken by another support member"
+        items={taken}
+        hint="Read-only — another support team member has already accepted these."
+      />
+      <Section title="Archive" items={done} />
+    </div>
+  );
+};

@@ -14,6 +14,7 @@ import { useGomasChamoyVisible } from "@/hooks/useStoreVisibility";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 const GomasChamoy = () => {
   const [searchParams] = useSearchParams();
@@ -23,6 +24,8 @@ const GomasChamoy = () => {
   const { addItem, removeItem, updateQuantity, getItemCount, items: cartItems } = useCart();
   const [cartOpen, setCartOpen] = useState(false);
   const { data: isVisible, isLoading: visibilityLoading } = useGomasChamoyVisible();
+  const { t } = useTranslation();
+  const tg = t.gomasChamoy;
 
   const candyProducts = React.useMemo(
     () => allProducts?.filter((p) => p.category === "candies") || [],
@@ -33,12 +36,12 @@ const GomasChamoy = () => {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white gap-4">
         <Candy className="h-16 w-16 text-pink-400" />
-        <h1 className="text-2xl font-bold">This page is currently unavailable</h1>
-        <p className="text-gray-400">Check back soon!</p>
+        <h1 className="text-2xl font-bold">{tg.unavailableTitle}</h1>
+        <p className="text-gray-400">{tg.unavailableDesc}</p>
         <Button 
         variant="outline" 
         className="text-black"
-        onClick={() => navigate("/")}>Go Home</Button>
+        onClick={() => navigate("/")}>{tg.goHome}</Button>
       </div>
     );
   }
@@ -56,11 +59,11 @@ const GomasChamoy = () => {
   const handleAddToCart = (product: Product) => {
     const available = getAvailableStock(product);
     if (available <= 0) {
-      toast({ title: "Out of Stock", description: `${product.name} is out of stock.`, variant: "destructive" });
+      toast({ title: tg.outOfStock, description: `${product.name} ${tg.outOfStockDesc}`, variant: "destructive" });
       return;
     }
     addItem(product);
-    toast({ title: "Added to Cart! 🛒", description: `${product.name} has been added to your cart.` });
+    toast({ title: tg.addedToCartTitle, description: `${product.name} ${tg.addedToCartDesc}` });
   };
 
   return (
@@ -87,7 +90,7 @@ const GomasChamoy = () => {
             <motion.div whileHover={{ x: -5 }} transition={{ duration: 0.2 }}>
               <ArrowLeft className="h-5 w-5 mr-2" />
             </motion.div>
-            Back to Treats
+            {tg.backToTreats}
           </Link>
 
           <Button
@@ -96,7 +99,7 @@ const GomasChamoy = () => {
             className="bg-pink-500/50 border-pink-20 text-gray-200 relative border-pink-400/50 hover:border-pink-400/50 hover:text-pink-700"
           >
             <ShoppingCart className="h-4 w-4 mr-2" />
-            Cart
+            {tg.cart}
             {getItemCount() > 0 && (
               <Badge className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs px-1.5 py-0.5">
                 {getItemCount()}
@@ -133,7 +136,7 @@ const GomasChamoy = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            Handcrafted chamoy gummy candy with authentic Latin American flavors. Pick your favorites!
+            {tg.pageSubtitle}
           </motion.p>
           <motion.p
             className="text-sm text-pink-400/70 mt-3 max-w-xl mx-auto"
@@ -141,7 +144,7 @@ const GomasChamoy = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.5 }}
           >
-            🌎 Currently shipping to Latin America only. More countries coming soon!
+            {tg.shippingNotice}
           </motion.p>
         </div>
 
@@ -192,7 +195,7 @@ const GomasChamoy = () => {
                             {product.name}
                           </CardTitle>
                           <p className="text-xs text-pink-400/70 font-medium uppercase tracking-wider">
-                            {product.type}
+                            {tg.products[product.id]?.type ?? product.type}
                           </p>
                         </div>
                       </div>
@@ -200,7 +203,7 @@ const GomasChamoy = () => {
 
                     <CardContent className="flex-1">
                       <CardDescription className="text-gray-300 leading-relaxed text-sm">
-                        {product.description}
+                        {tg.products[product.id]?.description ?? product.description}
                       </CardDescription>
                       {product.weight && (
                         <Badge variant="outline" className="mt-3 border-pink-400/30 text-pink-300 text-xs">
@@ -246,12 +249,12 @@ const GomasChamoy = () => {
                             className="w-full bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-500 hover:to-red-500 text-white border-0 disabled:opacity-50"
                           >
                             <Plus className="h-4 w-4 mr-2" />
-                            Add to Cart
+                            {tg.addToCart}
                           </Button>
                         )}
                         {product.stock !== null && product.stock !== undefined && (
                           <p className={`text-xs text-center ${(product.stock ?? 100) <= 10 ? 'text-red-400' : 'text-gray-500'}`}>
-                            {(product.stock ?? 100) <= 0 ? 'Out of Stock' : `${product.stock} left in stock`}
+                            {(product.stock ?? 100) <= 0 ? tg.outOfStock : `${product.stock} ${tg.leftInStock}`}
                           </p>
                         )}
                       </div>
@@ -264,7 +267,7 @@ const GomasChamoy = () => {
         ) : (
           <div className="text-center py-20 text-gray-400">
             <Candy className="h-12 w-12 mx-auto mb-4 text-pink-400/50" />
-            <p className="text-lg">No products available yet. Check back soon!</p>
+            <p className="text-lg">{tg.noProducts}</p>
           </div>
         )}
       </div>

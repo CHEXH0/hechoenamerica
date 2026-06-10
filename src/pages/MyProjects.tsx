@@ -26,6 +26,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useUserRole } from "@/hooks/useUserRole";
 import { DeliveryForm } from "@/components/DeliveryForm";
 import { RevisionTracker } from "@/components/RevisionTracker";
+import { DistroHelpCard } from "@/components/DistroHelpCard";
+import { ProducerPayoutsDialog } from "@/components/ProducerPayoutsDialog";
 import { useTranslation } from "@/contexts/TranslationContext";
 
 interface SongRequest {
@@ -805,6 +807,9 @@ const MyProjects = () => {
             />
           )}
 
+          {/* Distro Help Card (client view, only renders if a distro request exists) */}
+          {!isProducerView && <DistroHelpCard songRequestId={project.id} />}
+
           {/* Revision Tracker for Client View */}
           {!isProducerView && (project.number_of_revisions ?? 0) > 0 && 
            ["in_progress", "review", "completed"].includes(project.status) && (
@@ -1129,12 +1134,15 @@ const MyProjects = () => {
                 {isProducer ? tm.subtitleProducer : tm.subtitleClient}
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${isRealtimeConnected ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
-              <span className="text-xs text-muted-foreground">
-                {isRealtimeConnected ? tm.liveUpdates : tm.connecting}
-              </span>
-              <Wifi className={`h-4 w-4 ${isRealtimeConnected ? 'text-green-500' : 'text-muted-foreground'}`} />
+            <div className="flex items-center gap-3">
+              {isProducer && <ProducerPayoutsDialog />}
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${isRealtimeConnected ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+                <span className="text-xs text-muted-foreground">
+                  {isRealtimeConnected ? tm.liveUpdates : tm.connecting}
+                </span>
+                <Wifi className={`h-4 w-4 ${isRealtimeConnected ? 'text-green-500' : 'text-muted-foreground'}`} />
+              </div>
             </div>
           </div>
         </motion.div>

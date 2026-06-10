@@ -1,5 +1,5 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,17 +14,22 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const authHeader = req.headers.get('Authorization')!;
-    
+    const authHeader = req.headers.get('Authorization');
+
+    if (!authHeader) {
+      console.error('Missing Authorization header');
+      throw new Error('Unauthorized: missing Authorization header');
+    }
+
     const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
-    
+
     // Verify the requesting user is authenticated
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
 
     if (userError || !user) {
-      throw new Error('Unauthorized');
+      console.error('auth.getUser failed:', userError?.message);
+      throw new Error(`Unauthorized: ${userError?.message || 'no user'}`);
     }
 
     // Check if requesting user is admin
