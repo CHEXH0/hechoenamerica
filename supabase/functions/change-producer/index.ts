@@ -301,6 +301,8 @@ serve(async (req) => {
           assigned_producer_id: null,
           blocked_producer_ids: updatedBlocked,
           status: "paid",
+          producer_paid_out_cents: newPaidOutCents,
+          ...(producerPayoutCents > 0 ? { payout_method: payoutMethod } : {}),
           updated_at: new Date().toISOString(),
         })
         .eq("id", requestId);
