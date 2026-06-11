@@ -462,7 +462,10 @@ export const CancellationRequestsAdmin = () => {
                                   </SelectContent>
                                 </Select>
                                 <p className="text-xs text-muted-foreground mt-1">
-                                  Recommended: {recommendedRefund}% based on producer progress
+                                  Recommended: {recommendedRefund}% based on producer progress (60% checklist / 40% revisions).
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  This % applies to the <strong>song amount only</strong>. The producer is automatically paid 90% of the song for the work completed. Add-ons follow their own rules: the HEA Box ($27.68) is refunded only if it hasn't shipped, and Distro ($15) only if the consultation hasn't happened.
                                 </p>
                               </div>
 
