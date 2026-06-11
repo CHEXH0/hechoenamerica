@@ -395,7 +395,14 @@ serve(async (req) => {
                     <p style="margin: 4px 0 0 0;"><strong>Genre:</strong> ${songRequest.genre_category || 'Not specified'}</p>
                   </div>
                   
-                  <p style="font-size: 14px; color: #6B7280;">This project has been removed from your dashboard. You will not receive payment for this project.</p>
+                  ${producerPayoutCents > 0 ? `
+                    <div style="background: #ECFDF5; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10B981;">
+                      <p style="margin: 0; color: #065F46;"><strong>💰 Compensation for Work Completed:</strong> $${(producerPayoutCents / 100).toFixed(2)}</p>
+                      <p style="margin: 8px 0 0 0; font-size: 14px; color: #6B7280;">${producerPayoutMethod === 'stripe_connect' ? 'This has been transferred to your Stripe Connect account.' : 'The team will process this payment to you manually.'}</p>
+                    </div>
+                  ` : `
+                    <p style="font-size: 14px; color: #6B7280;">This project has been removed from your dashboard. As no qualifying work was completed, no compensation applies.</p>
+                  `}
                 ` : `
                   <p style="font-size: 16px;">A client requested to cancel their project, but the request was <strong>denied</strong> due to significant work progress.</p>
                   
