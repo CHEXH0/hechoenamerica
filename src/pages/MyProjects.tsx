@@ -89,17 +89,56 @@ const statusColors: Record<string, string> = {
   cancellation_requested: "bg-amber-600",
 };
 
-const getStatusProgress = (status: string): number => {
-  const progressMap: Record<string, number> = {
-    pending: 10,
-    pending_payment: 15,
-    paid: 20,
-    accepted: 30,
-    in_progress: 50,
-    review: 75,
-    completed: 100,
-  };
-  return progressMap[status] || 0;
+// Returns the list of applicable production checklist keys for a project
+const getChecklistKeys = (project: {
+  wants_recorded_stems: boolean | null;
+  wants_analog: boolean | null;
+  wants_mixing: boolean | null;
+  wants_mastering: boolean | null;
+}): string[] => {
+  const keys = ["base_production"];
+  if (project.wants_recorded_stems) keys.push("stems");
+  if (project.wants_analog) keys.push("analog");
+  if (project.wants_mixing) keys.push("mixing");
+  if (project.wants_mastering) keys.push("mastering");
+  return keys;
+};
+
+// Calculates real project progress.
+// Work-based statuses (in_progress / review / cancellation_requested) start at 0%
+// and grow as the producer completes the production checklist and delivers revisions.
+// Reaches 100% only when the final submission is made (status: completed).
+const getProjectProgress = (
+  project: SongRequest,
+  deliveredRevisionCount: number = 0
+): number => {
+  // Final submission delivered
+  if (project.status === "completed") return 100;
+
+  // Work has not started yet — production progress is 0
+  const preWorkStatuses = ["pending", "pending_payment", "paid", "accepted"];
+  if (preWorkStatuses.includes(project.status)) return 0;
+
+  // Refunded projects show no progress
+  if (project.status === "refunded") return 0;
+
+  // Work in progress (in_progress, review, cancellation_requested):
+  // weight the production checklist + delivered revisions, leaving the final
+  // submission as the last unit so we only hit 100% when the song is delivered.
+  const checklistKeys = getChecklistKeys(project);
+  const cl = project.producer_checklist || {};
+  const completedChecklist = checklistKeys.filter((k) => cl[k]).length;
+  const totalChecklist = checklistKeys.length;
+
+  const totalRevisions = project.number_of_revisions || 0;
+  const deliveredRevisions = Math.min(deliveredRevisionCount, totalRevisions);
+
+  // +1 unit represents the final submission, completed only at "completed" status
+  const totalUnits = totalChecklist + totalRevisions + 1;
+  const completedUnits = completedChecklist + deliveredRevisions;
+
+  // Cap below 100 until the final submission is delivered
+  return Math.min(95, Math.round((completedUnits / totalUnits) * 100));
 };
 
 const getTimeRemaining = (deadline: string | null): { text: string; hours: number; minutes: number; seconds: number; isUrgent: boolean; isExpired: boolean; percentage: number } => {
@@ -238,6 +277,7 @@ const MyProjects = () => {
   const [producerProjects, setProducerProjects] = useState<SongRequest[]>([]);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [producers, setProducers] = useState<Record<string, Producer>>({});
+  const [deliveredRevisions, setDeliveredRevisions] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
   const [activeTab, setActiveTab] = useState("my-requests");
@@ -588,6 +628,7 @@ const MyProjects = () => {
       setMyRequests((requestsData || []).map(r => ({ ...r, producer_checklist: castChecklist(r.producer_checklist) })) as SongRequest[]);
 
       // If user is a producer, fetch their assigned projects
+      let producerProjectsData: typeof requestsData = [];
       if (isProducer) {
         // First get the producer record for this user
         const { data: producerData } = await supabase
@@ -597,14 +638,15 @@ const MyProjects = () => {
           .single();
 
         if (producerData) {
-          const { data: producerProjectsData, error: producerError } = await supabase
+          const { data: assignedData, error: producerError } = await supabase
             .from("song_requests")
             .select("*")
             .eq("assigned_producer_id", producerData.id)
             .order("created_at", { ascending: false });
 
           if (producerError) throw producerError;
-          setProducerProjects((producerProjectsData || []).map(r => ({ ...r, producer_checklist: castChecklist(r.producer_checklist) })) as SongRequest[]);
+          producerProjectsData = assignedData || [];
+          setProducerProjects(producerProjectsData.map(r => ({ ...r, producer_checklist: castChecklist(r.producer_checklist) })) as SongRequest[]);
         }
       }
 
@@ -617,6 +659,29 @@ const MyProjects = () => {
 
       if (purchasesError) throw purchasesError;
       setPurchases(purchasesData || []);
+
+      // Fetch delivered revision counts for accurate progress tracking
+      const allProjectIds = Array.from(
+        new Set([
+          ...(requestsData || []).map((r) => r.id),
+          ...(producerProjectsData || []).map((r) => r.id),
+        ])
+      );
+
+      if (allProjectIds.length > 0) {
+        const { data: revisionsData } = await supabase
+          .from("song_revisions")
+          .select("song_request_id, status")
+          .in("song_request_id", allProjectIds);
+
+        const deliveredMap: Record<string, number> = {};
+        (revisionsData || []).forEach((rev) => {
+          if (rev.status === "delivered") {
+            deliveredMap[rev.song_request_id] = (deliveredMap[rev.song_request_id] || 0) + 1;
+          }
+        });
+        setDeliveredRevisions(deliveredMap);
+      }
 
       // Fetch producers for assigned projects
       const allProjects = [...(requestsData || [])];
@@ -700,13 +765,18 @@ const MyProjects = () => {
 
         <CardContent className="space-y-4">
           {/* Progress Bar */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm text-muted-foreground">
-              <span>{tm.progress}</span>
-              <span>{getStatusProgress(project.status)}%</span>
-            </div>
-            <Progress value={getStatusProgress(project.status)} className="h-2" />
-          </div>
+          {(() => {
+            const projectProgress = getProjectProgress(project, deliveredRevisions[project.id] || 0);
+            return (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>{tm.progress}</span>
+                  <span>{projectProgress}%</span>
+                </div>
+                <Progress value={projectProgress} className="h-2" />
+              </div>
+            );
+          })()}
 
           {/* Song Idea */}
           <div className="bg-muted/50 p-4 rounded-lg">
