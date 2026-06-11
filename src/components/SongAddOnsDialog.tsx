@@ -66,7 +66,7 @@ export const SongAddOnsDialog = ({
             {/* Image Section */}
             <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 overflow-hidden">
               <img
-                src="public\laptop-uploads\Find_Your_Distro.png"
+                src="/laptop-uploads/Find_Your_Distro.png"
                 alt="Discover Your Distro"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 loading="lazy"
@@ -131,7 +131,7 @@ export const SongAddOnsDialog = ({
             {/* Image Section */}
             <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 overflow-hidden">
               <img
-                src="public\laptop-uploads\Goodie_Box.png"
+                src="/laptop-uploads/Goodie_Box.png"
                 alt="HEA Exclusive Box"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 loading="lazy"
