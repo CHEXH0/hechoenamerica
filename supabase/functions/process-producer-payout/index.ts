@@ -241,7 +241,8 @@ serve(async (req) => {
       .from("song_requests")
       .update({
         platform_fee_cents: platformFeeCents,
-        producer_payout_cents: producerPayoutCents,
+        producer_payout_cents: totalProducerBudget,
+        producer_paid_out_cents: totalProducerBudget,
         producer_paid_at: new Date().toISOString(),
         stripe_transfer_id: transferId,
         payout_method: "stripe_connect",
