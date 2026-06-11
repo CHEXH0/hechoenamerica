@@ -715,6 +715,7 @@ export type Database = {
           price: string
           producer_checklist: Json | null
           producer_paid_at: string | null
+          producer_paid_out_cents: number
           producer_payout_cents: number | null
           refunded_at: string | null
           sample_rate: string | null
@@ -748,6 +749,7 @@ export type Database = {
           price: string
           producer_checklist?: Json | null
           producer_paid_at?: string | null
+          producer_paid_out_cents?: number
           producer_payout_cents?: number | null
           refunded_at?: string | null
           sample_rate?: string | null
@@ -781,6 +783,7 @@ export type Database = {
           price?: string
           producer_checklist?: Json | null
           producer_paid_at?: string | null
+          producer_paid_out_cents?: number
           producer_payout_cents?: number | null
           refunded_at?: string | null
           sample_rate?: string | null
