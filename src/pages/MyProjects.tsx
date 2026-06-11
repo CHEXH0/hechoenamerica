@@ -740,13 +740,18 @@ const MyProjects = () => {
 
         <CardContent className="space-y-4">
           {/* Progress Bar */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm text-muted-foreground">
-              <span>{tm.progress}</span>
-              <span>{getStatusProgress(project.status)}%</span>
-            </div>
-            <Progress value={getStatusProgress(project.status)} className="h-2" />
-          </div>
+          {(() => {
+            const projectProgress = getProjectProgress(project, deliveredRevisions[project.id] || 0);
+            return (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>{tm.progress}</span>
+                  <span>{projectProgress}%</span>
+                </div>
+                <Progress value={projectProgress} className="h-2" />
+              </div>
+            );
+          })()}
 
           {/* Song Idea */}
           <div className="bg-muted/50 p-4 rounded-lg">
