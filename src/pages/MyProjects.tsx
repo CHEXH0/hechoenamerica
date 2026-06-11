@@ -29,6 +29,8 @@ import { RevisionTracker } from "@/components/RevisionTracker";
 import { DistroHelpCard } from "@/components/DistroHelpCard";
 import { ProducerPayoutsDialog } from "@/components/ProducerPayoutsDialog";
 import { useTranslation } from "@/contexts/TranslationContext";
+import { useNotifications } from "@/hooks/useNotifications";
+import NotificationBadge from "@/components/NotificationBadge";
 
 interface SongRequest {
   id: string;
@@ -328,6 +330,7 @@ const MyProjects = () => {
   };
 
   const isProducer = userRole?.isProducer || false;
+  const { counts: notifCounts, markSeen } = useNotifications();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -340,6 +343,16 @@ const MyProjects = () => {
       fetchProjects();
     }
   }, [user, isProducer]);
+
+  // Clear the relevant "new update" bubble whenever the user views a tab.
+  useEffect(() => {
+    if (!user) return;
+    if (activeTab === "producer-projects") {
+      markSeen("producer");
+    } else {
+      markSeen("client");
+    }
+  }, [user, activeTab, isProducer]);
 
   const handleResendFiles = async (project: SongRequest) => {
     if (!project.file_urls || project.file_urls.length === 0) {
@@ -1224,10 +1237,12 @@ const MyProjects = () => {
               <TabsTrigger value="my-requests" className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
                 {tm.tabMyRequests} ({myRequests.length})
+                {activeTab !== "my-requests" && <NotificationBadge count={notifCounts.client} />}
               </TabsTrigger>
               <TabsTrigger value="producer-projects" className="flex items-center gap-2">
                 <Headphones className="h-4 w-4" />
                 {tm.tabProducerProjects} ({producerProjects.length})
+                {activeTab !== "producer-projects" && <NotificationBadge count={notifCounts.producer} />}
               </TabsTrigger>
             </TabsList>
 

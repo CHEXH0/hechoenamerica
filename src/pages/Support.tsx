@@ -5,16 +5,23 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useNotifications } from "@/hooks/useNotifications";
 import { DistroRequestsAdmin } from "@/components/DistroRequestsAdmin";
 
 const Support = () => {
   const { user, loading: authLoading } = useAuth();
   const { data: userRole, isLoading: roleLoading } = useUserRole();
+  const { markSeen } = useNotifications();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
   }, [user, authLoading, navigate]);
+
+  // Viewing the support panel clears its "new update" bubble.
+  useEffect(() => {
+    if (user && userRole?.isSupport) markSeen("support");
+  }, [user, userRole?.isSupport]);
 
   if (authLoading || roleLoading) {
     return (
