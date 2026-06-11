@@ -84,7 +84,7 @@ const ProfileIcon = () => {
         >
           <Music className="h-4 w-4 mr-2" />
           <span className="flex-1">{tp.myProjects}</span>
-          <NotificationBadge count={counts.client} />
+          <NotificationBadge count={counts.client + counts.producer} />
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => navigate('/purchases')}
