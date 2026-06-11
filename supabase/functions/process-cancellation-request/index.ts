@@ -75,19 +75,94 @@ serve(async (req) => {
 
     const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
-    let refundAmount = 0;
+    let refundAmount = 0; // total refunded to the client, in cents
     let refundId = null;
+    let producerPayoutCents = 0; // paid to the producer for work completed
+    let producerPayoutMethod = "none";
+    const addOnRefundDetails: string[] = [];
 
     if (action === 'approve') {
-      // Calculate refund based on percentage (default 100% if not specified)
-      const percentage = refundPercentage ?? 100;
-      
+      // The admin-entered percentage = % of the SONG amount to refund to the
+      // client (defaults to 100 = full refund). The remaining "kept" portion is
+      // the work the producer has completed.
+      const percentage = Math.max(0, Math.min(100, refundPercentage ?? 100));
+      const keptRatio = 1 - percentage / 100;
+
+      // --- SONG-ONLY amount (excludes Distro $15 + HEA Box $27.68) ---
+      const storedPayout = songRequest.producer_payout_cents ?? 0;
+      const storedFee = songRequest.platform_fee_cents ?? 0;
+      let songCents = storedPayout + storedFee;
+      let songProducerCents = storedPayout; // 90% of the song
+      const alreadyPaidCents = songRequest.producer_paid_out_cents ?? 0;
+
       if (songRequest.payment_intent_id) {
         const paymentIntent = await stripe.paymentIntents.retrieve(songRequest.payment_intent_id);
-        
+
         if (paymentIntent.status === "succeeded") {
-          refundAmount = Math.floor((paymentIntent.amount * percentage) / 100);
-          
+          // Legacy fallback: derive the song amount from the charge minus add-ons
+          if (songCents <= 0) {
+            const { data: boxRow } = await supabaseClient
+              .from("chamoy_requests")
+              .select("id")
+              .eq("stripe_session_id", `${songRequest.stripe_session_id}_heabox`)
+              .maybeSingle();
+            const { data: distroRow } = await supabaseClient
+              .from("distro_requests")
+              .select("id")
+              .eq("song_request_id", requestId)
+              .maybeSingle();
+            const addOnCents = (boxRow ? 2768 : 0) + (distroRow ? 1500 : 0);
+            songCents = Math.max(0, paymentIntent.amount - addOnCents);
+            songProducerCents = Math.round(songCents * 0.9);
+          }
+
+          // --- Client refund on the SONG portion ---
+          const songRefundCents = Math.round(songCents * (percentage / 100));
+
+          // --- Add-on refunds (separate rules) ---
+          let boxRefundCents = 0;
+          let distroRefundCents = 0;
+
+          // HEA Box ($27.68): refundable only if it has not shipped yet
+          const { data: boxOrder } = await supabaseClient
+            .from("chamoy_requests")
+            .select("id, shipping_status, status")
+            .eq("stripe_session_id", `${songRequest.stripe_session_id}_heabox`)
+            .maybeSingle();
+          if (boxOrder) {
+            if (!boxOrder.shipping_status || boxOrder.shipping_status === "pending") {
+              boxRefundCents = 2768;
+              await supabaseClient
+                .from("chamoy_requests")
+                .update({ status: "refunded", shipping_status: "cancelled", updated_at: new Date().toISOString() })
+                .eq("id", boxOrder.id);
+              addOnRefundDetails.push("HEA Exclusive Box ($27.68) — refunded (not yet shipped)");
+            } else {
+              addOnRefundDetails.push("HEA Exclusive Box ($27.68) — not refunded (already shipped)");
+            }
+          }
+
+          // Distro ($15): refundable only if the consultation isn't completed
+          const { data: distroReq } = await supabaseClient
+            .from("distro_requests")
+            .select("id, status")
+            .eq("song_request_id", requestId)
+            .maybeSingle();
+          if (distroReq) {
+            if (distroReq.status !== "completed") {
+              distroRefundCents = 1500;
+              await supabaseClient
+                .from("distro_requests")
+                .update({ status: "declined", updated_at: new Date().toISOString() })
+                .eq("id", distroReq.id);
+              addOnRefundDetails.push("Discover Your Distro ($15) — refunded (consultation not completed)");
+            } else {
+              addOnRefundDetails.push("Discover Your Distro ($15) — not refunded (consultation already done)");
+            }
+          }
+
+          refundAmount = songRefundCents + boxRefundCents + distroRefundCents;
+
           if (refundAmount > 0) {
             const refund = await stripe.refunds.create({
               payment_intent: songRequest.payment_intent_id,
@@ -96,23 +171,71 @@ serve(async (req) => {
               metadata: {
                 request_id: requestId,
                 reason: "Customer requested cancellation",
-                refund_percentage: percentage.toString(),
+                song_refund_percentage: percentage.toString(),
+                song_refund_cents: songRefundCents.toString(),
+                box_refund_cents: boxRefundCents.toString(),
+                distro_refund_cents: distroRefundCents.toString(),
                 admin_notes: adminNotes || "",
               },
             });
-            
             refundId = refund.id;
-            logStep("Refund created", { refundId, refundAmount, percentage });
+            logStep("Refund created", { refundId, refundAmount, percentage, songRefundCents, boxRefundCents, distroRefundCents });
+          }
+
+          // --- Pay the producer for the work completed ---
+          // 90% of the song scaled by the kept (work-done) ratio, minus anything
+          // already paid to a previous producer on this project.
+          let producerEarnCents = Math.round(songProducerCents * keptRatio) - alreadyPaidCents;
+          producerEarnCents = Math.max(0, Math.min(producerEarnCents, songProducerCents - alreadyPaidCents));
+
+          if (producerEarnCents > 0 && songRequest.assigned_producer_id) {
+            const { data: producerData } = await supabaseClient
+              .from("producers")
+              .select("stripe_connect_account_id, stripe_connect_onboarded_at")
+              .eq("id", songRequest.assigned_producer_id)
+              .single();
+
+            if (producerData?.stripe_connect_account_id && producerData?.stripe_connect_onboarded_at) {
+              try {
+                let sourceChargeId: string | null = null;
+                const latestCharge = (paymentIntent as any).latest_charge;
+                if (typeof latestCharge === "string") sourceChargeId = latestCharge;
+                const transferParams: Record<string, any> = {
+                  amount: producerEarnCents,
+                  currency: "usd",
+                  destination: producerData.stripe_connect_account_id,
+                  transfer_group: requestId,
+                  metadata: { request_id: requestId, reason: "partial_payout_cancellation" },
+                };
+                if (sourceChargeId) transferParams.source_transaction = sourceChargeId;
+                const transfer = await stripe.transfers.create(transferParams);
+                producerPayoutCents = producerEarnCents;
+                producerPayoutMethod = "stripe_connect";
+                logStep("Producer partial payout transferred", { transferId: transfer.id, amount: producerEarnCents });
+              } catch (transferError) {
+                producerPayoutCents = producerEarnCents;
+                producerPayoutMethod = "manual_required";
+                logStep("Producer transfer failed, manual payout needed", { error: transferError instanceof Error ? transferError.message : String(transferError) });
+              }
+            } else {
+              producerPayoutCents = producerEarnCents;
+              producerPayoutMethod = "manual_required";
+              logStep("Producer not on Stripe Connect, manual payout needed");
+            }
           }
         }
       }
 
-      // Update song request status
+      // Update song request status + record producer payout
       const { error: updateError } = await supabaseClient
         .from("song_requests")
         .update({
           status: "refunded",
           refunded_at: new Date().toISOString(),
+          producer_paid_out_cents: (songRequest.producer_paid_out_cents ?? 0) + producerPayoutCents,
+          ...(producerPayoutCents > 0
+            ? { producer_paid_at: new Date().toISOString(), payout_method: producerPayoutMethod }
+            : {}),
           updated_at: new Date().toISOString(),
         })
         .eq("id", requestId);
@@ -121,7 +244,7 @@ serve(async (req) => {
         throw new Error(`Failed to update request: ${updateError.message}`);
       }
 
-      logStep("Request marked as refunded");
+      logStep("Request marked as refunded", { refundAmount, producerPayoutCents, producerPayoutMethod });
 
     } else {
       // Deny - return to previous status (in_progress or accepted based on context)
@@ -272,7 +395,14 @@ serve(async (req) => {
                     <p style="margin: 4px 0 0 0;"><strong>Genre:</strong> ${songRequest.genre_category || 'Not specified'}</p>
                   </div>
                   
-                  <p style="font-size: 14px; color: #6B7280;">This project has been removed from your dashboard. You will not receive payment for this project.</p>
+                  ${producerPayoutCents > 0 ? `
+                    <div style="background: #ECFDF5; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10B981;">
+                      <p style="margin: 0; color: #065F46;"><strong>💰 Compensation for Work Completed:</strong> $${(producerPayoutCents / 100).toFixed(2)}</p>
+                      <p style="margin: 8px 0 0 0; font-size: 14px; color: #6B7280;">${producerPayoutMethod === 'stripe_connect' ? 'This has been transferred to your Stripe Connect account.' : 'The team will process this payment to you manually.'}</p>
+                    </div>
+                  ` : `
+                    <p style="font-size: 14px; color: #6B7280;">This project has been removed from your dashboard. As no qualifying work was completed, no compensation applies.</p>
+                  `}
                 ` : `
                   <p style="font-size: 16px;">A client requested to cancel their project, but the request was <strong>denied</strong> due to significant work progress.</p>
                   
