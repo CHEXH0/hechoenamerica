@@ -89,17 +89,56 @@ const statusColors: Record<string, string> = {
   cancellation_requested: "bg-amber-600",
 };
 
-const getStatusProgress = (status: string): number => {
-  const progressMap: Record<string, number> = {
-    pending: 10,
-    pending_payment: 15,
-    paid: 20,
-    accepted: 30,
-    in_progress: 50,
-    review: 75,
-    completed: 100,
-  };
-  return progressMap[status] || 0;
+// Returns the list of applicable production checklist keys for a project
+const getChecklistKeys = (project: {
+  wants_recorded_stems: boolean | null;
+  wants_analog: boolean | null;
+  wants_mixing: boolean | null;
+  wants_mastering: boolean | null;
+}): string[] => {
+  const keys = ["base_production"];
+  if (project.wants_recorded_stems) keys.push("stems");
+  if (project.wants_analog) keys.push("analog");
+  if (project.wants_mixing) keys.push("mixing");
+  if (project.wants_mastering) keys.push("mastering");
+  return keys;
+};
+
+// Calculates real project progress.
+// Work-based statuses (in_progress / review / cancellation_requested) start at 0%
+// and grow as the producer completes the production checklist and delivers revisions.
+// Reaches 100% only when the final submission is made (status: completed).
+const getProjectProgress = (
+  project: SongRequest,
+  deliveredRevisionCount: number = 0
+): number => {
+  // Final submission delivered
+  if (project.status === "completed") return 100;
+
+  // Work has not started yet — production progress is 0
+  const preWorkStatuses = ["pending", "pending_payment", "paid", "accepted"];
+  if (preWorkStatuses.includes(project.status)) return 0;
+
+  // Refunded projects show no progress
+  if (project.status === "refunded") return 0;
+
+  // Work in progress (in_progress, review, cancellation_requested):
+  // weight the production checklist + delivered revisions, leaving the final
+  // submission as the last unit so we only hit 100% when the song is delivered.
+  const checklistKeys = getChecklistKeys(project);
+  const cl = project.producer_checklist || {};
+  const completedChecklist = checklistKeys.filter((k) => cl[k]).length;
+  const totalChecklist = checklistKeys.length;
+
+  const totalRevisions = project.number_of_revisions || 0;
+  const deliveredRevisions = Math.min(deliveredRevisionCount, totalRevisions);
+
+  // +1 unit represents the final submission, completed only at "completed" status
+  const totalUnits = totalChecklist + totalRevisions + 1;
+  const completedUnits = completedChecklist + deliveredRevisions;
+
+  // Cap below 100 until the final submission is delivered
+  return Math.min(95, Math.round((completedUnits / totalUnits) * 100));
 };
 
 const getTimeRemaining = (deadline: string | null): { text: string; hours: number; minutes: number; seconds: number; isUrgent: boolean; isExpired: boolean; percentage: number } => {
