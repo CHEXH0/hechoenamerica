@@ -108,7 +108,8 @@ const ProfileIcon = () => {
             className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
           >
             <Compass className="h-4 w-4 mr-2" />
-            Support Panel
+            <span className="flex-1">Support Panel</span>
+            <NotificationBadge count={counts.support} />
           </DropdownMenuItem>
         )}
         {roleData?.isAdmin && (
