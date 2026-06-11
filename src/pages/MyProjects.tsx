@@ -29,6 +29,8 @@ import { RevisionTracker } from "@/components/RevisionTracker";
 import { DistroHelpCard } from "@/components/DistroHelpCard";
 import { ProducerPayoutsDialog } from "@/components/ProducerPayoutsDialog";
 import { useTranslation } from "@/contexts/TranslationContext";
+import { useNotifications } from "@/hooks/useNotifications";
+import NotificationBadge from "@/components/NotificationBadge";
 
 interface SongRequest {
   id: string;
