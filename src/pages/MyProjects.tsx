@@ -1237,10 +1237,12 @@ const MyProjects = () => {
               <TabsTrigger value="my-requests" className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
                 {tm.tabMyRequests} ({myRequests.length})
+                {activeTab !== "my-requests" && <NotificationBadge count={notifCounts.client} />}
               </TabsTrigger>
               <TabsTrigger value="producer-projects" className="flex items-center gap-2">
                 <Headphones className="h-4 w-4" />
                 {tm.tabProducerProjects} ({producerProjects.length})
+                {activeTab !== "producer-projects" && <NotificationBadge count={notifCounts.producer} />}
               </TabsTrigger>
             </TabsList>
 
