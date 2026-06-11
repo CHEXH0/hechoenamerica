@@ -330,6 +330,7 @@ const MyProjects = () => {
   };
 
   const isProducer = userRole?.isProducer || false;
+  const { counts: notifCounts, markSeen } = useNotifications();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -342,6 +343,16 @@ const MyProjects = () => {
       fetchProjects();
     }
   }, [user, isProducer]);
+
+  // Clear the relevant "new update" bubble whenever the user views a tab.
+  useEffect(() => {
+    if (!user) return;
+    if (activeTab === "producer-projects") {
+      markSeen("producer");
+    } else {
+      markSeen("client");
+    }
+  }, [user, activeTab, isProducer]);
 
   const handleResendFiles = async (project: SongRequest) => {
     if (!project.file_urls || project.file_urls.length === 0) {
