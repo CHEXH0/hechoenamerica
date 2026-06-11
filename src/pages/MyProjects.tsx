@@ -628,6 +628,7 @@ const MyProjects = () => {
       setMyRequests((requestsData || []).map(r => ({ ...r, producer_checklist: castChecklist(r.producer_checklist) })) as SongRequest[]);
 
       // If user is a producer, fetch their assigned projects
+      let producerProjectsData: typeof requestsData = [];
       if (isProducer) {
         // First get the producer record for this user
         const { data: producerData } = await supabase
@@ -637,14 +638,15 @@ const MyProjects = () => {
           .single();
 
         if (producerData) {
-          const { data: producerProjectsData, error: producerError } = await supabase
+          const { data: assignedData, error: producerError } = await supabase
             .from("song_requests")
             .select("*")
             .eq("assigned_producer_id", producerData.id)
             .order("created_at", { ascending: false });
 
           if (producerError) throw producerError;
-          setProducerProjects((producerProjectsData || []).map(r => ({ ...r, producer_checklist: castChecklist(r.producer_checklist) })) as SongRequest[]);
+          producerProjectsData = assignedData || [];
+          setProducerProjects(producerProjectsData.map(r => ({ ...r, producer_checklist: castChecklist(r.producer_checklist) })) as SongRequest[]);
         }
       }
 
@@ -657,6 +659,29 @@ const MyProjects = () => {
 
       if (purchasesError) throw purchasesError;
       setPurchases(purchasesData || []);
+
+      // Fetch delivered revision counts for accurate progress tracking
+      const allProjectIds = Array.from(
+        new Set([
+          ...(requestsData || []).map((r) => r.id),
+          ...(producerProjectsData || []).map((r) => r.id),
+        ])
+      );
+
+      if (allProjectIds.length > 0) {
+        const { data: revisionsData } = await supabase
+          .from("song_revisions")
+          .select("song_request_id, status")
+          .in("song_request_id", allProjectIds);
+
+        const deliveredMap: Record<string, number> = {};
+        (revisionsData || []).forEach((rev) => {
+          if (rev.status === "delivered") {
+            deliveredMap[rev.song_request_id] = (deliveredMap[rev.song_request_id] || 0) + 1;
+          }
+        });
+        setDeliveredRevisions(deliveredMap);
+      }
 
       // Fetch producers for assigned projects
       const allProjects = [...(requestsData || [])];
