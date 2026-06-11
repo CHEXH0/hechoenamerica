@@ -277,6 +277,7 @@ const MyProjects = () => {
   const [producerProjects, setProducerProjects] = useState<SongRequest[]>([]);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [producers, setProducers] = useState<Record<string, Producer>>({});
+  const [deliveredRevisions, setDeliveredRevisions] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
   const [activeTab, setActiveTab] = useState("my-requests");
