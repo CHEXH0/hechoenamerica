@@ -127,27 +127,37 @@ serve(async (req) => {
     // HEA Box ($27.68, a physical product kept by admin) are excluded — they are
     // not the producer's work. We use the song-only split stored at checkout;
     // if it's missing (legacy rows) we derive it from the song price.
-    let producerPayoutCents = request.producer_payout_cents ?? 0;
+    let totalProducerBudget = request.producer_payout_cents ?? 0;
     let platformFeeCents = request.platform_fee_cents ?? 0;
 
-    if (!producerPayoutCents || producerPayoutCents <= 0) {
+    if (!totalProducerBudget || totalProducerBudget <= 0) {
       const songCents = Math.round(
         parseFloat(String(request.price ?? "0").replace(/[^0-9.]/g, "")) * 100
       );
       platformFeeCents = Math.round(songCents * (PLATFORM_FEE_PERCENT / 100));
-      producerPayoutCents = songCents - platformFeeCents;
+      totalProducerBudget = songCents - platformFeeCents;
       logStep("Stored payout missing — derived from song price", { songCents });
     }
 
-    const songAmountCents = producerPayoutCents + platformFeeCents;
+    const songAmountCents = totalProducerBudget + platformFeeCents;
+
+    // Subtract anything already paid to a previous producer (e.g. after a
+    // producer change or partial cancellation payout) so we never pay out more
+    // than 90% of the song across all producers combined.
+    const alreadyPaidCents = request.producer_paid_out_cents ?? 0;
+    const producerPayoutCents = totalProducerBudget - alreadyPaidCents;
 
     if (producerPayoutCents <= 0) {
-      throw new Error("Unable to determine producer payout amount for this project");
+      throw new Error(
+        "This project's producer payout has already been fully distributed (a previous producer was compensated for the work)."
+      );
     }
 
     logStep("Payout calculation", {
       songAmountCents,
       platformFeeCents,
+      totalProducerBudget,
+      alreadyPaidCents,
       producerPayoutCents,
       platformFeePercent: PLATFORM_FEE_PERCENT,
       chargeAmountCents: paymentIntent.amount,
