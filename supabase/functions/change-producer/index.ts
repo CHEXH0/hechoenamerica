@@ -80,6 +80,27 @@ serve(async (req) => {
     const deliveredRevisions = revisions?.filter(r => r.status === 'delivered').length || 0;
     const totalRevisions = songRequest.number_of_revisions || 0;
 
+    // Unified progress: 60% production checklist + 40% revisions delivered
+    const checklist = (songRequest.producer_checklist || {}) as Record<string, boolean>;
+    const checklistKeys = ["base_production"];
+    if (songRequest.wants_recorded_stems) checklistKeys.push("stems");
+    if (songRequest.wants_analog) checklistKeys.push("analog");
+    if (songRequest.wants_mixing) checklistKeys.push("mixing");
+    if (songRequest.wants_mastering) checklistKeys.push("mastering");
+    const checklistCompleted = checklistKeys.filter((k) => checklist[k]).length;
+    const checklistTotal = checklistKeys.length;
+
+    let computedProgress: number;
+    if (totalRevisions > 0 && checklistTotal > 0) {
+      computedProgress = (checklistCompleted / checklistTotal) * 0.6 + (deliveredRevisions / totalRevisions) * 0.4;
+    } else if (checklistTotal > 0) {
+      computedProgress = checklistCompleted / checklistTotal;
+    } else if (totalRevisions > 0) {
+      computedProgress = deliveredRevisions / totalRevisions;
+    } else {
+      computedProgress = 0;
+    }
+
     // Calculate partial payout for old producer based on work done
     let producerPayoutCents = 0;
     let payoutMethod = "none";
@@ -92,99 +113,109 @@ serve(async (req) => {
       const paymentIntent = await stripe.paymentIntents.retrieve(songRequest.payment_intent_id);
 
       if (paymentIntent.status === "succeeded") {
-        const totalAmountCents = paymentIntent.amount;
-        
-        // Use admin-set percentage if provided, otherwise calculate from progress
-        let progressRatio: number;
-        if (payoutPercent !== null) {
-          progressRatio = payoutPercent / 100;
-        } else {
-          progressRatio = totalRevisions > 0 ? deliveredRevisions / totalRevisions : (deliveredRevisions > 0 ? 0.5 : 0);
+        // --- Charge the flat change fee FIRST. For client-initiated changes the
+        // fee is mandatory: if we can't charge it, abort the whole change. ---
+        if (flatChangeFee > 0) {
+          const changeFeeCents = flatChangeFee * 100;
+          const customerId = typeof paymentIntent.customer === 'string' ? paymentIntent.customer : paymentIntent.customer?.id;
+          const paymentMethodId = typeof paymentIntent.payment_method === 'string' ? paymentIntent.payment_method : paymentIntent.payment_method?.id;
+
+          if (!customerId || !paymentMethodId) {
+            throw new Error("Cannot charge the producer change fee — no saved payment method on file. The change was not processed.");
+          }
+
+          try {
+            const changeFeeIntent = await stripe.paymentIntents.create({
+              amount: changeFeeCents,
+              currency: "usd",
+              customer: customerId,
+              payment_method: paymentMethodId,
+              off_session: true,
+              confirm: true,
+              description: `Producer change fee - ${songRequest.tier} project`,
+              metadata: { request_id: requestId, type: "producer_change_fee" },
+            });
+            if (changeFeeIntent.status !== "succeeded") {
+              throw new Error(`Change fee charge did not succeed (status: ${changeFeeIntent.status}).`);
+            }
+            logStep("Change fee charged", { amount: flatChangeFee });
+          } catch (feeError) {
+            const msg = feeError instanceof Error ? feeError.message : String(feeError);
+            logStep("Failed to charge change fee — aborting change", { error: msg });
+            throw new Error(`Could not charge the $${flatChangeFee} producer change fee: ${msg}. The change was not processed.`);
+          }
         }
-        
-        // Producer gets their share (85%) proportional to work completed
-        const producerTotalShare = Math.round(totalAmountCents * (1 - PLATFORM_FEE_PERCENT / 100));
-        producerPayoutCents = Math.round(producerTotalShare * progressRatio);
+
+        // --- Old producer's partial payout, on the SONG amount only ---
+        // producer_payout_cents = 90% of the song (excludes Distro/HEA Box add-ons).
+        let songProducerCents = songRequest.producer_payout_cents ?? 0;
+        if (songProducerCents <= 0) {
+          // Legacy fallback: derive song-only producer share from the song price
+          const songCents = Math.round(parseFloat(String(songRequest.price ?? "0").replace(/[^0-9.]/g, "")) * 100);
+          songProducerCents = Math.round(songCents * (1 - PLATFORM_FEE_PERCENT / 100));
+        }
+        const alreadyPaidCents = songRequest.producer_paid_out_cents ?? 0;
+
+        // Admin can override the percentage; otherwise use the unified progress
+        const progressRatio = payoutPercent !== null ? payoutPercent / 100 : computedProgress;
+
+        let oldProducerEarn = Math.round(songProducerCents * progressRatio) - alreadyPaidCents;
+        oldProducerEarn = Math.max(0, Math.min(oldProducerEarn, songProducerCents - alreadyPaidCents));
+        producerPayoutCents = oldProducerEarn;
 
         logStep("Payout calculation", {
-          totalAmountCents,
+          songProducerCents,
+          alreadyPaidCents,
           progressRatio,
-          producerTotalShare,
+          computedProgress,
           producerPayoutCents,
+          checklistCompleted,
+          checklistTotal,
           deliveredRevisions,
           totalRevisions,
           adminSetPercent: payoutPercent,
         });
 
-        // Check if old producer has Stripe Connect for automatic payout
-        const { data: producerData } = await supabase
-          .from("producers")
-          .select("stripe_connect_account_id, stripe_connect_onboarded_at")
-          .eq("id", oldProducerId)
-          .single();
+        if (producerPayoutCents > 0) {
+          // Check if old producer has Stripe Connect for automatic payout
+          const { data: producerData } = await supabase
+            .from("producers")
+            .select("stripe_connect_account_id, stripe_connect_onboarded_at")
+            .eq("id", oldProducerId)
+            .single();
 
-        if (producerData?.stripe_connect_account_id && producerData?.stripe_connect_onboarded_at && producerPayoutCents > 0) {
-          try {
-            const transfer = await stripe.transfers.create({
-              amount: producerPayoutCents,
-              currency: "usd",
-              destination: producerData.stripe_connect_account_id,
-              transfer_group: requestId,
-              metadata: {
-                request_id: requestId,
-                reason: "partial_payout_producer_change",
-                progress_ratio: progressRatio.toString(),
-              },
-            });
-            payoutMethod = "stripe_connect";
-            logStep("Stripe transfer created for old producer", { transferId: transfer.id });
-          } catch (transferError) {
-            logStep("Transfer failed, recording manual payout needed", {
-              error: transferError instanceof Error ? transferError.message : String(transferError),
-            });
-            payoutMethod = "manual_required";
-          }
-        } else if (producerPayoutCents > 0) {
-          payoutMethod = "manual_required";
-          logStep("Old producer not on Stripe Connect, manual payout needed");
-        }
-
-        // Charge flat change fee to the client
-        let changeFeeCharged = false;
-        if (flatChangeFee > 0) {
-          const changeFeeCents = flatChangeFee * 100;
-          try {
-            // Get customer from original payment
-            const customerId = typeof paymentIntent.customer === 'string' ? paymentIntent.customer : paymentIntent.customer?.id;
-            const paymentMethodId = typeof paymentIntent.payment_method === 'string' ? paymentIntent.payment_method : paymentIntent.payment_method?.id;
-            
-            if (customerId && paymentMethodId) {
-              const changeFeeIntent = await stripe.paymentIntents.create({
-                amount: changeFeeCents,
+          if (producerData?.stripe_connect_account_id && producerData?.stripe_connect_onboarded_at) {
+            try {
+              let sourceChargeId: string | null = null;
+              const latestCharge = (paymentIntent as any).latest_charge;
+              if (typeof latestCharge === "string") sourceChargeId = latestCharge;
+              const transferParams: Record<string, any> = {
+                amount: producerPayoutCents,
                 currency: "usd",
-                customer: customerId,
-                payment_method: paymentMethodId,
-                off_session: true,
-                confirm: true,
-                description: `Producer change fee - ${songRequest.tier} project`,
-                metadata: {
-                  request_id: requestId,
-                  type: "producer_change_fee",
-                },
+                destination: producerData.stripe_connect_account_id,
+                transfer_group: requestId,
+                metadata: { request_id: requestId, reason: "partial_payout_producer_change", progress_ratio: progressRatio.toString() },
+              };
+              if (sourceChargeId) transferParams.source_transaction = sourceChargeId;
+              const transfer = await stripe.transfers.create(transferParams);
+              payoutMethod = "stripe_connect";
+              logStep("Stripe transfer created for old producer", { transferId: transfer.id });
+            } catch (transferError) {
+              logStep("Transfer failed, recording manual payout needed", {
+                error: transferError instanceof Error ? transferError.message : String(transferError),
               });
-              changeFeeCharged = changeFeeIntent.status === "succeeded";
-              logStep("Change fee charged", { amount: flatChangeFee, status: changeFeeIntent.status });
-            } else {
-              logStep("Cannot charge change fee - no customer/payment method on file");
+              payoutMethod = "manual_required";
             }
-          } catch (feeError) {
-            logStep("Failed to charge change fee", {
-              error: feeError instanceof Error ? feeError.message : String(feeError),
-            });
+          } else {
+            payoutMethod = "manual_required";
+            logStep("Old producer not on Stripe Connect, manual payout needed");
           }
         }
       }
     }
+
+    // Total paid to producers on this project after this change (caps completion payout)
+    const newPaidOutCents = (songRequest.producer_paid_out_cents ?? 0) + producerPayoutCents;
 
     // Block the old producer and unassign
     const existingBlocked = songRequest.blocked_producer_ids || [];
