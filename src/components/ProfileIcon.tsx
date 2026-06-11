@@ -83,7 +83,8 @@ const ProfileIcon = () => {
           className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
         >
           <Music className="h-4 w-4 mr-2" />
-          {tp.myProjects}
+          <span className="flex-1">{tp.myProjects}</span>
+          <NotificationBadge count={counts.client} />
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => navigate('/purchases')}
