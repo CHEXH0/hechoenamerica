@@ -68,6 +68,8 @@ const GenerateSong = () => {
   const [newDriveLink, setNewDriveLink] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAddOnsDialog, setShowAddOnsDialog] = useState(false);
+  const { data: distroAddOnVisible = true } = useDistroAddOnVisible();
+  const { data: heaBoxAddOnVisible = true } = useHeaBoxAddOnVisible();
   const [showTooltip, setShowTooltip] = useState(true);
   const [numberOfRevisions, setNumberOfRevisions] = useState(0);
   const [wantsRecordedStems, setWantsRecordedStems] = useState(false);
