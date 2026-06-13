@@ -779,6 +779,12 @@ const MyProjects = () => {
               <CardTitle className="flex items-center gap-2">
                 <Music className="h-5 w-5 text-primary" />
                 {project.tier} Song
+                {isProjectNew(project, isProducerView ? "producer" : "client") && (
+                  <span className="flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[11px] font-semibold text-red-500">
+                    <NotificationBadge count={1} className="h-2 w-2 min-w-0 p-0" />
+                    New update
+                  </span>
+                )}
               </CardTitle>
               <CardDescription className="flex items-center gap-4 mt-1">
                 <span className="flex items-center gap-1">
