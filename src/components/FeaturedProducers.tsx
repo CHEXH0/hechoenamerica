@@ -6,14 +6,12 @@ import { useNavigate, Link } from "react-router-dom";
 import { useProducers } from "@/hooks/useProducers";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSwipeScroll } from "@/hooks/useSwipeScroll";
-import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from "@/contexts/TranslationContext";
 
 const FeaturedProducers = () => {
   const navigate = useNavigate();
   const { data: producers = [], isLoading } = useProducers();
   const isMobile = useIsMobile();
-  const { user } = useAuth();
   const { t } = useTranslation();
   
   const [scrollDirection, setScrollDirection] = useState<'left' | 'right' | 'none'>('none');
@@ -129,102 +127,24 @@ const FeaturedProducers = () => {
   return (
     <section id="featured-producers" className="py-20 bg-black overflow-hidden">
       <div className="container mx-auto px-4 mb-12">
-        {user && producers.length >= 5 ? (
-          <>
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-3xl md:text-4xl font-bold text-center heading-gradient"
+        <>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-3xl md:text-4xl font-bold text-center heading-gradient"
+          >
+            {t.featuredProducers.title}
+          </motion.h2>
+          <div className="text-center mt-4">
+            <Link
+              to="/producers"
+              className="text-sm text-purple-400 hover:text-purple-300 underline underline-offset-4 transition-colors"
             >
-              {t.featuredProducers.title}
-            </motion.h2>
-            <div className="text-center mt-4">
-              <Link
-                to="/producers"
-                className="text-sm text-purple-400 hover:text-purple-300 underline underline-offset-4 transition-colors"
-              >
-                {t.featuredProducers.seeAll}
-              </Link>
-            </div>
-          </>
-        ) : (
-          <>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-center max-w-3xl mx-auto"
-            >
-              <h2 className="text-3xl md:text-4xl font-bold heading-gradient mb-4">
-                {t.featuredProducers.yourMusicTitle}
-              </h2>
-              <p className="text-base md:text-lg text-gray-400 leading-relaxed">
-                {t.featuredProducers.yourMusicSubtitle}
-              </p>
-            </motion.div>
-            <div className="flex justify-center items-center gap-3 md:gap-4 mt-6 flex-wrap px-4">
-              {[
-                /*{ code: "us", name: "USA" },
-                { code: "br", name: "Brazil" },
-                { code: "co", name: "Colombia" },
-                { code: "mx", name: "Mexico" },
-                { code: "ar", name: "Argentina" },
-                { code: "cu", name: "Cuba" },
-                { code: "pr", name: "Puerto Rico" },
-                { code: "do", name: "Dominican Republic" },
-                { code: "pe", name: "Peru" },
-                { code: "cl", name: "Chile" },
-                { code: "es", name: "Spain" },
-                { code: "jm", name: "Jamaica" },
-                { code: "gb", name: "United Kingdom" },
-                { code: "fr", name: "France" },
-                { code: "de", name: "Germany" },
-                { code: "jp", name: "Japan" },
-                { code: "kr", name: "South Korea" },
-                { code: "ng", name: "Nigeria" },
-                { code: "it", name: "Italy" },
-                { code: "ca", name: "Canada" },
-                { code: "au", name: "Australia" },
-                { code: "gh", name: "Ghana" },
-                { code: "se", name: "Sweden" },
-                { code: "tr", name: "Turkey" },
-                { code: "cn", name: "China" },
-                { code: "vn", name: "Vietnam" },
-                { code: "ru", name: "Russia" },
-                { code: "ua", name: "Ukraine" },
-                 */
-              ].map((flag, i) => (
-                <motion.img
-                  key={flag.code}
-                  src={`https://flagcdn.com/w40/${flag.code}.png`}
-                  srcSet={`https://flagcdn.com/w80/${flag.code}.png 2x`}
-                  alt={flag.name}
-                  title={flag.name}
-                  width={32}
-                  height={24}
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, delay: i * 0.06 }}
-                  viewport={{ once: true }}
-                  className="rounded-sm shadow-md hover:scale-125 transition-transform duration-200 cursor-default"
-                />
-              ))}
-            </div>
-            
-            {/* Promo Video */}
-            <div className="flex justify-center mt-8 px-4">
-              <div className="w-full max-w-2xl rounded-xl overflow-hidden border border-purple-900/30 bg-black/30 backdrop-blur-sm">
-                <video
-                  src="https://eapbuoqkhckqaswfjexv.supabase.co/storage/v1/object/public/product-images/producers/videos/producer-video-1771697674364.mp4"
-                  controls
-                  className="w-full aspect-video object-contain"
-                  preload="metadata"
-                />
-              </div>
-            </div>
-          </>
-        )}
+              {t.featuredProducers.seeAll}
+            </Link>
+          </div>
+        </>
       </div>
       
       {/* Full-width scrolling container */}
