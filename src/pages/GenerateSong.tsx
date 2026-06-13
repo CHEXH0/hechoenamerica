@@ -442,6 +442,12 @@ const GenerateSong = () => {
       return;
     }
 
+    // If no add-ons are available, skip the dialog and go straight to checkout
+    if (!distroAddOnVisible && !heaBoxAddOnVisible) {
+      proceedToCheckout({ wantsDistroHelp: false, wantsHeaBox: false });
+      return;
+    }
+
     // Open the add-ons dialog; checkout happens from there
     setShowAddOnsDialog(true);
   };
