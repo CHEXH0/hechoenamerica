@@ -200,6 +200,7 @@ export const SongAddOnsDialog = ({
               </div>
             </div>
           </label>
+          )}
         </div>
 
         {/* Order Summary */}
