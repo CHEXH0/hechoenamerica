@@ -373,6 +373,8 @@ const Admin = () => {
   const StoreVisibilityControl = () => {
     const { data: gomasVisible, isLoading: gomasLoading } = useGomasChamoyVisible();
     const { data: treatsVisible, isLoading: treatsLoading } = useSweetTreatsTabVisible();
+    const { data: distroAddOnVisible, isLoading: distroLoading } = useDistroAddOnVisible();
+    const { data: heaBoxAddOnVisible, isLoading: heaBoxLoading } = useHeaBoxAddOnVisible();
     const updateVisibility = useUpdateStoreVisibility();
 
     const handleToggle = async (key: string, checked: boolean, label: string) => {
