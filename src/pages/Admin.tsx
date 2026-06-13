@@ -565,14 +565,63 @@ const Admin = () => {
 
           {isAdmin && (
             <>
+              {/* Needs Attention — tells the admin exactly where to click */}
+              {adminTotal > 0 && (
+                <Card className="border-red-500/30 bg-red-500/5">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Bell className="h-5 w-5 text-red-500" />
+                      Needs Attention
+                      <NotificationBadge count={adminTotal} />
+                    </CardTitle>
+                    <CardDescription>
+                      Open items waiting on you. Click one to jump to its section.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {[
+                      { count: adminCounts.songUploads, label: "Song orders to deliver", icon: <Music className="h-4 w-4" />, target: "section-producer-projects" },
+                      { count: adminCounts.cancellations, label: "Cancellation requests", icon: <XCircle className="h-4 w-4" />, target: "section-cancellations" },
+                      { count: adminCounts.producerApplications, label: "Producer applications", icon: <UserPlus className="h-4 w-4" />, target: "section-applications" },
+                      { count: adminCounts.chamoyRequests, label: "Chamoy gummy requests", icon: <Candy className="h-4 w-4" />, target: "section-chamoy" },
+                      { count: adminCounts.candyOrders, label: "Candy orders to ship", icon: <Truck className="h-4 w-4" />, target: "section-candy" },
+                      { count: adminCounts.distroConsultations, label: "Distro consultations", icon: <Compass className="h-4 w-4" />, target: "section-distro" },
+                    ]
+                      .filter((item) => item.count > 0)
+                      .map((item) => (
+                        <button
+                          key={item.target}
+                          onClick={() =>
+                            document
+                              .getElementById(item.target)
+                              ?.scrollIntoView({ behavior: "smooth", block: "start" })
+                          }
+                          className="flex items-center gap-3 rounded-lg border border-border bg-background p-3 text-left transition-colors hover:bg-muted/50"
+                        >
+                          <span className="text-muted-foreground">{item.icon}</span>
+                          <span className="flex-1 text-sm font-medium">{item.label}</span>
+                          <NotificationBadge count={item.count} />
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        </button>
+                      ))}
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Cancellation Requests - Show at top for visibility */}
-              <CancellationRequestsAdmin />
+              <div id="section-cancellations" className="scroll-mt-24">
+                <CancellationRequestsAdmin />
+              </div>
 
               {/* Chamoy Gummy Requests */}
-              <ChamoyRequestsAdmin />
+              <div id="section-chamoy" className="scroll-mt-24">
+                <ChamoyRequestsAdmin />
+              </div>
 
               {/* Candy Orders Management */}
-              <CandyOrdersAdmin />
+              <div id="section-candy" className="scroll-mt-24">
+                <CandyOrdersAdmin />
+              </div>
 
               {/* Store Visibility Controls */}
               <StoreVisibilityControl />
@@ -581,7 +630,10 @@ const Admin = () => {
               <HiringStatusControl />
 
               {/* Producer Applications Management */}
-              <ProducerApplicationsAdmin onApprovalSuccess={fetchUsers} />
+              <div id="section-applications" className="scroll-mt-24">
+                <ProducerApplicationsAdmin onApprovalSuccess={fetchUsers} />
+              </div>
+
               
               {/* Payment Analytics Dashboard */}
               <PaymentAnalyticsDashboard />
