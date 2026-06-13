@@ -6,14 +6,12 @@ import { useNavigate, Link } from "react-router-dom";
 import { useProducers } from "@/hooks/useProducers";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSwipeScroll } from "@/hooks/useSwipeScroll";
-import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from "@/contexts/TranslationContext";
 
 const FeaturedProducers = () => {
   const navigate = useNavigate();
   const { data: producers = [], isLoading } = useProducers();
   const isMobile = useIsMobile();
-  const { user } = useAuth();
   const { t } = useTranslation();
   
   const [scrollDirection, setScrollDirection] = useState<'left' | 'right' | 'none'>('none');
