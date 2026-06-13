@@ -31,6 +31,20 @@ export const useSweetTreatsTabVisible = () =>
     staleTime: 1000 * 60 * 5,
   });
 
+export const useDistroAddOnVisible = () =>
+  useQuery({
+    queryKey: ["store-visibility", "addon_distro_help_visible"],
+    queryFn: () => fetchSetting("addon_distro_help_visible"),
+    staleTime: 1000 * 60 * 5,
+  });
+
+export const useHeaBoxAddOnVisible = () =>
+  useQuery({
+    queryKey: ["store-visibility", "addon_hea_box_visible"],
+    queryFn: () => fetchSetting("addon_hea_box_visible"),
+    staleTime: 1000 * 60 * 5,
+  });
+
 export const useUpdateStoreVisibility = () => {
   const queryClient = useQueryClient();
 

@@ -15,6 +15,8 @@ interface SongAddOnsDialogProps {
   baseTotal: number;
   onConfirm: (selections: { wantsDistroHelp: boolean; wantsHeaBox: boolean }) => void;
   isSubmitting?: boolean;
+  showDistroHelp?: boolean;
+  showHeaBox?: boolean;
 }
 
 export const SongAddOnsDialog = ({
@@ -23,14 +25,16 @@ export const SongAddOnsDialog = ({
   baseTotal,
   onConfirm,
   isSubmitting = false,
+  showDistroHelp = true,
+  showHeaBox = true,
 }: SongAddOnsDialogProps) => {
   const [wantsDistroHelp, setWantsDistroHelp] = useState(false);
   const [wantsHeaBox, setWantsHeaBox] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   const addOnsTotal =
-    (wantsDistroHelp ? DISTRO_HELP_PRICE : 0) +
-    (wantsHeaBox ? HEA_BOX_DISCOUNTED_PRICE : 0);
+    (showDistroHelp && wantsDistroHelp ? DISTRO_HELP_PRICE : 0) +
+    (showHeaBox && wantsHeaBox ? HEA_BOX_DISCOUNTED_PRICE : 0);
   const grandTotal = baseTotal + addOnsTotal;
 
   return (
@@ -52,7 +56,13 @@ export const SongAddOnsDialog = ({
         </div>
 
         <div className="space-y-4 p-6 bg-gradient-to-b from-muted/30 to-transparent">
+          {!showDistroHelp && !showHeaBox && (
+            <p className="text-center text-sm text-muted-foreground py-6">
+              No optional add-ons are available right now — continue to checkout below.
+            </p>
+          )}
           {/* Discover Your Distro Card */}
+          {showDistroHelp && (
           <label
             htmlFor="distro-help"
             className={`group relative flex gap-4 rounded-xl border-2 cursor-pointer overflow-hidden transition-all duration-300 ${
@@ -116,8 +126,10 @@ export const SongAddOnsDialog = ({
               </div>
             </div>
           </label>
+          )}
 
           {/* HEA Exclusive Box Card */}
+          {showHeaBox && (
           <label
             htmlFor="hea-box"
             className={`group relative flex gap-4 rounded-xl border-2 cursor-pointer overflow-hidden transition-all duration-300 ${
@@ -188,6 +200,7 @@ export const SongAddOnsDialog = ({
               </div>
             </div>
           </label>
+          )}
         </div>
 
         {/* Order Summary */}

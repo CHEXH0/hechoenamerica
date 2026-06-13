@@ -17,6 +17,7 @@ import { Progress } from "@/components/ui/progress";
 import { useSongPricing, DEFAULT_PRICING } from "@/hooks/useSongPricing";
 import { useTranslation } from "@/contexts/TranslationContext";
 import { SongAddOnsDialog } from "@/components/SongAddOnsDialog";
+import { useDistroAddOnVisible, useHeaBoxAddOnVisible } from "@/hooks/useStoreVisibility";
 
 // Google Drive link type
 interface DriveLink {
@@ -67,6 +68,8 @@ const GenerateSong = () => {
   const [newDriveLink, setNewDriveLink] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAddOnsDialog, setShowAddOnsDialog] = useState(false);
+  const { data: distroAddOnVisible = true } = useDistroAddOnVisible();
+  const { data: heaBoxAddOnVisible = true } = useHeaBoxAddOnVisible();
   const [showTooltip, setShowTooltip] = useState(true);
   const [numberOfRevisions, setNumberOfRevisions] = useState(0);
   const [wantsRecordedStems, setWantsRecordedStems] = useState(false);
@@ -436,6 +439,12 @@ const GenerateSong = () => {
         description: tg.authRequiredPaidDesc
       });
       navigate("/auth");
+      return;
+    }
+
+    // If no add-ons are available, skip the dialog and go straight to checkout
+    if (!distroAddOnVisible && !heaBoxAddOnVisible) {
+      proceedToCheckout({ wantsDistroHelp: false, wantsHeaBox: false });
       return;
     }
 
@@ -1406,6 +1415,8 @@ const GenerateSong = () => {
       baseTotal={totalPrice}
       onConfirm={proceedToCheckout}
       isSubmitting={isSubmitting}
+      showDistroHelp={distroAddOnVisible}
+      showHeaBox={heaBoxAddOnVisible}
     />
     </>);
 
