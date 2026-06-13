@@ -15,6 +15,8 @@ interface SongAddOnsDialogProps {
   baseTotal: number;
   onConfirm: (selections: { wantsDistroHelp: boolean; wantsHeaBox: boolean }) => void;
   isSubmitting?: boolean;
+  showDistroHelp?: boolean;
+  showHeaBox?: boolean;
 }
 
 export const SongAddOnsDialog = ({
@@ -23,14 +25,16 @@ export const SongAddOnsDialog = ({
   baseTotal,
   onConfirm,
   isSubmitting = false,
+  showDistroHelp = true,
+  showHeaBox = true,
 }: SongAddOnsDialogProps) => {
   const [wantsDistroHelp, setWantsDistroHelp] = useState(false);
   const [wantsHeaBox, setWantsHeaBox] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   const addOnsTotal =
-    (wantsDistroHelp ? DISTRO_HELP_PRICE : 0) +
-    (wantsHeaBox ? HEA_BOX_DISCOUNTED_PRICE : 0);
+    (showDistroHelp && wantsDistroHelp ? DISTRO_HELP_PRICE : 0) +
+    (showHeaBox && wantsHeaBox ? HEA_BOX_DISCOUNTED_PRICE : 0);
   const grandTotal = baseTotal + addOnsTotal;
 
   return (
