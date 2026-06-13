@@ -18,7 +18,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useHiringStatus, useUpdateHiringStatus } from "@/hooks/useHiringStatus";
-import { useGomasChamoyVisible, useSweetTreatsTabVisible, useUpdateStoreVisibility } from "@/hooks/useStoreVisibility";
+import { useGomasChamoyVisible, useSweetTreatsTabVisible, useUpdateStoreVisibility, useDistroAddOnVisible, useHeaBoxAddOnVisible } from "@/hooks/useStoreVisibility";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
