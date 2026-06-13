@@ -587,17 +587,21 @@ const Admin = () => {
                       { count: adminCounts.producerApplications, label: "Producer applications", icon: <UserPlus className="h-4 w-4" />, target: "section-applications" },
                       { count: adminCounts.chamoyRequests, label: "Chamoy gummy requests", icon: <Candy className="h-4 w-4" />, target: "section-chamoy" },
                       { count: adminCounts.candyOrders, label: "Candy orders to ship", icon: <Truck className="h-4 w-4" />, target: "section-candy" },
-                      { count: adminCounts.distroConsultations, label: "Distro consultations", icon: <Compass className="h-4 w-4" />, target: "section-distro" },
+                      { count: adminCounts.distroConsultations, label: "Distro consultations", icon: <Compass className="h-4 w-4" />, route: "/support" },
                     ]
                       .filter((item) => item.count > 0)
                       .map((item) => (
                         <button
-                          key={item.target}
-                          onClick={() =>
-                            document
-                              .getElementById(item.target)
-                              ?.scrollIntoView({ behavior: "smooth", block: "start" })
-                          }
+                          key={item.label}
+                          onClick={() => {
+                            if (item.route) {
+                              navigate(item.route);
+                            } else if (item.target) {
+                              document
+                                .getElementById(item.target)
+                                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                            }
+                          }}
                           className="flex items-center gap-3 rounded-lg border border-border bg-background p-3 text-left transition-colors hover:bg-muted/50"
                         >
                           <span className="text-muted-foreground">{item.icon}</span>
