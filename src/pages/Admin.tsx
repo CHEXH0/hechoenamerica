@@ -558,7 +558,9 @@ const Admin = () => {
           )}
 
           {/* Producer Projects - shows assigned song requests */}
-          <ProducerProjects />
+          <div id="section-producer-projects" className="scroll-mt-24">
+            <ProducerProjects />
+          </div>
 
           {/* Google Drive Integration for producers */}
           <GoogleDriveConnect />
