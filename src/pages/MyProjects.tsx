@@ -781,7 +781,7 @@ const MyProjects = () => {
                 {project.tier} Song
                 {isProjectNew(project, isProducerView ? "producer" : "client") && (
                   <span className="flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[11px] font-semibold text-red-500">
-                    <NotificationBadge count={1} className="h-2 w-2 min-w-0 p-0" />
+                    <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
                     New update
                   </span>
                 )}
