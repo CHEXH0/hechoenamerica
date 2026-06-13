@@ -581,14 +581,14 @@ const Admin = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {[
+                    {([
                       { count: adminCounts.songUploads, label: "Song orders to deliver", icon: <Music className="h-4 w-4" />, target: "section-producer-projects" },
                       { count: adminCounts.cancellations, label: "Cancellation requests", icon: <XCircle className="h-4 w-4" />, target: "section-cancellations" },
                       { count: adminCounts.producerApplications, label: "Producer applications", icon: <UserPlus className="h-4 w-4" />, target: "section-applications" },
                       { count: adminCounts.chamoyRequests, label: "Chamoy gummy requests", icon: <Candy className="h-4 w-4" />, target: "section-chamoy" },
                       { count: adminCounts.candyOrders, label: "Candy orders to ship", icon: <Truck className="h-4 w-4" />, target: "section-candy" },
                       { count: adminCounts.distroConsultations, label: "Distro consultations", icon: <Compass className="h-4 w-4" />, route: "/support" },
-                    ]
+                    ] as { count: number; label: string; icon: JSX.Element; target?: string; route?: string }[])
                       .filter((item) => item.count > 0)
                       .map((item) => (
                         <button
