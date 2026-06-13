@@ -126,8 +126,10 @@ export const SongAddOnsDialog = ({
               </div>
             </div>
           </label>
+          )}
 
           {/* HEA Exclusive Box Card */}
+          {showHeaBox && (
           <label
             htmlFor="hea-box"
             className={`group relative flex gap-4 rounded-xl border-2 cursor-pointer overflow-hidden transition-all duration-300 ${
