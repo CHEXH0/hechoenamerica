@@ -12,7 +12,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useProfile } from '@/hooks/useProfile';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useNotifications, useAdminNotifications } from '@/hooks/useNotifications';
 import NotificationBadge from '@/components/NotificationBadge';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from '@/contexts/TranslationContext';
