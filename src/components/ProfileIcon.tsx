@@ -64,7 +64,7 @@ const ProfileIcon = () => {
               <User className="h-3.5 w-3.5" />
             </AvatarFallback>
           </Avatar>
-          <NotificationBadge count={total} overlay />
+          <NotificationBadge count={total + adminTotal} overlay />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48 bg-black/90 backdrop-blur-md border-gray-700">
