@@ -397,7 +397,7 @@ const Admin = () => {
             <Candy className="h-5 w-5" />
             Store Visibility
           </CardTitle>
-          <CardDescription>Control which candy/treats pages are visible to users</CardDescription>
+          <CardDescription>Control which store pages and pre-checkout add-ons are visible to users</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
