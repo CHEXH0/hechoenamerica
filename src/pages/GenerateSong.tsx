@@ -1415,6 +1415,8 @@ const GenerateSong = () => {
       baseTotal={totalPrice}
       onConfirm={proceedToCheckout}
       isSubmitting={isSubmitting}
+      showDistroHelp={distroAddOnVisible}
+      showHeaBox={heaBoxAddOnVisible}
     />
     </>);
 
