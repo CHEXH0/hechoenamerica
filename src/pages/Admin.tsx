@@ -48,6 +48,7 @@ const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { data: userRole, isLoading: roleLoading } = useUserRole();
+  const { counts: adminCounts, total: adminTotal } = useAdminNotifications();
   const { toast } = useToast();
   const [isSyncing, setIsSyncing] = useState(false);
   const [pendingPurchases, setPendingPurchases] = useState<Purchase[]>([]);
