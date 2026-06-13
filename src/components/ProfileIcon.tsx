@@ -21,6 +21,7 @@ const ProfileIcon = () => {
   const { user, signOut, loading } = useAuth();
   const { data: roleData } = useUserRole();
   const { counts, total } = useNotifications();
+  const { total: adminTotal } = useAdminNotifications();
   const { data: profile } = useProfile(user?.id);
   const navigate = useNavigate();
   const { t } = useTranslation();
