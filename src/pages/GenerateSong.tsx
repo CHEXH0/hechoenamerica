@@ -17,6 +17,7 @@ import { Progress } from "@/components/ui/progress";
 import { useSongPricing, DEFAULT_PRICING } from "@/hooks/useSongPricing";
 import { useTranslation } from "@/contexts/TranslationContext";
 import { SongAddOnsDialog } from "@/components/SongAddOnsDialog";
+import { useDistroAddOnVisible, useHeaBoxAddOnVisible } from "@/hooks/useStoreVisibility";
 
 // Google Drive link type
 interface DriveLink {
