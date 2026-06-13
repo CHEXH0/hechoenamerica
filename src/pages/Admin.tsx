@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload, Users, User, Database, TrendingUp, DollarSign, FileText, HardDrive, UserPlus, Candy, Trash2, Bell, XCircle, Truck, ChevronRight } from "lucide-react";
+import { ArrowLeft, Settings, RefreshCw, Shield, Music, Upload, Users, User, Database, TrendingUp, DollarSign, FileText, HardDrive, UserPlus, Candy, Trash2, Bell, XCircle, Truck, ChevronRight, Compass } from "lucide-react";
 import NotificationBadge from "@/components/NotificationBadge";
 import { useAdminNotifications } from "@/hooks/useNotifications";
 import PricingAdmin from "@/components/PricingAdmin";
