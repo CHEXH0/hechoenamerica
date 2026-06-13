@@ -56,7 +56,13 @@ export const SongAddOnsDialog = ({
         </div>
 
         <div className="space-y-4 p-6 bg-gradient-to-b from-muted/30 to-transparent">
+          {!showDistroHelp && !showHeaBox && (
+            <p className="text-center text-sm text-muted-foreground py-6">
+              No optional add-ons are available right now — continue to checkout below.
+            </p>
+          )}
           {/* Discover Your Distro Card */}
+          {showDistroHelp && (
           <label
             htmlFor="distro-help"
             className={`group relative flex gap-4 rounded-xl border-2 cursor-pointer overflow-hidden transition-all duration-300 ${
