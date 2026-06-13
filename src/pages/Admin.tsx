@@ -436,6 +436,46 @@ const Admin = () => {
               />
             </div>
           </div>
+
+          <div className="border-t pt-6 space-y-6">
+            <p className="text-sm font-medium text-muted-foreground">Pre-Checkout Add-Ons</p>
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <Label className="text-base">Find Your Distro</Label>
+                <p className="text-sm text-muted-foreground">
+                  {distroAddOnVisible ? "Offered as an add-on before song checkout." : "Hidden from the pre-checkout add-ons."}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Badge variant={distroAddOnVisible ? "default" : "secondary"} className={distroAddOnVisible ? "bg-green-500" : ""}>
+                  {distroAddOnVisible ? "Enabled" : "Disabled"}
+                </Badge>
+                <Switch
+                  checked={distroAddOnVisible ?? true}
+                  onCheckedChange={(c) => handleToggle("addon_distro_help_visible", c, "Find Your Distro Add-On")}
+                  disabled={distroLoading || updateVisibility.isPending}
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <Label className="text-base">HEA Exclusive Box</Label>
+                <p className="text-sm text-muted-foreground">
+                  {heaBoxAddOnVisible ? "Offered as an add-on before song checkout." : "Hidden from the pre-checkout add-ons."}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Badge variant={heaBoxAddOnVisible ? "default" : "secondary"} className={heaBoxAddOnVisible ? "bg-green-500" : ""}>
+                  {heaBoxAddOnVisible ? "Enabled" : "Disabled"}
+                </Badge>
+                <Switch
+                  checked={heaBoxAddOnVisible ?? true}
+                  onCheckedChange={(c) => handleToggle("addon_hea_box_visible", c, "HEA Exclusive Box Add-On")}
+                  disabled={heaBoxLoading || updateVisibility.isPending}
+                />
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
     );
