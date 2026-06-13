@@ -83,6 +83,11 @@ export const useNotifications = () => {
 
   const counts = query.data || EMPTY;
 
+  // Read the stored "last seen" timestamp WITHOUT changing it.
+  // Lets a page show per-item "new" bubbles for the items that changed.
+  const peekLastSeen = (area: NotifArea): string =>
+    user ? getLastSeen(user.id, area) : EPOCH;
+
   // Mark an area as seen — clears its bubble until the next change.
   const markSeen = (area: NotifArea) => {
     if (!user) return;
@@ -94,6 +99,110 @@ export const useNotifications = () => {
     counts,
     total: counts.client + counts.producer + counts.support,
     markSeen,
+    peekLastSeen,
     isLoading: query.isLoading,
   };
+};
+
+export interface AdminPendingCounts {
+  /** Paid song orders waiting for a deliverable / fulfillment. */
+  songUploads: number;
+  /** Clients asking to cancel a project — needs an admin decision. */
+  cancellations: number;
+  /** Producer applications waiting for review. */
+  producerApplications: number;
+  /** Custom Chamoy gummy requests waiting for a price/decision. */
+  chamoyRequests: number;
+  /** Candy orders that still need to be shipped. */
+  candyOrders: number;
+  /** Distro consultations a client booked that still need handling. */
+  distroConsultations: number;
+}
+
+const EMPTY_ADMIN: AdminPendingCounts = {
+  songUploads: 0,
+  cancellations: 0,
+  producerApplications: 0,
+  chamoyRequests: 0,
+  candyOrders: 0,
+  distroConsultations: 0,
+};
+
+/**
+ * Persistent "needs attention" counters for the admin panel.
+ * Unlike the per-user "new update" bubbles, these reflect real open work
+ * (pending orders, cancellations, applications…) and only clear when the
+ * underlying item is actually resolved.
+ */
+export const useAdminNotifications = () => {
+  const { user } = useAuth();
+  const { data: role } = useUserRole();
+  const isAdmin = role?.isAdmin || false;
+
+  const query = useQuery({
+    queryKey: ["admin-notifications", user?.id, isAdmin],
+    enabled: !!user && isAdmin,
+    refetchInterval: 60000,
+    queryFn: async (): Promise<AdminPendingCounts> => {
+      if (!user || !isAdmin) return EMPTY_ADMIN;
+      const counts: AdminPendingCounts = { ...EMPTY_ADMIN };
+
+      const [
+        songUploads,
+        cancellations,
+        producerApplications,
+        chamoyRequests,
+        candyOrders,
+        distroConsultations,
+      ] = await Promise.all([
+        supabase
+          .from("purchases")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "pending"),
+        supabase
+          .from("song_requests")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "cancellation_requested"),
+        supabase
+          .from("contact_submissions")
+          .select("id", { count: "exact", head: true })
+          .eq("subject", "Producer Application")
+          .eq("application_status", "pending"),
+        supabase
+          .from("chamoy_requests")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "pending"),
+        supabase
+          .from("purchases")
+          .select("id", { count: "exact", head: true })
+          .eq("product_category", "candies")
+          .eq("shipping_status", "pending"),
+        supabase
+          .from("distro_requests")
+          .select("id", { count: "exact", head: true })
+          .not("client_selected_time", "is", null)
+          .neq("status", "completed"),
+      ]);
+
+      counts.songUploads = songUploads.count || 0;
+      counts.cancellations = cancellations.count || 0;
+      counts.producerApplications = producerApplications.count || 0;
+      counts.chamoyRequests = chamoyRequests.count || 0;
+      counts.candyOrders = candyOrders.count || 0;
+      counts.distroConsultations = distroConsultations.count || 0;
+
+      return counts;
+    },
+  });
+
+  const counts = query.data || EMPTY_ADMIN;
+  const total =
+    counts.songUploads +
+    counts.cancellations +
+    counts.producerApplications +
+    counts.chamoyRequests +
+    counts.candyOrders +
+    counts.distroConsultations;
+
+  return { counts, total, isLoading: query.isLoading };
 };

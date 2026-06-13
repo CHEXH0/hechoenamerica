@@ -12,7 +12,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useProfile } from '@/hooks/useProfile';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useNotifications, useAdminNotifications } from '@/hooks/useNotifications';
 import NotificationBadge from '@/components/NotificationBadge';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from '@/contexts/TranslationContext';
@@ -21,6 +21,7 @@ const ProfileIcon = () => {
   const { user, signOut, loading } = useAuth();
   const { data: roleData } = useUserRole();
   const { counts, total } = useNotifications();
+  const { total: adminTotal } = useAdminNotifications();
   const { data: profile } = useProfile(user?.id);
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -63,7 +64,7 @@ const ProfileIcon = () => {
               <User className="h-3.5 w-3.5" />
             </AvatarFallback>
           </Avatar>
-          <NotificationBadge count={total} overlay />
+          <NotificationBadge count={total + adminTotal} overlay />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48 bg-black/90 backdrop-blur-md border-gray-700">
@@ -127,7 +128,8 @@ const ProfileIcon = () => {
             className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer"
           >
             <Settings className="h-4 w-4 mr-2" />
-            {tp.adminPanel}
+            <span className="flex-1">{tp.adminPanel}</span>
+            <NotificationBadge count={adminTotal} />
           </DropdownMenuItem>
         )}
         <DropdownMenuItem 

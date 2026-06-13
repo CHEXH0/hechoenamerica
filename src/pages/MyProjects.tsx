@@ -330,7 +330,27 @@ const MyProjects = () => {
   };
 
   const isProducer = userRole?.isProducer || false;
-  const { counts: notifCounts, markSeen } = useNotifications();
+  const { counts: notifCounts, markSeen, peekLastSeen } = useNotifications();
+
+  // Snapshot of the "last seen" timestamps captured once when the page opens.
+  // Used to flag the exact projects that changed so the user knows where to click.
+  // We capture BEFORE markSeen runs so the highlights survive the current visit.
+  const [seenBaseline, setSeenBaseline] = useState<{ client: string; producer: string } | null>(null);
+
+  useEffect(() => {
+    if (user && !seenBaseline) {
+      setSeenBaseline({
+        client: peekLastSeen("client"),
+        producer: peekLastSeen("producer"),
+      });
+    }
+  }, [user, seenBaseline]);
+
+  // A project is "new" if it changed after we last viewed its area.
+  const isProjectNew = (project: SongRequest, area: "client" | "producer"): boolean => {
+    if (!seenBaseline) return false;
+    return new Date(project.updated_at).getTime() > new Date(seenBaseline[area]).getTime();
+  };
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -345,14 +365,16 @@ const MyProjects = () => {
   }, [user, isProducer]);
 
   // Clear the relevant "new update" bubble whenever the user views a tab.
+  // Runs after the baseline snapshot above, so per-project highlights stay.
   useEffect(() => {
-    if (!user) return;
+    if (!user || !seenBaseline) return;
     if (activeTab === "producer-projects") {
       markSeen("producer");
     } else {
       markSeen("client");
     }
-  }, [user, activeTab, isProducer]);
+  }, [user, activeTab, isProducer, seenBaseline]);
+
 
   const handleResendFiles = async (project: SongRequest) => {
     if (!project.file_urls || project.file_urls.length === 0) {
@@ -757,6 +779,12 @@ const MyProjects = () => {
               <CardTitle className="flex items-center gap-2">
                 <Music className="h-5 w-5 text-primary" />
                 {project.tier} Song
+                {isProjectNew(project, isProducerView ? "producer" : "client") && (
+                  <span className="flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[11px] font-semibold text-red-500">
+                    <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                    New update
+                  </span>
+                )}
               </CardTitle>
               <CardDescription className="flex items-center gap-4 mt-1">
                 <span className="flex items-center gap-1">
