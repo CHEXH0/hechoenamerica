@@ -104,12 +104,12 @@ export const en: Translations = {
     },
     mastering: {
       title: "Mastering",
-      description: "Final polish for your music",
+      description: "Final polish for your sound",
     },
   },
   cta: {
-    readyTitle: "Ready to Create Your Next Hit?",
-    getStarted: "Get Started",
+    readyTitle: "Let's Get Started",
+    getStarted: "I'm Ready",
   },
   contact: {
     title: "Get in Touch",
