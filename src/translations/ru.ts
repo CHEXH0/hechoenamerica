@@ -268,6 +268,8 @@ export const ru: Translations = {
     totalPrice: "Итоговая цена",
     baseLabel: "База",
     addOnsLabel: "доп. опции",
+    billedInUsd: "Локальные цены приблизительны. Оплата в USD; банк конвертирует при оплате.",
+    approxLabel: "прибл.",
     stemsLine: "Stems",
     analogLine: "Аналог",
     mixingLine: "Сведение",
