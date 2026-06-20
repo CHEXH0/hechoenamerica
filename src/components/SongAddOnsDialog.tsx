@@ -32,6 +32,8 @@ export const SongAddOnsDialog = ({
   const [wantsDistroHelp, setWantsDistroHelp] = useState(false);
   const [wantsHeaBox, setWantsHeaBox] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const { isLocal, usd, local } = useCurrency();
+  const price = (n: number) => (isLocal ? local(n) : usd(n));
 
   const addOnsTotal =
     (showDistroHelp && wantsDistroHelp ? DISTRO_HELP_PRICE : 0) +
