@@ -663,7 +663,7 @@ const GenerateSong = () => {
               </div>
               <div className="flex justify-between text-white/90 text-sm font-medium">
                 {tiers.map((tier) =>
-                <span key={tier.label}>{tier.label}</span>
+                <span key={tier.label}>{tier.price === 0 ? tier.label : price(tier.price)}</span>
                 )}
               </div>
               <AnimatePresence>
@@ -932,7 +932,7 @@ const GenerateSong = () => {
                         </HoverCard>
                       </div>
                       <span className="text-white/80 text-sm font-medium">
-                        +${addOnPricing.stems.prices[tierIndex]}
+                        {addFmt(addOnPricing.stems.prices[tierIndex])}
                       </span>
                     </div>
 
@@ -962,7 +962,7 @@ const GenerateSong = () => {
                         </HoverCard>
                       </div>
                       <span className="text-white/80 text-sm font-medium">
-                        +${addOnPricing.analog.prices[tierIndex]}
+                        {addFmt(addOnPricing.analog.prices[tierIndex])}
                       </span>
                     </div>
 
@@ -994,7 +994,7 @@ const GenerateSong = () => {
                         </HoverCard>
                       </div>
                       <span className="text-white/80 text-sm font-medium">
-                        +${addOnPricing.mixing.prices[tierIndex]}
+                        {addFmt(addOnPricing.mixing.prices[tierIndex])}
                       </span>
                     </div>
 
@@ -1024,7 +1024,7 @@ const GenerateSong = () => {
                         </HoverCard>
                       </div>
                       <span className="text-white/80 text-sm font-medium">
-                        +${addOnPricing.mastering.prices[tierIndex]}
+                        {addFmt(addOnPricing.mastering.prices[tierIndex])}
                       </span>
                     </div>
                     {!wantsMixing && !wantsNoneOfAbove && (
@@ -1098,8 +1098,8 @@ const GenerateSong = () => {
                           </HoverCard>
                         </div>
                         <span className="text-white/80 text-sm font-medium">
-                          +${numberOfRevisions * addOnPricing.revision.prices[tierIndex]} ($
-                          {addOnPricing.revision.prices[tierIndex]}/{tg.revisionsEach})
+                          {addFmt(numberOfRevisions * addOnPricing.revision.prices[tierIndex])} (
+                          {price(addOnPricing.revision.prices[tierIndex])}/{tg.revisionsEach})
                         </span>
                       </div>
                       <Slider
@@ -1145,7 +1145,7 @@ const GenerateSong = () => {
                           const bd = bitDepthOptions.find(o => o.value === bitDepth);
                           const surcharge = bd ? bd.surcharge[tierIndex] : 0;
                           return surcharge > 0 ? (
-                            <span className="text-white/80 text-sm font-medium">+${surcharge}</span>
+                            <span className="text-white/80 text-sm font-medium">{addFmt(surcharge)}</span>
                           ) : null;
                         })()}
                       </div>
@@ -1185,7 +1185,7 @@ const GenerateSong = () => {
                           const sr = sampleRateOptions.find(o => o.value === sampleRate);
                           const surcharge = sr ? sr.surcharge[tierIndex] : 0;
                           return surcharge > 0 ? (
-                            <span className="text-white/80 text-sm font-medium">+${surcharge}</span>
+                            <span className="text-white/80 text-sm font-medium">{addFmt(surcharge)}</span>
                           ) : null;
                         })()}
                       </div>
@@ -1223,33 +1223,39 @@ const GenerateSong = () => {
                 <div className="flex items-center justify-between">
                   <div className="text-white">
                     <p className="text-sm font-medium opacity-80">{tg.totalPrice}</p>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-3xl font-bold">${totalPrice}</span>
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                      <span className="text-3xl font-bold">{price(totalPrice)}</span>
+                      {isLocal &&
+                    <span className="text-sm opacity-70">{usd(totalPrice)} USD</span>
+                    }
                       {totalPrice > currentTier.price &&
-                    <span className="text-sm opacity-70">
-                          ({tg.baseLabel} ${currentTier.price} + ${totalPrice - currentTier.price} {tg.addOnsLabel})
+                    <span className="text-sm opacity-70 w-full">
+                          ({tg.baseLabel} {price(currentTier.price)} + {price(totalPrice - currentTier.price)} {tg.addOnsLabel})
                         </span>
                     }
                     </div>
+                    {isLocal &&
+                    <p className="text-[11px] opacity-60 mt-1 max-w-xs">{tg.billedInUsd}</p>
+                    }
                   </div>
                   {(wantsRecordedStems || wantsAnalog || wantsMixing || wantsMastering || numberOfRevisions > 0 || (bitDepthOptions.find(o => o.value === bitDepth)?.surcharge[tierIndex] ?? 0) > 0 || (sampleRateOptions.find(o => o.value === sampleRate)?.surcharge[tierIndex] ?? 0) > 0) &&
                 <div className="text-right text-white/70 text-xs space-y-0.5">
-                      {wantsRecordedStems && <p>{tg.stemsLine} +${addOnPricing.stems.prices[tierIndex]}</p>}
-                      {wantsAnalog && <p>{tg.analogLine} +${addOnPricing.analog.prices[tierIndex]}</p>}
-                      {wantsMixing && <p>{tg.mixingLine} +${addOnPricing.mixing.prices[tierIndex]}</p>}
-                      {wantsMastering && <p>{tg.masteringLine} +${addOnPricing.mastering.prices[tierIndex]}</p>}
+                      {wantsRecordedStems && <p>{tg.stemsLine} {addFmt(addOnPricing.stems.prices[tierIndex])}</p>}
+                      {wantsAnalog && <p>{tg.analogLine} {addFmt(addOnPricing.analog.prices[tierIndex])}</p>}
+                      {wantsMixing && <p>{tg.mixingLine} {addFmt(addOnPricing.mixing.prices[tierIndex])}</p>}
+                      {wantsMastering && <p>{tg.masteringLine} {addFmt(addOnPricing.mastering.prices[tierIndex])}</p>}
                       {numberOfRevisions > 0 &&
                   <p>
-                          {numberOfRevisions}x {tg.revisionsLine} +${numberOfRevisions * addOnPricing.revision.prices[tierIndex]}
+                          {numberOfRevisions}x {tg.revisionsLine} {addFmt(numberOfRevisions * addOnPricing.revision.prices[tierIndex])}
                         </p>
                   }
                       {(() => {
                         const bdSurcharge = bitDepthOptions.find(o => o.value === bitDepth)?.surcharge[tierIndex] ?? 0;
-                        return bdSurcharge > 0 ? <p>{bitDepth}-bit +${bdSurcharge}</p> : null;
+                        return bdSurcharge > 0 ? <p>{bitDepth}-bit {addFmt(bdSurcharge)}</p> : null;
                       })()}
                       {(() => {
                         const srSurcharge = sampleRateOptions.find(o => o.value === sampleRate)?.surcharge[tierIndex] ?? 0;
-                        return srSurcharge > 0 ? <p>{sampleRate} kHz +${srSurcharge}</p> : null;
+                        return srSurcharge > 0 ? <p>{sampleRate} kHz {addFmt(srSurcharge)}</p> : null;
                       })()}
                     </div>
                 }
