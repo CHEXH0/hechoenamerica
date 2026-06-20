@@ -268,6 +268,8 @@ export const pt: Translations = {
     totalPrice: "Preço Total",
     baseLabel: "Base",
     addOnsLabel: "adicionais",
+    billedInUsd: "Os preços locais são estimativas. Cobrado em USD; seu banco converte no checkout.",
+    approxLabel: "aprox.",
     stemsLine: "Stems",
     analogLine: "Analógico",
     mixingLine: "Mixagem",
