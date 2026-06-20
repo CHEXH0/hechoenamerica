@@ -156,7 +156,9 @@ export const useCurrency = (): UseCurrencyResult => {
   const local = (amountUsd: number) => {
     if (code === "USD") return usd(amountUsd);
     const value = amountUsd * rate;
-    return new Intl.NumberFormat(LOCALES[code] || "en-US", {
+    // Use en-US base locale so symbols are distinguishable from USD
+    // (e.g. MX$, R$, CA$) instead of a bare "$".
+    return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: code,
       maximumFractionDigits: ZERO_DECIMAL.has(code) ? 0 : 2,
