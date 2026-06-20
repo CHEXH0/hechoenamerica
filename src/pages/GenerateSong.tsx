@@ -18,6 +18,7 @@ import { useSongPricing, DEFAULT_PRICING } from "@/hooks/useSongPricing";
 import { useTranslation } from "@/contexts/TranslationContext";
 import { SongAddOnsDialog } from "@/components/SongAddOnsDialog";
 import { useDistroAddOnVisible, useHeaBoxAddOnVisible } from "@/hooks/useStoreVisibility";
+import { useCurrency } from "@/hooks/useCurrency";
 
 // Google Drive link type
 interface DriveLink {
