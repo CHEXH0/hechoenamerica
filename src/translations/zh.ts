@@ -268,8 +268,6 @@ export const zh: Translations = {
     totalPrice: "总价",
     baseLabel: "基础",
     addOnsLabel: "附加项",
-    billedInUsd: "本地价格为估算。以美元结算；结账时由银行换算。",
-    approxLabel: "约",
     stemsLine: "Stems",
     analogLine: "模拟",
     mixingLine: "混音",

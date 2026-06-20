@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Compass, Gift, Loader2, Sparkles, Check } from "lucide-react";
-import { useCurrency } from "@/hooks/useCurrency";
 
 export const DISTRO_HELP_PRICE = 15;
 export const HEA_BOX_FULL_PRICE = 36.90;
@@ -32,8 +31,6 @@ export const SongAddOnsDialog = ({
   const [wantsDistroHelp, setWantsDistroHelp] = useState(false);
   const [wantsHeaBox, setWantsHeaBox] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
-  const { isLocal, usd, local } = useCurrency();
-  const price = (n: number) => (isLocal ? local(n) : usd(n));
 
   const addOnsTotal =
     (showDistroHelp && wantsDistroHelp ? DISTRO_HELP_PRICE : 0) +
@@ -101,7 +98,7 @@ export const SongAddOnsDialog = ({
                     <span>Discover Your Distro</span>
                   </div>
                   <span className="text-sm font-bold text-purple-600 bg-purple-100 px-2.5 py-1 rounded-full">
-                    +{price(DISTRO_HELP_PRICE)}
+                    +${DISTRO_HELP_PRICE}
                   </span>
                 </div>
                 <p className={`text-sm leading-relaxed transition-all duration-500 ${
@@ -169,7 +166,7 @@ export const SongAddOnsDialog = ({
                   </div>
                   <div className="text-right">
                     <span className="text-sm font-bold text-rose-600 bg-rose-100 px-2.5 py-1 rounded-full">
-                      +{price(HEA_BOX_DISCOUNTED_PRICE)}
+                      +${HEA_BOX_DISCOUNTED_PRICE.toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -183,7 +180,7 @@ export const SongAddOnsDialog = ({
                 </p>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground line-through">
-                    {price(HEA_BOX_FULL_PRICE)}
+                    ${HEA_BOX_FULL_PRICE.toFixed(2)}
                   </span>
                   <span className="text-xs font-bold text-green-600 bg-green-100 px-1.5 py-0.5 rounded">
                     SAVE 25%
@@ -211,22 +208,21 @@ export const SongAddOnsDialog = ({
           <div className="flex items-center justify-between text-sm">
             <div className="space-y-1">
               <span className="text-muted-foreground">Song Idea</span>
-              <div className="font-medium text-foreground">{price(baseTotal)}</div>
+              <div className="font-medium text-foreground">${baseTotal.toFixed(2)}</div>
             </div>
             {addOnsTotal > 0 && (
               <>
                 <div className="text-muted-foreground">+</div>
                 <div className="space-y-1 text-center">
                   <span className="text-muted-foreground">Add-ons</span>
-                  <div className="font-medium text-foreground">{price(addOnsTotal)}</div>
+                  <div className="font-medium text-foreground">${addOnsTotal.toFixed(2)}</div>
                 </div>
               </>
             )}
             <div className="text-muted-foreground">=</div>
             <div className="space-y-1 text-right">
               <span className="text-muted-foreground">Total</span>
-              <div className="font-bold text-lg text-foreground">{price(grandTotal)}</div>
-              {isLocal && <div className="text-[10px] text-muted-foreground">{usd(grandTotal)} USD</div>}
+              <div className="font-bold text-lg text-foreground">${grandTotal.toFixed(2)}</div>
             </div>
           </div>
         </div>
@@ -255,7 +251,7 @@ export const SongAddOnsDialog = ({
                 Redirecting…
               </>
             ) : (
-              <>Continue — {price(grandTotal)}</>
+              <>Continue — ${grandTotal.toFixed(2)}</>
             )}
           </Button>
         </DialogFooter>
