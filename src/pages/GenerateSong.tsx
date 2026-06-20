@@ -95,6 +95,11 @@ const GenerateSong = () => {
   const { toast } = useToast();
   const currentTier = tiers[sliderValue[0]];
   const tierIndex = sliderValue[0];
+  const { isLocal, usd, local } = useCurrency();
+  // Friendly price formatters: local currency primary, USD as source of truth
+  const price = (n: number) => (isLocal ? local(n) : usd(n));
+  const addFmt = (n: number) => `+${price(n)}`;
+
 
   // Calculate total price with add-ons
   const calculateTotalPrice = () => {
