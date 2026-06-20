@@ -258,6 +258,8 @@ export interface Translations {
     totalPrice: string;
     baseLabel: string;
     addOnsLabel: string;
+    billedInUsd: string;
+    approxLabel: string;
     stemsLine: string;
     analogLine: string;
     mixingLine: string;
