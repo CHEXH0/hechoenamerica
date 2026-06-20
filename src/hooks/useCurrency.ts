@@ -43,19 +43,6 @@ const COUNTRY_CURRENCY: Record<string, string> = {
 };
 EUROZONE.forEach((c) => (COUNTRY_CURRENCY[c] = "EUR"));
 
-const LOCALES: Record<string, string> = {
-  USD: "en-US",
-  EUR: "de-DE",
-  GBP: "en-GB",
-  MXN: "es-MX",
-  BRL: "pt-BR",
-  CAD: "en-CA",
-  AUD: "en-AU",
-  ARS: "es-AR",
-  COP: "es-CO",
-  CLP: "es-CL",
-  PEN: "es-PE",
-};
 
 // Currencies we display without decimals (large nominal values)
 const ZERO_DECIMAL = new Set(["CLP", "COP", "ARS", "JPY"]);
