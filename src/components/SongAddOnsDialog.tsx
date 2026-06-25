@@ -123,7 +123,7 @@ export const SongAddOnsDialog = ({
                   className="data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
                 />
                 <span className={`text-sm font-medium transition-colors ${wantsDistroHelp ? "text-purple-700" : "text-muted-foreground"}`}>
-                  {wantsDistroHelp ? "Added to order" : "Click to add"}
+                  {wantsDistroHelp ? tx.added : tx.clickToAdd}
                 </span>
               </div>
             </div>
