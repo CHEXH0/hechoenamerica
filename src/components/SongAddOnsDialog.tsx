@@ -196,7 +196,7 @@ export const SongAddOnsDialog = ({
                   className="data-[state=checked]:bg-rose-500 data-[state=checked]:border-rose-500"
                 />
                 <span className={`text-sm font-medium transition-colors ${wantsHeaBox ? "text-rose-700" : "text-muted-foreground"}`}>
-                  {wantsHeaBox ? "Added to order" : "Click to add"}
+                  {wantsHeaBox ? tx.added : tx.clickToAdd}
                 </span>
               </div>
             </div>
