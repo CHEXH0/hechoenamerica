@@ -177,8 +177,7 @@ export const SongAddOnsDialog = ({
                     ? "text-foreground translate-y-0"
                     : "text-muted-foreground"
                 }`}>
-                  Gomas chamoy, stickers, and "fuel" for your creativity — exclusive 25% off
-                  when added with your song submission.
+                  {tx.boxDesc}
                 </p>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground line-through">
