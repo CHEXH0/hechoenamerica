@@ -184,7 +184,7 @@ export const SongAddOnsDialog = ({
                     ${HEA_BOX_FULL_PRICE.toFixed(2)}
                   </span>
                   <span className="text-xs font-bold text-green-600 bg-green-100 px-1.5 py-0.5 rounded">
-                    SAVE 25%
+                    {tx.save25}
                   </span>
                 </div>
               </div>
