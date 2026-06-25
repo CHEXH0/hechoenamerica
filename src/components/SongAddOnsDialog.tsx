@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Compass, Gift, Loader2, Sparkles, Check } from "lucide-react";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 export const DISTRO_HELP_PRICE = 15;
 export const HEA_BOX_FULL_PRICE = 36.90;
@@ -28,6 +29,8 @@ export const SongAddOnsDialog = ({
   showDistroHelp = true,
   showHeaBox = true,
 }: SongAddOnsDialogProps) => {
+  const { t } = useTranslation();
+  const tx = t.generateSong.songAddOns;
   const [wantsDistroHelp, setWantsDistroHelp] = useState(false);
   const [wantsHeaBox, setWantsHeaBox] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
@@ -47,10 +50,10 @@ export const SongAddOnsDialog = ({
           <DialogHeader className="relative z-10">
             <DialogTitle className="text-xl font-display flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-purpler-400 animate-pulse" />
-              Want to add anything else?
+              {tx.title}
             </DialogTitle>
             <DialogDescription className="text-white/70">
-              Optional bonuses from the HEA Team — skip or add before checkout.
+              {tx.subtitle}
             </DialogDescription>
           </DialogHeader>
         </div>
@@ -58,7 +61,7 @@ export const SongAddOnsDialog = ({
         <div className="space-y-4 p-6 bg-gradient-to-b from-muted/30 to-transparent">
           {!showDistroHelp && !showHeaBox && (
             <p className="text-center text-sm text-muted-foreground py-6">
-              No optional add-ons are available right now — continue to checkout below.
+              {tx.noAddOns}
             </p>
           )}
           {/* Discover Your Distro Card */}
@@ -95,7 +98,7 @@ export const SongAddOnsDialog = ({
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 font-display font-semibold text-foreground">
                     <Compass className={`h-5 w-5 transition-colors duration-300 ${wantsDistroHelp ? "text-purple-600" : "text-purple-500"}`} />
-                    <span>Discover Your Distro</span>
+                    <span>{tx.distroTitle}</span>
                   </div>
                   <span className="text-sm font-bold text-purple-600 bg-purple-100 px-2.5 py-1 rounded-full">
                     +${DISTRO_HELP_PRICE}
@@ -106,10 +109,9 @@ export const SongAddOnsDialog = ({
                     ? "text-foreground translate-y-0"
                     : "text-muted-foreground"
                 }`}>
-                  A member of the HEA Support team helps you find the best distribution
-                  platform for your budget and project.
+                  {tx.distroDesc}
                   <span className="block mt-1 text-xs font-medium text-purple-600/80">
-                    Handled by our support team.
+                    {tx.distroHandled}
                   </span>
                 </p>
               </div>
@@ -121,7 +123,7 @@ export const SongAddOnsDialog = ({
                   className="data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
                 />
                 <span className={`text-sm font-medium transition-colors ${wantsDistroHelp ? "text-purple-700" : "text-muted-foreground"}`}>
-                  {wantsDistroHelp ? "Added to order" : "Click to add"}
+                  {wantsDistroHelp ? tx.added : tx.clickToAdd}
                 </span>
               </div>
             </div>
@@ -162,7 +164,7 @@ export const SongAddOnsDialog = ({
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 font-display font-semibold text-foreground">
                     <Gift className={`h-5 w-5 transition-colors duration-300 ${wantsHeaBox ? "text-rose-600" : "text-rose-500"}`} />
-                    <span>HEA Exclusive Box</span>
+                    <span>{tx.boxTitle}</span>
                   </div>
                   <div className="text-right">
                     <span className="text-sm font-bold text-rose-600 bg-rose-100 px-2.5 py-1 rounded-full">
@@ -175,15 +177,14 @@ export const SongAddOnsDialog = ({
                     ? "text-foreground translate-y-0"
                     : "text-muted-foreground"
                 }`}>
-                  Gomas chamoy, stickers, and "fuel" for your creativity — exclusive 25% off
-                  when added with your song submission.
+                  {tx.boxDesc}
                 </p>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground line-through">
                     ${HEA_BOX_FULL_PRICE.toFixed(2)}
                   </span>
                   <span className="text-xs font-bold text-green-600 bg-green-100 px-1.5 py-0.5 rounded">
-                    SAVE 25%
+                    {tx.save25}
                   </span>
                 </div>
               </div>
@@ -195,7 +196,7 @@ export const SongAddOnsDialog = ({
                   className="data-[state=checked]:bg-rose-500 data-[state=checked]:border-rose-500"
                 />
                 <span className={`text-sm font-medium transition-colors ${wantsHeaBox ? "text-rose-700" : "text-muted-foreground"}`}>
-                  {wantsHeaBox ? "Added to order" : "Click to add"}
+                  {wantsHeaBox ? tx.added : tx.clickToAdd}
                 </span>
               </div>
             </div>
@@ -207,21 +208,21 @@ export const SongAddOnsDialog = ({
         <div className="mx-6 mb-2 rounded-xl bg-gradient-to-r from-muted/80 to-muted/40 p-4 border border-border/50">
           <div className="flex items-center justify-between text-sm">
             <div className="space-y-1">
-              <span className="text-muted-foreground">Song Idea</span>
+              <span className="text-muted-foreground">{tx.songIdea}</span>
               <div className="font-medium text-foreground">${baseTotal.toFixed(2)}</div>
             </div>
             {addOnsTotal > 0 && (
               <>
                 <div className="text-muted-foreground">+</div>
                 <div className="space-y-1 text-center">
-                  <span className="text-muted-foreground">Add-ons</span>
+                  <span className="text-muted-foreground">{tx.addOns}</span>
                   <div className="font-medium text-foreground">${addOnsTotal.toFixed(2)}</div>
                 </div>
               </>
             )}
             <div className="text-muted-foreground">=</div>
             <div className="space-y-1 text-right">
-              <span className="text-muted-foreground">Total</span>
+              <span className="text-muted-foreground">{tx.total}</span>
               <div className="font-bold text-lg text-foreground">${grandTotal.toFixed(2)}</div>
             </div>
           </div>
@@ -234,7 +235,7 @@ export const SongAddOnsDialog = ({
             disabled={isSubmitting}
             className="flex-1 hover:bg-muted"
           >
-            Skip & checkout
+            {tx.skipCheckout}
           </Button>
           <Button
             onClick={() => onConfirm({ wantsDistroHelp, wantsHeaBox })}
@@ -248,10 +249,10 @@ export const SongAddOnsDialog = ({
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Redirecting…
+                {tx.redirecting}
               </>
             ) : (
-              <>Continue — ${grandTotal.toFixed(2)}</>
+              <>{tx.continueLabel} — ${grandTotal.toFixed(2)}</>
             )}
           </Button>
         </DialogFooter>
