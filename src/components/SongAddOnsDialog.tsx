@@ -109,10 +109,9 @@ export const SongAddOnsDialog = ({
                     ? "text-foreground translate-y-0"
                     : "text-muted-foreground"
                 }`}>
-                  A member of the HEA Support team helps you find the best distribution
-                  platform for your budget and project.
+                  {tx.distroDesc}
                   <span className="block mt-1 text-xs font-medium text-purple-600/80">
-                    Handled by our support team.
+                    {tx.distroHandled}
                   </span>
                 </p>
               </div>
