@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Compass, Gift, Loader2, Sparkles, Check } from "lucide-react";
+import { useTranslation } from "@/contexts/TranslationContext";
 
 export const DISTRO_HELP_PRICE = 15;
 export const HEA_BOX_FULL_PRICE = 36.90;
