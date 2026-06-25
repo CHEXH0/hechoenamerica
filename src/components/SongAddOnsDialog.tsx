@@ -222,7 +222,7 @@ export const SongAddOnsDialog = ({
             )}
             <div className="text-muted-foreground">=</div>
             <div className="space-y-1 text-right">
-              <span className="text-muted-foreground">Total</span>
+              <span className="text-muted-foreground">{tx.total}</span>
               <div className="font-bold text-lg text-foreground">${grandTotal.toFixed(2)}</div>
             </div>
           </div>
