@@ -164,7 +164,7 @@ export const SongAddOnsDialog = ({
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 font-display font-semibold text-foreground">
                     <Gift className={`h-5 w-5 transition-colors duration-300 ${wantsHeaBox ? "text-rose-600" : "text-rose-500"}`} />
-                    <span>HEA Exclusive Box</span>
+                    <span>{tx.boxTitle}</span>
                   </div>
                   <div className="text-right">
                     <span className="text-sm font-bold text-rose-600 bg-rose-100 px-2.5 py-1 rounded-full">
