@@ -50,10 +50,10 @@ export const SongAddOnsDialog = ({
           <DialogHeader className="relative z-10">
             <DialogTitle className="text-xl font-display flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-purpler-400 animate-pulse" />
-              Want to add anything else?
+              {tx.title}
             </DialogTitle>
             <DialogDescription className="text-white/70">
-              Optional bonuses from the HEA Team — skip or add before checkout.
+              {tx.subtitle}
             </DialogDescription>
           </DialogHeader>
         </div>
@@ -61,7 +61,7 @@ export const SongAddOnsDialog = ({
         <div className="space-y-4 p-6 bg-gradient-to-b from-muted/30 to-transparent">
           {!showDistroHelp && !showHeaBox && (
             <p className="text-center text-sm text-muted-foreground py-6">
-              No optional add-ons are available right now — continue to checkout below.
+              {tx.noAddOns}
             </p>
           )}
           {/* Discover Your Distro Card */}
