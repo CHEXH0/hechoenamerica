@@ -249,10 +249,10 @@ export const SongAddOnsDialog = ({
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Redirecting…
+                {tx.redirecting}
               </>
             ) : (
-              <>Continue — ${grandTotal.toFixed(2)}</>
+              <>{tx.continueLabel} — ${grandTotal.toFixed(2)}</>
             )}
           </Button>
         </DialogFooter>
