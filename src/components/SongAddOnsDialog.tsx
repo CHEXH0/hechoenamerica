@@ -235,7 +235,7 @@ export const SongAddOnsDialog = ({
             disabled={isSubmitting}
             className="flex-1 hover:bg-muted"
           >
-            Skip & checkout
+            {tx.skipCheckout}
           </Button>
           <Button
             onClick={() => onConfirm({ wantsDistroHelp, wantsHeaBox })}
