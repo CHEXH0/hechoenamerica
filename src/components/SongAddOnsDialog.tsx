@@ -208,7 +208,7 @@ export const SongAddOnsDialog = ({
         <div className="mx-6 mb-2 rounded-xl bg-gradient-to-r from-muted/80 to-muted/40 p-4 border border-border/50">
           <div className="flex items-center justify-between text-sm">
             <div className="space-y-1">
-              <span className="text-muted-foreground">Song Idea</span>
+              <span className="text-muted-foreground">{tx.songIdea}</span>
               <div className="font-medium text-foreground">${baseTotal.toFixed(2)}</div>
             </div>
             {addOnsTotal > 0 && (
