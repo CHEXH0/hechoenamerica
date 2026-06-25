@@ -215,7 +215,7 @@ export const SongAddOnsDialog = ({
               <>
                 <div className="text-muted-foreground">+</div>
                 <div className="space-y-1 text-center">
-                  <span className="text-muted-foreground">Add-ons</span>
+                  <span className="text-muted-foreground">{tx.addOns}</span>
                   <div className="font-medium text-foreground">${addOnsTotal.toFixed(2)}</div>
                 </div>
               </>
