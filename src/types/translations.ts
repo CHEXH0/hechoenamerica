@@ -204,6 +204,25 @@ export interface Translations {
       mastering: string;
       revision: string;
     };
+    songAddOns: {
+      title: string;
+      subtitle: string;
+      noAddOns: string;
+      distroTitle: string;
+      distroDesc: string;
+      distroHandled: string;
+      boxTitle: string;
+      boxDesc: string;
+      save25: string;
+      added: string;
+      clickToAdd: string;
+      songIdea: string;
+      addOns: string;
+      total: string;
+      skipCheckout: string;
+      redirecting: string;
+      continueLabel: string;
+    };
     genreLabel: string;
     genrePlaceholder: string;
     genreHelpAi: string;
