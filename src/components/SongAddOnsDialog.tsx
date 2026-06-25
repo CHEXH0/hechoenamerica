@@ -98,7 +98,7 @@ export const SongAddOnsDialog = ({
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 font-display font-semibold text-foreground">
                     <Compass className={`h-5 w-5 transition-colors duration-300 ${wantsDistroHelp ? "text-purple-600" : "text-purple-500"}`} />
-                    <span>Discover Your Distro</span>
+                    <span>{tx.distroTitle}</span>
                   </div>
                   <span className="text-sm font-bold text-purple-600 bg-purple-100 px-2.5 py-1 rounded-full">
                     +${DISTRO_HELP_PRICE}
