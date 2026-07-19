@@ -787,6 +787,13 @@ export const ru: Translations = {
     submitRequest: "Отправить запрос",
     cancellationUnderReview: "Отмена на рассмотрении",
     cancellationUnderReviewDesc: "Мы рассматриваем ваш запрос и скоро ответим.",
+    completePayment: "Завершить оплату",
+    completePaymentDesc: "Ваш проект сохранён, но оплата не завершена. Нажмите ниже, чтобы безопасно оплатить через Stripe и назначить продюсера.",
+    completingPayment: "Открываем безопасную оплату...",
+    completePaymentFailedTitle: "Не удалось начать оплату",
+    completePaymentFailedDesc: "Что-то пошло не так. Попробуйте ещё раз через минуту.",
+    redirectingToStripeTitle: "Перенаправление в Stripe",
+    redirectingToStripeDesc: "Вы будете перенаправлены на безопасную страницу оплаты.",
     statusLabels: {
       pending: "В ожидании",
       pending_payment: "Ожидание оплаты",
