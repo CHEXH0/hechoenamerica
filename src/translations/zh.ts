@@ -787,6 +787,13 @@ export const zh: Translations = {
     submitRequest: "提交申请",
     cancellationUnderReview: "取消申请审核中",
     cancellationUnderReviewDesc: "我们正在审核您的申请,会尽快回复。",
+    completePayment: "完成付款",
+    completePaymentDesc: "您的项目已保存,但付款尚未完成。点击下方通过 Stripe 安全付款,以解锁制作人分配。",
+    completingPayment: "正在打开安全结账...",
+    completePaymentFailedTitle: "无法开始付款",
+    completePaymentFailedDesc: "出了点问题。请稍后重试。",
+    redirectingToStripeTitle: "正在跳转到 Stripe",
+    redirectingToStripeDesc: "您将被引导至安全付款页面。",
     statusLabels: {
       pending: "待处理",
       pending_payment: "等待付款",
