@@ -287,6 +287,31 @@ const MyProjects = () => {
   const [cancellingProjectId, setCancellingProjectId] = useState<string | null>(null);
   const [requestingCancellationId, setRequestingCancellationId] = useState<string | null>(null);
   const [changingProducerId, setChangingProducerId] = useState<string | null>(null);
+  const [resumingPaymentId, setResumingPaymentId] = useState<string | null>(null);
+
+  const handleCompletePayment = async (projectId: string) => {
+    setResumingPaymentId(projectId);
+    try {
+      const { data, error } = await supabase.functions.invoke("resume-song-payment", {
+        body: { requestId: projectId },
+      });
+      if (error) throw error;
+      if (!data?.url) throw new Error("No checkout URL returned");
+      toast({
+        title: tm.redirectingToStripeTitle,
+        description: tm.redirectingToStripeDesc,
+      });
+      window.location.href = data.url;
+    } catch (err) {
+      console.error("resume-song-payment failed", err);
+      toast({
+        title: tm.completePaymentFailedTitle,
+        description: tm.completePaymentFailedDesc,
+        variant: "destructive",
+      });
+      setResumingPaymentId(null);
+    }
+  };
   const { toast } = useToast();
   const { t } = useTranslation();
   const tm = t.myProjects;
@@ -1070,6 +1095,30 @@ const MyProjects = () => {
                   
                   {(project.status === "pending" || project.status === "paid") && project.acceptance_deadline && (
                     <CountdownTimer deadline={project.acceptance_deadline} labels={countdownLabels} />
+                  )}
+
+                  {/* Complete Payment - shown when project was saved but Stripe payment never finished */}
+                  {project.status === "pending_payment" && (
+                    <div className="mt-3 rounded-lg border border-orange-500/40 bg-orange-500/5 p-3 space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        {tm.completePaymentDesc}
+                      </p>
+                      <Button
+                        size="sm"
+                        onClick={() => handleCompletePayment(project.id)}
+                        disabled={resumingPaymentId === project.id}
+                        className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white"
+                      >
+                        {resumingPaymentId === project.id ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            {tm.completingPayment}
+                          </>
+                        ) : (
+                          tm.completePayment
+                        )}
+                      </Button>
+                    </div>
                   )}
 
                   {/* Cancel button for pre-acceptance projects (full refund) */}
