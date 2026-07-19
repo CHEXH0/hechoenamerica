@@ -1097,6 +1097,30 @@ const MyProjects = () => {
                     <CountdownTimer deadline={project.acceptance_deadline} labels={countdownLabels} />
                   )}
 
+                  {/* Complete Payment - shown when project was saved but Stripe payment never finished */}
+                  {project.status === "pending_payment" && (
+                    <div className="mt-3 rounded-lg border border-orange-500/40 bg-orange-500/5 p-3 space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        {tm.completePaymentDesc}
+                      </p>
+                      <Button
+                        size="sm"
+                        onClick={() => handleCompletePayment(project.id)}
+                        disabled={resumingPaymentId === project.id}
+                        className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white"
+                      >
+                        {resumingPaymentId === project.id ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            {tm.completingPayment}
+                          </>
+                        ) : (
+                          tm.completePayment
+                        )}
+                      </Button>
+                    </div>
+                  )}
+
                   {/* Cancel button for pre-acceptance projects (full refund) */}
                   {(project.status === "pending" || project.status === "pending_payment" || project.status === "paid") && (
                     <AlertDialog>
