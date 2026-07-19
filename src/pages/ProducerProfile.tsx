@@ -137,7 +137,7 @@ const ProducerProfile = () => {
           </CardHeader>
           <CardContent>
             <Button onClick={() => navigate('/')} className="w-full">
-              {tp.goToHome}
+              Go to Home
             </Button>
           </CardContent>
         </Card>
@@ -158,7 +158,7 @@ const ProducerProfile = () => {
           </CardHeader>
           <CardContent>
             <Button onClick={() => navigate('/')} className="w-full">
-              {tp.goToHome}
+              Go to Home
             </Button>
           </CardContent>
         </Card>
