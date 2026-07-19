@@ -126,3 +126,7 @@ verify_jwt = false
 [functions.admin-delete-user]
 verify_jwt = false
 
+[functions.resume-song-payment]
+verify_jwt = true
+
+
