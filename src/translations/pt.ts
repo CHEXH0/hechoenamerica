@@ -787,6 +787,13 @@ export const pt: Translations = {
     submitRequest: "Enviar Pedido",
     cancellationUnderReview: "Cancelamento em Análise",
     cancellationUnderReviewDesc: "Estamos analisando seu pedido e responderemos em breve.",
+    completePayment: "Concluir Pagamento",
+    completePaymentDesc: "Seu projeto foi salvo, mas o pagamento não foi concluído. Clique abaixo para pagar com segurança via Stripe e liberar a atribuição do produtor.",
+    completingPayment: "Abrindo checkout seguro...",
+    completePaymentFailedTitle: "Não foi possível iniciar o pagamento",
+    completePaymentFailedDesc: "Algo deu errado. Tente novamente em instantes.",
+    redirectingToStripeTitle: "Redirecionando para o Stripe",
+    redirectingToStripeDesc: "Você será levado a uma página de pagamento segura.",
     statusLabels: {
       pending: "Pendente",
       pending_payment: "Aguardando Pagamento",
