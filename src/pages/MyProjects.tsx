@@ -287,6 +287,31 @@ const MyProjects = () => {
   const [cancellingProjectId, setCancellingProjectId] = useState<string | null>(null);
   const [requestingCancellationId, setRequestingCancellationId] = useState<string | null>(null);
   const [changingProducerId, setChangingProducerId] = useState<string | null>(null);
+  const [resumingPaymentId, setResumingPaymentId] = useState<string | null>(null);
+
+  const handleCompletePayment = async (projectId: string) => {
+    setResumingPaymentId(projectId);
+    try {
+      const { data, error } = await supabase.functions.invoke("resume-song-payment", {
+        body: { requestId: projectId },
+      });
+      if (error) throw error;
+      if (!data?.url) throw new Error("No checkout URL returned");
+      toast({
+        title: tm.redirectingToStripeTitle,
+        description: tm.redirectingToStripeDesc,
+      });
+      window.location.href = data.url;
+    } catch (err) {
+      console.error("resume-song-payment failed", err);
+      toast({
+        title: tm.completePaymentFailedTitle,
+        description: tm.completePaymentFailedDesc,
+        variant: "destructive",
+      });
+      setResumingPaymentId(null);
+    }
+  };
   const { toast } = useToast();
   const { t } = useTranslation();
   const tm = t.myProjects;
