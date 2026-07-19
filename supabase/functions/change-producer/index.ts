@@ -110,9 +110,27 @@ serve(async (req) => {
         apiVersion: "2025-08-27.basil",
       });
 
-      const paymentIntent = await stripe.paymentIntents.retrieve(songRequest.payment_intent_id);
+      let paymentIntent: any = null;
+      try {
+        paymentIntent = await stripe.paymentIntents.retrieve(songRequest.payment_intent_id);
+      } catch (retrieveErr) {
+        const msg = retrieveErr instanceof Error ? retrieveErr.message : String(retrieveErr);
+        logStep("Could not retrieve original payment intent — treating as legacy/unavailable", { error: msg });
+        // Legacy test-mode intents (or intents deleted/expired) can't be charged.
+        // For admin-initiated changes we allow the swap to proceed; for client-initiated
+        // changes with a fee we must abort so the client isn't reassigned without paying.
+        if (!isAdminDirectAssign && flatChangeFee > 0) {
+          throw new Error(
+            `The original payment for this project could not be located in Stripe (${msg}). ` +
+            `The $${flatChangeFee} change fee cannot be charged automatically. ` +
+            `Please contact support to change producers on this project.`
+          );
+        }
+        paymentIntent = null;
+      }
 
-      if (paymentIntent.status === "succeeded") {
+      if (paymentIntent && paymentIntent.status === "succeeded") {
+
         // --- Charge the flat change fee FIRST. For client-initiated changes the
         // fee is mandatory: if we can't charge it, abort the whole change. ---
         if (flatChangeFee > 0) {
