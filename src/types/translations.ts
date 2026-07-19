@@ -612,6 +612,13 @@ export interface Translations {
     submitRequest: string;
     cancellationUnderReview: string;
     cancellationUnderReviewDesc: string;
+    completePayment: string;
+    completePaymentDesc: string;
+    completingPayment: string;
+    completePaymentFailedTitle: string;
+    completePaymentFailedDesc: string;
+    redirectingToStripeTitle: string;
+    redirectingToStripeDesc: string;
     statusLabels: {
       pending: string;
       pending_payment: string;
